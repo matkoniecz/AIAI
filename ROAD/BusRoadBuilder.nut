@@ -13,11 +13,11 @@ function BusRoadBuilder::FindBusPair()
 {
 	trasa.start = GetRatherBigRandomTown();
 	trasa.end = GetNiceRandomTown(AITown.GetLocation(trasa.start))
-	trasa.cargo = GetPAXCargoId();
+	trasa.cargo = Helper.GetPAXCargo();
 
 	if(trasa.end == null) return false;
 	Info("From " + AITown.GetName(trasa.start) + "  to " +  AITown.GetName(trasa.end) );
-	trasa.cargo = GetPAXCargoId();
+	trasa.cargo = Helper.GetPAXCargo();
 
 	trasa = BusStationAllocator(trasa);
 

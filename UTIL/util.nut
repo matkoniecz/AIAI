@@ -1,43 +1,27 @@
-function RepayLoan()
+function RepayOnePieceOfLoan()
 {
-while(AICompany.SetLoanAmount(AICompany.GetLoanAmount()-AICompany.GetLoanInterval()));
+return AICompany.SetLoanAmount(AICompany.GetLoanAmount()-AICompany.GetLoanInterval())
 }
 
-function GetMailCargoId()
+function BorrowOnePieceOfLoan()
 {
-local result = Helper.GetMailCargo();
-if(result==-1)abort("mail cargo does not exist");
-return result;
+return AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval())
 }
 
-function GetPAXCargoId()
+function IntToStrFill(int_val, num_digits)
 {
-local result = Helper.GetPAXCargo();
-if(result==-1)abort("PAX cargo does not exist");
-return result;
+   local str = int_val.tostring();
+   while(str.len() < num_digits)
+      {
+      str = "0" + str;
+      }
+   return str;
 }
 
 function GetAvailableMoney()
 {
-local me = AICompany.ResolveCompanyID(AICompany.COMPANY_SELF);
-return AICompany.GetBankBalance(me) + AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount() - Money.Inflate(10000);
+return AICompany.GetBankBalance(AICompany.COMPANY_SELF) + AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount() - Money.Inflate(10000);
 }
-
-function TotalLastYearProfit()
-	{
-	local list = AIVehicleList();
-	local suma =0;
-	for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
-		{
-		suma += AIVehicle.GetProfitLastYear(q);
-		}
-	return suma;
-	}
-
-function NewLine()
-	{
-	AILog.Info(" ");
-	} 
 
 function Info(string)
 {
@@ -110,8 +94,10 @@ function GetVehicleType(vehicle_id)
 	return AIEngine.GetVehicleType(AIVehicle.GetEngineType(vehicle_id));
 }
 
-function Sqrt(i) { //from Rondje
-	if(i<0)abort("sqrt supplied with "+i)
+//from Rondje, computes square root of i using Babylonian method
+function Sqrt(i) 
+{ 
+	assert(i>=0);
 	if (i == 0)
 		return 0;   // Avoid divide by zero
 	local n = (i / 2) + 1;       // Initial estimate, never low
@@ -129,14 +115,8 @@ function SafeAddRectangle(list, tile, radius) { //from Rondje
 	
 	local x2 = min(AIMap.GetMapSizeX() - 2, AIMap.GetTileX(tile) + radius);
 	local y2 = min(AIMap.GetMapSizeY() - 2, AIMap.GetTileY(tile) + radius);
-	
-	//Error("(" + x1 + ", " + y1 + ")" + "(" + x2 + ", " + y2 + ")")
-	
-	list.AddRectangle(AIMap.GetTileIndex(x1, y1),AIMap.GetTileIndex(x2, y2)); 
-}
-
-function RandomTile() { //from ChooChoo
-	return Helper.Abs(AIBase.Rand()) % AIMap.GetMapSize();
+		
+	list.AddRectangle(AIMap.GetTileIndex(x1, y1), AIMap.GetTileIndex(x2, y2)); 
 }
 
 function StringToInteger(string)

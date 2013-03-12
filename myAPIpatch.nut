@@ -41,7 +41,9 @@ AIWaypointList.HasNext <-
 AIWaypointList_Vehicle.HasNext <-
 function()
 {
-	return !this.IsEnd(); //I have better things to do than changing HasNext to IsEnd all over my code because OpenTTD devs suddenly decided that former one is somehow better (IMHO it is worse due to more complex contruction - it requires !)
+	return !this.IsEnd(); 
+	//I have better things to do than changing HasNext to IsEnd all over my code because OpenTTD devs 
+	//suddenly decided that former one is somehow better (IMHO it is worse due to more complex contruction - it requires !)
 }
 
 
@@ -66,7 +68,7 @@ AISign.BuildSign <- function(tile, text)
 		if(!AIMap.IsValidTile(tile))Error("Tile invalid");
 		}
 	return returned;
-}
+} 
 
 AISign._RemoveSign <- AISign.RemoveSign;
 AISign.RemoveSign <- function(id)
@@ -90,6 +92,17 @@ AIOrder.AppendOrder <- function(vehicle_id, destination, order_flags)
 	if(AIOrder._AppendOrder(vehicle_id, destination, order_flags)) return true;
 	Error(AIError.GetLastErrorString() + "in AppendOrder") //assertion
 	local boom  = 0/0;
+}
+
+AIVehicleList_Station_ <- AIVehicleList_Station
+AIVehicleList_Station <- function(station_id)
+{
+	local vehicle_list = AIVehicleList_Station_(station_id)
+	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()){
+		if(AIVehicle.GetState(vehicle_id) == AIVehicle.VS_CRASHED) Error("AIVehicleList_Station contains crashed vehicle: "+AIVehicle.GetName(vehicle_id))
+		}
+	if(vehicle_list.Count()==0) Error("Empty AIVehicleList_Station");
+	return vehicle_list;
 }
 
 AILog.Info("changing API finished");

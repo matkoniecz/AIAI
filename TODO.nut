@@ -1,19 +1,20 @@
 [fix] fix attempting to clone first vehicle from the empty list
 [fix] copy-paste failure
+[fix] train refuses to be sold, goes mad
 
 Known bug: vehicles suddenly getting invalid (happens around once in 900 in-game years). Nothing new, I am trying to find how this happens for years.
 
+TODO: build depots to allow vehicle test
 TODO: properly handle economy.infrastructure_maintenance and av8 for planes
 TODO: fix IsItPossibleToAddBurden
 TODO: reuse roads http://www.tt-forums.net/viewtopic.php?p=958414#p958414
-TODO: sprawdziæ jak (i czy) dzia³a lista zbanowanych
+TODO: sprawdziæ jak (i czy) dzia³a lista zbanowanych przedsiêbiorstw
 TODO: foo supplies
 TODO: networking
 TODO: better engine choosing
 TODO: error stats
 http://www.tt-forums.net/viewtopic.php?f=31&t=61429&view=unread#unread
 
-TODO: during heavy competition (more companies that ind + towns) build statues after every connection
 TODO: check during pathfinding is it still possible to have station
 TODO: supplies
 	- supplies - cargos accepted by raw industries
@@ -45,3 +46,5 @@ TODO: air
 	//lepsze wybieranie przy a8	
 	//industry - valuate before building
 	//kasowanie nadmiaru
+
+Longterm TODO: during heavy competition build statues after every connection (unable to detect competition)

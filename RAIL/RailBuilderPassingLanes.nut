@@ -142,7 +142,7 @@ if((dataprev==AIMap.GetTileIndex(0, -1) && data==AIMap.GetTileIndex(1, 0)) || (d
 	//RAILTRACK_SW_SE
 	return 4;
 	}
-AIAI.ClearSigns();
+Helper.ClearAllSigns();
 AISign.BuildSign(tile, "tile");
 AISign.BuildSign(pre, "pre");
 AISign.BuildSign(prepre, "prepre");

@@ -1,3 +1,4 @@
+//used by RAIL\RailBuilderDepotConnection.nut
 /*
  * This file is part of AdmiralAI.
  *

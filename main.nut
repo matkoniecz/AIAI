@@ -14,7 +14,7 @@ require("headers.nut");
 function AIAI::Starter()
 {
 	Info("AIAI loaded!");
-	NewLine();
+	Info("");
 	Info("Hi!");
 	
 	//PaintMapWithHillData();
@@ -33,6 +33,8 @@ function AIAI::Starter()
 		}
 	else{
 		}
+	if(Helper.GetMailCargo==-1)	abort("mail cargo does not exist");
+	if(Helper.GetPAXCargo==-1)	abort("PAX cargo does not exist");
 }
 
 function AIAI::Start()
@@ -41,12 +43,12 @@ function AIAI::Start()
 	local builders = strategyGenerator();
 	while(true){
 		Warning("Desperation: " + desperation);
-		root_tile = RandomTile();
+		root_tile = Tile.GetRandomTile();
 		if(AIVehicleList().Count()!=0){
 			local need = Money.Inflate(100000);
 			if(GetAvailableMoney()<need){
 				Info("Waiting for more money: " + GetAvailableMoney()/1000 + "k / " + need/1000 + "k");
-				while(AICompany.SetLoanAmount(AICompany.GetLoanAmount() - AICompany.GetLoanInterval()));
+				Money.MakeMaximumPayback();
 				this.Maintenance();
 				BankruptProtector();
 				Sleep(500);
@@ -71,6 +73,7 @@ function AIAI::Start()
 			}
 		Info("===================================");
 		}
+	abort("Escaped Start function, it was not supposed to happen");
 }
 
 function AIAI::RunGeneralInspection()
@@ -120,10 +123,10 @@ for(local i = 0; i<builders.len(); i++)
 	if(builders[i] != null){
 		if(builders[i].Possible()){
 			if(builders[i].Go()){
-				RepayLoan();
+				Money.MakeMaximumPayback();
 				return true;
 				}
-			RepayLoan();
+			Money.MakeMaximumPayback();
 			}
 		}
 	}
@@ -161,19 +164,12 @@ function AIAI::Statue()
 	return false;
 }
 
-function AIAI::ClearSigns()
-{
-	local sign_list = AISignList();
-	for (local x = sign_list.Begin(); sign_list.HasNext(); x = sign_list.Next()) AISign.RemoveSign(x);
-	AIAI.ContactInfo();
-}
-
 function AIAI::SignMenagement()
 	{
 	//Info("SignMenagement")
 	if(AIAI.GetSetting("clear_signs"))
 		{
-		AIAI.ClearSigns();
+		Helper.ClearAllSigns();
 		}
 	
 	if(AIAI.GetSetting("debug_signs_for_airports_load"))
@@ -191,7 +187,7 @@ function BankruptProtector()
 if(AIVehicleList().Count()==0) return;
 if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<AICompany.GetLoanInterval()*2)
 {
-AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
+BorrowOnePieceOfLoan();
 while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
 	{
 	if(AIBase.RandRange(10)==1)Error("We need bailout!");
@@ -204,7 +200,7 @@ while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
 			DoomsdayMachine();
 			Sleep(1000);
 			}
-		AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
+		BorrowOnePieceOfLoan()
 		}
 	Info("End of financial problems!");
 	}
@@ -272,22 +268,24 @@ function AIAI::Load(version, data)
 
 function AIAI::gentleSellVehicle(vehicle_id, why)
 {
+if(AIVehicle.GetName(vehicle_id) == "stupid #1"){Error("detected"); AIController.Sleep(50);}
+
+if(IsForSell(vehicle_id)) return false;
+
 local tile_1 = GetLoadStationLocation(vehicle_id);
 local tile_2 = GetUnloadStationLocation(vehicle_id);
-if(IsForSell(vehicle_id)) return false;
-Info("ORAR");
-SetNameOfVehicle(vehicle_id, "for sell!" + why);
 local depot_location = GetDepotLocation(vehicle_id);
+
 if(!AIOrder.UnshareOrders(vehicle_id))
 	{
 	abort("WTF? Unshare impossible? "+AIVehicle.GetName(vehicle_id));
 	}
 
-if(!AIOrder.AppendOrder(vehicle_id, tile_1, AIOrder.OF_FULL_LOAD_ANY))
+if(!AIOrder.AppendOrder(vehicle_id, tile_1, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_FULL_LOAD_ANY))
 	{
 	abort("WTF? AppendOrder impossible? "+AIVehicle.GetName(vehicle_id));
 	}
-if(!AIOrder.AppendOrder(vehicle_id, tile_2, AIOrder.OF_NO_LOAD))
+if(!AIOrder.AppendOrder(vehicle_id, tile_2, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_NO_LOAD))
 	{
 	abort("WTF? AppendOrder impossible? "+AIVehicle.GetName(vehicle_id))
 	}
@@ -296,6 +294,7 @@ if(!AIOrder.AppendOrder (vehicle_id, depot_location, AIOrder.OF_NON_STOP_INTERME
 	abort("WTF? AppendOrder impossible? "+AIVehicle.GetName(vehicle_id));
 	}
 AIOrder.SkipToOrder(vehicle_id, 1);
+SetNameOfVehicle(vehicle_id, "for sell!" + why);
 }
 
 function AIAI::sellVehicle(vehicle_id, why)
@@ -313,7 +312,7 @@ local state_crashed = AIVehicle.VS_CRASHED
 local state_crashed_and_broken = AIVehicle.VS_CRASHED | AIVehicle.VS_BROKEN 
 
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck1 " + vehicle_id);
-if(IsForSell(vehicle_id)==true) return false;
+if(IsForSell(vehicle_id) == true) return false;
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck2 " + vehicle_id);
 SetNameOfVehicle(vehicle_id, "sell!" + why);
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck3 " + vehicle_id);
@@ -334,21 +333,21 @@ return AIVehicleList_Station(station).Count();
 
 function AIAI::DeleteEmptyStations()
 {
-local list;
-list = AIStationList(AIStation.STATION_TRUCK_STOP);
-list.Valuate(VehicleCounter);
-list.KeepValue(0);
-for (local spam = list.Begin(); list.HasNext(); spam = list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
+local station_id_list;
+station_id_list = AIStationList(AIStation.STATION_TRUCK_STOP);
+station_id_list.Valuate(VehicleCounter);
+station_id_list.KeepValue(0);
+for (local spam = station_id_list.Begin(); station_id_list.HasNext(); spam = station_id_list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
 
-list = AIStationList(AIStation.STATION_BUS_STOP);
-list.Valuate(VehicleCounter);
-list.KeepValue(0);
-for (local spam = list.Begin(); list.HasNext(); spam = list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
+station_id_list = AIStationList(AIStation.STATION_BUS_STOP);
+station_id_list.Valuate(VehicleCounter);
+station_id_list.KeepValue(0);
+for (local spam = station_id_list.Begin(); station_id_list.HasNext(); spam = station_id_list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
 
-list = AIStationList(AIStation.STATION_TRAIN); //TODO: remove also tracks
-list.Valuate(VehicleCounter);
-list.KeepValue(0);
-for (local spam = list.Begin(); list.HasNext(); spam = list.Next()) AITile.DemolishTile(AIBaseStation.GetLocation(spam));
+station_id_list = AIStationList(AIStation.STATION_TRAIN); //TODO: remove also tracks
+station_id_list.Valuate(VehicleCounter);
+station_id_list.KeepValue(0);
+for (local spam = station_id_list.Begin(); station_id_list.HasNext(); spam = station_id_list.Next()) AITile.DemolishTile(AIBaseStation.GetLocation(spam));
 }
 
 function AIAI::DeleteUnprofitable()
@@ -493,7 +492,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			local company = event.GetCompanyID();
 			if (AICompany.IsMine(company)){
 				Warning("Our company is in trouble!");
-			   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0) AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
+			   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0) BorrowOnePieceOfLoan();
 			   this.BankruptProtector();
 			   }
 			else {
@@ -521,25 +520,12 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 	}
 }
 
-function IntToStrFill(int_val, num_digits) //from ClueHelper
-{
-	local str = int_val.tostring();
-	while(str.len() < num_digits)
-		{
-		str = "0" + str;
-		}
-	return str;
-}
-
-function LoadDataFromStationNameFoundByStationId(station, delimiters)
+function LoadDataFromStationNameFoundByStationId(station_id, delimiters)
 {	
+	assert(AIStation.IsValidStation(station_id))
 	local start_code = delimiters[0]
 	local end_code = delimiters[1]
-	if(!AIStation.IsValidStation(station))
-		{
-		abort("");
-		}
-	local str = AIBaseStation.GetName(station)
+	local str = AIBaseStation.GetName(station_id)
 	local result = null;
 		
 	for(local i = 0; i < str.len(); ++i)
@@ -560,14 +546,6 @@ function LoadDataFromStationNameFoundByStationId(station, delimiters)
 			}
 		}
 	return null;
-}
-
-function LoadDataFromStationName(location)
-{
-	local station = AIStation.GetStationID(location);
-	if(!AIBaseStation.IsValidBaseStation(station))
-		return null;
-	return LoadDataFromStationNameFoundByStationId(station, "{}");
 }
 
 function AIAI::TrySetStationName(station_id, data, leading_number)

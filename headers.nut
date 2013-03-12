@@ -10,6 +10,7 @@ Tile <- SuperLib.Tile
 Direction <- SuperLib.Direction
 Road <- SuperLib.Road
 Money <- SuperLib.Money
+DataStore <- SuperLib.DataStore
 
 require("myAPIpatch.nut");
 require("path.nut");

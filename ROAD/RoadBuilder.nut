@@ -1015,15 +1015,15 @@ return ile;
 
 function RoadBuilder::DynamicFullLoadManagement(full_station, empty_station, RV)
 {
+if(AIBase.RandRange(3)!=0) return true; //To wait for effects of action and avoid RV flood
+
 local first_station_is_full = (AIStation.GetStationID(GetLoadStationLocation(RV)) == full_station);
 
 if(first_station_is_full)
    {
    if(AIOrder.GetOrderFlags(RV, 0)!= (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE))
       {
-	  if(AIBase.RandRange(3)!=0) return true; //To wait for effects of action and avoid RV flood
-
-	  Info(AIVehicle.GetName(RV) + "wykonano zmiane typu 1");
+	  Info(AIVehicle.GetName(RV) + " - change, type 1");
 	  AIOrder.SetOrderFlags(RV, 0, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE);
 	  return true;
 	  }
@@ -1031,9 +1031,7 @@ if(first_station_is_full)
       {
       if(AIOrder.GetOrderFlags(RV, 1)== (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE))
       {
-	  if(AIBase.RandRange(3)!=0) return true; //To wait for effects of action and avoid RV flood
-
-	  Info(AIVehicle.GetName(RV) + "wykonano zmiane typu 2");
+	  Info(AIVehicle.GetName(RV) + " - change, type 2");
 	  AIOrder.SetOrderFlags(RV, 1, AIOrder.OF_NON_STOP_INTERMEDIATE);
 	  return true;
 	  }
@@ -1043,9 +1041,7 @@ else
    {
    if(AIOrder.GetOrderFlags(RV, 1)!= (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE))
       {
-	  if(AIBase.RandRange(3)!=0) return true; //To wait for effects of action and avoid RV flood
-
-	  Info(AIVehicle.GetName(RV) + "wykonano zmiane typu 3");
+	  Info(AIVehicle.GetName(RV) + " - change, type 3");
 	  AIOrder.SetOrderFlags(RV, 1, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE);
 	  return true;
 	  }
@@ -1053,9 +1049,7 @@ else
       {
       if(AIOrder.GetOrderFlags(RV, 0)== (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE))
       {
-	  if(AIBase.RandRange(3)!=0) return true; //To wait for effects of action and avoid RV flood
-
-	  Info(AIVehicle.GetName(RV) + "wykonano zmiane typu 4");
+	  Info(AIVehicle.GetName(RV) + " - change, type 4");
 	  AIOrder.SetOrderFlags(RV, 0, AIOrder.OF_NON_STOP_INTERMEDIATE);
 	  return true;
 	  }
@@ -1149,7 +1143,7 @@ function RoadBuilder::RemoveRedundantRVFromStation(station_list)
 local full_delete_count=0;
 local cargo_list = AICargoList();
 
-for (local station = station_list.Begin(); station_list.HasNext(); station = station_list.Next()) //from Chopper 
+for (local station = station_list.Begin(); station_list.HasNext(); station = station_list.Next())
 	{
 	local waiting_counter=0;
 	local active_counter=0;
@@ -1158,7 +1152,7 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 	local vehicle_list = AIVehicleList_Station(station);
 	if(vehicle_list.Count()==0)continue;
 	
-	for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) //from Chopper 
+	for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next())
 		{
 		if(AIVehicle.GetCapacity (vehicle_list.Begin(), cargo)>0)
 			{
@@ -1173,19 +1167,19 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 		//Info("Station with " + AIStation.GetCargoWaiting(station, cargo) + " of " + AICargo.GetCargoLabel(cargo));
 		if(!IsItNeededToImproveThatStation(station, cargo))
 			{
-			for (local vehicle = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle = vehicle_list.Next()) //from Chopper 
+			for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next())
 				{
-				if(IsForSell(vehicle) || AIVehicle.GetAge(vehicle)<60)
+				if(IsForSell(vehicle_id) || AIVehicle.GetAge(vehicle_id)<60)
 					{
 					waiting_counter=0;
 					break;
 					}
-				if(AIVehicle.GetCargoLoad (vehicle, cargo)==0 && AIStation.GetDistanceManhattanToTile(station, AIVehicle.GetLocation(vehicle))<=4) //OPTION
+				if(AIVehicle.GetCargoLoad (vehicle_id, cargo)==0 && AIStation.GetDistanceManhattanToTile(station, AIVehicle.GetLocation(vehicle_id))<=4)
 					{
-					//Info(AIVehicle.GetName(vehicle)+" ***"+AIStation.GetDistanceManhattanToTile (station, AIVehicle.GetLocation(vehicle))+"*** <"+counter);
-					if(AIVehicle.GetState(vehicle) == AIVehicle.VS_AT_STATION)
+					//Info(AIVehicle.GetName(vehicle_id)+" *"+AIStation.GetDistanceManhattanToTile (station, AIVehicle.GetLocation(vehicle_id))+"* <"+counter);
+					if(AIVehicle.GetState(vehicle_id) == AIVehicle.VS_AT_STATION)
 					waiting_counter++;
-					if(AIVehicle.GetCurrentSpeed(vehicle)==0)waiting_counter++; //TODO - max speed <20!
+					if(AIVehicle.GetCurrentSpeed(vehicle_id)==0)waiting_counter++; //TODO - max speed <20!
 					else waiting_counter--;
 					}
 				else
@@ -1208,7 +1202,7 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 			vehicle_list.KeepAboveValue(60);
 			vehicle_list.Valuate(AIVehicle.GetCargoLoad, cargo)
 			vehicle_list.KeepValue(0);
-			for (local vehicle = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle = vehicle_list.Next()) //from Chopper 
+			for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()) //from Chopper 
 				{
 				if(delete_goal-delete_count<0)
 					{
@@ -1217,9 +1211,9 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 					}
 				Info(delete_count+" of "+delete_goal+" deleted.")
 				local result = null;
-				if(rodzic.sellVehicle(vehicle, "kolejkowicze"))
+				if(rodzic.sellVehicle(vehicle_id, "kolejkowicze"))
 					{
-					result = vehicle;
+					result = vehicle_id;
 					delete_count++;
 					}
 				}
