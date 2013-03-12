@@ -79,12 +79,12 @@ if( track == AIRail.RAILTRACK_NE_SE ) {
 return AIMap.TILE_INVALID;
 }
 
-function RailBuilder::DoubleConnected(tile, tile2, tile3)
+function RailBuilder::IsDoubleConnected(tile, tile2, tile3)
 {
-return Connected(tile, tile2) && Connected(tile3, tile2);
+return IsConnected(tile, tile2) && IsConnected(tile3, tile2);
 }
 
-function RailBuilder::Connected(tile, tile2)
+function RailBuilder::IsConnected(tile, tile2)
 {
 for(local x=-1; x<=1; x++)
 	for(local y=-1; y<=1; y++)
@@ -236,10 +236,10 @@ if(path.GetTile() == tile){
 local prev = path.GetTile();
 
 if(this.IsLongJump(prev, tile)) return {path=path, OK=false};
-if(!this.Connected(prev, tile)) {
+if(!this.IsConnected(prev, tile)) {
 	for(local x=-1; x<=1; x++) {
 		for(local y=-1; y<=1; y++) {
-			if(this.DoubleConnected(prev, prev+AIMap.GetTileIndex(x, y), tile)) {
+			if(this.IsDoubleConnected(prev, prev+AIMap.GetTileIndex(x, y), tile)) {
 				if(!AITile.HasTransportType(prev+AIMap.GetTileIndex(x, y), AITile.TRANSPORT_RAIL))
 					{
 					path = Path(path, prev+AIMap.GetTileIndex(x, y), null);
@@ -497,6 +497,10 @@ while (path != null) {
 	right.process(path, stay_behind_path, tile, prevtile, prevprevtile, nextile, nextile_in_end, after1tile_in_end, after2tile_in_end, after3tile_in_end, i)
 	left.process(path, stay_behind_path, tile, prevtile, prevprevtile, nextile, nextile_in_end, after1tile_in_end, after2tile_in_end, after3tile_in_end, i)
 
+	AISign.BuildSign(tile, right.GetPositionOfStart() + " <" + i + "> " + left.GetPositionOfStart());
+	AISign.BuildSign(right.GetPositionOfStart(), i);
+	AISign.BuildSign(left.GetPositionOfStart(), i);
+	
 	if(right.Finished() && (right.GetPositionOfStart() < left.GetPositionOfStart() || left.Failed())) {
 		list.append(right.GetLane());
 		right = PassingLaneConstructor(true);

@@ -106,6 +106,19 @@ function Name()
 	}
 
 	
+function AIAI::ContactInfo()
+{
+	if(AIAI.GetSetting("hide_contact_information") != 1){
+		local tile = AICompany.GetCompanyHQ(AICompany.COMPANY_SELF);
+		AISign.BuildSign(tile, "In case of strange or stupid")
+		AISign.BuildSign(tile+AIMap.GetTileIndex(1, 1), "AIAI behaviour, please");
+		AISign.BuildSign(tile+AIMap.GetTileIndex(2, 2), "report it on");
+		AISign.BuildSign(tile+AIMap.GetTileIndex(3, 3), "http://tinyurl.com/ottdaiai");
+		//AISign.BuildSign(tile+AIMap.GetTileIndex(3, 4), "bulwersator@gmail.com");
+	}
+
+}
+
 function AIAI::HQ() //from Rondje
 	{
 	if(AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) return;//from simpleai
@@ -128,13 +141,7 @@ function AIAI::HQ() //from Rondje
 	Info("Building company HQ...");
 	for (local tile = HQArea.Begin(); HQArea.HasNext(); tile = HQArea.Next()){
 		if(AICompany.BuildCompanyHQ(tile)){
-			if(AIAI.GetSetting("hide_ad") != 1)
-			{
-				AISign.BuildSign(tile, "In case of strange or stupid")
-				AISign.BuildSign(tile+AIMap.GetTileIndex(1, 1), "AIAI behaviour, please");
-				AISign.BuildSign(tile+AIMap.GetTileIndex(2, 2), "report it on");
-				AISign.BuildSign(tile+AIMap.GetTileIndex(3, 3), "http://tinyurl.com/ottdaiai");
-			}
+			AIAI.ContactInfo();
 			return;
 			} 
 		}

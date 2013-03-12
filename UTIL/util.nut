@@ -234,7 +234,6 @@ function HandleFailedStationConstruction(location, error)
 {	
 	if(error==AIError.ERR_LOCAL_AUTHORITY_REFUSES) 
 		{
-		Warning("ImproveTownRating")
 		ImproveTownRating(AITile.GetClosestTown(location), this.desperation);
 		}
 }

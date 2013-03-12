@@ -11,9 +11,9 @@ class CustomPathfinder extends RoadPathFinder //Made with Zutty's help - thanks 
       this._pathfinder.InitializePath(nsources, goals, ignored);
    }
 
-function _Cost(path, new_tile, new_direction, self)//from SIMPLEAI
+function _Cost(self, path, new_tile, new_direction)//from SIMPLEAI
 {
-	local cost = ::RoadPathFinder._Cost(path, new_tile, new_direction, self);
+	local cost = ::RoadPathFinder._Cost(self, path, new_tile, new_direction);
 	if (AITile.HasTransportType(new_tile, AITile.TRANSPORT_RAIL)) cost += self._cost_level_crossing;
 	return cost;
 }

@@ -1,5 +1,3 @@
-import("pathfinder.road", "RoadPathFinder", 3);
-
 class RoadBuilder extends Builder
 {
 	desperation=0;
@@ -13,10 +11,6 @@ class RoadBuilder extends Builder
 
 require("KRAI_level_crossing_menagement_from_clueless_plus.nut");
 require("KRAIpathfinder.nut");
-
-/////////////////////////////////////////////////
-/// Age of the youngest vehicle (in days)
-/////////////////////////////////////////////////
 
 function RoadBuilder::Maintenance()
 {
@@ -360,7 +354,7 @@ if(path == false || path == null){
   }
   
 Info("   Road pathfinder found sth.");
-local estimated_cost = this.sprawdz_droge(path);
+local estimated_cost = this.CheckRoad(path);
 if(estimated_cost==null){
   Info("   Pathfinder failed to find correct route.");
   return false;
@@ -525,8 +519,9 @@ return route;
 function RoadBuilder::FindRVValuator(engine)
 {
 //rating points for station:  (Speed (km/h) - 85) / 4 
+//max rating points: 17% (255 points - 100%, 17% - 43,35) 
 //rating points more important than anything
-return max((AIEngine.GetMaxSpeed(engine) - 85) /4, 0) * 10000 + AIEngine.GetCapacity(engine)*AIEngine.GetMaxSpeed(engine);
+return min(43, max((AIEngine.GetMaxSpeed(engine) - 85) /4, 0)) * 10000 + AIEngine.GetCapacity(engine)*AIEngine.GetMaxSpeed(engine);
 }
 
 function RoadBuilder::FindRV(cargo)
@@ -832,7 +827,7 @@ if(!AIVehicle.IsValidVehicle(vehicle_id)) return null;
 return AIVehicle.GetName(vehicle_id)[0]=='B';
 }
 
-function RoadBuilder::sprawdz_droge(path)
+function RoadBuilder::CheckRoad(path)
 {
 local costs = AIAccounting();
 costs.ResetCosts ();
@@ -916,44 +911,52 @@ function RoadBuilder::AddTruck()
 {
 local ile=0;
 local cargo_list=AICargoList();
-for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) //from Chopper
-   {
-   local station_list=AIStationList(AIStation.STATION_TRUCK_STOP);
-   for (local station_id = station_list.Begin(); station_list.HasNext(); station_id = station_list.Next()) //from Chopper
-	  {
-	  if(AgeOfTheYoungestVehicle(station_id)>20) //nie dodawaæ masowo
-	  if(IsItNeededToImproveThatStation(station_id, cargo))
-	  {
-	     local vehicle_list=AIVehicleList_Station(station_id);
+for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) 
+	{
+	local station_list=AIStationList(AIStation.STATION_TRUCK_STOP);
+	for (local station_id = station_list.Begin(); station_list.HasNext(); station_id = station_list.Next())
+		{
+		if(AgeOfTheYoungestVehicle(station_id)>20) //to protect from floods of new vehicles
+			{
+			if(IsItNeededToImproveThatStation(station_id, cargo))
+				{
+				local vehicle_list=AIVehicleList_Station(station_id);
 		 
-		 vehicle_list.Valuate(AIBase.RandItem);
-		 vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
-		 local original=vehicle_list.Begin();
+				vehicle_list.Valuate(AIBase.RandItem);
+				vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
+				local original=vehicle_list.Begin();
 		 
-		 if(AIVehicle.GetProfitLastYear(original)<0)continue;
-		if(HowManyVehiclesFromThisStationAreStopped(station_id) != 0)continue;
-		 local end = AIOrder.GetOrderDestination(original, AIOrder.GetOrderCount(original)-2);
+				if(AIVehicle.GetProfitLastYear(original)<0){
+					if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles"))AISign.BuildSign(AIStation.GetLocation(station_id), "unprofitable")
+					continue;
+					}
+				if(HowManyVehiclesFromThisStationAreStopped(station_id) != 0){
+					if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles"))AISign.BuildSign(AIStation.GetLocation(station_id), "stopped vehicles")
+					continue;
+					}
+				local end = GetUnloadStationLocation(original);
 
-	     if(AITile.GetCargoAcceptance (end, cargo, 1, 1, 4)==0)
-		    {
-			if(AIAI.GetSetting("other_debug_signs"))AISign.BuildSign(end, "ACCEPTATION STOPPED");
-			continue;
-			}
-		local raw = this.RawVehicle(original);
-		 if(raw && raw != null) 
-		    {
-			if(this.copyVehicle(original, cargo )) ile++;
-			}
-		 else 
-		    {
-			if(IsItNeededToImproveThatNoRawStation(station_id, cargo)) 
-			   {
-			   if(this.copyVehicle(original, cargo)) ile++;
-			   }
+				if(AITile.GetCargoAcceptance (end, cargo, 1, 1, 4)==0)
+					{
+					if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles"))AISign.BuildSign(end, "ACCEPTATION STOPPED");
+						continue;
+					}
+				local raw = this.RawVehicle(original);
+				if(raw && raw != null) 
+					{
+					if(this.copyVehicle(original, cargo )) ile++;
+					}
+				else 
+					{
+					if(IsItNeededToImproveThatNoRawStation(station_id, cargo)) 
+						{
+						if(this.copyVehicle(original, cargo)) ile++;
+						}
+					}
+				}
 			}
 		}
-	  }
-   }
+	}
 return ile;
 }
 
@@ -1071,19 +1074,18 @@ function RoadBuilder::copyVehicle(main_vehicle_id, cargo)
 {
 if(AIVehicle.IsValidVehicle(main_vehicle_id)==false) return false;
 local depot_tile = GetDepotLocation(main_vehicle_id);
-
 local speed = AIEngine.GetMaxSpeed(this.FindRV(cargo));
 local distance = AIMap.DistanceManhattan(GetLoadStationLocation(main_vehicle_id), GetUnloadStationLocation(main_vehicle_id));
 
 //OPTION TODO
 //1 na tile przy 25 km/h
-//mo¿na obs³u¿yæ 22 miesiêcznie
+//mo¿na obs³u¿yæ 22 miesiêcznie //24?
 //30 dni
 //52 tiles
 //48 km/h
 // w dwie strony
-//maksymalnie = 22*(distance/51)/(speed/48)*2
-local maksymalnie = 22*distance*48/51/speed*2;
+//maksymalnie = 24*(distance/51)/(speed/48)*2
+local maksymalnie = 24*distance*48/51/speed*2;
 //local maksymalnie=distance*50/(speed+10); - old
 
 local load_station_tile = GetLoadStationLocation(main_vehicle_id);
@@ -1091,13 +1093,14 @@ local load_station_id = AIStation.GetStationID(load_station_tile);
 local list = AIVehicleList_Station(load_station_id);   	
 local ile = list.Count();
 
-if(AIAI.GetSetting("other_debug_signs")){
+
+if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")){
 	Helper.SetSign(load_station_tile+AIMap.GetTileIndex(-1, 0), "Ile: "+ile+" na " + maksymalnie);
 	Helper.SetSign(load_station_tile+AIMap.GetTileIndex(-2, 0), "distance " + distance);
 	}
 
 	if(ile>maksymalnie){
-		if(AIAI.GetSetting("other_debug_signs"))AISign.BuildSign(load_station_tile, "maxed!");
+		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles"))AISign.BuildSign(load_station_tile, "maxed!");
 		Warning("Too many vehicles on this route!");
 		return false;
 	}

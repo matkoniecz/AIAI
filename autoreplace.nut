@@ -66,24 +66,18 @@ local engine_list=AIEngineList(AIVehicle.VT_ROAD);
 engine_list.Valuate(AIEngine.GetRoadType);
 engine_list.KeepValue(AIRoad.ROADTYPE_ROAD);
 
-for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_existing = engine_list.Next()) //from Chopper 
-   {
-   local cargo_list=AICargoList();
-   local cargo;
-   for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) //from Chopper
-      {
-	  if(AIEngine.CanRefitCargo(engine_existing, cargo))break;
-	  }
-	
-   if(AIEngine.IsBuildable(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
-      {
-	  local engine_best = (RoadBuilder(this, 0)).GetReplace(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing), cargo);
-	  if(engine_best != engine_existing && engine_best != null)
-	     {
-		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
-         Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));
-		 }
-	  }
-   
-   }
+for(local engine = engine_list.Begin(); engine_list.HasNext(); engine = engine_list.Next()){
+	local veh_list = AIVehicleList()
+	local cargo;
+	veh_list.Valuate(AIVehicle.GetEngineType);
+	veh_list.KeepValue(engine);
+	if(veh_list.Count() != 0){
+		local cargo_list=AICargoList();
+		for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next())
+			if(AIVehicle.GetCapacity(veh_list.Begin(), cargo) > 0) break;
+		local engine_best = (RoadBuilder(this, 0)).GetReplace(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine), cargo);
+		AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine, engine_best);
+		Info(AIEngine.GetName(engine) + " will be replaced by " + AIEngine.GetName(engine_best));
+		}
+	}
 }

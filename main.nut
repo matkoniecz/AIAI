@@ -165,6 +165,7 @@ function AIAI::ClearSigns()
 {
 	local sign_list = AISignList();
 	for (local x = sign_list.Begin(); sign_list.HasNext(); x = sign_list.Next()) AISign.RemoveSign(x);
+	AIAI.ContactInfo();
 }
 
 function AIAI::SignMenagement()
@@ -245,20 +246,23 @@ function AIAI::Load(version, data)
   if (data.rawin("BridgeList")) 
   if (data.rawin("station_number")) 
   {
-    this.desperation = data.rawget("desperation");
-    this.GeneralInspection = data.rawget("GeneralInspection");
-	this.bridge_list =  data.rawget("BridgeList");
-	this.loaded_game = true;
-	Info(this.bridge_list)
-	this.station_number = station_number;
+    this.desperation = data.rawget("desperation")
+    this.GeneralInspection = data.rawget("GeneralInspection")
+	this.bridge_list =  data.rawget("BridgeList")
+	this.loaded_game = true
+	this.station_number = data.rawget("station_number")
 	//fix broken savegames
 	if(this.desperation == null){
-		this.desperation = 0;
+		this.desperation = 0
 		Error("Broken savegame, used default data for desperation")
 		}
 	if(this.GeneralInspection == null){
-		this.GeneralInspection = GetDate()-12;
+		this.GeneralInspection = GetDate()-12
 		Error("Broken savegame, used default data for GeneralInspection")
+		}
+	if(this.station_number == null){
+		this.station_number = 1
+		Error("Broken savegame, used default data for station_number")
 		}
 
 	return;
@@ -301,7 +305,13 @@ if(!AIVehicle.IsValidVehicle(vehicle_id))
 	Error("Invalid vehicle " + vehicle_id);
 	return true;
 	}
+local location = AIVehicle.GetLocation(vehicle_id)
 if(AIVehicle.GetState(vehicle_id) == AIVehicle.VS_CRASHED) return true;
+local state = AIVehicle.GetState(vehicle_id)
+local state_maybe_crashed = AIVehicle.GetState(vehicle_id) & AIVehicle.VS_CRASHED
+local state_crashed = AIVehicle.VS_CRASHED
+local state_crashed_and_broken = AIVehicle.VS_CRASHED | AIVehicle.VS_BROKEN 
+
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck1 " + vehicle_id);
 if(IsForSell(vehicle_id)==true) return false;
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck2 " + vehicle_id);

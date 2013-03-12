@@ -1,14 +1,14 @@
 class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
-  function GetDescription() { return "Automatic Idiot AI Version iota (78). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
-  function GetVersion()     { return 78; }
+  function GetDescription() { return "Automatic Idiot AI Version iota (82). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
+  function GetVersion()     { return 82; }
   function GetAPIVersion() { return "1.2"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
-  function MinVersionToLoad() { return 77; } 
-  function GetDate()        { return "2012-06-17"; }
-  function GetURL() {return "http://tinyurl.com/ottdaiai or bulwersator@gmail.com. Thanks! [iota (78)]";}
+  function MinVersionToLoad() { return 81; } 
+  function GetDate()        { return "2012-10-1"; }
+  function GetURL() {return "http://tinyurl.com/ottdaiai or bulwersator@gmail.com. Thanks! [iota (82)]";}
 
     function GetSettings() {
 	AddSetting( {
@@ -73,6 +73,16 @@ class AIAI extends AIInfo {
 	AddSetting( {
 		name = "debug_signs_about_failed_railway_contruction",
 		description = "debug_signs_about_failed_railway_contruction allowed",
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
+		flags = CONFIG_BOOLEAN + CONFIG_INGAME + CONFIG_DEVELOPER
+	});
+
+	AddSetting( {
+		name = "debug_signs_about_adding_road_vehicles",
+		description = "debug_signs_about_adding_road_vehicles allowed",
 		easy_value = 0,
 		medium_value = 0,
 		hard_value = 0,
@@ -152,8 +162,8 @@ class AIAI extends AIInfo {
 	});
 
 	AddSetting( {
-		name = "hide_ad",
-		description = "hide ad",
+		name = "hide_contact_information",
+		description = "hide contact information (http://tinyurl.com/ottdaiai or bulwersator@gmail.com)",
 		easy_value = 0,
 		medium_value = 0,
 		hard_value = 0,

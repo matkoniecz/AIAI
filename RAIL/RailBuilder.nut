@@ -349,8 +349,8 @@ return weight;
 
 function RailBuilder::BuildTrainButNotWithThisEngine(route, string, bestEngine)
 {
-	Info("Failed to build engine '" + AIEngine.GetName(bestEngine) +"':" + AIError.GetLastErrorString() +" **@@*");
-	blacklisted_engines.AddItem(bestEngine, 0);
+	Info("Failed to build" + AIEngine.GetName(bestEngine) +"':" + AIError.GetLastErrorString() +" **@@*");
+	blacklisted_vehicles.AddItem(bestEngine, 0);
 	Error("blacklisted "+AIEngine.GetName(bestEngine))
 	Error("trying to find a new train")
 	route = RailBuilder.FindTrain(route);
@@ -359,6 +359,7 @@ function RailBuilder::BuildTrainButNotWithThisEngine(route, string, bestEngine)
 	}
 	return null;
 }
+
 function RailBuilder::BuildTrain(route, string) //from denver & RioGrande
 {	
 	Info("BuildTrain")
@@ -370,7 +371,12 @@ function RailBuilder::BuildTrain(route, string) //from denver & RioGrande
 	local stationSize = route.station_size;
 	local cargoIndex = route.cargo;
 
-	if(!AIEngine.IsBuildable(bestEngine) || !AIEngine.IsBuildable(bestWagon)) abort("impossible engine");
+	if(!AIEngine.IsBuildable(bestEngine))
+		return this.BuildTrainButNotWithThisEngine(route, string, bestEngine)
+
+	if(!AIEngine.IsBuildable(bestWagon))
+		return this.BuildTrainButNotWithThisEngine(route, string, bestEngine)
+
 	if(AIEngine.GetPrice(bestEngine) + AIEngine.GetPrice(bestWagon) > AICompany.GetBankBalance(AICompany.COMPANY_SELF)) return null;
 	
 	local engineId = AIAI.BuildVehicle(depotTile, bestEngine);
@@ -708,19 +714,23 @@ function RailBuilder::WagonValuator(engineId)//from DenverAndRioGrande
 	return  AIEngine.GetCapacity(engineId) * AIEngine.GetMaxSpeed(engineId);
 	}
 
-function RailBuilder::FindBestWagon(cargoIndex, track_type)//from DenverAndRioGrande
+function RailBuilder::IsThisThingBanned(engine, cargo_id, blacklisted_vehicles)
+	{
+	return blacklisted_vehicles.HasItem(engine);
+	}
+
+function RailBuilder::FindBestWagon(cargoId, track_type)//from DenverAndRioGrande
 	{   
-    local wagons = RailBuilder.FindWagons(cargoIndex, track_type);
+    local wagons = RailBuilder.FindWagons(cargoId, track_type);
 	if(wagons.Count()==0) return null;
-    wagons.Valuate(RailBuilder.WagonValuator);
+
+	wagons.Valuate(this.IsThisThingBanned, cargoId, blacklisted_vehicles);
+	wagons.RemoveValue(1);
+    
+	wagons.Valuate(RailBuilder.WagonValuator);
     return wagons.Begin();
 	}
 
-function RailBuilder::IsThisThingBanned(engine, cargo_id, blacklisted_engines)
-	{
-	return blacklisted_engines.HasItem(engine);
-	}
-	
 function RailBuilder::FindBestEngine(wagonId, trainsize, cargoId, track_type)//from DenverAndRioGrande	
 	{
 	local minHP = 175 * trainsize;
@@ -734,7 +744,7 @@ function RailBuilder::FindBestEngine(wagonId, trainsize, cargoId, track_type)//f
 	engines.Valuate(AIEngine.IsBuildable);
 	engines.RemoveValue(0);
 
-	engines.Valuate(this.IsThisThingBanned, cargoId, blacklisted_engines);
+	engines.Valuate(this.IsThisThingBanned, cargoId, blacklisted_vehicles);
 	engines.RemoveValue(1);
 
 	engines.Valuate(AIEngine.CanPullCargo, cargoId);
@@ -1050,7 +1060,9 @@ if(!this.RailwayLinkConstruction(path)){
 	return false;	  
 	}
 
-trasa.depot_tile = this.BuildDepot(path, true);
+local max_train_count = this.AddPassingLanes(path);
+
+trasa.depot_tile = this.BuildDepot(path, false);
    
 if(trasa.depot_tile==null){
 	Info("   Depot placement error");
@@ -1068,9 +1080,6 @@ if(new_engine == null) {
 	}
 this.TrainOrders(new_engine);
 Info("   Route constructed!");
-
-ProvideMoney();
-local max_train_count = this.AddPassingLanes(path);
 
 if(max_train_count==0) max_train_count = 1;
 else if(max_train_count>=2) max_train_count = 2 + (max_train_count-2)/2;

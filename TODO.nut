@@ -1,9 +1,16 @@
+[feature] better autoreplacing
+[fix] handle rare problem (engine expired during route construction) rather than crash AI
+[fix] road vehicles were not added to station despite huge amounts of waiting cargo
+[change] better description of options, better debug options
+[feature] smarter (I hope) rail depot construction
+
 TODO: reuse roads http://www.tt-forums.net/viewtopic.php?p=958414#p958414
 TODO: sprawdziæ jak (i czy) dzia³a lista zbanowanych
 TODO: foo supplies
 TODO: networking
 TODO: better engine choosing
 TODO: error stats
+http://www.tt-forums.net/viewtopic.php?f=31&t=61429&view=unread#unread
 
 TODO: during heavy competition (more companies that ind + towns) build statues after every connection
 TODO: check during pathfinding is it still possible to have station

@@ -1,6 +1,10 @@
 const INFINITE_DISTANCE = 4000000;
 
-import("util.superlib", "SuperLib", 24);
+//import("queue.binary_heap", "", 1); - in aystar.nut
+
+import("pathfinder.road", "RoadPathFinder", 4);      //################################################## <- external
+
+import("util.superlib", "SuperLib", 26);      //################################################## <- external
 Helper <- SuperLib.Helper
 Tile <- SuperLib.Tile
 Direction <- SuperLib.Direction
