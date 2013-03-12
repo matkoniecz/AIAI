@@ -246,7 +246,7 @@ function AirBuilder::CostEstimation()
 function AirBuilder::FindEngine(route)
 {
 route.engine_count = 3;
-route.engine = AirBuilder.FindAircraft(route.station_size, route.cargo, route.engine_count = 3, route.budget, AIOrder.GetOrderDistance(AIVehicle.VT_AIR, route.start_tile, route.end_tile));
+route.engine = AirBuilder.FindAircraft(route.station_size, route.cargo, route.engine_count = 3, route.budget, Sqrt(AIOrder.GetOrderDistance(AIVehicle.VT_AIR, route.start_tile, route.end_tile)));
 route.demand = AirBuilder.CostEstimation();
 return route;
 }
@@ -290,6 +290,7 @@ if(engine_list.Count()==0) return null;
 Info("((((((")
 Info(AIEngine.GetName(engine_list.Begin()))
 Info(Sqrt(AIEngine.GetMaximumOrderDistance(engine_list.Begin())))
+Warning(distance)
 return engine_list.Begin();
 }
 

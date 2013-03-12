@@ -1,11 +1,7 @@
-[change] beter money menagement (train before passing lanes)
-[change] wait for money during construction of passing lanes rather than immediately abandon project
-[fix] request money before cloning RV
-[change] handle economy.infrastructure_maintenance - by disabling aircrafts if this is set to true, as currently AI is unable to make sure that airplanes will get profitable
-[fix] creating impossible aircraft connections (with limited range aircrafts)
-[savegame combatibility]  MinVersionToLoad bumped
+[fix] fix attempting to clone first vehicle from the empty list
+[fix] copy-paste failure
 
-Known bug: vehicles suddenly getting invalid (happens around once in 900 in-game years)
+Known bug: vehicles suddenly getting invalid (happens around once in 900 in-game years). Nothing new, I am trying to find how this happens for years.
 
 TODO: properly handle economy.infrastructure_maintenance and av8 for planes
 TODO: fix IsItPossibleToAddBurden

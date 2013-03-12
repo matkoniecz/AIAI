@@ -921,7 +921,11 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
 			if(IsItNeededToImproveThatStation(station_id, cargo))
 				{
 				local vehicle_list=AIVehicleList_Station(station_id);
-		 
+				if(vehicle_list.Count()==0){
+					//TODO - revive empty station (?) or maybe delete station?
+					continue;
+					}
+					
 				vehicle_list.Valuate(AIBase.RandItem);
 				vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
 				local original=vehicle_list.Begin();

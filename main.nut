@@ -463,7 +463,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 				this.HandleNewLevelCrossing(event);
 				}
 			}
-		else if(ev_type == AIEvent.AIRCRAFT_DEST_TOO_FAR){
+		else if(ev_type == AIEvent.ET_AIRCRAFT_DEST_TOO_FAR){
 			local order_event = AIEventAircraftDestTooFar.Convert(event);
 			local airplane_id = order_event.GetVehicleID();
 			abort("AIRCRAFT_DEST_TOO_FAR " + airplane_id + " " + airplane_id + " " + AIVehicle.GetName(airplane_id));
