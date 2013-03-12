@@ -1,3 +1,18 @@
+function AIAI::DeleteVehiclesInDepots()
+{
+local ile=0;
+
+local list=AIVehicleList();
+for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
+   {
+   if(AIVehicle.IsStoppedInDepot(q))
+      {
+	  AIVehicle.SellVehicle(q);
+	  ile++;
+	  }
+   }
+return ile;
+}
 function AIAI::IsTileWrongToFullUse(tile)
 {
 return ((!AITile.IsBuildable(tile))||!(AITile.SLOPE_FLAT == AITile.GetSlope(tile)));
@@ -24,24 +39,20 @@ veh_list.Valuate(AIBase.RandItem);
 veh_list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_DESCENDING);
 for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next()) 
    {
-   AILog.Error(AIVehicle.GetName(veh));
    for(local i=0; i<AIOrder.GetOrderCount(veh); i++)
       {
-	  AILog.Warning(i+"");
 	  local location = AIOrder.GetOrderDestination(veh, i);
 	  if(AITile.IsStationTile(location))
 		{
-  	    AILog.Warning("OK");
 	    if(AIOrder.GetOrderFlags(veh, i)!=AIOrder.AIOF_NO_LOAD)
 		   {
-  	       AILog.Info("OK");
 		   if(AITown.PerformTownAction(AITile.GetClosestTown(location), AITown.TOWN_ACTION_BUILD_STATUE)) 
 		      {
+			  Warning("Statue for " + AIVehicle.GetName(veh));
 			  return true;
 			  }
 		   else
 		      {
-			  AILog.Error(AIError.GetLastErrorString());
 		      if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH) return false;
 			  }
 		   }
@@ -49,8 +60,8 @@ for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next())
 	  }
    }
 
+Error("Fail");
 return false;
-AILog.Error("Fail");
    
 local list = AIStationList(AIStation.STATION_ANY);
 for (local aktualna = list.Begin(); list.HasNext(); aktualna = list.Next()) 
@@ -98,7 +109,7 @@ function AIAI::Autoreplace()
 AutoreplaceRV();
 AutoreplaceSmallPlane();
 AutoreplaceBigPlane();
-AILog.Warning("Autoreplace list updated by Autoreplace() from util.nut");
+Warning("Autoreplace list updated by Autoreplace() from util.nut");
 }
 
 function AIAI::AutoreplaceBigPlane()
@@ -122,7 +133,7 @@ for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_e
 	  if(engine_best != engine_existing)
 	     {
 		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
-         AILog.Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));
+         Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));
 		 }
 	  }
    
@@ -150,7 +161,7 @@ for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_e
 	  if(engine_best != engine_existing)
 	     {
 		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
-         AILog.Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));
+         Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));
 		 }
 	  }
    
@@ -178,7 +189,7 @@ for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_e
 	  if(engine_best != engine_existing)
 	     {
 		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
-         AILog.Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));
+         Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));
 		 }
 	  }
    

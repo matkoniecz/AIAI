@@ -1,3 +1,84 @@
+function Info(string)
+{
+local date=AIDate.GetCurrentDate ();
+AILog.Info(AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date)  + " " + string);
+}
+
+function Warning(string)
+{
+local date=AIDate.GetCurrentDate ();
+AILog.Warning(AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date)  + " " + string);
+}
+
+function Error(string)
+{
+local date=AIDate.GetCurrentDate ();
+AILog.Error(AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date)  + " " + string);
+}
+
+function NajmlodszyPojazd(station)
+{
+local list = AIVehicleList_Station(station);
+local minimum = 10000;
+for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
+   {
+   local age=AIVehicle.GetAge(q);
+   if(minimum>age)minimum=age;
+   }
+
+return minimum;
+}
+
+function GetAverageCapacity(station, cargo)
+{
+local list = AIVehicleList_Station(station);
+local total = 0;
+local ile = 0;
+for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
+   {
+   local plus=AIVehicle.GetCapacity (q, cargo);
+   if(plus>0)
+      {
+	  total+=plus;
+	  ile++;
+	  }
+   }
+if(ile==0)return 0;
+else return total/ile;
+}
+
+function GetDepot(vehicle)
+{
+for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) if(AIOrder.IsGotoDepotOrder(vehicle, i))return AIOrder.GetOrderDestination(vehicle, i);
+Warning("Explosion caused by vehicle " + AIVehicle.GetName(vehicle));
+Warning("Please, post savegame");
+local zero=0/0;
+}
+function GetLoadStation(vehicle)
+{
+for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) if(AIOrder.IsGotoStationOrder(vehicle, i))return AIOrder.GetOrderDestination(vehicle, i);
+Warning("Explosion caused by vehicle " + AIVehicle.GetName(vehicle));
+Warning("Please, post savegame");
+local zero=0/0;
+}
+
+function GetUnLoadStation(vehicle)
+{
+local onoff = false;
+
+for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) 
+   {
+   if(AIOrder.IsGotoStationOrder(vehicle, i))
+      {
+	  if(onoff==true)return AIOrder.GetOrderDestination(vehicle, i);
+	  onoff=true
+	  }
+   }
+Warning("Explosion caused by vehicle " + AIVehicle.GetName(vehicle));
+Warning("Please, post savegame");
+local zero=0/0;
+}
+
 function GetVehicleType(vehicle_id)
 {
 return AIEngine.GetVehicleType(AIVehicle.GetEngineType(vehicle_id));
@@ -23,6 +104,7 @@ ile = veh_list.Count();
 local allowed = AIGameSettings.GetValue("vehicle.max_aircraft");
 
 if(allowed==0)return false;
+if(ile==0)return true;
 
 if((allowed - ile)<4) return false;
 if(((ile*100)/(allowed))>90) return false;
@@ -51,6 +133,7 @@ ile = veh_list.Count();
 local allowed = AIGameSettings.GetValue("vehicle.max_roadveh");
 
 if(allowed==0)return false;
+if(ile==0)return true;
 
 if(((ile*100)/(allowed))>90) return false;
 if((allowed - ile)<5) return false;
