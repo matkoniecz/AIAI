@@ -19,8 +19,7 @@ return 500+desperacja*50;
 
 function KWAI::GetMinimalDistance()
 {
-if(200-this.desperacja*10<70)return 70;
-return 200-this.desperacja*10;
+return maxi(200-this.desperacja*10, 70);
 }
 
 function KWAI::GetOptimalDistance()
@@ -311,7 +310,7 @@ for (local aktualna = list.Begin(); list.HasNext(); aktualna = list.Next())
 
 		 //dobrych producentów
 		 industry_list.Valuate(AIIndustry.GetLastMonthProduction, cargo);
-		 industry_list.KeepAboveValue(110-2*desperacja); //HARDCODED OPTION
+		 industry_list.KeepAboveValue(maxi(100-10*desperacja, 50)); //HARDCODED OPTION
 		 if(industry_list.Count()==0)
 		    {
 			//Warning(AICargo.GetCargoLabel(cargo) +" "+AITile.GetCargoAcceptance(pozycja, cargo, airport_x, airport_y, airport_rad) + " producer failed: "+ (110-2*desperacja) );
