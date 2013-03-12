@@ -66,7 +66,7 @@ function CargoAirBuilder::FindPair(route)
 local GetIndustryList = rodzic.GetIndustryList.bindenv(rodzic);
 local IsProducerOK = null;
 local IsConsumerOK = null;
-local IsConnectedIndustry = rodzic.IsConnectedIndustry.bindenv(rodzic);
+local IsConnectedIndustry = IsConnectedIndustry.bindenv(this);
 local ValuateProducer = this.ValuateProducer.bindenv(this);
 local ValuateConsumer = this.ValuateConsumer.bindenv(this);
 local distanceBetweenIndustriesValuator = this.distanceBetweenIndustriesValuator.bindenv(this);

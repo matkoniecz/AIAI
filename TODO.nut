@@ -1,12 +1,9 @@
-
-HasNext -> IsEnd 
 class Station - multiplatforms
 TODO: cargo planes reusing industry
 TODO: reuse roads http://www.tt-forums.net/viewtopic.php?p=958414#p958414
 TODO: $ menag during pf
 TODO: sprawdziæ jak (i czy) dzia³a lista zbanowanych
 TODO: foo supplies
-TODO: banuj na zawsze, jesli zbanowany zezwalaj z 1%szansy, jeœli lista przelecia³a to czyœæ listê
 TODO: networking
 TODO: better engine choosing
 TODO: better RV choosing (problem with very small)
@@ -21,6 +18,7 @@ TODO: supplies
 	- by truck, to industry serviced with profit by AIAI with statue with high rating (trains preffered?)
 
 TODO: remove empty railway tracks
+HasNext -> IsEnd 
 
 TODO: handle bus queues
 
@@ -28,7 +26,6 @@ TODO: long term average for secondaries
 TODO: allow replacing small planes by big on big airports!
 
 TODO: 6x ciê¿szy poci¹g jeœli podjazdy s¹ pojedyñcze????
-TODO: better findpair
 TODO: better busses (managing & construction)
 TODO: world scanner and rework main with dynamic strategy
 TODO: rebridger over valleys, debridger
@@ -42,6 +39,6 @@ TODO: long bridges sometimes are unavailable!
 TODO: helicopters
 TODO: dodawanie samolotów zale¿ne od pojemnoœci
 TODO: air
-//lepsze wybieranie przy a8
-//industry - valuate before building
-//kasowanie nadmiaru
+	//lepsze wybieranie przy a8	
+	//industry - valuate before building
+	//kasowanie nadmiaru

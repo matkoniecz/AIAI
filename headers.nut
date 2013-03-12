@@ -1,4 +1,4 @@
-import("util.superlib", "SuperLib", 19);
+import("util.superlib", "SuperLib", 24);
 Helper <- SuperLib.Helper
 Tile <- SuperLib.Tile
 Direction <- SuperLib.Direction
@@ -19,7 +19,6 @@ require("classes_enums.nut");
 require("findpair.nut");
 require("Builder.nut");
 require("RAIL/RailBuilder.nut");
-require("RAIL/StupidRailBuilder.nut");
 require("ROAD/RoadBuilder.nut");
 require("ROAD/BusRoadBuilder.nut");
 require("ROAD/TruckRoadBuilder.nut");

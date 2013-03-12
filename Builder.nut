@@ -5,6 +5,7 @@ rodzic = null;
 desperation = 0;
 retry_limit = 2;
 pathfinding_time_limit = 10;
+blacklisted_engines = AIList();
 };
 
 function Builder::SetDesperation(new_desperation)

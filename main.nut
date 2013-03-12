@@ -57,18 +57,18 @@ function AIAI::Start()
 				Sleep(500);
 				}
 			}
-		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>Money.Inflate(500000)&&this.Statue()) Info("I Am Rich! Statues!");
 		this.Maintenance();
+		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>Money.Inflate(500000) && this.Statue()) Info("I Am Rich! Statues!");
+		this.InformationCenter(builders);
 		if(this.TryEverything(builders)){
+			desperation = 0;
+			}
+		else{
 			Info("Nothing to do!");
 			Sleep(100);
+			desperation++;
 			continue;
 			}
-		this.InformationCenter(builders);
-		if(!this.UberBuilder(builders)) desperation++;
-		else desperation = 0;
-		Sleep(100);
-		RailBuilder(this, 0).TrainReplace();
 		Info(GetDate()-GeneralInspection+" month from general check")
 		if((GetDate()-GeneralInspection)>=6){ //6 months
 			this.RunGeneralInspection();
@@ -83,7 +83,6 @@ function AIAI::RunGeneralInspection()
 			this.DeleteUnprofitable();
 			DeleteEmptyStations();
 			Autoreplace();
-			RailBuilder(this, 0).TrainReplace();
 			this.UpgradeBridges();
 }
 
@@ -123,28 +122,14 @@ function AIAI::TryEverything(builders)
 {
 for(local i = 0; i<builders.len(); i++)
 	{
-	if(builders[i] != null)
-	if(builders[i].Possible())
-		{
-		return false;
-		}
-	}
-return true;
-}
-
-function AIAI::UberBuilder(builders)
-{
-for(local i = 0; i<builders.len(); i++)
-	{
-	if(builders[i] != null)
-	if(builders[i].Possible())
-		{
-		if(builders[i].Go()) 
-			{
+	if(builders[i] != null){
+		if(builders[i].Possible()){
+			if(builders[i].Go()){
+				RepayLoan();
+				return true;
+				}
 			RepayLoan();
-			return true;
 			}
-		RepayLoan();
 		}
 	}
 return false;
@@ -241,33 +226,16 @@ while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
 }	   
 }
 
-function AIAI::IsConnectedIndustry(industry_id, cargo)
-{
-if((RoadBuilder(this, 0)).IsConnectedIndustry(industry_id, cargo)==true) return true;
-return (AirBuilder(this, 0)).IsConnectedIndustry(industry_id, cargo);
-}
 
-function AIAI::IsConnectedDistrict(town_tile)
-{
-
-local list = AIStationList(AIStation.STATION_AIRPORT);
-if(list.Count()!=0)
-  {
-  list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
-  list.KeepBelowValue(18);
-  if(!list.IsEmpty()) return true;
-  }
-
-list = AIStationList(AIStation.STATION_BUS_STOP);
-if(list.Count()!=0)
-  {
-  list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
-  list.KeepBelowValue(8);
-  if(!list.IsEmpty()) return true;
-  }
-
-return false;
-}
+function IsCargoLoadedOnThisStation(station_id, cargo_id)
+	{
+	local vehicle_list=AIVehicleList_Station(station_id);
+	if(vehicle_list.Count()!=0)
+		if(AIStation.GetStationID(GetLoadStationLocation(vehicle_list.Begin()))==station_id)
+			if(AIVehicle.GetCapacity(vehicle_list.Begin(), cargo_id)!=0)
+				return true;
+	return false;
+	}
 
 function AIAI::GetDate()
 {
@@ -312,22 +280,11 @@ function AIAI::Load(version, data)
   abort("unable to load");
  }
 
-function AIAI::ForSell(vehicle_id)
-{
-if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle " + vehicle_id);
-local name=AIVehicle.GetName(vehicle_id)+"            ";
-local forsell="for sell";
-
-for(local i=0; i<forsell.len(); i++)
-if(name[i]!=forsell[i]) return false;
-return true;
-}
-
 function AIAI::gentleSellVehicle(vehicle_id, why)
 {
 local tile_1 = GetLoadStationLocation(vehicle_id);
 local tile_2 = GetUnloadStationLocation(vehicle_id);
-if(AIAI.ForSell(vehicle_id)) return false;
+if(IsForSell(vehicle_id)) return false;
 Info("ORAR");
 SetNameOfVehicle(vehicle_id, "for sell!" + why);
 local depot_location = GetDepotLocation(vehicle_id);
@@ -360,7 +317,7 @@ if(!AIVehicle.IsValidVehicle(vehicle_id))
 	}
 if(AIVehicle.GetState(vehicle_id) == AIVehicle.VS_CRASHED) return true;
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck1 " + vehicle_id);
-if(AIAI.ForSell(vehicle_id)==true) return false;
+if(IsForSell(vehicle_id)==true) return false;
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck2 " + vehicle_id);
 SetNameOfVehicle(vehicle_id, "sell!" + why);
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck3 " + vehicle_id);
@@ -402,7 +359,7 @@ function AIAI::DeleteUnprofitable()
 {
 	local vehicle_list = AIVehicleList();
 
-   	vehicle_list.Valuate(AIAI.ForSell);
+   	vehicle_list.Valuate(IsForSell);
 	vehicle_list.KeepValue(0);
 
    	vehicle_list.Valuate(AIVehicle.GetAge);
@@ -463,7 +420,7 @@ function AIAI::Maintenance()
 this.SafeMaintenance();
 this.HandleEvents();
 this.BankruptProtector();
-DeleteVehiclesInDepots();
+DeleteVehiclesInDepots(); //must not be run during creating vehicles
 }
 
 function AIAI::SafeMaintenance()
@@ -506,8 +463,6 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			Warning("Vehicle crash detected!");
 			local crash_event = AIEventVehicleCrashed.Convert(event);
 			local crash_reason = crash_event.GetCrashReason();
-			//local vehicle_id = crash_event.GetVehicleID();
-			//local crash_tile = crash_event.GetCrashSite();
 			if(crash_reason == AIEventVehicleCrashed.CRASH_RV_LEVEL_CROSSING){
 				this.HandleNewLevelCrossing(event);
 				}
@@ -517,7 +472,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			if (event.AcceptPreview()){
 				Info("New engine available from preview: " + event.GetName());
 				Autoreplace();
-				if(event.GetVehicleType() == AIVehicle.VT_RAIL)(RailBuilder(this, 0)).TrainReplace();
+				if(event.GetVehicleType() == AIVehicle.VT_RAIL) this.BuilderMaintenance();
 				}
 			}
 		else if(ev_type == AIEvent.ET_ENGINE_AVAILABLE){
@@ -525,7 +480,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			local engine = event.GetEngineID();
 			Info("New engine available: " + AIEngine.GetName(engine));
 			Autoreplace();
-			if(AIEngine.GetVehicleType(engine) == AIVehicle.VT_RAIL)(RailBuilder(this, 0)).TrainReplace();
+			if(AIEngine.GetVehicleType(engine) == AIVehicle.VT_RAIL) this.BuilderMaintenance();
 			}
 		else if(ev_type == AIEvent.ET_COMPANY_NEW){
 			event = AIEventCompanyNew.Convert(event);

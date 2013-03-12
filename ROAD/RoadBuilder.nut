@@ -17,29 +17,6 @@ require("KRAIpathfinder.nut");
 /////////////////////////////////////////////////
 /// Age of the youngest vehicle (in days)
 /////////////////////////////////////////////////
-function RoadBuilder::IsConnectedIndustry(industry_id, cargo)
-{
-if(AIStationList(AIStation.STATION_ANY).IsEmpty()) return false;
-
-local tile_list=AITileList_IndustryProducing(industry_id, 3);
-for(local tile = tile_list.Begin(); tile_list.HasNext(); tile = tile_list.Next())
-   {
-   local station_id = AIStation.GetStationID(tile);
-   if(AIStation.IsValidStation(station_id))
-      {
-	  local vehicle_list=AIVehicleList_Station(station_id);
-	  if(vehicle_list.Count()!=0)
-	  if(AIStation.GetStationID(GetLoadStationLocation(vehicle_list.Begin()))==station_id) //czy full load jest na wykrytej stacji
-	  {
-	  if(AIVehicle.GetCapacity(vehicle_list.Begin(), cargo)!=0)//i laduje z tej stacji
-	     {
-		 return true;
-		 }
-	  }
-	  }
-   }
-return false;
-}
 
 function RoadBuilder::Maintenance()
 {
@@ -85,7 +62,7 @@ function RoadBuilder::BuildRVStation(type)
 	if(!AIRoad.BuildDriveThroughRoadStation(trasa.first_station.location, trasa.start_otoczka[0], type, AIStation.STATION_NEW)) 
 	{
 		Warning("<")
-		rodzic.HandleFailedStationConstruction(trasa.first_station.location, AIError.GetLastError());
+		HandleFailedStationConstruction(trasa.first_station.location, AIError.GetLastError());
 		Warning(">")
 		if(!AIRoad.BuildDriveThroughRoadStation(trasa.first_station.location, trasa.start_otoczka[0], type, AIStation.STATION_NEW))
 		{
@@ -97,7 +74,7 @@ function RoadBuilder::BuildRVStation(type)
 	if(!AIRoad.BuildDriveThroughRoadStation(trasa.second_station.location, trasa.koniec_otoczka[0], type, AIStation.STATION_NEW)) 
 	{
 		Warning("<")
-		rodzic.HandleFailedStationConstruction(trasa.second_station.location, AIError.GetLastError());
+		HandleFailedStationConstruction(trasa.second_station.location, AIError.GetLastError());
 		Warning(">")
 		if(!AIRoad.BuildDriveThroughRoadStation(trasa.second_station.location, trasa.koniec_otoczka[0], type, AIStation.STATION_NEW)) 
 		{
@@ -620,7 +597,7 @@ return true;
 function RoadBuilder::IsWrongPlaceForRVStation(station_tile, direction)
 {
 	if(IsTileWithAuthorityRefuse(station_tile)) {
-		rodzic.HandleFailedStationConstruction(station_tile, AIError.ERR_LOCAL_AUTHORITY_REFUSES);
+		HandleFailedStationConstruction(station_tile, AIError.ERR_LOCAL_AUTHORITY_REFUSES);
 		if(IsTileWithAuthorityRefuse(station_tile))
 			{
 			return false;
@@ -726,7 +703,7 @@ if(start != null)
    list.RemoveBelowValue(20);
    }
 
-list.Valuate(rodzic.IsConnectedDistrict);
+list.Valuate(IsConnectedDistrict);
 list.KeepValue(0);
 
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
@@ -1185,7 +1162,7 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 			{
 			for (local vehicle = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle = vehicle_list.Next()) //from Chopper 
 				{
-				if(rodzic.ForSell(vehicle) || AIVehicle.GetAge(vehicle)<60)
+				if(IsForSell(vehicle) || AIVehicle.GetAge(vehicle)<60)
 					{
 					waiting_counter=0;
 					break;
@@ -1212,7 +1189,7 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 				local delete2=1;
 			if(delete2>delete1)delete_goal=delete2;
 			else delete_goal=delete1;
-			vehicle_list.Valuate(rodzic.ForSell);
+			vehicle_list.Valuate(IsForSell);
 			vehicle_list.KeepValue(0);
 			vehicle_list.Valuate(AIVehicle.GetAge);
 			vehicle_list.KeepAboveValue(60);

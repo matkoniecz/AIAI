@@ -105,10 +105,6 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile)
 	airport_rad = AIAirport.GetAirportCoverageRadius(airport_type);
 	local town_list = AITownList();
 
-	//Info(town_list.Count());
-	
-	//town_list.Valuate(AITown.GetLocation);
-	
 	town_list.Valuate(this.PopulationWithRandValuator);
 	town_list.KeepAboveValue(500-desperation);
 
@@ -123,42 +119,23 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile)
 	   
 	town_list.KeepBottom(50);
 
-	//Info(town_list.Count());
-	
 	for (local town = town_list.Begin(); town_list.HasNext(); town = town_list.Next()) {
-
     	local tile = AITown.GetLocation(town);
-
 		local list = AITileList();
 		local range = Sqrt(AITown.GetPopulation(town)/100) + 15;
 		SafeAddRectangle(list, tile, range);
-
-		//Info("tiles " + list.Count());
-	
 		list.Valuate(AITile.IsBuildableRectangle, airport_x, airport_y);
 		list.KeepValue(1);
-
-		//Info(list.Count());
-	
-		list.Valuate(rodzic.IsConnectedDistrict);
+		list.Valuate(IsConnectedDistrict);
 		list.KeepValue(0);
-
-		//Info(list.Count());
-	
-		/* Sort on acceptance, remove places that don't have acceptance */
+		// Sort on acceptance, remove places that don't have acceptance 
 		list.Valuate(AITile.GetCargoAcceptance, GetPAXCargoId(), airport_x, airport_y, airport_rad);
 		list.RemoveBelowValue(50);
-
-		//Info(list.Count());
-	
 		list.Valuate(AITile.GetCargoAcceptance, GetMailCargoId(), airport_x, airport_y, airport_rad);
 		list.RemoveBelowValue(10);
-
-		//Info(list.Count());
-	
-		/* Couldn't find a suitable place for this town, skip to the next */
+		// Couldn't find a suitable place for this town, skip to the next 
 		if (list.Count() == 0) continue;
-		/* Walk all the tiles and see if we can build the airport at all */
+		// Walk all the tiles and see if we can build the airport at all
 		{
 			local good_tile = 0;
 			for (tile = list.Begin(); list.HasNext(); tile = list.Next()) {
@@ -172,7 +149,7 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile)
 				break;
 			}
 
-			/* Did we found a place to build the airport on? */
+			// Did we found a place to build the airport on?
 			if (good_tile == 0) continue;
 		}
 
@@ -234,39 +211,6 @@ return 400;
 function AirBuilder::ValuatorDlaCzyJuzZlinkowane(station_id, i)
 {
 return AITile.GetDistanceManhattanToTile( AIStation.GetLocation(station_id), AIIndustry.GetLocation(i) );
-}
-
-function AirBuilder::IsConnectedIndustry(industry, cargo)
-{
-if(CheckerIsReallyConnectedIndustry(industry, cargo, AIAirport.AT_LARGE)) return true;
-else if(CheckerIsReallyConnectedIndustry(industry, cargo, AIAirport.AT_METROPOLITAN)) return true;
-else if(CheckerIsReallyConnectedIndustry(industry, cargo, AIAirport.AT_COMMUTER)) return true;
-else return CheckerIsReallyConnectedIndustry(industry, cargo, AIAirport.AT_SMALL);
-}
-
-function AirBuilder::CheckerIsReallyConnectedIndustry(industry, cargo, airport_type)
-{
-local radius = AIAirport.GetAirportCoverageRadius(airport_type);
-
-local tile_list=AITileList_IndustryProducing(industry, radius);
-for (local q = tile_list.Begin(); tile_list.HasNext(); q = tile_list.Next()) //from Chopper 
-   {
-   local station_id = AIStation.GetStationID(q);
-   if(AIAirport.IsAirportTile(q))
-   if(AIAirport.GetAirportType(q)==airport_type)
-      {
-	  local vehicle_list=AIVehicleList_Station(station_id);
-	  if(vehicle_list.Count()!=0)
-	  if(AIStation.GetStationID(GetLoadStationLocation(vehicle_list.Begin()))==station_id) //czy load jest na wykrytej stacji
-	  {
-	  if(AIVehicle.GetCapacity(vehicle_list.Begin(), cargo)!=0)//i laduje z tej stacji
-	     {
-		 return true;
-		 }
-	  }
-	  }
-   }
-return false;
 }
 
 function AirBuilder::CostEstimation()
@@ -458,13 +402,11 @@ function AirBuilder::Maintenance()
 this.Skipper();
 
 if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_AIR)) return;
-local ile;
 local veh_list = AIVehicleList();
 veh_list.Valuate(GetVehicleType);
 veh_list.KeepValue(AIVehicle.VT_AIR);
-ile = veh_list.Count();
 local allowed = AIGameSettings.GetValue("vehicle.max_aircraft");
-if(allowed==ile) return;
+if(allowed == veh_list.Count()) return;
 
 this.addPAXAircrafts();
 this.AddCargoAircrafts();
@@ -696,7 +638,7 @@ function AirBuilder::IsItPossibleToHaveAirport(tile, airport_type, c)
 	local test = AITestMode();
 	if(AIAirport.BuildAirport(tile, airport_type, c)) return true;
 	local error = AIError.GetLastError()
-	rodzic.HandleFailedStationConstruction(tile, error);
+	HandleFailedStationConstruction(tile, error);
 	return (error == AIError.ERR_NOT_ENOUGH_CASH);
 }
 

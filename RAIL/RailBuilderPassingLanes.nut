@@ -535,6 +535,11 @@ while (path != null) {
 		right = PassingLaneConstructor(true);
 		left = PassingLaneConstructor(false);
 		}
+	if(left.Finished() && right.Finished()){
+		list = addToArray(list, right.GetLane());
+		right = PassingLaneConstructor(true);
+		left = PassingLaneConstructor(false);
+		}
 	if(left.Finished()) left.GetLane();
 	if(right.Finished()) right.GetLane();
 	prevprevtile = prevtile;
@@ -545,6 +550,7 @@ local count = 0;
 if(list!=null)
 for(local i=0; i<list.len(); i++)
 	{
+	Error("******************************** "+list.len())
 	local copy = list[i].path;
 	if(DumbBuilder(copy)) {
 		copy = list[i].path;

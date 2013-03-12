@@ -249,7 +249,7 @@ function ImproveTownRating(town_id, desperation) //from AdmiralAI
 	}
 }
 
-function AIAI::HandleFailedStationConstruction(location, error)
+function HandleFailedStationConstruction(location, error)
 {	
 	if(error==AIError.ERR_LOCAL_AUTHORITY_REFUSES) 
 		{
@@ -269,4 +269,23 @@ local town_list = AITownList();
 town_list.Valuate(GetRatherBigRandomTownValuator);
 town_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
 return town_list.Begin();
+}
+
+function IsConnectedDistrict(town_tile)
+{
+	//TODO - it is a hack rather than function
+	local list = AIStationList(AIStation.STATION_AIRPORT);
+	if(list.Count()!=0){
+		list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
+		list.KeepBelowValue(18);
+		if(!list.IsEmpty()) return true;
+	}
+
+	list = AIStationList(AIStation.STATION_BUS_STOP);
+	if(list.Count()!=0){
+		list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
+		list.KeepBelowValue(8);
+		if(!list.IsEmpty()) return true;
+	}
+	return false;
 }

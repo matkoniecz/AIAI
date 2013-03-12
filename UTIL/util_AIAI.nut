@@ -1,3 +1,14 @@
+function IsForSell(vehicle_id)
+{
+if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle " + vehicle_id);
+local name=AIVehicle.GetName(vehicle_id)+"            ";
+local forsell="for sell";
+
+for(local i=0; i<forsell.len(); i++)
+if(name[i]!=forsell[i]) return false;
+return true;
+}
+
 function AIAI::GetIndustryList()
 {
 local list = AIIndustryList();
@@ -131,3 +142,48 @@ function AIAI::HQ() //from Rondje
 	Info("No possible HQ location found");
 	}
 
+function IsConnectedIndustryUsingThisAirport(industry, cargo_id, airport_type)
+{
+local radius = AIAirport.GetAirportCoverageRadius(airport_type);
+
+local tile_list=AITileList_IndustryProducing(industry, radius);
+for (local q = tile_list.Begin(); tile_list.HasNext(); q = tile_list.Next()) //from Chopper 
+	{
+	local station_id = AIStation.GetStationID(q);
+	if(AIAirport.IsAirportTile(q))
+	if(AIAirport.GetAirportType(q)==airport_type)
+		{
+		if(IsCargoLoadedOnThisStation(station_id, cargo_id))return true;
+		}
+	}
+return false;
+}
+
+function IsConnectedIndustry(industry_id, cargo_id)
+{
+if(AIStationList(AIStation.STATION_ANY).IsEmpty()) return false;
+
+local tile_list=AITileList_IndustryProducing(industry_id, AIStation.GetCoverageRadius(AIStation.STATION_TRAIN));
+for(local tile = tile_list.Begin(); tile_list.HasNext(); tile = tile_list.Next())
+	{
+	local station_id = AIStation.GetStationID(tile);
+	if(AIStation.IsValidStation(station_id))
+		if(AITile.HasTransportType(tile, AITile.TRANSPORT_RAIL)) //check for railstation (workaround, as there is no equivalent of IsAirportTile. this hack will fail with eyecandy station tiles without rail)
+			if(IsCargoLoadedOnThisStation(station_id, cargo_id))return true;
+	}
+
+local tile_list=AITileList_IndustryProducing(industry_id, AIStation.GetCoverageRadius(AIStation.STATION_TRUCK_STOP)); //assumes that STATION_BUS_STOP have the same coverage
+for(local tile = tile_list.Begin(); tile_list.HasNext(); tile = tile_list.Next())
+	{
+	local station_id = AIStation.GetStationID(tile);
+	if(AIStation.IsValidStation(station_id))
+		if(AITile.HasTransportType(tile, AITile.TRANSPORT_ROAD)) //check for railstation (workaround, as there is no equivalent of IsAirportTile. this hack will fail with eyecandy station tiles without rail)
+			if(IsCargoLoadedOnThisStation(station_id, cargo_id))return true;
+	}
+
+if(IsConnectedIndustryUsingThisAirport(industry_id, cargo_id, AIAirport.AT_LARGE)) return true;
+if(IsConnectedIndustryUsingThisAirport(industry_id, cargo_id, AIAirport.AT_METROPOLITAN)) return true;
+if(IsConnectedIndustryUsingThisAirport(industry_id, cargo_id, AIAirport.AT_COMMUTER)) return true;
+if(IsConnectedIndustryUsingThisAirport(industry_id, cargo_id, AIAirport.AT_SMALL)) return true;
+return false;
+}
