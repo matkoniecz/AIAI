@@ -37,12 +37,6 @@ function RepayLoan()
 while(AICompany.SetLoanAmount(AICompany.GetLoanAmount()-AICompany.GetLoanInterval()));
 }
 
-function GetBankBalance()
-{
-local me = AICompany.ResolveCompanyID(AICompany.COMPANY_SELF);
-return AICompany.GetBankBalance(me)
-}
-
 function GetAvailableMoney()
 {
 local me = AICompany.ResolveCompanyID(AICompany.COMPANY_SELF);

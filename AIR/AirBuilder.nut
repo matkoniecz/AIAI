@@ -459,7 +459,6 @@ return town_list.Begin();
 
 function AirBuilder::Maintenance()
 {
-Info("Skipper!");
 this.Skipper();
 
 if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_AIR))return;
@@ -624,61 +623,46 @@ function CzyToPassengerCargoValuator(veh)
    return 0;
    }
 
-function AirBuilder::Skip(plane, stacja)
-{
-for(local i=0; i<AIOrder.GetOrderCount(plane); i++)
-   {
-   if(AIOrder.GetOrderFlags(plane, i)==AIOrder.AIOF_FULL_LOAD_ANY)
-      {
-	   AIOrder.SetOrderFlags(plane, i, AIOrder.AIOF_NO_LOAD);
-	   AIController.Sleep(10);
-	   AIOrder.SetOrderFlags(plane, i, AIOrder.AIOF_FULL_LOAD_ANY);	  	
-	  }
-   }
-}
-
 function AirBuilder::Skipper()
 {
 local list = AIStationList(AIStation.STATION_AIRPORT);
 if(list.Count()==0)return;
 
-local lista = AIList();
+local list = AIList();
 
 for (local airport = list.Begin(); list.HasNext(); airport = list.Next())
    {
    local pozycja=AIStation.GetLocation(airport)
    local airlist=AIVehicleList_Station(airport);
    if(airlist.Count()==0)continue;
+
    local counter=0;
-   
    local minimum = 101;
-   local pustak = null;
-   for (local plane = airlist.Begin(); airlist.HasNext(); plane = airlist.Next())
-      {
+   local plane_left_on_airport = null;
+   for (local plane = airlist.Begin(); airlist.HasNext(); plane = airlist.Next()){
 	  if(AIVehicle.GetState(plane)==AIVehicle.VS_AT_STATION)
 	     if(AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(plane), pozycja)<30)
-		    if(AIVehicle.GetCapacity(plane, rodzic.GetPassengerCargoId())>0)
-			{
+		    if(AIVehicle.GetCapacity(plane, rodzic.GetPassengerCargoId())>0){
 			local percent = ( 100 * AIVehicle.GetCargoLoad(plane, rodzic.GetPassengerCargoId()))/(AIVehicle.GetCapacity(plane, rodzic.GetPassengerCargoId()));
 		    //Info(percent + " %");
 			if(percent < minimum)
 			   {
 			   //Info(percent + " %%%")
 			   minimum=percent;
-			   pustak=plane;
+			   plane_left_on_airport=plane;
 			   }
-  		    lista.AddItem(plane, airport);
+  		    list.AddItem(plane, airport);
 			counter++;
 			}
 	  }
-   if(pustak!=null)lista.RemoveItem(pustak); //airport may be empty
+   if(plane_left_on_airport!=null)list.RemoveItem(plane_left_on_airport); 
    }
-   
-for (local skipping = lista .Begin(); lista.HasNext(); skipping = lista.Next())
+local count=0;
+for (local plane = list.Begin(); list.HasNext(); plane = list.Next())
    {
-   this.Skip(skipping, list.GetValue(skipping));
+   if(AIOrder.SkipToOrder(plane, (AIOrder.ORDER_CURRENT+1)%AIOrder.GetOrderCount(plane)))count++;
    }
-
+Info(count+" planes skipped to next destination!");
 }
 
 function AirBuilder::PopulationWithRandValuator(town_id)

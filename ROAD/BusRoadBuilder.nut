@@ -5,7 +5,7 @@ class BusRoadBuilder extends RoadBuilder
 function BusRoadBuilder::Possible()
 {
 if(!IsAllowedBus())return false;
-Info("$: " + this.cost + " / " + GetAvailableMoney());
+Info("estimated cost of a bus connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
 

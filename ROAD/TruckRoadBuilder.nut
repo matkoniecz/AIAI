@@ -5,7 +5,7 @@ class TruckRoadBuilder extends RoadBuilder
 function TruckRoadBuilder::Possible()
 {
 if(!IsAllowedTruck())return false;
-Warning("$: " + this.cost + " / " + GetAvailableMoney());
+Warning("estimated cost of a truck connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
 

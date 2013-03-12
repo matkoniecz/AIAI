@@ -33,28 +33,25 @@ function AIAI::Start()
 {
 	this.Starter();
 	local builders = strategyGenerator();
-
 	while(true){
 		Warning("Desperation: " + desperation);
 		root_tile = RandomTile();
 		if(AIVehicleList().Count()!=0){
-			BankruptProtector();
-			while((AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())<inflate(100000) && AICompany.GetLoanAmount()!=AICompany.GetMaxLoanAmount()){
+			local need = inflate(100000);
+			if(GetAvailableMoney()<need)
+				{
+				Info("Waiting for more money: " + GetAvailableMoney()/1000 + "k / " + need/1000 + "k");
 				while(AICompany.SetLoanAmount(AICompany.GetLoanAmount() - AICompany.GetLoanInterval()));
+				this.Maintenance();
 				BankruptProtector();
-				local have = (AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())/1000;
-				local need = 100*GetInflationRate()/100;
-				if(have<=need){
-					Info("Waiting for more money: " + have + "k / " + need + "k");
-					Sleep(500);
-					this.Maintenance();
-					}
+				Sleep(500);
 				}
 			}
 		this.BankruptProtector();
-		while(GetBankBalance()>inflate(500000)&&this.Statue()) Info("I Am Rich! Statues!");
+		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>inflate(500000)&&this.Statue()) Info("I Am Rich! Statues!");
 		this.Maintenance();
-		if(this.EverythingFailed(builders)){
+		this.DeleteVehiclesInDepots();
+		if(this.TryEverything(builders)){
 			Info("Nothing to do!");
 			Sleep(100);
 			continue;
@@ -84,7 +81,7 @@ function AIAI::InformationCenter(builders)
 		}
 }
 
-function AIAI::EverythingFailed(builders)
+function AIAI::TryEverything(builders)
 {
 for(local i = 0; i<builders.len(); i++)
 	{
@@ -375,10 +372,8 @@ this.DeleteVehiclesInDepots();
 function AIAI::Maintenance()
 {
 this.SignMenagement();
-this.BankruptProtector();
 this.HandleOldLevelCrossings();
 this.BuilderMaintenance();
-this.DeleteVehiclesInDepots();
 this.HandleEvents();
 }
 
@@ -575,7 +570,6 @@ for(local x_cluster=0; x_cluster*rectangle_size<AIMap.GetMapSizeX(); x_cluster++
 
 function AIAI::BuildVehicle(depot_tile, engine_id)
 {		
-	AISign.BuildSign(depot_tile, "here");
 	if(!AIEngine.IsBuildable(engine_id))
 		abort("not buildable!");
 		
@@ -587,17 +581,16 @@ function AIAI::BuildVehicle(depot_tile, engine_id)
 		if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH)
 			{
 			do {
-				//rodzic.Maintenance(); - to protect train from dletion during construction of wagon
+				rodzic.Maintenance();
 				ProvideMoney();
-				AIController.Sleep(10);
-				Info("retry");
+				AIController.Sleep(400);
+				Info("retry: BuildVehicle");
 				newengineId = AIVehicle.BuildVehicle(depot_tile, engine_id);
 			} while(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH)
 			}
 		Error(AIError.GetLastErrorString());
 		if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_BUILD_DISABLED || AIError.GetLastError()==AIVehicle.ERR_VEHICLE_TOO_MANY )
 			{
-			AIAI.SignMenagement();
 			return false;
 			}
 		if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_WRONG_DEPOT) abort("depot nuked");
@@ -611,6 +604,5 @@ function AIAI::BuildVehicle(depot_tile, engine_id)
 		}
 	Info(AIEngine.GetName(engine_id) + " constructed! ("+newengineId+")")
 	if(!AIVehicle.IsValidVehicle(newengineId)) abort("!!!!!!!!!!!!!!!");
-	AIAI.SignMenagement();
 	return newengineId;
 }

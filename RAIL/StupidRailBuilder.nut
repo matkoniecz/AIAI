@@ -5,7 +5,7 @@ class StupidRailBuilder extends RailBuilder
 function StupidRailBuilder::Possible()
 {
 if(!IsAllowedStupidCargoTrain())return false;
-Info("$: " + this.cost + " / " + GetAvailableMoney());
+Info("estimated cost of a stupid railway connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
 

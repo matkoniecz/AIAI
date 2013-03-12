@@ -5,7 +5,7 @@ class PAXAirBuilder extends AirBuilder
 function PAXAirBuilder::Possible()
 {
 if(!IsAllowedPAXPlane())return false;
-Info("$: " + this.cost + " / " + GetAvailableMoney());
+Info("estimated cost of a PAX airplane connection: " + this.cost + " / available funds: " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
 
@@ -35,7 +35,6 @@ function PAXAirBuilder::Go()
 
 function PAXAirBuilder::BuildAirportRouteBetweenCitiesWithAirportTypeSet(airport_type)
 {	
-Info("BuildAirportRouteBetweenCitiesWithAirportTypeSet");
 if(!AIAirport.IsValidAirportType(airport_type))return false;
 local engine=this.FindAircraft(airport_type, rodzic.GetPassengerCargoId(), 3, GetAvailableMoney());
 if(engine==null)

@@ -5,7 +5,7 @@ class SmartRailBuilder extends RailBuilder
 function SmartRailBuilder::Possible()
 {
 	if(!IsAllowedSmartCargoTrain())return false;
-	Info("$: " + this.cost + " / " + GetAvailableMoney());
+	Info("estimated cost of a smart rail connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
 	return this.cost<GetAvailableMoney();
 }
 
@@ -441,7 +441,8 @@ if(!this.RailwayLinkConstruction(path)){
 	}
 */
 trasa.depot_tile = this.BuildDepot(path, false);
-local max_train_count = 9;
+local max_train_count = AITile.GetDistanceManhattanToTile(trasa.first_station.location, trasa.second_station.location)/10;
+if (max_train_count<2) max_train_count = 2;
 rodzic.SetStationName(trasa.first_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
 rodzic.SetStationName(trasa.second_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
 
@@ -632,7 +633,8 @@ if(second_engine != null)
 		this.TrainOrders(second_engine);
 		}
    }
-local max_train_count = 9;
+local max_train_count = AITile.GetDistanceManhattanToTile(trasa.first_station.location, trasa.second_station.location)/10;
+if (max_train_count<2) max_train_count = 2;
 rodzic.SetStationName(trasa.first_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
 rodzic.SetStationName(trasa.second_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
 return true;

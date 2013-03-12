@@ -1,3 +1,5 @@
+class Station - multiplatforms
+
 TODO: reuse roads http://www.tt-forums.net/viewtopic.php?p=958414#p958414
 TODO: $ menag during pf
 TODO: sprawdziæ jak (i czy) dzia³a lista zbanowanych

@@ -771,6 +771,7 @@ function RoadBuilder::BudujPojazdy()
 	local ile = trasa.engine_count;	
 	local vehicle_id = -1;
 	vehicle_id=AIAI.BuildVehicle (trasa.depot_tile, trasa.engine);
+	if(!vehicle_id)return null;
 	{
 	zbudowano++;
 
@@ -1201,22 +1202,20 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 				local delete2=1;
 			if(delete2>delete1)delete_goal=delete2;
 			else delete_goal=delete1;
-			Info(delete_goal+"<-delete_goal");
-			Info(vehicle_list.Count());
 			vehicle_list.Valuate(rodzic.CzyNaSprzedaz);
 			vehicle_list.KeepValue(0);
-			Info(vehicle_list.Count());
 			vehicle_list.Valuate(AIVehicle.GetAge);
 			vehicle_list.KeepAboveValue(60);
-			Info(vehicle_list.Count());
 			vehicle_list.Valuate(AIVehicle.GetCargoLoad, cargo)
 			vehicle_list.KeepValue(0);
-			Info(vehicle_list.Count());
 			for (local vehicle = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle = vehicle_list.Next()) //from Chopper 
 				{
-				Info(delete_count+" of "+delete_goal+" deleted.")
 				if(delete_goal-delete_count<0)
+					{
+					Info("DELETION END")
 					break;
+					}
+				Info(delete_count+" of "+delete_goal+" deleted.")
 				local result = null;
 				if(rodzic.sellVehicle(vehicle, "kolejkowicze"))
 					{
