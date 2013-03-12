@@ -48,14 +48,14 @@ function GetDepotLocation(vehicle)
 if (!AIVehicle.IsValidVehicle(vehicle)) abort("invalid vehicle: " + vehicle);
 local new_style = LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(GetLoadStationLocation(vehicle)), "[]");
 if(AIMap.IsValidTile(new_style)) return new_style;
-//for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) if(AIOrder.IsGotoDepotOrder(vehicle, i))return AIOrder.GetOrderDestination(vehicle, i);
+//for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) if(AIOrder.IsGotoDepotOrder(vehicle, i)) return AIOrder.GetOrderDestination(vehicle, i);
 abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle)+ "psudotile from station name is "+new_style);
 }
 
 function GetLoadStationLocation(vehicle)
 {
 if (!AIVehicle.IsValidVehicle(vehicle)) abort("invalid vehicle: " + vehicle);
-for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) if(AIOrder.IsGotoStationOrder(vehicle, i))return AIOrder.GetOrderDestination(vehicle, i);
+for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) if(AIOrder.IsGotoStationOrder(vehicle, i)) return AIOrder.GetOrderDestination(vehicle, i);
 abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle));
 }
 
@@ -66,7 +66,7 @@ if (!AIVehicle.IsValidVehicle(vehicle)) abort("invalid vehicle: " + vehicle);
 local onoff = false;
 for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) {
    if(AIOrder.IsGotoStationOrder(vehicle, i)) {
-	  if(onoff==true)return AIOrder.GetOrderDestination(vehicle, i);
+	  if(onoff==true) return AIOrder.GetOrderDestination(vehicle, i);
 	  onoff=true
 	  }
    }
@@ -101,7 +101,7 @@ function AIAI::HQ() //from Rondje
 	// Find biggest town for HQ
 	local towns = AITownList();
 	towns.Valuate(AITown.GetPopulation);
-	towns.Sort(AIAbstractList.SORT_BY_VALUE, false);
+	towns.Sort(AIList.SORT_BY_VALUE, false);
 	local town = towns.Begin();
 	
 	// Find empty 2x2 square as close to town centre as possible
@@ -117,7 +117,13 @@ function AIAI::HQ() //from Rondje
 	Info("Building company HQ...");
 	for (local tile = HQArea.Begin(); HQArea.HasNext(); tile = HQArea.Next()){
 		if(AICompany.BuildCompanyHQ(tile)){
-			AISign.BuildSign(tile, "In case of strange or stupid AIAI behaviour send mail on bulwersator@gmail.com");
+			if(AIAI.GetSetting("hide_ad") != 1)
+			{
+				AISign.BuildSign(tile, "In case of strange or stupid")
+				AISign.BuildSign(tile+AIMap.GetTileIndex(1, 1), "AIAI behaviour, please");
+				AISign.BuildSign(tile+AIMap.GetTileIndex(2, 2), "report it on");
+				AISign.BuildSign(tile+AIMap.GetTileIndex(3, 3), "http://tinyurl.com/ottdaiai");
+			}
 			return;
 			} 
 		}

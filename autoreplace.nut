@@ -4,7 +4,7 @@ Info("Autoreplace started");
 AutoreplaceRV();
 AutoreplaceSmallPlane();
 AutoreplaceBigPlane();
-Info("Autoreplace list updated by Autoreplace() from AIAI.nut");
+Info("Autoreplace list updated by Autoreplace()");
 }
 
 function AutoreplaceBigPlane()

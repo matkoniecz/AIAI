@@ -22,7 +22,7 @@ cost = 1;
 function Builder::CountVehicles(station)
 {
 local vehicle_list=AIVehicleList_Station(station);
-vehicle_list.Valuate(rodzic.CzyNaSprzedaz)
+vehicle_list.Valuate(rodzic.ForSell)
 vehicle_list.KeepValue(0);
 return vehicle_list.Count();
 }

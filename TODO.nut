@@ -1,13 +1,23 @@
+CHANGE: clear_signs is set to false as default
+FIXED: gentleSellVehicle function (everything was wrong)
+FIXED: ancient bug that blocked ad (with link to this thread) is fixed 
+FIXED: Lowkee33 bug (AIAI goes out of business after replacing trains.)
+FIXED: crash caused by vehicle_id getting invalid halway through function
+FIXED: merging 2 stations without merging :D
+DONE: code translation (ZbudujKawalateczekDrogi -> BuildRoadSegment, CzyNaSprzedaz -> ForSell etc)
+DONE: compat_1.0 is limited to fixing pointless change of HasNext() into !IsEnd()
+DONE: desperation, GeneralInspection date is saved/loaded
+DONE: AICONFIG_AI_DEVELOPER (hides debug options)
 DONE: bribes
-DONE: SuperLib updateed to v15
-DONE: ConvertRailCrossingToBridge is imported in proper way
-DONE: better debug output (still terrible)
-FIXED: YA crash bug
-
 DONE: Tree planting (from AdmiralAI)
- 
-class Station - multiplatforms
+DONE: passing lanes for railways contruction
+CHANGE: Both types of rail construction replaced by new (passing lanes)
+SAVEGAME COMBATIBILITY: broken
+KNOWN PROBLEM: Handling range for airplanes is one giant TODO, for now feature only in the trunk and without any published newgrfs
+KNOWN PROBLEM: Passing lanes construction is not finished, sometimes it is possible to add more but AI is stupid and unable to do so
 
+HasNext -> IsEnd 
+class Station - multiplatforms
 TODO: cargo planes reusing industry
 TODO: reuse roads http://www.tt-forums.net/viewtopic.php?p=958414#p958414
 TODO: $ menag during pf
@@ -20,7 +30,6 @@ TODO: better RV choosing (problem with very small)
 TODO: error stats
 
 TODO: during heavy competition (more companies that ind + towns) build statues after every connection
-TODO: error catherw w BuildTrain
 TODO: check during pathfinding is it still possible to have station
 TODO: supplies
 	- supplies - cagos accepted by raw industries

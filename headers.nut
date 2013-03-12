@@ -1,9 +1,27 @@
-import("util.superlib", "SuperLib", 15);
+require("compat_1.0.nut");
+import("util.superlib", "SuperLib", 19);
 Helper <- SuperLib.Helper
 Tile <- SuperLib.Tile
 Direction <- SuperLib.Direction
 Road <- SuperLib.Road
 Money <- SuperLib.Money
+
+AIMap._IsValidTile <- AIMap.IsValidTile;
+AIMap.IsValidTile <- function(tile)
+{
+	if(tile == null) return false;
+	return AIMap._IsValidTile(tile);
+}
+
+AISign._BuildSign <- AISign.BuildSign;
+AISign.BuildSign <- function(tile, text)
+{
+	local returned = AISign._BuildSign(tile, text);
+	if(AIError.GetLastError()!=AIError.ERR_NONE)
+		Error(AIError.GetLastErrorString() + " - SIGN FAILED" );
+	Info("signSTOP!  ("+text+")")
+	return returned;
+}
 
 require("UTIL/util.nut");
 require("UTIL/util_is_allowed.nut");
@@ -15,7 +33,6 @@ require("classes_enums.nut");
 require("findpair.nut");
 require("Builder.nut");
 require("RAIL/RailBuilder.nut");
-require("RAIL/SmartRailBuilder.nut");
 require("RAIL/StupidRailBuilder.nut");
 require("ROAD/RoadBuilder.nut");
 require("ROAD/BusRoadBuilder.nut");
@@ -23,6 +40,7 @@ require("ROAD/TruckRoadBuilder.nut");
 require("AIR/AirBuilder.nut");
 require("AIR/PAXAirBuilder.nut");
 require("AIR/CargoAirBuilder.nut");
+
 
 /**
  *  path from the AyStar algorithm, without internal pf data.
@@ -37,6 +55,7 @@ class Path
 	_direction = null;
 	_cost = null;
 	_length = null;
+	_real_length = null;
 
 	constructor(old_path, new_tile, new_direction)
 	{
@@ -45,8 +64,29 @@ class Path
 		this._direction = new_direction;
 		if (old_path == null) {
 			this._length = 0;
+			this._real_length = 0.0;
 		} else {
 			this._length = old_path.GetLength() + AIMap.DistanceManhattan(old_path.GetTile(), new_tile);
+			if(old_path.GetParent() != null)
+				{
+				local old_tile = old_path.GetTile();
+				if(Helper.Abs(AIMap.GetTileX(old_tile)-AIMap.GetTileX(new_tile))<=1 && Helper.Abs(AIMap.GetTileY(old_tile)-AIMap.GetTileY(new_tile))<=1) {
+					Info(this._real_length+">");
+					this._real_length = old_path.GetRealLength() + 0.5;
+					Info(this._real_length+"<");
+					}
+				else{
+					Info(this._real_length+">");
+					this._real_length = old_path.GetRealLength() + 1.0;
+					Info(this._real_length+"<");
+					}
+				}
+			else
+				{
+				Info(this._real_length+">");
+				this._real_length = 0.0;
+				Info(this._real_length+"<");
+				}
 		}
 	};
 
@@ -69,4 +109,13 @@ class Path
 	 * Return the length (in tiles) of this path.
 	 */
 	function GetLength() { return this._length; }
+	/**
+
+	* Return the length (in tiles) of this path.
+	 */
+	function GetRealLength() 
+	{ 
+	if(this.GetParent() == null) return 0;
+	return this.GetParent()._real_length; 
+	}
 };

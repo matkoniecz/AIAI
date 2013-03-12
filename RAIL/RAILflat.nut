@@ -1,10 +1,10 @@
 
 function IsCrossingPossible(tile)
 {
-if(AITile.GetSlope(tile) != AITile.SLOPE_FLAT)return false;
-if(AITile.GetSlope(tile + AIMap.GetTileIndex(0, 1)) !=AITile.SLOPE_FLAT)return false;
-if(AITile.GetSlope(tile + AIMap.GetTileIndex(1, 1)) !=AITile.SLOPE_FLAT)return false;
-if(AITile.GetSlope(tile + AIMap.GetTileIndex(1, 0)) !=AITile.SLOPE_FLAT)return false;
+if(AITile.GetSlope(tile) != AITile.SLOPE_FLAT) return false;
+if(AITile.GetSlope(tile + AIMap.GetTileIndex(0, 1)) !=AITile.SLOPE_FLAT) return false;
+if(AITile.GetSlope(tile + AIMap.GetTileIndex(1, 1)) !=AITile.SLOPE_FLAT) return false;
+if(AITile.GetSlope(tile + AIMap.GetTileIndex(1, 0)) !=AITile.SLOPE_FLAT) return false;
 return AITile.IsBuildableRectangle(tile, 2, 2);
 }
 
@@ -60,8 +60,8 @@ RAIL.DumbBuilder(line_b);
 
 function RAIL::WrongStarter(result)
 {
-if(IsCrossingPossible(result.a)==false)return true;
-if(IsCrossingPossible(result.b)==false)return true;
+if(IsCrossingPossible(result.a)==false) return true;
+if(IsCrossingPossible(result.b)==false) return true;
 return !((AIMap.GetTileX(result.a) <= AIMap.GetTileX(result.b))&&(AIMap.GetTileY(result.a)<=AIMap.GetTileY(result.b)));
 }
 

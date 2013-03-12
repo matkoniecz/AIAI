@@ -4,7 +4,7 @@ class PAXAirBuilder extends AirBuilder
 
 function PAXAirBuilder::Possible()
 {
-if(!IsAllowedPAXPlane())return false;
+if(!IsAllowedPAXPlane()) return false;
 Info("estimated cost of a PAX airplane connection: " + this.cost + " / available funds: " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
@@ -35,8 +35,8 @@ function PAXAirBuilder::Go()
 
 function PAXAirBuilder::BuildAirportRouteBetweenCitiesWithAirportTypeSet(airport_type)
 {	
-if(!AIAirport.IsValidAirportType(airport_type))return false;
-local engine=this.FindAircraft(airport_type, GetPassengerCargoId(), 3, GetAvailableMoney());
+if(!AIAirport.IsValidAirportType(airport_type)) return false;
+local engine=this.FindAircraft(airport_type, GetPAXCargoId(), 3, GetAvailableMoney());
 if(engine==null)
     {
 	Info("Unfortunatelly no suitable aircraft found");
@@ -80,13 +80,13 @@ local airport_rad = AIAirport.GetAirportCoverageRadius(airport_type);
 	Info("Airports constructed on distance " + AIMap.DistanceManhattan(tile_1, tile_2) + " but effective distanse is: " + GetEffectiveDistanceBetweenAirports(tile_1, tile_2));
 	local dystans = this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2);
 	local speed = AIEngine.GetMaxSpeed(engine);
-	local production_at_first_airport = AITile.GetCargoAcceptance(tile_1, GetPassengerCargoId(), airport_x, airport_y, airport_rad);
-	local production_at_second_airport = AITile.GetCargoAcceptance(tile_2, GetPassengerCargoId(), airport_x, airport_y, airport_rad);
+	local production_at_first_airport = AITile.GetCargoAcceptance(tile_1, GetPAXCargoId(), airport_x, airport_y, airport_rad);
+	local production_at_second_airport = AITile.GetCargoAcceptance(tile_2, GetPAXCargoId(), airport_x, airport_y, airport_rad);
 	local production = min(production_at_first_airport, production_at_second_airport);
 	local licznik = this.HowManyAirplanes(dystans, speed, production, engine);
 	for(local i=0; i<licznik; i++) 
 		{
-		while(!this.BuildPassengerAircraftWithRand(tile_1, tile_2, engine, GetPassengerCargoId()))
+		while(!this.BuildPassengerAircraftWithRand(tile_1, tile_2, engine, GetPAXCargoId()))
 			{
 			Error("PAX aircraft construction failed due to " + AIError.GetLastErrorString()+".")
 			if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH) 

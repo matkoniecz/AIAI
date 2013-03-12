@@ -4,7 +4,7 @@ class TruckRoadBuilder extends RoadBuilder
 
 function TruckRoadBuilder::Possible()
 {
-if(!IsAllowedTruck())return false;
+if(!IsAllowedTruck()) return false;
 Warning("estimated cost of a truck connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
@@ -29,7 +29,7 @@ trasa = Route();
 
 for(local i=0; i<retry_limit; i++)
    {
-   Important("Scanning for truck route");
+   Info("Scanning for truck route");
    trasa = this.FindPair(trasa); 
    if(!trasa.OK) 
       {
@@ -38,7 +38,7 @@ for(local i=0; i<retry_limit; i++)
       return false;
       }
 
-   Important("Scanning for truck route completed [ " + desperation + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
+   Info("Scanning for truck route completed [ " + desperation + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
    if(this.PrepareRoute())
       {
 	  Info("   Contruction started on correct route.");
@@ -49,7 +49,7 @@ for(local i=0; i<retry_limit; i++)
    else
       {
 	  Info("   Route preaparings failed.");	  
-	  if(trasa.start==null)return false;
+	  if(trasa.start==null) return false;
 	  else trasa.forbidden.AddItem(trasa.start, 0);
 	  }
    }

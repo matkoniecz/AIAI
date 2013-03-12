@@ -4,7 +4,7 @@ class BusRoadBuilder extends RoadBuilder
 
 function BusRoadBuilder::Possible()
 {
-if(!IsAllowedBus())return false;
+if(!IsAllowedBus()) return false;
 Info("estimated cost of a bus connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
@@ -13,11 +13,11 @@ function BusRoadBuilder::FindBusPair()
 {
 trasa.start = GetRatherBigRandomTown();
 trasa.end = GetNiceRandomTown(AITown.GetLocation(trasa.start))
-trasa.cargo = GetPassengerCargoId();
+trasa.cargo = GetPAXCargoId();
 
 if(trasa.end == null) return false;
 Info("From " + AITown.GetName(trasa.start) + "  to " +  AITown.GetName(trasa.end) );
-trasa.cargo = GetPassengerCargoId();
+trasa.cargo = GetPAXCargoId();
 
 trasa = BusStationAllocator(trasa);
 
@@ -42,14 +42,14 @@ trasa = Route();
 
 for(local i=0; i<retry_limit; i++)
    {
-   Important("Scanning for bus route");
+   Info("Scanning for bus route");
    if(!this.FindBusPair())
       {
 	  Info("Nothing found!");
 	  cost = 0;
 	  return false;
       }
-   Important("Scanning for bus route completed [ " + desperation + " ] ");
+   Info("Scanning for bus route completed [ " + desperation + " ] ");
    if(this.PrepareRoute())
       {
 	  Info("   Contruction started on correct route.");
@@ -59,7 +59,7 @@ for(local i=0; i<retry_limit; i++)
 	  }
    else
       {
-	  if(trasa.start==null)return false;
+	  if(trasa.start==null) return false;
 	  else trasa.forbidden.AddItem(trasa.start, 0);
 	  }
    }

@@ -5,7 +5,7 @@ trasa = null;
 
 function CargoAirBuilder::Possible()
 {
-if(!IsAllowedCargoPlane())return false;
+if(!IsAllowedCargoPlane()) return false;
 return this.cost<GetAvailableMoney();
 }
 
