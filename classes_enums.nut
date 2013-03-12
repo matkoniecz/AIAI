@@ -60,10 +60,19 @@ function RemoveRailwayTracks(first, last)
 	}
 }
 
-function ProvideMoney()
+function ProvideMoney(amount = null)
 {
 if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>10*AICompany.GetMaxLoanAmount()) AICompany.SetLoanAmount(0);
 else AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
+
+if(amount != null){
+	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF) - 3*AICompany.GetLoanInterval() > amount && AICompany.GetLoanAmount() != 0){
+		AICompany.SetLoanAmount(AICompany.GetLoanAmount() - AICompany.GetLoanInterval());
+		Info("Loan rebalanced to " + AICompany.GetLoanAmount());
+		}
+	}
+		
+Info("Loan rebalanced to " + AICompany.GetLoanAmount());
 }
 
 class Route

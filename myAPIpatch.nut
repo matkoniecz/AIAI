@@ -79,7 +79,7 @@ AIEngine._GetMaximumOrderDistance <- AIEngine.GetMaximumOrderDistance;
 AIEngine.GetMaximumOrderDistance <- function(engine_id)
 {
 	local value = AIEngine._GetMaximumOrderDistance(engine_id);
-	if(value == 0) value = INFINITE_DISTANCE; //we prefer to get rid of 0 here, to allow KeepBelow etc in valuators
+	if(value == 0) value = INFINITE_DISTANCE; //it is better to get rid of 0 here, to allow KeepBelow etc in valuators
 	return value;
 }
 

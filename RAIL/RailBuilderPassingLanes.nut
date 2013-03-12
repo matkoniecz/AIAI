@@ -497,9 +497,9 @@ while (path != null) {
 	right.process(path, stay_behind_path, tile, prevtile, prevprevtile, nextile, nextile_in_end, after1tile_in_end, after2tile_in_end, after3tile_in_end, i)
 	left.process(path, stay_behind_path, tile, prevtile, prevprevtile, nextile, nextile_in_end, after1tile_in_end, after2tile_in_end, after3tile_in_end, i)
 
-	AISign.BuildSign(tile, right.GetPositionOfStart() + " <" + i + "> " + left.GetPositionOfStart());
-	AISign.BuildSign(right.GetPositionOfStart(), i);
-	AISign.BuildSign(left.GetPositionOfStart(), i);
+	//AISign.BuildSign(tile, right.GetPositionOfStart() + " <" + i + "> " + left.GetPositionOfStart());
+	//AISign.BuildSign(right.GetPositionOfStart(), i);
+	//AISign.BuildSign(left.GetPositionOfStart(), i);
 	
 	if(right.Finished() && (right.GetPositionOfStart() < left.GetPositionOfStart() || left.Failed())) {
 		list.append(right.GetLane());
@@ -527,10 +527,31 @@ for(local i=0; i<list.len(); i++)
 	{
 	Error("******************************** "+list.len())
 	local copy = list[i].path;
-	if(DumbBuilder(copy)) {
-		copy = list[i].path;
-		count+=SignalPathAdvanced(copy, 7, null, 9999, false);
-		count+=SignalPathAdvanced(list[i].start, 7, list[i].end, 9999, false);
+	local cost;
+
+	cost = GetCostOfRoute(copy);
+	Info("******" + cost)
+	while(cost != null && cost > GetAvailableMoney()){
+		AIController.Sleep(500);
+		rodzic.Maintenance();
+		cost = GetCostOfRoute(copy);
+		Info("Waiting for more money: " + GetAvailableMoney()/1000 + "k / " + cost/1000 + "k");
+		}
+	
+	Info("******" + GetAvailableMoney())
+	
+	if(cost != null){
+		Info("Entered")
+		ProvideMoney(cost)
+		Info("Provided")
+		if(DumbBuilder(copy, [	{error = AIError.ERR_NOT_ENOUGH_CASH, retry_count = 100, retry_time_wait = 50}, 
+							{error = AIError.ERR_VEHICLE_IN_THE_WAY, retry_count = 4, retry_time_wait = 50}])) {
+			Info("Catched");
+			copy = list[i].path;
+			count+=SignalPathAdvanced(copy, 7, null, 9999, false);
+			count+=SignalPathAdvanced(list[i].start, 7, list[i].end, 9999, false);
+			Info("Signalled!");
+			}
 		}
 	}
 Info("AddPassingLanes: " + count);

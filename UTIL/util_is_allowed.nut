@@ -13,6 +13,7 @@ function IsAllowedCargoPlane()
 function IsAllowedPlane()
 {
 	if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_AIR)) return false;
+	if(AIGameSettings.GetValue("economy.infrastructure_maintenance")) return false;
 
 	local ile;
 	local veh_list = AIVehicleList();

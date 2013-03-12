@@ -101,6 +101,7 @@ function abort(message)
 {
 Error(message + ", last error is " + AIError.GetLastErrorString());
 Warning("Please, post savegame");
+if(AIAI.GetSetting("pause_game_on_calling_abort_funtion_and_activated_ai_developer_tools") == 1 ) AIController.Break("STOP!")
 local zero=0/0;
 }
 

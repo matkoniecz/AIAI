@@ -463,6 +463,11 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 				this.HandleNewLevelCrossing(event);
 				}
 			}
+		else if(ev_type == AIEvent.AIRCRAFT_DEST_TOO_FAR){
+			local order_event = AIEventAircraftDestTooFar.Convert(event);
+			local airplane_id = order_event.GetVehicleID();
+			abort("AIRCRAFT_DEST_TOO_FAR " + airplane_id + " " + airplane_id + " " + AIVehicle.GetName(airplane_id));
+			}
 		else if(ev_type == AIEvent.ET_ENGINE_PREVIEW){
 			event = AIEventEnginePreview.Convert(event);
 			if (event.AcceptPreview()){
@@ -540,7 +545,7 @@ function LoadDataFromStationNameFoundByStationId(station, delimiters)
 	for(local i = 0; i < str.len(); ++i)
 		{
 		//Warning(result+" from "+str+" ["+i+"]="+str[i]);
-		if(str[i]==start_code)
+		if(str[i]==start_code && result == null)
 			{
 			result=0
 			}
@@ -565,18 +570,27 @@ function LoadDataFromStationName(location)
 	return LoadDataFromStationNameFoundByStationId(station, "{}");
 }
 
+function AIAI::TrySetStationName(station_id, data, leading_number)
+{
+	local string;
+	string = IntToStrFill(leading_number, 4)+data;
+	if(AIBaseStation.GetName(station_id) == string) return true;
+	return AIBaseStation.SetName(station_id, string)
+}
+
 function AIAI::SetStationName(location, data)
 {
-	local station = AIStation.GetStationID(location);
-	if(!AIBaseStation.IsValidBaseStation(station))
-		return;
-	local string;
-	do
-		{
-		string = IntToStrFill(station_number, 4)+data;
-		station_number++;
-		}
-	while(!AIBaseStation.SetName(station, string))
+	local station_id = AIStation.GetStationID(location);
+	local current_number = LoadDataFromStationNameFoundByStationId(station_id, "0{");
+	if(current_number != null)
+		if(TrySetStationName(station_id, data, current_number))
+			return;
+	
+	if(!AIBaseStation.IsValidBaseStation(station_id))
+		abort("no station found");
+
+	while(!TrySetStationName(station_id, data, station_number))station_number++;
+	station_number++;
 }
 
 function AIAI::SetWaypointName(network, location)
@@ -671,7 +685,7 @@ return bridge_list.Begin()
 
 function AIAI::BuildBridge(vehicle_type, start, end)
 {
-local bridge_type_id = GetMaxSpeedBridge(start, end);
+local bridge_type_id = this.GetMaxSpeedBridge(start, end);
 local result = AIBridge.BuildBridge(vehicle_type, bridge_type_id, start, end);
 if(result) bridge_list.append(start);
 return result;

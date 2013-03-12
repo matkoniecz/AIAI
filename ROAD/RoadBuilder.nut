@@ -1072,6 +1072,7 @@ static AIOrderFlags AIOrder::GetOrderFlags  	(  	VehicleID   	 vehicle_id,
 
 function RoadBuilder::copyVehicle(main_vehicle_id, cargo)
 {
+ProvideMoney();
 if(AIVehicle.IsValidVehicle(main_vehicle_id)==false) return false;
 local depot_tile = GetDepotLocation(main_vehicle_id);
 local speed = AIEngine.GetMaxSpeed(this.FindRV(cargo));

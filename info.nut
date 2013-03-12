@@ -1,16 +1,88 @@
 class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
-  function GetDescription() { return "Automatic Idiot AI Version iota (82). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
-  function GetVersion()     { return 82; }
+  function GetDescription() { return "Automatic Idiot AI Version iota (83). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
+  function GetVersion()     { return 83; }
   function GetAPIVersion() { return "1.2"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
-  function MinVersionToLoad() { return 81; } 
+  function MinVersionToLoad() { return 83; } 
   function GetDate()        { return "2012-10-1"; }
-  function GetURL() {return "http://tinyurl.com/ottdaiai or bulwersator@gmail.com. Thanks! [iota (82)]";}
+  function GetURL() {return "http://tinyurl.com/ottdaiai (redirects to http://www.tt-forums.net/viewtopic.php?f=65&t=47298) or bulwersator@gmail.com. Thanks! [iota (83)]";}
+
+    function GetParameters() {
+	////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////
+	/////////////////////Exporting hardcoded values/////////////////////
+	////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////
+
+	AddSetting( {
+		name = "max_train_station_length",
+		description = "max_train_station_length",
+		easy_value = 7,
+		medium_value = 7,
+		hard_value = 7,
+		custom_value = 7,
+		min_value = 0,
+		max_value = 1000,
+		flags = CONFIG_DEVELOPER
+	});
+
+	AddSetting( {
+		name = "max_train_station_platform_count_city",
+		description = "max_train_station_platform_count_city",
+		easy_value = 4,
+		medium_value = 4,
+		hard_value = 4,
+		custom_value = 4,
+		min_value = 0,
+		max_value = 1000,
+		flags = CONFIG_DEVELOPER + CONFIG_INGAME
+	});
+
+	AddSetting( {
+		name = "max_train_station_platform_count_city",
+		description = "max_train_station_platform_count_city",
+		easy_value = 2,
+		medium_value = 2,
+		hard_value = 2,
+		custom_value = 2,
+		min_value = 0,
+		max_value = 1000,
+		flags = CONFIG_DEVELOPER + CONFIG_INGAME
+	});
+
+	AddSetting( {
+		name = "max_train_station_platform_count_end_industry",
+		description = "max_train_station_platform_count_end_industry",
+		easy_value = 2,
+		medium_value = 2,
+		hard_value = 2,
+		custom_value = 2,
+		min_value = 0,
+		max_value = 1000,
+		flags = CONFIG_DEVELOPER + CONFIG_INGAME
+	});
+
+	AddSetting( {
+		name = "max_train_station_platform_count_start_industry",
+		description = "max_train_station_platform_count_start_industry",
+		easy_value = 3,
+		medium_value = 3,
+		hard_value = 3,
+		custom_value = 3,
+		min_value = 0,
+		max_value = 1000,
+		flags = CONFIG_DEVELOPER + CONFIG_INGAME
+	});
+	}
 
     function GetSettings() {
+	GetParameters();
+
 	AddSetting( {
 		name = "use_trucks",
 		description = "Trucks allowed",
@@ -184,6 +256,18 @@ class AIAI extends AIInfo {
 	});
 
 	AddSetting( {
+		name = "pause_game_on_calling_abort_funtion_and_activated_ai_developer_tools",
+		description = "pause_game_on_calling_abort_funtion_and_activated_ai_developer_tools",
+		easy_value = 1,
+		medium_value = 1,
+		hard_value = 1,
+		custom_value = 1,
+		min_value = 0,
+		max_value = 1000,
+		flags = CONFIG_INGAME + CONFIG_DEVELOPER
+	});
+
+	AddSetting( {
 		name = "show_pathfinding",
 		description = "show pathfinding (using 737474828920202 signs)",
 		easy_value = 0,
@@ -202,7 +286,6 @@ class AIAI extends AIInfo {
 		custom_value = 0,
 		flags = CONFIG_BOOLEAN + CONFIG_INGAME
 	});
-
 	}
 }
 
