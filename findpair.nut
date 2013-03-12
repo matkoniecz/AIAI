@@ -66,6 +66,7 @@ Info(" first_station.direction " + first_station.direction);
 Info(" second_station.location " + second_station.location);
 Info(" second_station.direction " + second_station.direction);
 
+Info(" start_tile " + start_tile);
 Info(" end_tile " + end_tile);
 Info(" cargo " + AICargo.GetCargoLabel(cargo));
 Info(" production " + production);
@@ -159,13 +160,15 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 		//Info(new + " (" + best + ")");	  
 		if(new>best)
 			{
+			traska.start_tile = AIIndustry.GetLocation(traska.start);
+			traska.end_tile = AIIndustry.GetLocation(traska.end);
 			traska = DualIndustryStationAllocator(traska);
 			if(traska.StationsAllocated()){
 				traska = FindEngine(traska);
 				if(traska.engine != null){
 					best = new;
-					traska.start_tile = AIIndustry.GetLocation(traska.start);
-					traska.end_tile = AIIndustry.GetLocation(traska.end);
+					choise.start_tile = traska.start_tile;
+					choise.end_tile = traska.end_tile;
 					choise = clone traska;
 					choise.first_station = clone traska.first_station;
 					choise.second_station = clone traska.second_station;
@@ -186,7 +189,9 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 	   /*if(AIIndustry.GetStockpiledCargo(x, traska.cargo)==0)*/ new*=2;
 		if(new>best)
 			{
-	        Info("Z " + AIIndustry.GetName(traska.start) + " nie ma dokad wysylac. Sorry. Or maybe " + AITown.GetName(traska.end));
+	        Info("There is no industrial acceptor for " + AIIndustry.GetName(traska.start) + " . We will try send to " + AITown.GetName(traska.end));
+			traska.start_tile = AIIndustry.GetLocation(traska.start);
+			traska.end_tile = AITown.GetLocation(traska.end);
 			traska = ToCityStationAllocator(traska)
 			if(traska.StationsAllocated())
 				{
@@ -194,6 +199,8 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 				if(traska.engine != null)
 				   {
 				best = new;
+				choise.start_tile = traska.start_tile;
+				choise.end_tile = traska.end_tile;
 				choise = clone traska;
 				choise.first_station = clone traska.first_station;
 				choise.second_station = clone traska.second_station;

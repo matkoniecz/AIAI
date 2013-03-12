@@ -469,46 +469,44 @@ else
    local zero=0/0;
    }
 }
-
-function RailBuilder::SetRailType(skip) //modified //from DenverAndRioGrande
+function RailBuilder::ValuatorRailType(rail_type_id)
 {
-local types = AIRailTypeList();
-if(types.Count() == 0)
-	{
-	Error("No rail types!");
-	return false;
+local max_speed = AIRail.GetMaxSpeed(rail_type_id);
+if(max_speed==0){
+	local engines = AIEngineList(AIVehicle.VT_RAIL);
+	engines.Valuate(AIEngine.IsWagon);
+	engines.RemoveValue(1);  
+	engines.Valuate(AIEngine.IsBuildable);
+	engines.RemoveValue(0);
+	engines.Valuate(AIEngine.HasPowerOnRail, rail_type_id);
+	engines.RemoveValue(0);
+	engines.Valuate(AIEngine.CanRunOnRail, rail_type_id);
+	engines.RemoveValue(0);
+	engines.Valuate(AIEngine.GetMaxSpeed);
+	engines.Sort(AIAbstractList.SORT_BY_VALUE, false); //descending
+	max_speed=engines.GetValue(engines.Begin());
 	}
-	
-  types.Valuate(AIRail.IsRailTypeAvailable);
-  types.KeepValue(1);
-  if(types.Count() == 0)
-  {
-  Error("No available rail types!");
-  return false;
-  }
-  
-//  types.Valuate(AIRail.GetMaxSpeed);  //TODO what with nutracks
-//  types.RemoveValue(0);
-//  if(types.Count() == 0)
-//  {
-//  Error("No usable this types!");
-//  return false;
-//  }
-
-  
-for (local rail_type = types.Begin(); types.HasNext(); rail_type = types.Next())
-   {
-   if(skip==0)
-      {
-		AIRail.SetCurrentRailType(rail_type);
-		//Info("this type selected.");
-		return true;
-	  }
-   skip--;
-   }
-Error("Too many RailTypes failed");
-return false;
+return max_speed*5-AIRail.GetBuildCost(rail_type_id, AIRail.BT_TRACK);
 }
+
+function RailBuilder::GetRailTypeList() //modified //from DenverAndRioGrande
+	{
+	local types = AIRailTypeList();
+	if(types.Count() == 0){
+		Error("No rail types!");
+		return null;
+		}
+	types.Valuate(AIRail.IsRailTypeAvailable);
+	types.KeepValue(1);
+	if(types.Count() == 0){
+		Error("No available rail types!");
+		return null;
+		}
+  
+	types.Valuate(this.ValuatorRailType);
+	types.Sort(AIAbstractList.SORT_BY_VALUE, false); //descending
+	return types;
+	}
 
 function RailBuilder::FindTrain(trasa)//from DenverAndRioGrande
 {
@@ -521,27 +519,26 @@ return trasa;
 }
 
 function RailBuilder::GetTrain(trasa)//from DenverAndRioGrande
-{
+	{
+	local railTypes = GetRailTypeList();
+	for(local rail_type = railTypes.Begin(); railTypes.HasNext(); rail_type = railTypes.Next()){
+		AIRail.SetCurrentRailType(rail_type);
+		trasa = RailBuilder.FindTrain(trasa);
+		if(AIEngine.IsBuildable(trasa.engine[0]) && AIEngine.IsBuildable(trasa.engine[1])) {
+			//Info("Return OK: " + trasa.engine);
+			//Info("engine:" + trasa.engine[0] + "wagon:" + trasa.engine[1] )
+			//Info("engine:" + AIEngine.GetName(trasa.engine[0]) + "wagon:" + AIEngine.GetName(trasa.engine[1]) )
+			trasa.track_type = AIRail.GetCurrentRailType();
+			return trasa;
+		}
+	}
 
-for(local i = 0; RailBuilder.SetRailType(i); i++)
-{
-trasa = RailBuilder.FindTrain(trasa);
-if(AIEngine.IsBuildable(trasa.engine[0]) && AIEngine.IsBuildable(trasa.engine[1])) 
-   {
-   //Info("Return OK: " + trasa.engine);
-   //Info("engine:" + trasa.engine[0] + "wagon:" + trasa.engine[1] )
-   //Info("engine:" + AIEngine.GetName(trasa.engine[0]) + "wagon:" + AIEngine.GetName(trasa.engine[1]) )
-   trasa.track_type = AIRail.GetCurrentRailType();
-   return trasa;
-   }
-}
-
-trasa.engine = null;
-//Info("Return bad: " + trasa.engine);
-//   Info("engine:" + engine + "wagon:" + wagon )
-//   Info("engine:" + AIEngine.GetName(engine) + "wagon:" + AIEngine.GetName(wagon) )
-return trasa;
-}
+	trasa.engine = null;
+	//Info("Return bad: " + trasa.engine);
+	//   Info("engine:" + engine + "wagon:" + wagon )
+	//   Info("engine:" + AIEngine.GetName(engine) + "wagon:" + AIEngine.GetName(wagon) )
+	return trasa;
+	}
 
 function RailBuilder::FindWagons(cargoIndex)//from DenverAndRioGrande
 {
@@ -595,8 +592,8 @@ function RailBuilder::FindBestEngine(wagonId, trainsize, cargoId)//from DenverAn
   engines.RemoveValue(0);
   engines.Valuate(AIEngine.HasPowerOnRail, AIRail.GetCurrentRailType());
   engines.RemoveValue(0);
-  //engines.Valuate(AIEngine.TrainCanRunOnRail, AIRail.GetCurrentRailType()); TODO activate it
-  //engines.RemoveValue(0);
+  engines.Valuate(AIEngine.CanRunOnRail, AIRail.GetCurrentRailType());
+  engines.RemoveValue(0);
   
   engines.Valuate(AIEngine.GetPower);
   

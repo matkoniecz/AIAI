@@ -1,14 +1,14 @@
 class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
-  function GetDescription() { return "Automatic Idiot AI Version epsilon (39). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
-  function GetVersion()     { return 39; }
-  function GetAPIVersion() { return "1.0"; }
+  function GetDescription() { return "Automatic Idiot AI Version epsilon (41). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
+  function GetVersion()     { return 41; }
+  function GetAPIVersion() { return "1.0.4"; }
   function GetDate()        { return "2010-05-21"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
   function MinVersionToLoad() { return 0; } 
-  function GetURL() {return "[epsilon (39)] http://www.tt-forums.net/viewtopic.php?f=65&t=47298 or bulwersator@gmail.com. Thanks!";}
+  function GetURL() {return "[epsilon (41)] http://www.tt-forums.net/viewtopic.php?f=65&t=47298 or bulwersator@gmail.com. Thanks!";}
 
 	function GetSettings() {
 

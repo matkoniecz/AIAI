@@ -56,15 +56,13 @@ if(GetAvailableMoney()<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w R
 	if(total_last_year_profit>koszt)
 		{
 		Error("But we can wait!");
-		while(GetAvailableMoney()<koszt+2000)  //TODO: inflate
-			{
+		while(GetAvailableMoney()<koszt+2000){ //TODO: real station cost
 			Info("too expensivee, we have only " + GetAvailableMoney() + " And we need " + koszt);
 			rodzic.Konserwuj(); //TODO bez wydawania kasy
 			AIController.Sleep(1000);
 			}
 		}
-		else
-		{
+		else{
 			Error("And we can not wait!");
 			this.cost = koszt;
 			return false;
@@ -77,34 +75,33 @@ else
 ProvideMoney();
 if(!this.StationConstruction()) return false;   
 if(!this.RailwayLinkConstruction(path)){
-   //AIRail.RemoveRailStationTileRect(trasa.first_station); ........... //TODO DO IT
-   Info("   But stopped by error");
-  AITile.DemolishTile(trasa.first_station.location);
-  AITile.DemolishTile(trasa.second_station.location);
-   return false;	  
-   }
+	//AIRail.RemoveRailStationTileRect(trasa.first_station); ........... //TODO DO IT
+	Info("   But stopped by error");
+	AITile.DemolishTile(trasa.first_station.location);
+	AITile.DemolishTile(trasa.second_station.location);
+	return false;	  
+	}
 
 trasa.depot_tile = this.BuildDepot(path, false);
    
 if(trasa.depot_tile==null){
-   Info("   Depot placement error");
-  AITile.DemolishTile(trasa.first_station.location);
-  AITile.DemolishTile(trasa.second_station.location);
-  this.DumbRemover(path, null)
-   return false;	  
-   }
+	Info("   Depot placement error");
+	AITile.DemolishTile(trasa.first_station.location);
+	AITile.DemolishTile(trasa.second_station.location);
+	this.DumbRemover(path, null)
+	return false;	  
+	}
 
 local new_engine = this.BuildTrain(trasa, "smart uno");
 
-if(new_engine == null)
-   {
-  AITile.DemolishTile(trasa.first_station.location);
-  AITile.DemolishTile(trasa.second_station.location);
-  this.DumbRemover(path, null)
-   return false;
-   }
+if(new_engine == null){
+	AITile.DemolishTile(trasa.first_station.location);
+	AITile.DemolishTile(trasa.second_station.location);
+	this.DumbRemover(path, null)
+	return false;
+	}
 this.TrainOrders(new_engine);
-   Info("   I stage completed");
+Info("   I stage completed");
 RepayLoan();
 
 local date=AIDate.GetCurrentDate ();
@@ -249,12 +246,16 @@ function SmartRailBuilder::ZnajdzStacjeKonsumentaSmartRail(consumer, cargo, size
 local list=AITileList_IndustryAccepting(consumer, 3);
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
 list.RemoveValue(0);
+list.Valuate(AIMap.DistanceSquare, trasa.end_tile); //pure eyecandy (station near industry)
+list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_ASCENDING);
 return this.ZnajdzStacjeSmartRail(list, size);
 }
 
 function SmartRailBuilder::ZnajdzStacjeProducentaSmartRail(producer, cargo, size)
 {
 local list=AITileList_IndustryProducing(producer, 3);
+list.Valuate(AIMap.DistanceSquare, trasa.start_tile); //pure eyecandy (station near industry)
+list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_ASCENDING);
 return this.ZnajdzStacjeSmartRail(list, size);
 }
 

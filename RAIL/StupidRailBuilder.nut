@@ -187,12 +187,16 @@ function StupidRailBuilder::ZnajdzStacjeKonsumentaStupidRail(consumer, cargo, si
 local list=AITileList_IndustryAccepting(consumer, 3);
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
 list.RemoveValue(0);
+list.Valuate(AIMap.DistanceSquare, trasa.end_tile); //pure eyecandy (station near industry)
+list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_ASCENDING);
 return this.ZnajdzStacjeStupidRail(list, size);
 }
 
 function StupidRailBuilder::ZnajdzStacjeProducentaStupidRail(producer, cargo, size)
 {
 local list=AITileList_IndustryProducing(producer, 3);
+list.Valuate(AIMap.DistanceSquare, trasa.start_tile); //pure eyecandy (station near industry)
+list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_ASCENDING);
 return this.ZnajdzStacjeStupidRail(list, size);
 }
 
