@@ -2,6 +2,9 @@ import("pathfinder.road", "RoadPathFinder", 3);
 
 class KRAI
 {
+desperacja=0;
+rodzic=null;
+_koszt=0;
 }
 
 function KRAI::CzyJuzZlinkowane(i, cargo)
@@ -13,7 +16,7 @@ for (local q = tile_list.Begin(); tile_list.HasNext(); q = tile_list.Next()) //f
    if(AIStation.IsValidStation(station_id))
       {
 	  local vehicle_list=AIVehicleList_Station(station_id);
-	  if(AIStation.GetStationID(KRAI.GetLoadStation(vehicle_list.Begin()))==station_id) //czy full load jest na wykrytej stacji
+	  if(AIStation.GetStationID(this.GetLoadStation(vehicle_list.Begin()))==station_id) //czy full load jest na wykrytej stacji
 	  {
 	  if(AIVehicle.GetCapacity(vehicle_list.Begin(), cargo)!=0)//i laduje z tej stacji //TERAZ to getcargoload
 	     {
@@ -33,16 +36,16 @@ AILog.Info(AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.G
 
 function KRAI::Konserwuj()
 {
-local sold = KRAI.DeleteRVInDepots();
-local new = KRAI.ZbudujDodatkowePojazdy();
-local redundant = KRAI.UsunNadmiarowePojazdy();
-if((new+sold+redundant)>0) KRAI.Info(" Vehicles: " + new + " new, " +  sold + " deleted, " + redundant + " redundant send to depot.");
+local sold = this.DeleteRVInDepots();
+local new = this.ZbudujDodatkowePojazdy();
+local redundant = this.UsunNadmiarowePojazdy();
+if((new+sold+redundant)>0) this.Info(" Vehicles: " + new + " new, " +  sold + " deleted, " + redundant + " redundant send to depot.");
 
 //local renew=array(2);
 //renew[0]=0;
 //renew[1]=0;
-//if(AICompany.GetLoanAmount()==0) renew=KRAI.RenewRV();
-//if((new+sold+renew[0]+renew[1])>0) KRAI.Info(" Vehicles: " + new + " new, " +  sold + " deleted, " + redundant + " redundant send to depot, " + renew[0] + " old replaced by " + renew[1] + " new.");
+//if(AICompany.GetLoanAmount()==0) renew=this.RenewRV();
+//if((new+sold+renew[0]+renew[1])>0) this.Info(" Vehicles: " + new + " new, " +  sold + " deleted, " + redundant + " redundant send to depot, " + renew[0] + " old replaced by " + renew[1] + " new.");
 }
 
 function KRAI::GetLoadStation(vehicle)
@@ -138,11 +141,12 @@ cost.max_tunnel_length = 0;   // The maximum length of a tunnel that will be bui
 
 }
 
-function KRAI::distanceBetweenIndustriesValuator(distance, station_counter, desperacja)
+function KRAI::distanceBetweenIndustriesValuator(distance, station_counter)
 {
+if(distance<10) return 0;
+
 if(desperacja>5)
    {
-   if(distance<10) return 0;
    if(distance>desperacja*100)return 0;
    if(distance>desperacja*60)return 1;
    return 4;
@@ -161,7 +165,7 @@ if(distance>100) return 20;
 if(distance>80) return 30;
 if(distance>=40) return 20;
 if(distance<40) return 10;
-if(distance<10) return 1;
+if(distance<20) return 1;
 }
 
 class Route
@@ -176,12 +180,12 @@ function KRAI::ZbudujStacjeCiezarowek(start_station, ts, end_station, te)
 {
 if(!AIRoad.BuildDriveThroughRoadStation(start_station, ts[0], AIRoad.ROADVEHTYPE_TRUCK, AIStation.STATION_NEW)) 
    {
-   KRAI.Info("   Producer station placement impossible due to " + AIError.GetLastErrorString());
+   this.Info("   Producer station placement impossible due to " + AIError.GetLastErrorString());
    return false;
    }
 if(!AIRoad.BuildDriveThroughRoadStation(end_station, te[0], AIRoad.ROADVEHTYPE_TRUCK, AIStation.STATION_NEW)) 
    {
-   KRAI.Info("   Consumer station placement impossible due to " + AIError.GetLastErrorString());
+   this.Info("   Consumer station placement impossible due to " + AIError.GetLastErrorString());
    AIRoad.RemoveRoadStation(start_station);
    return false;
    }
@@ -190,7 +194,7 @@ if(!AIRoad.BuildRoad(ts[1], start_station))
    if(AIError.GetLastError()!=AIError.ERR_ALREADY_BUILT)
    if(AIError.GetLastError()!=AIError.ERR_NONE)
       {
-	  KRAI.Info("   Road to producer station placement impossible due to " + AIError.GetLastErrorString());
+	  this.Info("   Road to producer station placement impossible due to " + AIError.GetLastErrorString());
       AIRoad.RemoveRoadStation(start_station);
       AIRoad.RemoveRoadStation(end_station);
       return false;
@@ -201,7 +205,7 @@ if(!AIRoad.BuildRoad(start_station, ts[0]))
    if(AIError.GetLastError()!=AIError.ERR_ALREADY_BUILT)
    if(AIError.GetLastError()!=AIError.ERR_NONE)
       {
-  	  KRAI.Info("   Road to producer station placement impossible due to " + AIError.GetLastErrorString());
+  	  this.Info("   Road to producer station placement impossible due to " + AIError.GetLastErrorString());
       AIRoad.RemoveRoadStation(start_station);
       AIRoad.RemoveRoadStation(end_station);
       return false;
@@ -212,7 +216,7 @@ if(!AIRoad.BuildRoad(te[1], end_station))
    if(AIError.GetLastError()!=AIError.ERR_ALREADY_BUILT)
    if(AIError.GetLastError()!=AIError.ERR_NONE)
       {
-  	  KRAI.Info("   Road to consumer station placement impossible due to " + AIError.GetLastErrorString());
+  	  this.Info("   Road to consumer station placement impossible due to " + AIError.GetLastErrorString());
       AIRoad.RemoveRoadStation(start_station);
       AIRoad.RemoveRoadStation(end_station);
       return false;
@@ -223,7 +227,7 @@ if(!AIRoad.BuildRoad(end_station, te[0]))
    if(AIError.GetLastError()!=AIError.ERR_ALREADY_BUILT)
    if(AIError.GetLastError()!=AIError.ERR_NONE)
       {
-  	  KRAI.Info("   Road to consumer station placement impossible due to " + AIError.GetLastErrorString());
+  	  this.Info("   Road to consumer station placement impossible due to " + AIError.GetLastErrorString());
       AIRoad.RemoveRoadStation(start_station);
       AIRoad.RemoveRoadStation(end_station);
       return false;
@@ -232,7 +236,7 @@ if(!AIRoad.BuildRoad(end_station, te[0]))
 return true;
 }
 
-function KRAI::FindRoute(forbidden, desperacja)
+function KRAI::FindRoute(forbidden)
 {
 local industry_list = AIIndustryList();
 local trasa = Route();
@@ -255,7 +259,7 @@ for (local i = industry_list.Begin(); industry_list.HasNext(); i = industry_list
    {
    if(!(AIStationList(AIStation.STATION_ANY)).IsEmpty())
       {
-	  if(KRAI.CzyJuzZlinkowane(i, cargo))
+	  if(this.CzyJuzZlinkowane(i, cargo))
 	     {
 		 if(i!=null)forbidden.AddItem(i, 0);
 		 continue;
@@ -272,8 +276,8 @@ for (local i = industry_list.Begin(); industry_list.HasNext(); i = industry_list
 		   new =  AIIndustry.GetLastMonthProduction(i, cargo);
 
 		   local distance = AITile.GetDistanceManhattanToTile(AIIndustry.GetLocation(x), AIIndustry.GetLocation(i));
-		   new*= KRAI.distanceBetweenIndustriesValuator
-		       (distance, (AIStationList(AIStation.STATION_ANY)).Count(), desperacja);
+		   new*= this.distanceBetweenIndustriesValuator
+		       (distance, (AIStationList(AIStation.STATION_ANY)).Count());
 
 		   new*=(100-AIIndustry.GetLastMonthTransportedPercentage (i, cargo));
 
@@ -290,7 +294,7 @@ for (local i = industry_list.Begin(); industry_list.HasNext(); i = industry_list
 
 		  if(AITile.GetCargoAcceptance (AIIndustry.GetLocation(x), cargo, 1, 1, 4)==0)
               {
-			  if(AIAI.GetSetting("other_debug_signs"))AISign.BuildSign(AIIndustry.GetLocation(x), AICargo.GetCargoLabel(cargo) + "refused here");
+			  if(rodzic.GetSetting("other_debug_signs"))AISign.BuildSign(AIIndustry.GetLocation(x), AICargo.GetCargoLabel(cargo) + "refused here");
 			  new=0;
 			  }
 		   }
@@ -313,8 +317,8 @@ for (local i = industry_list.Begin(); industry_list.HasNext(); i = industry_list
 			   trasa.end=end;
 			   trasa.cargo=_cargo;
 			   trasa.zakazane=forbidden;
-			   KRAI.Info("");
-			   KRAI.Info("(" + best + " points)");
+			   this.Info("");
+			   this.Info("(" + best + " points)");
 			   return trasa;
 			   }
 			}
@@ -326,12 +330,12 @@ trasa.start=start;
 trasa.end=end;
 trasa.cargo=_cargo;
 trasa.zakazane=forbidden;
-KRAI.Info("");
-KRAI.Info("(" + best + " points)");
+this.Info("");
+this.Info("(" + best + " points)");
 return trasa;
 }
 
-function KRAI::skonstruj_trase(desperacja)
+function KRAI::skonstruj_trase()
 {
 local bic_producentow = AIBase.RandRange(2);
 
@@ -350,14 +354,15 @@ local te=array(2);
 while (true)
 {
 local trasa=Route();
-trasa = KRAI.FindRoute(forbidden, desperacja);
+trasa = this.FindRoute(forbidden);
 start = trasa.start;
 end = trasa.end;
 cargo = trasa.cargo;
 forbidden = trasa.zakazane;
 if(start == null)
    {
-   KRAI.Info("Nothing found!");
+   this.Info("Nothing found!");
+   _koszt = 0;
    return false;
    }
 _production=AIIndustry.GetLastMonthProduction(start, cargo)*(100-AIIndustry.GetLastMonthTransportedPercentage (start, cargo))/100;
@@ -365,48 +370,48 @@ _production=AIIndustry.GetLastMonthProduction(start, cargo)*(100-AIIndustry.GetL
 local start_tile = AIIndustry.GetLocation(start);
 local end_tile = AIIndustry.GetLocation(end);
 	
-if(AIAI.GetSetting("debug_signs_for_planned_route")) 
+if(rodzic.GetSetting("debug_signs_for_planned_route")) 
     {
     AISign.BuildSign(start_tile, "start_tile");
     AISign.BuildSign(end_tile, "end_tile");
 	}
 	
-KRAI.Info("   Company started route planning between " + AIIndustry.GetName(start) + " and " + AIIndustry.GetName(end) + 
+this.Info("   Company started route planning between " + AIIndustry.GetName(start) + " and " + AIIndustry.GetName(end) + 
 ". Distance: " + AIMap.DistanceManhattan(start_tile, end_tile));
 
-if(KRAI.WybierzRV(cargo)==null)
+if(this.WybierzRV(cargo)==null)
   {
   AILog.Error("No truck for " + AICargo.GetCargoLabel(cargo) + " available.");
   if(AIDate.GetYear(AIDate.GetCurrentDate ())<1935)  AILog.Error("Default truck are available after 1935! Start game later or try eGRVTS with vehicles from year 1705");
-  else AILog.Error(" Probably you use newgrf industry without newgrf road vehicles. Try eGRVTS with trucks for new cargos.");
+  else AILog.Error(" Probably you use newgrf industry without newgrf road vehicles. Try eGRVTS or HEQS with trucks for new cargos.");
   forbidden.AddItem(start, 0);
   continue;
   }
 
-start_station = KRAI.ZnajdzStacjeProducenta(start);
-end_station = KRAI.ZnajdzStacjeKonsumenta(end, cargo);
+start_station = this.ZnajdzStacjeProducenta(start);
+end_station = this.ZnajdzStacjeKonsumenta(end, cargo);
 
 if((start_station==null)||(end_station==null))
   {
   if((start_station==null)&&(end_station==null))
     {
-	KRAI.Info("   Station placing near "+AIIndustry.GetName(start)+" and "+AIIndustry.GetName(end)+" is impossible.");
+	this.Info("   Station placing near "+AIIndustry.GetName(start)+" and "+AIIndustry.GetName(end)+" is impossible.");
     forbidden.AddItem(start, 0);
     forbidden.AddItem(end, 0);
 	}
   if((start_station==null)&&(end_station!=null))
     {
-    KRAI.Info("   Station placing near "+AIIndustry.GetName(start)+" is impossible.");
+    this.Info("   Station placing near "+AIIndustry.GetName(start)+" is impossible.");
     forbidden.AddItem(start, 0);
 	}
   if((start_station!=null)&&(end_station==null)) 
     {
-	KRAI.Info("   Station placing near "+AIIndustry.GetName(end)+" is impossible.");
+	this.Info("   Station placing near "+AIIndustry.GetName(end)+" is impossible.");
     forbidden.AddItem(end, 0);
 	}
   continue;
   }
-KRAI.Info("   Stations planned.");
+this.Info("   Stations planned.");
 
 ts[0]=start_station+AIMap.GetTileIndex(0, 1);
 ts[1]=start_station+AIMap.GetTileIndex(0, -1);
@@ -424,12 +429,12 @@ pathfinder.InitializePath(te, ts, forbidden_tiles);
 
 local path = false;
 local guardian=0;
-//KRAI.Info("   Library pathfindrer started");
+//this.Info("   Library pathfindrer started");
 while (path == false) {
   path = pathfinder.FindPath(1000);
-  AIAI.Konserwuj();
+  rodzic.Konserwuj();
   AIController.Sleep(1);
-  //KRAI.Info("   Pathfinding ("+guardian+")");
+  //this.Info("   Pathfinding ("+guardian+")");
   guardian++;
   if(guardian>desperacja+30)break;
 }
@@ -445,79 +450,82 @@ if(path == false || path == null)
 	 forbidden.AddItem(end, 0);
 	 }
   if(start!=null)forbidden.AddItem(start, 0);
-  KRAI.Info("   Pathfinder failed to find route. ");
+  this.Info("   Pathfinder failed to find route. ");
   continue;
   }
   
-KRAI.Info("   Pathfinder found sth.");
+this.Info("   Pathfinder found sth.");
 
-local koszt = KRAI.sprawdz_droge(path);
+local koszt = this.sprawdz_droge(path);
 
 if(koszt==null)
   {
   if(start!=null)forbidden.AddItem(start, 0);
-  KRAI.Info("   Pathfinder failed to find correct route.");
+  this.Info("   Pathfinder failed to find correct route.");
   continue;
   }
 
+koszt += AIEngine.GetPrice(WybierzRV(cargo))*3;
+  
 if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000) 
     {
-	KRAI.Info("too expensivee, we have only " + AICompany.GetBankBalance(AICompany.COMPANY_SELF) + " And we need " + koszt);
+	this.Info("too expensivee, we have only " + AICompany.GetBankBalance(AICompany.COMPANY_SELF) + " And we need " + koszt);
       {
 	  if(start!=null) forbidden.AddItem(start, 0);
+	  _koszt=koszt;
 	  continue;	  
 	  }
 	}
 
-KRAI.Info("   Contruction started on correct route.");
+this.Info("   Contruction started on correct route.");
 
-if(!KRAI.ZbudujStacjeCiezarowek(start_station, ts, end_station, te))
+if(!this.ZbudujStacjeCiezarowek(start_station, ts, end_station, te))
    {
    if(start!=null) forbidden.AddItem(start, 0);
    continue;	  
    }
 
-if(!KRAI.zbuduj_droge(path))
+if(!this.zbuduj_droge(path))
    {
    AIRoad.RemoveRoadStation(start_station);
    AIRoad.RemoveRoadStation(end_station);
-   KRAI.Info("   But stopped by error");
+   this.Info("   But stopped by error");
    if(start!=null) forbidden.AddItem(start, 0);
    continue;
    }
 
 //path po kolei szukaj¹c miejsca na depot - droga p³aska, miejsce na depot p³askie niezabudowane, //TODO droga wolna od kolei!
 
-depot_tile = KRAI.PostawDepot(path);
+depot_tile = this.PostawDepot(path);
 if(depot_tile==null)
    {
    AIRoad.RemoveRoadStation(start_station);
    AIRoad.RemoveRoadStation(end_station);
-   KRAI.Info("   Depot placement error");
+   this.Info("   Depot placement error");
    if(start!=null) forbidden.AddItem(start, 0);
    continue;
    }
 break;   
 }
-KRAI.Info("   Route constructed!");
+this.Info("   Route constructed!");
 
 while( AICompany.GetBankBalance(AICompany.COMPANY_SELF) < 4000)
    {
-   KRAI.Info("   Not enough money for vehicles. Waiting. ");
-   AIAI.Konserwuj();
+   this.Info("   Not enough money for vehicles. Waiting. ");
+   rodzic.Konserwuj();
    AIController.Sleep(1000);
    }
 
 
-KRAI.Info("   working on circle around loading bay");
-if(!KRAI.CircleAroundStation(ts[0], ts[1], start_station))
+this.Info("   working on circle around loading bay");
+if(!this.CircleAroundStation(ts[0], ts[1], start_station))
    {
    AIController.Sleep(100);
-   KRAI.CircleAroundStation(ts[0], ts[1], start_station);
+   this.CircleAroundStation(ts[0], ts[1], start_station);
    }
 
 local raw=AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(start));
-local pojazdy_ile_nowych = KRAI.BudujPojazdy(depot_tile, start_station, end_station, cargo, _production, raw);
+local pojazdy_ile_nowych = this.BudujPojazdy(depot_tile, start_station, end_station, cargo, _production, raw);
 
 if(pojazdy_ile_nowych==null)
    {
@@ -525,16 +533,17 @@ if(pojazdy_ile_nowych==null)
    AILog.Error("TOO MANY RV");
    AIRoad.RemoveRoadStation(start_station);
    AIRoad.RemoveRoadStation(end_station);
+   _koszt = 0;
    return false;
    }
 
-KRAI.Info("   Vehicles construction, " + pojazdy_ile_nowych + " vehicles constructed.");
+this.Info("   Vehicles construction, " + pojazdy_ile_nowych + " vehicles constructed.");
 
-KRAI.Info("   working on circle around unloading bay");
-if(!KRAI.CircleAroundStation(te[0], te[1], end_station))
+this.Info("   working on circle around unloading bay");
+if(!this.CircleAroundStation(te[0], te[1], end_station))
    {
    AIController.Sleep(100);
-   KRAI.CircleAroundStation(te[0], te[1], end_station);
+   this.CircleAroundStation(te[0], te[1], end_station);
    }
 
 return true;
@@ -623,7 +632,7 @@ return returnik;
 
 function KRAI::GetReplace(existing_vehicle, cargo)
 {
-return KRAI.WybierzRV(cargo);
+return this.WybierzRV(cargo);
 }
 
 function KRAI::WybierzRV(cargo)
@@ -656,13 +665,13 @@ function KRAI::ZnajdzStacje(test)
 local station=test.Begin();
 while
 (
-IsTileWrongToFullUse(station)
+rodzic.IsTileWrongToFullUse(station)
 ||
-IsTileWrongToFullUse(station+AIMap.GetTileIndex(0, 1))
+rodzic.IsTileWrongToFullUse(station+AIMap.GetTileIndex(0, 1))
 ||
-IsTileWrongToFullUse(station+AIMap.GetTileIndex(0, -1))
+rodzic.IsTileWrongToFullUse(station+AIMap.GetTileIndex(0, -1))
 ||
-IsTileWithAuthorityRefuse(station)
+rodzic.IsTileWithAuthorityRefuse(station)
 )
 {
 if(test.HasNext()) 
@@ -677,7 +686,7 @@ return station;
 function KRAI::ZnajdzStacjeProducenta(start)
 {
 local test=AITileList_IndustryProducing(start, 3);
-return KRAI.ZnajdzStacje(test);
+return this.ZnajdzStacje(test);
 }
 
 function KRAI::ZnajdzStacjeKonsumenta(start, cargo)
@@ -685,15 +694,15 @@ function KRAI::ZnajdzStacjeKonsumenta(start, cargo)
 local test=AITileList_IndustryAccepting(start, 3);
 test.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
 test.RemoveValue(0);
-return KRAI.ZnajdzStacje(test);
+return this.ZnajdzStacje(test);
 }
 
 function KRAI::ZbudujKawalateczekDrogi(path, par, depth)
 {
 if(depth==6)
    {
-	KRAI.Info("Construction terminated: "+AIError.GetLastErrorString()); 
-	if(AIAI.GetSetting("other_debug_signs"))AISign.BuildSign(path, "stad" + depth+AIError.GetLastErrorString());
+	this.Info("Construction terminated: "+AIError.GetLastErrorString()); 
+	if(rodzic.GetSetting("other_debug_signs"))AISign.BuildSign(path, "stad" + depth+AIError.GetLastErrorString());
    }
 
 if(depth>=6)return false;
@@ -732,7 +741,7 @@ if(!rezultat)
    if(error==AIError.ERR_VEHICLE_IN_THE_WAY)
    {
    AIController.Sleep(20);
-   return KRAI.ZbudujKawalateczekDrogi(path, par, depth+1);
+   return this.ZbudujKawalateczekDrogi(path, par, depth+1);
    }
    return false;
    }
@@ -754,7 +763,7 @@ while (path != null) {
   local par = path.GetParent();
   if (par != null) {
     local last_node = path.GetTile();
-	if(!KRAI.ZbudujKawalateczekDrogi(path.GetTile(),  par.GetTile(), 0))
+	if(!this.ZbudujKawalateczekDrogi(path.GetTile(),  par.GetTile(), 0))
 	    {
 		AILog.Error(AIError.GetLastErrorString());
 		return null;
@@ -776,7 +785,7 @@ while (path != null) {
   local par = path.GetParent();
   if (par != null) {
     local last_node = path.GetTile();
-	if(!KRAI.ZbudujKawalateczekDrogi(path.GetTile(),  par.GetTile(), 0))
+	if(!this.ZbudujKawalateczekDrogi(path.GetTile(),  par.GetTile(), 0))
 	    {
 		return false;
 		}
@@ -801,30 +810,38 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
    local station_list=AIStationList(AIStation.STATION_TRUCK_STOP);
    for (local aktualna = station_list.Begin(); station_list.HasNext(); aktualna = station_list.Next()) //from Chopper
 	  {
-	  if(NajmlodszyPojazd(aktualna)>20)
+	  if(NajmlodszyPojazd(aktualna)>20) //nie dodawaæ masowo
 	  if(AIStation.GetCargoWaiting(aktualna, cargo)>50 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0) ) //HARDCODED OPTION
 	  {
 	     local vehicle_list=AIVehicleList_Station(aktualna);
+		 
+		 vehicle_list.Valuate(AIBase.RandItem);
+		 vehicle_list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_DESCENDING);
 		 local original=vehicle_list.Begin();
+		 
+		 if(AIVehicle.GetProfitLastYear(original)<0)continue;
 
 		 //WTF NIE DZIA£A
-		 //local end = KRAI.GetUnloadStation(original);
+		 //local end = this.GetUnloadStation(original);
 		 //return AIOrder.GetOrderDestination(vehicle, AIOrder.GetOrderCount(vehicle)-2);
 		 
 		 local end = AIOrder.GetOrderDestination(original, AIOrder.GetOrderCount(original)-2);
 
 	     if(AITile.GetCargoAcceptance (end, cargo, 1, 1, 4)==0)
 		    {
-			if(AIAI.GetSetting("other_debug_signs"))AISign.BuildSign(end, "ACCEPTATION STOPPED");
+			if(rodzic.GetSetting("other_debug_signs"))AISign.BuildSign(end, "ACCEPTATION STOPPED");
 			continue;
 			}
-		 if(KRAI.RawVehicle(original)) 
+		 if(this.RawVehicle(original)) 
 		    {
-			if(KRAI.copyVehicle(original, cargo )) ile++;
+			if(this.copyVehicle(original, cargo )) ile++;
 			}
 		 else 
 		    {
-			if(AIStation.GetCargoWaiting(aktualna, cargo)>150) if(KRAI.copyVehicle(original, cargo)) ile++;
+			if(AIStation.GetCargoWaiting(aktualna, cargo)>150 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0)) 
+			   {
+			   if(this.copyVehicle(original, cargo)) ile++;
+			   }
 			}
 		}
 	  }
@@ -863,26 +880,26 @@ function KRAI::copyVehicle(main_vehicle_id, cargo)
 {
 if(AIVehicle.IsValidVehicle(main_vehicle_id)==false)return false;
 
-local depot_tile = KRAI.GetDepot(main_vehicle_id);
+local depot_tile = this.GetDepot(main_vehicle_id);
 
-local speed = AIEngine.GetMaxSpeed(KRAI.WybierzRV(cargo));
-local distance = AIMap.DistanceManhattan(KRAI.GetLoadStation(main_vehicle_id), KRAI.GetUnLoadStation(main_vehicle_id));
+local speed = AIEngine.GetMaxSpeed(this.WybierzRV(cargo));
+local distance = AIMap.DistanceManhattan(this.GetLoadStation(main_vehicle_id), this.GetUnLoadStation(main_vehicle_id));
 
 //OPTION
 //1 na tile przy 25 km/h
 
 local maksymalnie=distance*50/(speed+10);
 
-local station_tile = KRAI.GetLoadStation(main_vehicle_id);
+local station_tile = this.GetLoadStation(main_vehicle_id);
 local station_id = AIStation.GetStationID(station_tile);
 local list = AIVehicleList_Station(station_id);   	
 local ile = list.Count();
 
-//KRAI.Info("Ile: "+ile+" na " + maksymalnie);
+//this.Info("Ile: "+ile+" na " + maksymalnie);
 
 if(ile<maksymalnie)
    {
-   local vehicle_id = AIVehicle.BuildVehicle (depot_tile, KRAI.WybierzRV(cargo));
+   local vehicle_id = AIVehicle.BuildVehicle (depot_tile, this.WybierzRV(cargo));
    if(AIVehicle.IsValidVehicle(vehicle_id))
       {
 	  AIOrder.CopyOrders (vehicle_id, main_vehicle_id)
@@ -896,7 +913,7 @@ return false;
 
 function KRAI::sellVehicle(main_vehicle_id)
 {
-if(KRAI.CzyNaSprzedaz(main_vehicle_id)==true)return false;
+if(this.CzyNaSprzedaz(main_vehicle_id)==true)return false;
 
 if(AIVehicle.SendVehicleToDepot(main_vehicle_id))
    {
@@ -922,14 +939,14 @@ local list=AIVehicleList();
 local cargo_list = AICargoList();
 for (local main_vehicle_id = list.Begin(); list.HasNext(); main_vehicle_id = list.Next()) //from Chopper 
    {
-   if(!KRAI.CzyNaSprzedaz(main_vehicle_id))
+   if(!this.CzyNaSprzedaz(main_vehicle_id))
    if(AIVehicle.GetAge(main_vehicle_id)>900)
       {
 	  for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) //from Chopper 
 	  if(AIVehicle.GetCapacity (main_vehicle_id, cargo)>0)
 	  if(AIVehicle.GetCargoLoad (main_vehicle_id, cargo)==0)
          {
-		 local station_id = AIStation.GetStationID(KRAI.GetLoadStation(main_vehicle_id));
+		 local station_id = AIStation.GetStationID(this.GetLoadStation(main_vehicle_id));
 
 		 if(AIStation.GetCargoWaiting(station_id, cargo)>200)continue;
 
@@ -941,16 +958,16 @@ for (local main_vehicle_id = list.Begin(); list.HasNext(); main_vehicle_id = lis
 
 		 if(percent<85)
 		    {
-    		if(KRAI.copyVehicle(main_vehicle_id, cargo)) 
+    		if(this.copyVehicle(main_vehicle_id, cargo)) 
 			   {
-			   KRAI.sellVehicle(main_vehicle_id);
+			   this.sellVehicle(main_vehicle_id);
 			   ile[1]++;
                ile[0]++;
 			   }
 		    }
 		 else
             {
-			KRAI.sellVehicle(main_vehicle_id);
+			this.sellVehicle(main_vehicle_id);
             ile[0]++;
 			}		 
 		 }	  
@@ -983,9 +1000,9 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 	  }
 	
 	local czy_load=vehicle_list.Begin();
-	local station_id = AIStation.GetStationID(KRAI.GetLoadStation(czy_load));
+	local station_id = AIStation.GetStationID(this.GetLoadStation(czy_load));
 
-   //KRAI.Info("Station with " + AIStation.GetCargoWaiting(station, cargo) + " of " + AICargo.GetCargoLabel(cargo));
+   //this.Info("Station with " + AIStation.GetCargoWaiting(station, cargo) + " of " + AICargo.GetCargoLabel(cargo));
 	
    if(station==station_id)	
    if(AIStation.GetCargoWaiting(station, cargo)<150)
@@ -994,10 +1011,10 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
        {
 	   if(AIVehicle.GetCargoLoad (vehicle, cargo)==0)
 	   if(AIVehicle.GetAge(vehicle)>60)
-	   if(!KRAI.CzyNaSprzedaz(vehicle))
+	   if(!this.CzyNaSprzedaz(vehicle))
 	   if(AIStation.GetDistanceManhattanToTile(station, AIVehicle.GetLocation(vehicle))<=2) //OPTION
 	      {
-    	  //KRAI.Info(AIVehicle.GetName(vehicle)+" ***"+AIStation.GetDistanceManhattanToTile (station, AIVehicle.GetLocation(vehicle))+"*** <"+counter);
+    	  //this.Info(AIVehicle.GetName(vehicle)+" ***"+AIStation.GetDistanceManhattanToTile (station, AIVehicle.GetLocation(vehicle))+"*** <"+counter);
 		  counter++;
 		  
 		  if(AIVehicle.GetCurrentSpeed(vehicle)<20)counter++;
@@ -1006,7 +1023,7 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 		  if(counter>5) //OPTION
 	         {
 		     ile++;
-		     KRAI.sellVehicle(vehicle);
+		     this.sellVehicle(vehicle);
 		     }
 		  }
 	   }
@@ -1035,21 +1052,21 @@ while (path == false)
 
   if(path==null)return false;
 
-  AIAI.Konserwuj();
+  rodzic.Konserwuj();
 
   AIController.Sleep(1);
   }
 
-return KRAI.zbuduj_droge(path);
+return this.zbuduj_droge(path);
 }
 
 function KRAI::BudujPojazdy(depot_tile, start_station, end_station, cargo, _production, raw)
 {
 local zbudowano=0;
 
-local new_engine_id = KRAI.WybierzRV(cargo);
+local new_engine_id = this.WybierzRV(cargo);
 if(new_engine_id==null)return null;
-local speed = AIEngine.GetMaxSpeed(KRAI.WybierzRV(cargo));
+local speed = AIEngine.GetMaxSpeed(this.WybierzRV(cargo));
 local distance = AIMap.DistanceManhattan(start_station, end_station);
 local ile = _production/AIEngine.GetCapacity(new_engine_id);
 local mnoznik = ((distance*88)/(50*speed));
@@ -1057,14 +1074,14 @@ if(mnoznik==0)mnoznik=1;
 ile*=mnoznik;
 ile+=3;
 
-//KRAI.Info("ile: "+ile);
+//this.Info("ile: "+ile);
 local vehicle_id = -1;
 
 vehicle_id=AIVehicle.BuildVehicle (depot_tile, new_engine_id);
 while(!AIVehicle.IsValidVehicle(vehicle_id)) 
    {
    vehicle_id=AIVehicle.BuildVehicle (depot_tile, new_engine_id);
-   KRAI.Info("Vehicle building fail "+AIError.GetLastErrorString());
+   this.Info("Vehicle building fail "+AIError.GetLastErrorString());
    if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_BUILD_DISABLED)return null;
    if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_TOO_MANY)return null;
    if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_WRONG_DEPOT)return 0;
@@ -1104,7 +1121,7 @@ AIVehicle.RefitVehicle (vehicle_id, cargo);
 AIVehicle.StartStopVehicle (vehicle_id);
 }
 
-for(local i = 0; i<ile; i++) if(KRAI.copyVehicle(vehicle_id, cargo)) zbudowano++;
+for(local i = 0; i<ile; i++) if(this.copyVehicle(vehicle_id, cargo)) zbudowano++;
 
 return zbudowano;
 }

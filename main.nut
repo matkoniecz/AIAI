@@ -23,6 +23,7 @@ class AIAI extends AIController
 {
 desperacja = null;
 air=null;
+truck=null;
 }
 
 require("KRAI.nut");
@@ -45,6 +46,9 @@ Info("Hi!!!");
 air = KWAI();
 air.rodzic=this;
 
+truck = KRAI();
+truck.rodzic=this;
+
 desperacja = 0;
 
 for(local i=0; true; i++)
@@ -57,21 +61,38 @@ for(local i=0; true; i++)
 	AISign.RemoveSign(x);
 	}
    }
+   
+   local list = AIStationList(AIStation.STATION_AIRPORT);
+   for (local x = list.Begin(); list.HasNext(); x = list.Next()) 
+      {
+	  air.GetBurden(x);
+	  }
 	
    air.desperacja = desperacja;
+   truck.desperacja = desperacja;
+
    this.MoneyMenagement();
+
+   AILog.Warning("desperation: " + desperacja);
+   AILog.Warning("air: " + air._koszt);
+   AILog.Warning("truck: " + truck._koszt);
+   
    if(desperacja>1000)
       {
 	  Info("We wait for better times.");
 	  Sleep(200);
 	  }
-   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF) > 20000)
+	  
+   if(
+     (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > truck._koszt && IsAllowedTruck() && truck._koszt!=0)||
+     (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedPlane() && air._koszt!=0)
+	 )
       {
 	  local air_city = false; 
 	  local air_cargo = false; 
 	  local truck_cargo = false;
 	  if(IsAllowedPlane())air_city = air.BuildAirportRouteBetweenCities();
-	  if(IsAllowedTruck())truck_cargo = KRAI.skonstruj_trase(desperacja);
+	  if(IsAllowedTruck())truck_cargo = truck.skonstruj_trase();
 	  if(IsAllowedPlane())air_cargo = air.CargoConnectionBuilder();
 	  if((air_cargo||air_city||truck_cargo)==false)
 	     {
@@ -84,14 +105,15 @@ for(local i=0; true; i++)
 	  }
 	else 
 	   {
-	   if(desperacja==0)
-	      {
-	      desperacja=1;
-	      }
+	   Sleep(100);
+       desperacja=1;
+	   if(IsAllowedPlane()) air.BuildAirportRouteBetweenCities();
+	   if(IsAllowedTruck()) truck.skonstruj_trase();
+	   if(IsAllowedPlane()) air.CargoConnectionBuilder();
 	   }
 
    this.Konserwuj();
-   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount()+AICompany.GetLoanInterval())
+   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount()*2)
         {
 		ZbudujStatue();
 		}
@@ -111,27 +133,20 @@ for(local i=0; true; i++)
 		}
 	   }
  
-   AILog.Warning("desperation: " + desperacja);
    }
 }
 function AIAI::MoneyMenagement()
 {
 if(AIVehicleList().Count()==0)AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
 
-if(AIBase.RandRange(10)==1)
-if(desperacja>100)if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>6*AICompany.GetLoanInterval())
+if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetLoanInterval())
 	{
     AICompany.SetLoanAmount(AICompany.GetLoanAmount()-AICompany.GetLoanInterval());
     }
 
-if(AIBase.RandRange(10)==1)
-if(desperacja>140)if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetLoanInterval())
-   {
-   AICompany.SetLoanAmount(AICompany.GetLoanAmount()-AICompany.GetLoanInterval());
-   }
-
 if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
 {
+if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0) AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
 while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
 	{
 	if(AIBase.RandRange(10)==1)AILog.Error("We need bailout!");
@@ -148,6 +163,22 @@ while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
 	}
 AILog.Warning("End of financial problems!");
 }
+
+local money;
+local available_loan;
+
+available_loan = AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount();
+money = AICompany.GetBankBalance(AICompany.COMPANY_SELF);
+if(money<air._koszt)
+   if(available_loan+money>air._koszt)
+       AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
+
+available_loan = AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount();
+money = AICompany.GetBankBalance(AICompany.COMPANY_SELF);
+if(money<truck._koszt)
+   if(available_loan+money>truck._koszt)
+       AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
+	   
 }
 
 function AIAI::IsConnectedIndustry(industry_id)
@@ -183,7 +214,7 @@ function AIAI::Load(version, data)
 
 function AIAI::Konserwuj()
 {
-KRAI.Konserwuj();
+truck.Konserwuj();
 air.Konserwuj();
 if(desperacja)if(AIBase.RandRange(50)==1)Autoreplace(); //TODO - wywo³aæ gdy pojawia siê nowy pojazd/przeglad pojazdu (ale do tego trzeba obs³ugi wydarzeñ)
 }
@@ -199,4 +230,22 @@ for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper
    }
 
 return minimum;
+}
+
+function GetAverageCapacity(station, cargo)
+{
+local list = AIVehicleList_Station(station);
+local total = 0;
+local ile = 0;
+for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
+   {
+   local plus=AIVehicle.GetCapacity (q, cargo);
+   if(plus>0)
+      {
+	  total+=plus;
+	  ile++;
+	  }
+   }
+if(ile==0)return 0;
+else return total/ile;
 }

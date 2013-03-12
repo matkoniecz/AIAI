@@ -92,3 +92,95 @@ for (local tile = HQArea.Begin(); HQArea.HasNext(); tile = HQArea.Next())
 		
 Debug("No possible HQ location found");
 }
+
+function AIAI::Autoreplace()
+{
+AutoreplaceRV();
+AutoreplaceSmallPlane();
+AutoreplaceBigPlane();
+AILog.Warning("Autoreplace list updated by Autoreplace() from util.nut");
+}
+
+function AIAI::AutoreplaceBigPlane()
+{
+local engine_list=AIEngineList(AIVehicle.VT_AIR);
+engine_list.Valuate(AIEngine.GetPlaneType);
+engine_list.KeepValue(AIAirport.PT_BIG_PLANE);
+
+for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_existing = engine_list.Next()) //from Chopper 
+   {
+   local cargo_list=AICargoList();
+   local cargo;
+   for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) //from Chopper
+      {
+	  if(AIEngine.CanRefitCargo(engine_existing, cargo))break;
+	  }
+	
+   if(AIEngine.IsValidEngine(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
+      {
+	  local engine_best = KWAI.FindAircraft(AIAirport.AT_LARGE, cargo, 1, 100000000)
+	  if(engine_best != engine_existing)
+	     {
+		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
+         AILog.Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));
+		 }
+	  }
+   
+   }
+}
+
+function AIAI::AutoreplaceSmallPlane()
+{
+local engine_list=AIEngineList(AIVehicle.VT_AIR);
+engine_list.Valuate(AIEngine.GetPlaneType);
+engine_list.RemoveValue(AIAirport.PT_BIG_PLANE);
+
+for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_existing = engine_list.Next()) //from Chopper 
+   {
+   local cargo_list=AICargoList();
+   local cargo;
+   for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) //from Chopper
+      {
+	  if(AIEngine.CanRefitCargo(engine_existing, cargo))break;
+	  }
+	
+   if(AIEngine.IsValidEngine(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
+      {
+	  local engine_best = KWAI.FindAircraft(AIAirport.AT_SMALL, cargo, 1, 100000000)
+	  if(engine_best != engine_existing)
+	     {
+		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
+         AILog.Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));
+		 }
+	  }
+   
+   }
+}
+
+function AIAI::AutoreplaceRV()
+{
+local engine_list=AIEngineList(AIVehicle.VT_ROAD);
+engine_list.Valuate(AIEngine.GetRoadType);
+engine_list.KeepValue(AIRoad.ROADTYPE_ROAD);
+
+for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_existing = engine_list.Next()) //from Chopper 
+   {
+   local cargo_list=AICargoList();
+   local cargo;
+   for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) //from Chopper
+      {
+	  if(AIEngine.CanRefitCargo(engine_existing, cargo))break;
+	  }
+	
+   if(AIEngine.IsValidEngine(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
+      {
+	  local engine_best = truck.GetReplace(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing), cargo);
+	  if(engine_best != engine_existing)
+	     {
+		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
+         AILog.Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));
+		 }
+	  }
+   
+   }
+}

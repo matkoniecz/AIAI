@@ -2,7 +2,7 @@ class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
   function GetDescription() { return "Automatic Idiot AI Version beta."; }
-  function GetVersion()     { return 3; }
+  function GetVersion()     { return 5; }
   function GetDate()        { return "2010-02-14"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
