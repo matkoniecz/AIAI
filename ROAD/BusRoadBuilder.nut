@@ -68,15 +68,10 @@ return false;
 
 function BusRoadBuilder::ConstructionOfBusRoute()
 {
-if(!this.ZbudujStacjeAutobusow())
+if(!this.BuildRVStation(AIRoad.ROADVEHTYPE_BUS))
    {
    if(trasa.start!=null) trasa.forbidden.AddItem(trasa.start, 0);
    return false;	  
    }
 return this.ConstructionOfRVRoute();
-}
-
-function BusRoadBuilder::ZbudujStacjeAutobusow()
-{
-	return this.BuildRVStation(AIRoad.ROADVEHTYPE_BUS);
 }

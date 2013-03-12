@@ -9,6 +9,12 @@ Warning("estimated cost of a truck connection: " + this.cost + " /  available fu
 return this.cost<GetAvailableMoney();
 }
 
+function TruckRoadBuilder::ValuateProducer(ID, cargo)
+{
+if(AIRoad.GetRoadVehicleTypeForCargo(cargo) != AIRoad.ROADVEHTYPE_TRUCK) return 0;
+return RoadBuilder.ValuateProducer(ID, cargo);
+}
+
 function TruckRoadBuilder::FindPair(route)
 {
 local GetIndustryList = rodzic.GetIndustryList.bindenv(rodzic);
@@ -58,7 +64,7 @@ return false;
 
 function TruckRoadBuilder::ConstructionOfTruckRoute()
 {
-if(!this.ZbudujStacjeCiezarowek())
+if(!this.BuildRVStation(AIRoad.ROADVEHTYPE_TRUCK))
    {
    trasa.forbidden.AddItem(trasa.start, 0);
    return false;	  

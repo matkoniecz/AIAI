@@ -354,8 +354,8 @@ function AirBuilder::BuildPassengerAircraft(tile_1, tile_2, engine, cargo)
 {
 local vehicle = this.BuildAircraft(tile_1, tile_2, engine, cargo);
 if(vehicle==-1) return false;
-if(!AIOrder.AppendOrder(vehicle, tile_1, AIOrder.AIOF_FULL_LOAD_ANY))abort(AIVehicle.GetName(vehicle) + " - order fail")
-if(!AIOrder.AppendOrder(vehicle, tile_2, AIOrder.AIOF_FULL_LOAD_ANY))abort(AIVehicle.GetName(vehicle) + " - order fail")
+if(!AIOrder.AppendOrder(vehicle, tile_1, AIOrder.OF_FULL_LOAD_ANY))abort(AIVehicle.GetName(vehicle) + " - order fail")
+if(!AIOrder.AppendOrder(vehicle, tile_2, AIOrder.OF_FULL_LOAD_ANY))abort(AIVehicle.GetName(vehicle) + " - order fail")
 if(!AIVehicle.StartStopVehicle(vehicle)) abort(AIVehicle.GetName(vehicle) + " - startstop fail")
 return true;
 }
@@ -434,8 +434,8 @@ function AirBuilder::BuildCargoAircraft(tile_1, tile_2, engine, cargo, nazwa)
 local vehicle = this.BuildAircraft(tile_1, tile_2, engine, cargo);
 if(vehicle==-1) return false;
 
-AIOrder.AppendOrder(vehicle, tile_1, AIOrder.AIOF_FULL_LOAD_ANY);
-AIOrder.AppendOrder(vehicle, tile_2, AIOrder.AIOF_NO_LOAD);
+AIOrder.AppendOrder(vehicle, tile_1, AIOrder.OF_FULL_LOAD_ANY);
+AIOrder.AppendOrder(vehicle, tile_2, AIOrder.OF_NO_LOAD);
 AIVehicle.StartStopVehicle(vehicle);
 SetNameOfVehicle(vehicle, nazwa);
 return true;

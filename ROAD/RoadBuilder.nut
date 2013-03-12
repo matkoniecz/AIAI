@@ -80,11 +80,6 @@ if(distance>10) return 1;
 return 0;
 }
 
-function RoadBuilder::ZbudujStacjeCiezarowek()
-	{
-	return this.BuildRVStation(AIRoad.ROADVEHTYPE_TRUCK);
-	}
-
 function RoadBuilder::BuildRVStation(type)
 {
 	if(!AIRoad.BuildDriveThroughRoadStation(trasa.first_station.location, trasa.start_otoczka[0], type, AIStation.STATION_NEW)) 
@@ -417,14 +412,14 @@ return true;
 
 function RoadBuilder::ConstructionOfRVRoute()
 {
-if(!this.zbuduj_droge(path)){
+if(!this.BuildRoad(path)){
    AIRoad.RemoveRoadStation(trasa.first_station.location);
    AIRoad.RemoveRoadStation(trasa.second_station.location);
    Info("   But stopped by error");
    return false;	  
    }
 
-trasa.depot_tile = this.PostawDepot(path);
+trasa.depot_tile = this.BuildRoadDepotOnRoute(path);
 if(trasa.depot_tile==null){
    Info("   Depot placement error");
    return false;	  
@@ -461,7 +456,7 @@ AIRoad.BuildRoadDepot (trasa.koniec_otoczka[1], trasa.second_station.location);
 return true;
 }
 
-function RoadBuilder::PostawDepot(path)
+function RoadBuilder::BuildRoadDepotOnRoute(path)
 {
 local ile = 0;
 local odstep = 70;
@@ -778,8 +773,8 @@ function RoadBuilder::BuildVehicles()
 
 	if(trasa.type==1) //1 raw
 		{
-		if(!(AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE )&&
-		AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD ))){
+		if(!(AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE )&&
+		AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_NO_LOAD ))){
 			this.sellVehicleStoppedInDepotDueToFoo(vehicle_id, "order appending");
 			return null;
 			}
@@ -789,10 +784,10 @@ function RoadBuilder::BuildVehicles()
 		local pozycja_porownywacza=1;
 		local pozycja_przeskakiwacza=3;
 
-		if(!(AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.AIOF_NON_STOP_INTERMEDIATE )&&
-		AIOrder.AppendOrder (vehicle_id, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE )&&
-		AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD )&&
-		AIOrder.AppendOrder (vehicle_id, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE )&&
+		if(!(AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.OF_NON_STOP_INTERMEDIATE )&&
+		AIOrder.AppendOrder (vehicle_id, trasa.depot_tile,  AIOrder.OF_NON_STOP_INTERMEDIATE )&&
+		AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_NO_LOAD )&&
+		AIOrder.AppendOrder (vehicle_id, trasa.depot_tile,  AIOrder.OF_NON_STOP_INTERMEDIATE )&&
 	
 		AIOrder.InsertConditionalOrder (vehicle_id, pozycja_porownywacza, 2)&&
 		AIOrder.SetOrderCompareValue(vehicle_id, pozycja_porownywacza, 0)&&
@@ -808,8 +803,8 @@ function RoadBuilder::BuildVehicles()
 		}
 	else if(trasa.type == 2) //2 passenger
 		{
-		if(!(AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE )&&
-		AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE ))){
+		if(!(AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE )&&
+		AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE ))){
 			this.sellVehicleStoppedInDepotDueToFoo(vehicle_id, "order appending");
 			return null;
 			}
@@ -869,7 +864,7 @@ costs.ResetCosts ();
 local test = AITestMode();
 /* Test Mode */
 
-if(RoadBuilder.zbuduj_droge(path))
+if(RoadBuilder.BuildRoad(path))
    {
    return costs.GetCosts();
    }
@@ -895,7 +890,7 @@ while (path != null) {
 return costs.GetCosts();
 }
 
-function RoadBuilder::zbuduj_droge(path)
+function RoadBuilder::BuildRoad(path)
 {
 if(path==null) return false;
 while (path != null) {
@@ -936,7 +931,7 @@ while (path == false)
   AIController.Sleep(1);
   }
 
-return this.zbuduj_droge(path);
+return this.BuildRoad(path);
 }
 
 function RoadBuilder::AddTruck()
@@ -1039,44 +1034,44 @@ local first_station_is_full = (AIStation.GetStationID(GetLoadStationLocation(RV)
 
 if(first_station_is_full)
    {
-   if(AIOrder.GetOrderFlags(RV, 0)!= (AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE))
+   if(AIOrder.GetOrderFlags(RV, 0)!= (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE))
       {
 	  if(AIBase.RandRange(3)!=0) return true; //To wait for effects of action and avoid RV flood
 
 	  Info(AIVehicle.GetName(RV) + "wykonano zmiane typu 1");
-	  AIOrder.SetOrderFlags(RV, 0, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+	  AIOrder.SetOrderFlags(RV, 0, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE);
 	  return true;
 	  }
    else
       {
-      if(AIOrder.GetOrderFlags(RV, 1)== (AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE))
+      if(AIOrder.GetOrderFlags(RV, 1)== (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE))
       {
 	  if(AIBase.RandRange(3)!=0) return true; //To wait for effects of action and avoid RV flood
 
 	  Info(AIVehicle.GetName(RV) + "wykonano zmiane typu 2");
-	  AIOrder.SetOrderFlags(RV, 1, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+	  AIOrder.SetOrderFlags(RV, 1, AIOrder.OF_NON_STOP_INTERMEDIATE);
 	  return true;
 	  }
 	  }
    }
 else
    {
-   if(AIOrder.GetOrderFlags(RV, 1)!= (AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE))
+   if(AIOrder.GetOrderFlags(RV, 1)!= (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE))
       {
 	  if(AIBase.RandRange(3)!=0) return true; //To wait for effects of action and avoid RV flood
 
 	  Info(AIVehicle.GetName(RV) + "wykonano zmiane typu 3");
-	  AIOrder.SetOrderFlags(RV, 1, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+	  AIOrder.SetOrderFlags(RV, 1, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE);
 	  return true;
 	  }
    else
       {
-      if(AIOrder.GetOrderFlags(RV, 0)== (AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE))
+      if(AIOrder.GetOrderFlags(RV, 0)== (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE))
       {
 	  if(AIBase.RandRange(3)!=0) return true; //To wait for effects of action and avoid RV flood
 
 	  Info(AIVehicle.GetName(RV) + "wykonano zmiane typu 4");
-	  AIOrder.SetOrderFlags(RV, 0, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
+	  AIOrder.SetOrderFlags(RV, 0, AIOrder.OF_NON_STOP_INTERMEDIATE);
 	  return true;
 	  }
 	  }

@@ -77,9 +77,9 @@ function Name()
 	{
 	if((AICompany.GetName(AICompany.COMPANY_SELF)!="AIAI")&&(AIVehicleList().Count()>0)){
 		while(true){
-			Sleep(1000);
 			Info("Company created by other ai. As such it is not possible for AIAI to menage that company.");
 			Info("Zzzzz...")
+			Sleep(1000);
 			}
 		}
 	AICompany.SetPresidentName("http://tinyurl.com/ottdaiai");

@@ -164,7 +164,7 @@ for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next())
 	  local location = AIOrder.GetOrderDestination(veh, i);
 	  if(AITile.IsStationTile(location))
 		{
-	    if(AIOrder.GetOrderFlags(veh, i)!=AIOrder.AIOF_NO_LOAD)
+	    if(AIOrder.GetOrderFlags(veh, i)!=AIOrder.OF_NO_LOAD)
 		{
 		local station = AIStation.GetStationID(location);
 		local suma = 0;
@@ -295,6 +295,18 @@ function AIAI::Load(version, data)
     this.GeneralInspection = data.rawget("GeneralInspection");
 	this.bridge_list =  data.rawget("BridgeList");
 	this.loaded_game = true;
+	Info(this.bridge_list)
+
+	//fix broken savegames
+	if(this.desperation == null){
+		this.desperation = 0;
+		Error("Broken savegame, used default data for desperation")
+		}
+	if(this.GeneralInspection == null){
+		this.GeneralInspection = GetDate()-12;
+		Error("Broken savegame, used default data for GeneralInspection")
+		}
+
 	return;
   }
   abort("unable to load");
@@ -324,15 +336,15 @@ if(!AIOrder.UnshareOrders(vehicle_id))
 	abort("WTF? Unshare impossible? "+AIVehicle.GetName(vehicle_id));
 	}
 
-if(!AIOrder.AppendOrder(vehicle_id, tile_1, AIOrder.AIOF_FULL_LOAD_ANY))
+if(!AIOrder.AppendOrder(vehicle_id, tile_1, AIOrder.OF_FULL_LOAD_ANY))
 	{
 	abort("WTF? AppendOrder impossible? "+AIVehicle.GetName(vehicle_id));
 	}
-if(!AIOrder.AppendOrder(vehicle_id, tile_2, AIOrder.AIOF_NO_LOAD))
+if(!AIOrder.AppendOrder(vehicle_id, tile_2, AIOrder.OF_NO_LOAD))
 	{
 	abort("WTF? AppendOrder impossible? "+AIVehicle.GetName(vehicle_id))
 	}
-if(!AIOrder.AppendOrder (vehicle_id, depot_location, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_STOP_IN_DEPOT)) //trains are not replaced by autoreplace! TODO
+if(!AIOrder.AppendOrder (vehicle_id, depot_location, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_STOP_IN_DEPOT)) //trains are not replaced by autoreplace! TODO
 	{
 	abort("WTF? AppendOrder impossible? "+AIVehicle.GetName(vehicle_id));
 	}
@@ -467,7 +479,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 		local event = AIEventController.GetNextEvent();
 		if(event == null) return;
 		local ev_type = event.GetEventType();
-		if(ev_type == AIEvent.AI_ET_VEHICLE_LOST){
+		if(ev_type == AIEvent.ET_VEHICLE_LOST){
     		Warning("Vehicle lost event detected!");
 			local lost_event = AIEventVehicleLost.Convert(event);
 			local lost_veh = lost_event.GetVehicleID();
@@ -490,7 +502,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			*/
 			
 		}
-		else if(ev_type == AIEvent.AI_ET_VEHICLE_CRASHED){
+		else if(ev_type == AIEvent.ET_VEHICLE_CRASHED){
 			Warning("Vehicle crash detected!");
 			local crash_event = AIEventVehicleCrashed.Convert(event);
 			local crash_reason = crash_event.GetCrashReason();
@@ -500,7 +512,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 				this.HandleNewLevelCrossing(event);
 				}
 			}
-		else if(ev_type == AIEvent.AI_ET_ENGINE_PREVIEW){
+		else if(ev_type == AIEvent.ET_ENGINE_PREVIEW){
 			event = AIEventEnginePreview.Convert(event);
 			if (event.AcceptPreview()){
 				Info("New engine available from preview: " + event.GetName());
@@ -508,19 +520,19 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 				if(event.GetVehicleType() == AIVehicle.VT_RAIL)(RailBuilder(this, 0)).TrainReplace();
 				}
 			}
-		else if(ev_type == AIEvent.AI_ET_ENGINE_AVAILABLE){
+		else if(ev_type == AIEvent.ET_ENGINE_AVAILABLE){
 			event = AIEventEngineAvailable.Convert(event);
 			local engine = event.GetEngineID();
 			Info("New engine available: " + AIEngine.GetName(engine));
 			Autoreplace();
 			if(AIEngine.GetVehicleType(engine) == AIVehicle.VT_RAIL)(RailBuilder(this, 0)).TrainReplace();
 			}
-		else if(ev_type == AIEvent.AI_ET_COMPANY_NEW){
+		else if(ev_type == AIEvent.ET_COMPANY_NEW){
 			event = AIEventCompanyNew.Convert(event);
 			local company = event.GetCompanyID();
 			Info("Welcome " + AICompany.GetName(company));
 			}
-		else if(ev_type == AIEvent.AI_ET_COMPANY_IN_TROUBLE){
+		else if(ev_type == AIEvent.ET_COMPANY_IN_TROUBLE){
 			event = AIEventCompanyInTrouble.Convert(event);
 			local company = event.GetCompanyID();
 			if (AICompany.IsMine(company)){
@@ -532,13 +544,13 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 				Warning("Competitor is in trouble!");
 				}
 			}
-		else if(ev_type == AIEvent.AI_ET_INDUSTRY_OPEN){
+		else if(ev_type == AIEvent.ET_INDUSTRY_OPEN){
 			event = AIEventIndustryOpen.Convert(event);
 			local industry = event.GetIndustryID();
 			Info("New industry: " + AIIndustry.GetName(industry));
 			/* TODO: Handle it. */
 			}
-		else if(ev_type == AIEvent.AI_ET_INDUSTRY_CLOSE)//from simpleai
+		else if(ev_type == AIEvent.ET_INDUSTRY_CLOSE)//from simpleai
 			{
 			event = AIEventIndustryClose.Convert(event);
 			local industry = event.GetIndustryID();
