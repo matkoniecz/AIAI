@@ -68,14 +68,10 @@ if(GetAvailableMoney()<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w R
 			return false;
 		}
 	}
-else
-	{
-	Info("money OK")
-	}
+else Info("We have enough money.")
 ProvideMoney();
 if(!this.StationConstruction()) return false;   
 if(!this.RailwayLinkConstruction(path)){
-	//AIRail.RemoveRailStationTileRect(trasa.first_station); ........... //TODO DO IT
 	Info("   But stopped by error");
 	AITile.DemolishTile(trasa.first_station.location);
 	AITile.DemolishTile(trasa.second_station.location);
@@ -83,7 +79,6 @@ if(!this.RailwayLinkConstruction(path)){
 	}
 
 trasa.depot_tile = this.BuildDepot(path, false);
-   
 if(trasa.depot_tile==null){
 	Info("   Depot placement error");
 	AITile.DemolishTile(trasa.first_station.location);

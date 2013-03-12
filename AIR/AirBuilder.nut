@@ -420,20 +420,26 @@ return ile;
 }
 
 function AirBuilder::ValuateProducer(ID, cargo)
-{
-   local base = AIIndustry.GetLastMonthProduction(ID, cargo);
-   base*=(100-AIIndustry.GetLastMonthTransportedPercentage (ID, cargo));
-   if(AIIndustry.GetLastMonthTransportedPercentage (ID, cargo)==0)base*=3;
-   base*=AICargo.GetCargoIncome(cargo, 10, 50);
-   if(base!=0)
-	  if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(ID)))
-		{
-		//base*=3;
-	    //base/=2;
-		base+=10000;
-	    }
-return base;
-}
+	{
+	if(AIIndustry.GetLastMonthProduction(ID, cargo)<50-4*desperacja)return 0; //protection from tiny industries servised by giant trains
+	local base = AIIndustry.GetLastMonthProduction(ID, cargo);
+	base*=(100-AIIndustry.GetLastMonthTransportedPercentage (ID, cargo));
+	if(AIIndustry.GetLastMonthTransportedPercentage (ID, cargo)==0)base*=3;
+	base*=AICargo.GetCargoIncome(cargo, 10, 50);
+	if(base!=0){
+		if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(ID))){
+			//base*=3;
+			//base/=2;
+			base+=10000;
+			base*=100;
+			}
+		else{
+			base*=min(99, deinflate(TotalLastYearProfit()/1000))+1;
+			}
+		}
+	//Info(AIIndustry.GetName(ID) + " is " + base + " point producer of " + AICargo.GetCargoLabel(cargo));
+	return base;
+	}
 
 function AirBuilder::ValuateConsumer(ID, cargo, score)
 {
@@ -531,9 +537,9 @@ local maksimum;
 local total = this.GetBurden(stacja);
 local airport_type = AIAirport.GetAirportType(AIStation.GetLocation(stacja));
 if(airport_type==AIAirport.AT_LARGE) maksimum = 1500; //1 l¹dowanie miesiêcznie - 250 //6 na du¿ym
-if(airport_type==AIAirport.AT_METROPOLITAN ) maksimum = 2000; //1 l¹dowanie miesiêcznie - 250 //6 na du¿ym
+if(airport_type==AIAirport.AT_METROPOLITAN ) maksimum = 2000; //1 l¹dowaie miesiêcznie - 250 //6 na du¿ym
 if(airport_type==AIAirport.AT_COMMUTER) maksimum = 500; //1 l¹dowanie miesiêcznie - 250 //4 na ma³ym
-if(airport_type==AIAirport.AT_SMALL) maksimum = 600; //1 l¹dowanie miesiêcznie - 250 //4 na ma³ym
+if(airport_type==AIAirport.AT_SMALL) maksimum = 500; //1 l¹dowanie miesiêcznie - 250 //4 na ma³ym
  
 if(AIAI.GetSetting("debug_signs_for_airports_load")) AISign.BuildSign(AIStation.GetLocation(stacja), total + " (" + maksimum + ")");
 

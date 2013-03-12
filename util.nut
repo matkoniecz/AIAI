@@ -3,6 +3,11 @@ function inflate(money)
 	return money*GetInflationRate()/100;
 	}
 
+function deinflate(money)
+	{
+	return money*100/GetInflationRate();
+	}
+
 function GetInflationRate() //from simpleai
 	{
 	return (100 * AICompany.GetMaxLoanAmount() / AIGameSettings.GetValue("difficulty.max_loan"));
@@ -318,23 +323,22 @@ while(true)
 
 function Name()
 	{
+	if((AICompany.GetName(AICompany.COMPANY_SELF)!="AIAI")&&(AIVehicleList().Count()>0)){
+		while(true){
+			Sleep(1000);
+			Info("Company created by other ai. As such it is not possible for AIAI to menage that company.");
+			Info("Zzzzz...")
+			}
+		}
 	AICompany.SetPresidentName("http://tinyurl.com/ottdaiai");
 	AICompany.SetName("AIAI");
 	if (AICompany.GetName(AICompany.COMPANY_SELF)!="AIAI"){
-		if(GetSetting("suicide")){
 			if(!AICompany.SetName("Suicide AIAI")){
 			local i = 2;
 			while (!AICompany.SetName("Suicide AIAI #" + i))i++;
 			}
 		BurnMoney();
 		while(true) Sleep(1000);
-		}
-		else{
-			if (!AICompany.SetName("Additional AIAI")){
-				local i = 2;
-				while (!AICompany.SetName("Additional AIAI #" + i))i++;
-				}
-			}
 		}
 	}
 

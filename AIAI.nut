@@ -36,55 +36,47 @@ function AIAI::DeleteVehiclesInDepots()
 	}
 
 function AIAI::IsTileWrongToFullUse(tile)
-{
-return ((!AITile.IsBuildable(tile))||!(AITile.SLOPE_FLAT == AITile.GetSlope(tile)));
-}
+	{
+	return ((!AITile.IsBuildable(tile))||!(AITile.SLOPE_FLAT == AITile.GetSlope(tile)));
+	}
 
 function AIAI::IsTileWithAuthorityRefuse(tile)
-{
-local town_id=AITile.GetClosestTown (tile);
-if(AITown.GetRating (town_id, AICompany.COMPANY_SELF) == AITown.TOWN_RATING_APPALLING) 
-   {
-   return true;
-   }
-if(AITown.GetRating (town_id, AICompany.COMPANY_SELF) == AITown.TOWN_RATING_VERY_POOR)
-   {
-   return true;
-   }
-return false;
-}
+	{
+	local town_id=AITile.GetClosestTown (tile);
+	if(AITown.GetRating (town_id, AICompany.COMPANY_SELF) == AITown.TOWN_RATING_APPALLING)return true;
+	if(AITown.GetRating (town_id, AICompany.COMPANY_SELF) == AITown.TOWN_RATING_VERY_POOR)return true;
+	return false;
+	}
 
 function AIAI::HQ() //from Rondje
-{
-if(AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) return;//from simpleai
+	{
+	if(AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) return;//from simpleai
+	// Find biggest town for HQ
+	local towns = AITownList();
+	towns.Valuate(AITown.GetPopulation);
+	towns.Sort(AIAbstractList.SORT_BY_VALUE, false);
+	local town = towns.Begin();
+	
+	// Find empty 2x2 square as close to town centre as possible
+	local maxRange = Sqrt(AITown.GetPopulation(town)/100) + 5;
+	local HQArea = AITileList();
+			
+	HQArea.AddRectangle(AITown.GetLocation(town) - AIMap.GetTileIndex(maxRange, maxRange), AITown.GetLocation(town) + AIMap.GetTileIndex(maxRange, maxRange));
+	HQArea.Valuate(AITile.IsBuildableRectangle, 2, 2);
+	HQArea.KeepValue(1);
+	HQArea.Valuate(AIMap.DistanceManhattan, AITown.GetLocation(town));
+	HQArea.Sort(AIList.SORT_BY_VALUE, true);
 
-// Find biggest town for HQ
-local towns = AITownList();
-towns.Valuate(AITown.GetPopulation);
-towns.Sort(AIAbstractList.SORT_BY_VALUE, false);
-local town = towns.Begin();
-
-// Find empty 2x2 square as close to town centre as possible
-local maxRange = Sqrt(AITown.GetPopulation(town)/100) + 5;
-local HQArea = AITileList();
-		
-HQArea.AddRectangle(AITown.GetLocation(town) - AIMap.GetTileIndex(maxRange, maxRange), AITown.GetLocation(town) + AIMap.GetTileIndex(maxRange, maxRange));
-HQArea.Valuate(AITile.IsBuildableRectangle, 2, 2);
-HQArea.KeepValue(1);
-HQArea.Valuate(AIMap.DistanceManhattan, AITown.GetLocation(town));
-HQArea.Sort(AIList.SORT_BY_VALUE, true);
-
-Debug("Building company HQ...");
-for (local tile = HQArea.Begin(); HQArea.HasNext(); tile = HQArea.Next()) 
-    {
-	if (AICompany.BuildCompanyHQ(tile)) {
+	Debug("Building company HQ...");
+	for (local tile = HQArea.Begin(); HQArea.HasNext(); tile = HQArea.Next()){
+		if(AICompany.BuildCompanyHQ(tile)){
 			AISign.BuildSign(tile, "In case of strange or stupid AIAI behaviour send mail on bulwersator@gmail.com");
 			return;
-		} 
-	}
+			} 
+		}
 		
-Debug("No possible HQ location found");
-}
+	Debug("No possible HQ location found");
+	}
 
 function AIAI::Autoreplace()
 {

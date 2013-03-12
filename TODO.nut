@@ -1,4 +1,7 @@
-TODO: railtypes
+BLOCKER: railtypes
+BLOCKER: engine upgrading
+
+TODO: $ menag during pf
 TODO: sprawdziæ jak (i czy) dzia³a lista zbanowanych
 TODO: brake van [tarin is failing to start and there is brake van wagon]
 TODO: foo supplies
@@ -6,9 +9,7 @@ TODO: banuj na zawsze, jesli zbanowany zezwalaj z 1%szansy, jeœli lista przeleci
 TODO: networking
 TODO: better engine choosing
 TODO: better RV choosing (problem with very small)
-
-TODO: better strategy
-TODO: limit 25 jest z³y: zazwyczaj za wysoki jeœli jednak faile nastêpuj¹ z powodu za krótkiego czasu skanowania to trzeba zwiêkszyæ
+TODO: error stats
 
 TODO: during heavy competition (more companies that ind + towns) build statues after every connection
 TODO: error catherw w BuildTrain
@@ -40,8 +41,7 @@ TODO: rework statues
 TODO: rebridger over valleys, debridger
 
 TODO: AIAI.GetLastError()
-TODO: tourist support
-TODO: terminus RV station
+TODO: tourist, mail support
 TODO: better RV depot placing (replace double flat by test mode)
 TODO: more working depots
 TODO: reuse existing roads constructed by another players

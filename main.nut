@@ -67,6 +67,7 @@ while(true)
 		this.DeleteUnprofitable();
 		DeleteEmptyStations();
 		Autoreplace();
+		RailBuilder(this, 0).TrainReplace();
 		this.generalna_konserwacja = GetDate();
 		}
 	}
