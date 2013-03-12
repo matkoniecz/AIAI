@@ -1,8 +1,13 @@
 /*
-TODO: train managing, autoreplace addding/removing trains on smart rotes
+TODO: groups of trais / Unprofitable from x years / delete only from last category
+TODO: use loan for too expensive
+TODO: replace helis by helis or nothing
+TODO: stop invoking trainreplace after new no tarin engine
+
+TODO: bridge upgrading
+TODO: better engine construction (multiengines)
 TODO: protection vs very small stations
 TODO: try to clear road in RAILbuilder
-TODO: use loan for too expensive
 
 TODO: reversing path for depot placing 
 TODO: better findpair
@@ -17,6 +22,7 @@ TODO: station allocators: fail may be caused by low money
 TODO: rebridger over valleys, debridger
 TODO koszty podzieliæ
 
+TODO: tourist support
 TODO: terminus RV station
 TODO: better RV depot placing (replace double flat by test mode)
 TODO: more working depots
@@ -26,7 +32,6 @@ TODO: For all newly build routes, check both ways. This way, if one-way roads ar
 TODO: long bridges sometimes are unavailable!
 TODO: helicopters
 TODO: dodawanie samolotów zale¿ne od pojemnoœci
-TODO: - RV stations use both directions - make it also in second function!
 
 TODO: bus scanner
 	- construction of 2 bus stops
@@ -38,11 +43,7 @@ TODO: bus scanner
 	limitation: real players rarely construct intercity routes
 
 Changelog
-- Faster pathfinder(from ChooChoo)
-- train upgrader
-- smarter rail connection
-- suicide company will be closed below one year after starting (water destroying & tree planting) 
-- suicide controlled by option (but disabling it is unsupported feature and may result in multiple instances of AIAI building in the same place)
+[quote="Michiel"]But yeah, I think I see where some of the difficulty comes from. It's very crowded, and the trains are severely underpowered, crawling uphill at 9 km/h, which means they make little profit.[/quote]
 */
 
 class AIAI extends AIController 
@@ -123,7 +124,7 @@ while(true)
 	local bus = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > RV._koszt && IsAllowedBus();
 	local cargo_plane = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedCargoPlane();
 
-	local wszystkoszszlagtrafil = !(StupidCargoRailConnection || truck || PAX_plane || bus || cargo_plane);
+	local wszystkoszszlagtrafil = !(StupidCargoRailConnection || SmartCargoRailConnection || truck || PAX_plane || bus || cargo_plane);
     if(wszystkoszszlagtrafil)
 	   {
 	   Error("Nothing to do!");
@@ -425,11 +426,7 @@ if(AIAI.CzyNaSprzedaz(main_vehicle_id)==true)return false;
 
 if(AIVehicle.SendVehicleToDepot(main_vehicle_id))
    {
-   if(!AIVehicle.SetName(main_vehicle_id, "for sell " + why))
-      {
-	  local o=1;
-	  while(!AIVehicle.SetName(main_vehicle_id, "for sell # "+o + " " + why)){o++;}
-	  }
+   SetNameOfVehicle(main_vehicle_id, "for sell " + why);
    return true;
    }
 return false;

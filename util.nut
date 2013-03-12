@@ -10,6 +10,28 @@ location = null;
 direction = null;
 }
 
+function SetNameOfVehicle(vehicle_id, string)
+{
+if(!AIVehicle.IsValidVehicle(vehicle_id))return;
+local i = AIVehicleList().Count();
+for(;!AIVehicle.SetName(vehicle_id, string + " #" + i); i++)
+	{
+	if(AIError.GetLastError() == AIError.ERR_PRECONDITION_FAILED)
+	 SetNameOfVehicle(vehicle_id, "PRECONDITION_FAILED");
+	}
+}
+
+function TotalLastYearProfit()
+{
+local list = AIVehicleList();
+local suma =0;
+for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
+   {
+   suma += AIVehicle.GetProfitLastYear(q);
+   }
+return suma;
+}
+
 function IsItNeededToImproveThatStation(aktualna, cargo)
 {
 return AIStation.GetCargoWaiting(aktualna, cargo)>50 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0) ;

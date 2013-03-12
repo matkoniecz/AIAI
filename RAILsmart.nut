@@ -93,7 +93,7 @@ else
    }
   
   
-pathfinder.InitializePath(start, end);
+pathfinder.InitializePath(end, start);
 path = false
 path = false;
 local guardian=0;
@@ -126,18 +126,40 @@ if(koszt==null){
   return false;
   }
 
+Info("Construction can start!")
+  
 koszt+=AIEngine.GetPrice(trasa.engine[0])+trasa.station_size*2*AIEngine.GetPrice(trasa.engine[1]);
 _koszt=koszt;
 
 if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w RV
     {
 	rodzic.MoneyMenagement();
-    while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000) 
-	   {
-	   Info("too expensivee, we have only " + AICompany.GetBankBalance(AICompany.COMPANY_SELF) + " And we need " + koszt);
-	   rodzic.Konserwuj(); //TODO bez wydawania kasy
-	   AIController.Sleep(1000);
-	   }
+	if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w RV
+		{
+		Error("WE NEED CASH TO BUILD OUR PRECIOUS ROUTE!")
+		local total_last_year_profit = TotalLastYearProfit();
+		if(total_last_year_profit>koszt)
+		{
+		Error("But we can wait!");
+		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000) 
+			{
+			Info("too expensivee, we have only " + AICompany.GetBankBalance(AICompany.COMPANY_SELF) + " And we need " + koszt);
+			rodzic.Konserwuj(); //TODO bez wydawania kasy
+			AIController.Sleep(1000);
+			}
+		}
+		else
+			{
+			Error("And we can not wait!");
+			AITile.DemolishTile(trasa.first_station.location);
+			AITile.DemolishTile(trasa.second_station.location);
+			return false;
+			}
+		}
+	}
+else
+	{
+	Info("OK")
 	}
 
 if(!this.RailwayLinkConstruction(path)){
@@ -148,7 +170,7 @@ if(!this.RailwayLinkConstruction(path)){
    return false;	  
    }
 
-trasa.depot_tile = RAIL.BuildDepot(path, true);
+trasa.depot_tile = RAIL.BuildDepot(path, false);
    
 if(trasa.depot_tile==null){
    this.Info("   Depot placement error");
@@ -158,7 +180,8 @@ if(trasa.depot_tile==null){
    return false;	  
    }
 
-local new_engine = this.BuildTrain(trasa);
+Error("RAIL.BuildTrain(wrzut) 2");
+local new_engine = RAIL.BuildTrain(trasa, "smart uno");
 
 if(new_engine == null)
    {
@@ -171,7 +194,7 @@ this.TrainOrders(new_engine);
    Info("   I stage completed");
 
 local old_path = path;
-pathfinder.InitializePath(end, start);
+pathfinder.InitializePath(start, end);
 path = false
 path = false;
 guardian=0;
@@ -188,7 +211,7 @@ while (path == false) {
 if(path == false || path == null){
   Info("   Pathfinder failed to find route. ");
   //TODO passing lanes
-  return false;
+  return true;
   }
   
 this.Info("   Pathfinder found sth.");
@@ -197,7 +220,7 @@ local koszt = RAIL.GetCostOfRoute(path);
 if(koszt==null){
   this.Info("   Pathfinder failed to find correct route.");
   //TODO passing lanes
-  return false;
+  return true;
   }
 
 _koszt=koszt;
@@ -216,7 +239,7 @@ if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000)  //TODO zamiast 
 if(!this.RailwayLinkConstruction(path)){
    this.Info("   But stopped by error");
   //TODO passing lanes
-   return false;	  
+   return true;	  
    }
 
 RAIL.SignalPath(path);
@@ -234,7 +257,8 @@ if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000)  //TODO zamiast 
 	   }
 	}
 
-new_engine = this.BuildTrain(trasa);
+Error("RAIL.BuildTrain(wrzut) 3");
+new_engine = RAIL.BuildTrain(trasa, "smart duo");
 if(new_engine == null)
    {
    //TODO handle that
@@ -454,126 +478,4 @@ function RAIL::GetMaxDistanceSmartRail()
 {
 if(desperacja>5) return 100+desperacja*75;
 return 250+desperacja*50;
-}
-
-function RAIL::TrainOrders(engineId)
-{
-if(trasa.type==1) //1 raw
-   {
-	AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	AIOrder.AppendOrder (engineId, trasa.end_station, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD );
-	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")=="0") AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	else AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_SERVICE_IF_NEEDED);
-	}
-else if(trasa.type==0) //0 proceed trasa.cargo
-   {
-	AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	AIOrder.AppendOrder (engineId, trasa.end_station, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD );
-	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")=="0") AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	else AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_SERVICE_IF_NEEDED);
-	}
-else if(trasa.type == 2) //2 passenger
-   {
-	AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	AIOrder.AppendOrder (engineId, trasa.end_station, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")=="0") AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	else AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_SERVICE_IF_NEEDED);
-   }
-else
-   {
-   Error("Wrong value in trasa.type. (" + trasa.type + ") Prepare for explosion.");
-   local zero=0/0;
-   }
-}
-  
-function RAIL::BuildTrain(trasa) //from denver & RioGrande
-{
-local cargoIndex = trasa.cargo;
-   local bestWagon = trasa.engine[1];
-   local bestEngine = trasa.engine[0];
-   
-   local engineId = AIVehicle.BuildVehicle(trasa.depot_tile, bestEngine);
-   local err = AIError.GetLastErrorString();
-   local name = AIEngine.GetName(bestEngine);
-
-   if(AIVehicle.IsValidVehicle(engineId) == false) 
-   {
-
-    AILog.Warning("Failed to build engine '" + name +"':" + err);
-    return null;
-   }
-   
-	AIVehicle.RefitVehicle(engineId, trasa.cargo);
-   
-   for(local i = 0; true; i++)
-   {
-	if(AIVehicle.GetLength(engineId)>trasa.station_size*16)
-	   {
-	   AIVehicle.SellWagon(engineId, 1);
-	   break;
-	   }
-    local newWagon = AIVehicle.BuildVehicle(trasa.depot_tile, bestWagon);
-        
-    AIVehicle.RefitVehicle(newWagon, cargoIndex);
-    local result = AIVehicle.MoveWagon(newWagon, newWagon, engineId, engineId);
-              
-    if(result == false)
-    {
-      //AILog.Error("Couldn't join wagon to train: " + AIError.GetLastErrorString());
-      result = AIVehicle.MoveWagon(newWagon, 0, engineId, 0);
-      if(result == false)
-      {
-        //AILog.Error("Couldn't join wagon to train: " + AIError.GetLastErrorString());
-        result = AIVehicle.MoveWagon(0, newWagon, 0, engineId);
-        if(result == false)
-        {                  
-          if(i==0)
-          {
-            AILog.Error("Couldn't join wagon to train: " + AIError.GetLastErrorString());         
-            return null;
-          }
-        }
-      }
-    }
-   }
-   AIVehicle.StartStopVehicle(engineId);
-   return engineId;
-}
-
-function RAIL::SignalPath(path) //admiral
-{
-	local prev = null;
-	local prevprev = null;
-	local tiles_skipped = 39;
-	local lastbuild_tile = null;
-	local lastbuild_front_tile = null;
-	while (path != null) {
-		if (prevprev != null) {
-			if (AIMap.DistanceManhattan(prev, path.GetTile()) > 1) {
-				tiles_skipped += 10 * AIMap.DistanceManhattan(prev, path.GetTile());
-			} else {
-				if (path.GetTile() - prev != prev - prevprev) {
-					tiles_skipped += 7;
-				} else {
-					tiles_skipped += 10;
-				}
-				if (AIRail.GetSignalType(prev, path.GetTile()) != AIRail.SIGNALTYPE_NONE) tiles_skipped = 0;
-				if (tiles_skipped > 49 && path.GetParent() != null) {
-					if (AIRail.BuildSignal(prev, path.GetTile(), AIRail.SIGNALTYPE_PBS_ONEWAY)) {
-						tiles_skipped = 0;
-						lastbuild_tile = prev;
-						lastbuild_front_tile = path.GetTile();
-					}
-				}
-			}
-		}
-		prevprev = prev;
-		prev = path.GetTile();
-		path = path.GetParent();
-	}
-	/* Although this provides better signalling (trains cannot get stuck half in the station),
-	 * it is also the cause of using the same track of rails both ways, possible causing deadlocks.
-	if (tiles_skipped < 50 && lastbuild_tile != null) {
-		AIRail.RemoveSignal(lastbuild_tile, lastbuild_front_tile);
-	}*/
 }

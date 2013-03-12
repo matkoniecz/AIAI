@@ -51,7 +51,8 @@ if(trasa.depot_tile==null){
    return false;	  
    }
 
-local new_engine = this.BuildTrain(trasa);
+Error("RAIL.BuildTrain(wrzut) 4");
+local new_engine = RAIL.BuildTrain(trasa, "stupid");
 
 if(new_engine == null)
    {
@@ -376,92 +377,3 @@ function RAIL::GetMaxDistanceStupidRail()
 if(desperacja>5) return desperacja*75;
 return 150+desperacja*50;
 }
-
-function RAIL::TrainOrders(engineId)
-{
-if(trasa.type==1) //1 raw
-   {
-	AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	AIOrder.AppendOrder (engineId, trasa.end_station, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD );
-	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")=="0") AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	else AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_SERVICE_IF_NEEDED);
-	}
-else if(trasa.type==0) //0 proceed trasa.cargo
-   {
-	AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	AIOrder.AppendOrder (engineId, trasa.end_station, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD );
-	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")=="0") AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	else AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_SERVICE_IF_NEEDED);
-	}
-else if(trasa.type == 2) //2 passenger
-   {
-	AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	AIOrder.AppendOrder (engineId, trasa.end_station, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")=="0") AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	else AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_SERVICE_IF_NEEDED);
-   }
-else
-   {
-   Error("Wrong value in trasa.type. (" + trasa.type + ") Prepare for explosion.");
-   local zero=0/0;
-   }
-}
-  
-function RAIL::BuildTrain(trasa) //from denver & RioGrande
-{
-local cargoIndex = trasa.cargo;
-   local bestWagon = trasa.engine[1];
-   local bestEngine = trasa.engine[0];
-   
-   local engineId = AIVehicle.BuildVehicle(trasa.depot_tile, bestEngine);
-   local err = AIError.GetLastErrorString();
-   local name = AIEngine.GetName(bestEngine);
-
-   if(AIVehicle.IsValidVehicle(engineId) == false) 
-   {
-
-    AILog.Warning("Failed to build engine '" + name +"':" + err);
-    return null;
-   }
-   
-	AIVehicle.RefitVehicle(engineId, trasa.cargo);
-   
-   for(local i = 0; true; i++)
-   {
-	if(AIVehicle.GetLength(engineId)>trasa.station_size*16)
-	   {
-	   AIVehicle.SellWagon(engineId, 1);
-	   break;
-	   }
-    local newWagon = AIVehicle.BuildVehicle(trasa.depot_tile, bestWagon);
-        
-    AIVehicle.RefitVehicle(newWagon, cargoIndex);
-    local result = AIVehicle.MoveWagon(newWagon, newWagon, engineId, engineId);
-              
-    if(result == false)
-    {
-      //AILog.Error("Couldn't join wagon to train: " + AIError.GetLastErrorString());
-      result = AIVehicle.MoveWagon(newWagon, 0, engineId, 0);
-      if(result == false)
-      {
-        //AILog.Error("Couldn't join wagon to train: " + AIError.GetLastErrorString());
-        result = AIVehicle.MoveWagon(0, newWagon, 0, engineId);
-        if(result == false)
-        {                  
-          if(i==0)
-          {
-            AILog.Error("Couldn't join wagon to train: " + AIError.GetLastErrorString());         
-            return null;
-          }
-        }
-      }
-    }
-	
-   }
-   
-   
-   
-   AIVehicle.StartStopVehicle(engineId);
-   return engineId;
-}
-

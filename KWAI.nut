@@ -244,14 +244,7 @@ if(vehicle==-1)return false;
 AIOrder.AppendOrder(vehicle, tile_1, AIOrder.AIOF_FULL_LOAD_ANY);
 AIOrder.AppendOrder(vehicle, tile_2, AIOrder.AIOF_NO_LOAD);
 AIVehicle.StartStopVehicle(vehicle);
-/*
-for(local i=1; AIVehicle.SetName(vehicle, nazwa)==false; i++)
-   {
-   //maksimum 30 znaków
-   //potrzeba obcinacza stringa
-   AIVehicle.SetName(vehicle, nazwa+" # "+i);
-   }
-*/	
+SetNameOfVehicle(vehicle, nazwa);
 return true;
 }
 

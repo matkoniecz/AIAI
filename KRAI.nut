@@ -966,8 +966,8 @@ if(trasa.type==1) string = "Raw cargo";
 else if(trasa.type==0) string = "Processed cargo"; 
 else if(trasa.type==2) string = "Bus line";
 else string = "WTF?"; 
-local i = AIVehicleList().Count();
-for(;!AIVehicle.SetName(vehicle_id, string + " #" + i); i++);
+
+SetNameOfVehicle(vehicle_id, string);
 }
 
 for(local i = 0; i<ile; i++) if(this.copyVehicle(vehicle_id, trasa.cargo)) zbudowano++;

@@ -283,8 +283,7 @@ if(ile<maksymalnie)
 	     {
 		 return false; //TODO - cancel sell order
 		 }
-	  local i = AIVehicleList().Count();
-	  for(;!AIVehicle.SetName(vehicle_id, string + " #" + i); i++) ; //Error(AIError.GetLastErrorString());
+	  SetNameOfVehicle(vehicle_id, string);
       return true;
 	  }
    }   

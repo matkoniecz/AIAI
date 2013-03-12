@@ -146,7 +146,8 @@ for (local aktualna = station_list.Begin(); station_list.HasNext(); aktualna = s
 		      {
 			  if(AIAI.CzyNaSprzedaz(vehicle)==false)
 			      {
-				  local train = RAIL.BuildTrain(wrzut);
+				  Error("RAIL.BuildTrain(wrzut) 1");
+				  local train = RAIL.BuildTrain(wrzut, "replacing");
 				  if(train != null)
 				     {
 					if(AIOrder.ShareOrders(train, vehicle)) AIAI.sellVehicle(vehicle, "replacing for new");
@@ -434,9 +435,29 @@ local wrzut = RAIL.GetStarter();
 RAIL.FlatPathfinder(wrzut.a, wrzut.b);
 }
 
+class RPathItem
+{
+	_tile = null;
+	_parent = null;
+
+	constructor(tile)
+	{
+		this._tile = tile;
+	}
+
+	function GetTile()
+	{
+		return this._tile;
+	}
+
+	function GetParent()
+	{
+		return this._parent;
+	}
+};
+
 function RAIL::BuildDepot(path, reverse) //from adimral
 {
-reverse = false; //TODO do sth with it!!!!!!!!
 	if (reverse) {
 		local rpath = RPathItem(path.GetTile());
 		while (path.GetParent() != null) {
@@ -573,4 +594,142 @@ function ConnectDepotDiagonal(tile_a, tile_b, tile_c)
 	return depot_tile;
 }
 
+function RAIL::WeightOfEngine(engine, cargo)
+{
+local weight = AIEngine.GetWeight(engine);
+local capacity = max(AIEngine.GetCapacity(engine), 0);
+if(AICargo.IsFreight(cargo)) weight += capacity * AIGameSettings.GetValue("vehicle.freight_trains");
+return weight;
+}
 
+function RAIL::BuildTrain(trasa, string) //from denver & RioGrande
+{
+local cargoIndex = trasa.cargo;
+   local bestWagon = trasa.engine[1];
+   local bestEngine = trasa.engine[0];
+   
+   local engineId = AIVehicle.BuildVehicle(trasa.depot_tile, bestEngine);
+   local err = AIError.GetLastErrorString();
+   local name = AIEngine.GetName(bestEngine);
+
+   if(AIVehicle.IsValidVehicle(engineId) == false) 
+   {
+    AILog.Warning("Failed to build engine '" + name +"':" + err);
+    return null;
+   }
+   
+   local max_number_of_wagons = 1000;
+   
+   if(AIGameSettings.GetValue("vehicle.train_acceleration_model")==1) //TODO multiheading, rescanning for better etc
+		{
+		local maximal_weight = AIEngine.GetMaxTractiveEffort(bestEngine) * 3;
+		maximal_weight -= RAIL.WeightOfEngine(bestEngine, trasa.cargo);
+		max_number_of_wagons = max(1, maximal_weight/RAIL.WeightOfEngine(bestWagon, trasa.cargo));
+		}
+
+	AIVehicle.RefitVehicle(engineId, trasa.cargo);
+   
+   for(local i = 0; i<max_number_of_wagons; i++)
+   {
+	if(AIVehicle.GetLength(engineId)>trasa.station_size*16)
+	   {
+	   AIVehicle.SellWagon(engineId, 1);
+	   break;
+	   }
+    local newWagon = AIVehicle.BuildVehicle(trasa.depot_tile, bestWagon);
+        
+    AIVehicle.RefitVehicle(newWagon, cargoIndex);
+    local result = AIVehicle.MoveWagon(newWagon, newWagon, engineId, engineId);
+              
+    if(result == false)
+    {
+      //AILog.Error("Couldn't join wagon to train: " + AIError.GetLastErrorString());
+      result = AIVehicle.MoveWagon(newWagon, 0, engineId, 0);
+      if(result == false)
+      {
+        //AILog.Error("Couldn't join wagon to train: " + AIError.GetLastErrorString());
+        result = AIVehicle.MoveWagon(0, newWagon, 0, engineId);
+        if(result == false)
+        {                  
+          if(i==0)
+          {
+            AILog.Error("Couldn't join wagon to train: " + AIError.GetLastErrorString());         
+            return null;
+          }
+        }
+      }
+    }
+
+   }
+   SetNameOfVehicle(engineId, string);
+   AIVehicle.StartStopVehicle(engineId);
+   return engineId;
+}
+
+function RAIL::SignalPath(path) //admiral
+{
+	local prev = null;
+	local prevprev = null;
+	local tiles_skipped = 39;
+	local lastbuild_tile = null;
+	local lastbuild_front_tile = null;
+	while (path != null) {
+		if (prevprev != null) {
+			if (AIMap.DistanceManhattan(prev, path.GetTile()) > 1) {
+				tiles_skipped += 10 * AIMap.DistanceManhattan(prev, path.GetTile());
+			} else {
+				if (path.GetTile() - prev != prev - prevprev) {
+					tiles_skipped += 7;
+				} else {
+					tiles_skipped += 10;
+				}
+				if (AIRail.GetSignalType(prev, path.GetTile()) != AIRail.SIGNALTYPE_NONE) tiles_skipped = 0;
+				if (tiles_skipped > 49 && path.GetParent() != null) {
+					if (AIRail.BuildSignal(prev, path.GetTile(), AIRail.SIGNALTYPE_PBS_ONEWAY)) {
+						tiles_skipped = 0;
+						lastbuild_tile = prev;
+						lastbuild_front_tile = path.GetTile();
+					}
+				}
+			}
+		}
+		prevprev = prev;
+		prev = path.GetTile();
+		path = path.GetParent();
+	}
+	/* Although this provides better signalling (trains cannot get stuck half in the station),
+	 * it is also the cause of using the same track of rails both ways, possible causing deadlocks.
+	if (tiles_skipped < 50 && lastbuild_tile != null) {
+		AIRail.RemoveSignal(lastbuild_tile, lastbuild_front_tile);
+	}*/
+}
+
+function RAIL::TrainOrders(engineId)
+{
+if(trasa.type==1) //1 raw
+   {
+	AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
+	AIOrder.AppendOrder (engineId, trasa.end_station, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD );
+	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")=="0") AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
+	else AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_SERVICE_IF_NEEDED);
+	}
+else if(trasa.type==0) //0 proceed trasa.cargo
+   {
+	AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
+	AIOrder.AppendOrder (engineId, trasa.end_station, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD );
+	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")=="0") AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
+	else AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_SERVICE_IF_NEEDED);
+	}
+else if(trasa.type == 2) //2 passenger
+   {
+	AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
+	AIOrder.AppendOrder (engineId, trasa.end_station, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
+	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")=="0") AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
+	else AIOrder.AppendOrder (engineId, trasa.depot_tile,  AIOrder.AIOF_SERVICE_IF_NEEDED);
+   }
+else
+   {
+   Error("Wrong value in trasa.type. (" + trasa.type + ") Prepare for explosion.");
+   local zero=0/0;
+   }
+}
