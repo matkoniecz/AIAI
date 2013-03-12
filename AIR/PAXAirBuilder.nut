@@ -36,7 +36,7 @@ function PAXAirBuilder::Go()
 function PAXAirBuilder::BuildAirportRouteBetweenCitiesWithAirportTypeSet(airport_type)
 {	
 if(!AIAirport.IsValidAirportType(airport_type))return false;
-local engine=this.FindAircraft(airport_type, rodzic.GetPassengerCargoId(), 3, GetAvailableMoney());
+local engine=this.FindAircraft(airport_type, GetPassengerCargoId(), 3, GetAvailableMoney());
 if(engine==null)
     {
 	Info("Unfortunatelly no suitable aircraft found");
@@ -80,13 +80,13 @@ local airport_rad = AIAirport.GetAirportCoverageRadius(airport_type);
 	Info("Airports constructed on distance " + AIMap.DistanceManhattan(tile_1, tile_2) + " but effective distanse is: " + GetEffectiveDistanceBetweenAirports(tile_1, tile_2));
 	local dystans = this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2);
 	local speed = AIEngine.GetMaxSpeed(engine);
-	local production_at_first_airport = AITile.GetCargoAcceptance(tile_1, AIAI.GetPassengerCargoId(), airport_x, airport_y, airport_rad);
-	local production_at_second_airport = AITile.GetCargoAcceptance(tile_2, AIAI.GetPassengerCargoId(), airport_x, airport_y, airport_rad);
+	local production_at_first_airport = AITile.GetCargoAcceptance(tile_1, GetPassengerCargoId(), airport_x, airport_y, airport_rad);
+	local production_at_second_airport = AITile.GetCargoAcceptance(tile_2, GetPassengerCargoId(), airport_x, airport_y, airport_rad);
 	local production = min(production_at_first_airport, production_at_second_airport);
 	local licznik = this.HowManyAirplanes(dystans, speed, production, engine);
 	for(local i=0; i<licznik; i++) 
 		{
-		while(!this.BuildPassengerAircraftWithRand(tile_1, tile_2, engine, rodzic.GetPassengerCargoId()))
+		while(!this.BuildPassengerAircraftWithRand(tile_1, tile_2, engine, GetPassengerCargoId()))
 			{
 			Error("PAX aircraft construction failed due to " + AIError.GetLastErrorString()+".")
 			if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH) 

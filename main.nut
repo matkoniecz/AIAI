@@ -37,7 +37,7 @@ function AIAI::Start()
 		Warning("Desperation: " + desperation);
 		root_tile = RandomTile();
 		if(AIVehicleList().Count()!=0){
-			local need = inflate(100000);
+			local need = Money.Inflate(100000);
 			if(GetAvailableMoney()<need)
 				{
 				Info("Waiting for more money: " + GetAvailableMoney()/1000 + "k / " + need/1000 + "k");
@@ -47,10 +47,8 @@ function AIAI::Start()
 				Sleep(500);
 				}
 			}
-		this.BankruptProtector();
-		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>inflate(500000)&&this.Statue()) Info("I Am Rich! Statues!");
+		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>Money.Inflate(500000)&&this.Statue()) Info("I Am Rich! Statues!");
 		this.Maintenance();
-		this.DeleteVehiclesInDepots();
 		if(this.TryEverything(builders)){
 			Info("Nothing to do!");
 			Sleep(100);
@@ -240,13 +238,13 @@ function AIAI::Load(version, data)
 {
 }
 
-function AIAI::CzyNaSprzedaz(car)
+function AIAI::CzyNaSprzedaz(vehicle_id)
 {
-local name=AIVehicle.GetName(car)+"            ";
+if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle " + vehicle_id);
+local name=AIVehicle.GetName(vehicle_id)+"            ";
 local forsell="for sell";
-local n=6;
 
-for(local i=0; i<n; i++)
+for(local i=0; i<forsell.len(); i++)
 if(name[i]!=forsell[i])return false;
 return true;
 }
@@ -262,7 +260,7 @@ if(!AIOrder.UnshareOrders(vehicle_id))
 	{
 	abort("WTF? Unshare impossible? "+AIVehicle.GetName(vehicle_id));
 	}
-if(!AIOrder.AppendOrder (vehicle_id, depot_location, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_STOP_IN_DEPOT)) //trains are not replaced by autoreplace!
+if(!AIOrder.AppendOrder (vehicle_id, depot_location, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_STOP_IN_DEPOT)) //trains are not replaced by autoreplace! TODO
 	{
 	abort("WTF? AppendOrder impossible? "+AIVehicle.GetName(vehicle_id));
 	}
@@ -272,15 +270,23 @@ AIOrder.AppendOrder(vehicle_id, tile_2, AIOrder.AIOF_NO_LOAD);
 
 function AIAI::sellVehicle(vehicle_id, why)
 {
+if(!AIVehicle.IsValidVehicle(vehicle_id)) 
+	{
+	Error("Invalid vehicle " + vehicle_id);
+	return true;
+	}
+if(AIVehicle.GetState(vehicle_id) == AIVehicle.VS_CRASHED) return true;
+if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck1 " + vehicle_id);
 if(AIAI.CzyNaSprzedaz(vehicle_id)==true)return false;
-
+if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck2 " + vehicle_id);
 SetNameOfVehicle(vehicle_id, "sell!" + why);
-
+if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck3 " + vehicle_id);
 if(!AIVehicle.SendVehicleToDepot(vehicle_id)) 
 	{
 	Info("failed to sell vehicle! "+AIError.GetLastErrorString());
 	return false;
 	}
+if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck4 " + vehicle_id);
 SetNameOfVehicle(vehicle_id, "for sell " + why);
 return true;
 }
@@ -328,11 +334,11 @@ function AIAI::DeleteUnprofitable()
    	
 	local counter = 0;
 	
-	for (local veh = vehicle_list.Begin(); vehicle_list.HasNext(); veh = vehicle_list.Next()) 
+	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()) 
 	   {
-	   if(AIVehicle.GetVehicleType(veh)!=AIVehicle.VT_RAIL || (AIVehicleList_Station(AIStation.GetStationID(GetLoadStationLocation(veh)))).Count()>2)
+	   if(AIVehicle.GetVehicleType(vehicle_id)!=AIVehicle.VT_RAIL || (AIVehicleList_Station(AIStation.GetStationID(GetLoadStationLocation(vehicle_id)))).Count()>2)
 	      {
-		  if(AIAI.sellVehicle(veh, "unprofitable")) counter++;
+		  if(AIVehicle.IsValidVehicle(vehicle_id)) if(AIAI.sellVehicle(vehicle_id, "unprofitable")) counter++;
 		  }
 	   }
 	Info(counter + " vehicle(s) sold.");
@@ -355,26 +361,33 @@ function DoomsdayMachine()
 {
 Info("DoomsdayMachine!");
 Info("Scrap useless vehicles!");
-this.DeleteVehiclesInDepots();
+DeleteVehiclesInDepots();
 Info("BuilderMaintenance!");
 this.BuilderMaintenance();
 Info("Scrap useless vehicles!");
-this.DeleteVehiclesInDepots();
+DeleteVehiclesInDepots();
 Sleep(500);
 Info("Scrap useless vehicles!");
-this.DeleteVehiclesInDepots();
+DeleteVehiclesInDepots();
 Sleep(500);
 Info("Scrap useless vehicles!");
-this.DeleteVehiclesInDepots();
+DeleteVehiclesInDepots();
 }
 
 
 function AIAI::Maintenance()
 {
+this.SafeMaintenance();
+this.HandleEvents();
+this.BankruptProtector();
+DeleteVehiclesInDepots();
+}
+
+function AIAI::SafeMaintenance()
+{
 this.SignMenagement();
 this.HandleOldLevelCrossings();
 this.BuilderMaintenance();
-this.HandleEvents();
 }
 
 function AIAI::HandleEvents() //from CluelessPlus and simpleai
@@ -384,7 +397,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 		if(event == null)return;
 		local ev_type = event.GetEventType();
 		if(ev_type == AIEvent.AI_ET_VEHICLE_LOST){
-    		Error("Vehicle lost event detected!");
+    		Warning("Vehicle lost event detected!");
 			local lost_event = AIEventVehicleLost.Convert(event);
 			local lost_veh = lost_event.GetVehicleID();
 
@@ -407,6 +420,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			
 		}
 		else if(ev_type == AIEvent.AI_ET_VEHICLE_CRASHED){
+			Warning("Vehicle crash detected!");
 			local crash_event = AIEventVehicleCrashed.Convert(event);
 			local crash_reason = crash_event.GetCrashReason();
 			//local vehicle_id = crash_event.GetVehicleID();
@@ -439,9 +453,13 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			event = AIEventCompanyInTrouble.Convert(event);
 			local company = event.GetCompanyID();
 			if (AICompany.IsMine(company)){
+				Warning("Our company is in trouble!");
 			   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0) AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
 			   this.BankruptProtector();
 			   }
+			else {
+				Warning("Competitor is in trouble!");
+				}
 			}
 		else if(ev_type == AIEvent.AI_ET_INDUSTRY_OPEN){
 			event = AIEventIndustryOpen.Convert(event);
@@ -455,7 +473,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			local industry = event.GetIndustryID();
 			if (AIIndustry.IsValidIndustry(industry)){
 				Info("Closing industry: " + AIIndustry.GetName(industry));
-				/* Handling is useless. */
+				/* Handling is useless. TODO? */
 				}
 			}
 		/*events left
@@ -581,7 +599,7 @@ function AIAI::BuildVehicle(depot_tile, engine_id)
 		if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH)
 			{
 			do {
-				rodzic.Maintenance();
+				rodzic.SafeMaintenance();
 				ProvideMoney();
 				AIController.Sleep(400);
 				Info("retry: BuildVehicle");

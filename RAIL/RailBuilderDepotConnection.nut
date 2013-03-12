@@ -42,7 +42,7 @@ function RailBuilder::BuildDepot(path, reverse) //from adimral
 				}
 			} else if (ppppp - ppp == ppp - prev && ppppp - pppp != pp - prev) {
 				local offsets = null;
-				if (abs(ppppp - ppp) == AIMap.GetTileIndex(1, 1)) {
+				if (Helper.Abs(ppppp - ppp) == AIMap.GetTileIndex(1, 1)) {
 					if (ppppp - pppp == AIMap.GetTileIndex(1, 0) || prev - pp == AIMap.GetTileIndex(1, 0)) {
 						local d = ConnectDepotDiagonal(prev, ppppp, max(prev, ppppp) + AIMap.GetTileIndex(-2, 0));
 						if (d != null) return d;

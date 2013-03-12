@@ -1,14 +1,14 @@
 class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
-  function GetDescription() { return "Automatic Idiot AI Version eta (51). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
-  function GetVersion()     { return 51; }
+  function GetDescription() { return "Automatic Idiot AI Version eta (52). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
+  function GetVersion()     { return 52; }
   function GetAPIVersion() { return "1.0"; }
   function GetDate()        { return "2011-10-25"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
   function MinVersionToLoad() { return 50; } 
-  function GetURL() {return "http://tinyurl.com/ottdaiai or bulwersator@gmail.com. Thanks! [eta (51)]";}
+  function GetURL() {return "http://tinyurl.com/ottdaiai or bulwersator@gmail.com. Thanks! [eta (52)]";}
 
 	function GetSettings() {
 
@@ -130,6 +130,18 @@ class AIAI extends AIInfo {
 		hard_value = 0,
 		custom_value = 0,
 		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
+	});
+
+	AddSetting( {
+		name = "no_road_cost",
+		description = "no_road_cost",
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
+		min_value = 0,
+		max_value = 1000,
+		flags = AICONFIG_INGAME
 	});
 	}
 }

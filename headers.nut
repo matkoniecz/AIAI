@@ -1,9 +1,18 @@
-require("strategy.nut");
-require("findpair.nut");
-require("util.nut");
-require("UTILtile.nut");
-require("AIAI.nut");
+import("util.superlib", "SuperLib", 15);
+Helper <- SuperLib.Helper
+Tile <- SuperLib.Tile
+Direction <- SuperLib.Direction
+Road <- SuperLib.Road
+Money <- SuperLib.Money
 
+require("UTIL/util.nut");
+require("UTIL/util_is_allowed.nut");
+require("UTIL/UTILtile.nut");
+require("UTIL/util_AIAI.nut")
+require("strategy.nut");
+require("autoreplace.nut");
+require("classes_enums.nut");
+require("findpair.nut");
 require("Builder.nut");
 require("RAIL/RailBuilder.nut");
 require("RAIL/SmartRailBuilder.nut");
@@ -14,12 +23,6 @@ require("ROAD/TruckRoadBuilder.nut");
 require("AIR/AirBuilder.nut");
 require("AIR/PAXAirBuilder.nut");
 require("AIR/CargoAirBuilder.nut");
-
-import("util.superlib", "SuperLib", 7); //http://www.tt-forums.net/viewtopic.php?p=960013#p960013 - przed up do 10
-
-Helper <- SuperLib.Helper
-Tile <- SuperLib.Tile
-Direction <- SuperLib.Direction
 
 /**
  *  path from the AyStar algorithm, without internal pf data.

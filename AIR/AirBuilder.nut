@@ -146,12 +146,12 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile)
 		//Info(list.Count());
 	
 		/* Sort on acceptance, remove places that don't have acceptance */
-		list.Valuate(AITile.GetCargoAcceptance, rodzic.GetPassengerCargoId(), airport_x, airport_y, airport_rad);
+		list.Valuate(AITile.GetCargoAcceptance, GetPassengerCargoId(), airport_x, airport_y, airport_rad);
 		list.RemoveBelowValue(50);
 
 		//Info(list.Count());
 	
-		list.Valuate(AITile.GetCargoAcceptance, rodzic.GetMailCargoId(), airport_x, airport_y, airport_rad);
+		list.Valuate(AITile.GetCargoAcceptance, GetMailCargoId(), airport_x, airport_y, airport_rad);
 		list.RemoveBelowValue(10);
 
 		//Info(list.Count());
@@ -195,15 +195,11 @@ function AirBuilder::FindSuitableAirportSpotInTheTown(town, cargo)
 	list.KeepValue(1);
 
 	/* Sort on acceptance, remove places that don't have acceptance */
-	list.Valuate(AITile.GetCargoAcceptance, rodzic.GetPassengerCargoId(), airport_x, airport_y, airport_rad);
+	list.Valuate(AITile.GetCargoAcceptance, GetPassengerCargoId(), airport_x, airport_y, airport_rad);
 	list.RemoveBelowValue(50);
 
-	//Info(list.Count());
-
-	list.Valuate(AITile.GetCargoAcceptance, rodzic.GetMailCargoId(), airport_x, airport_y, airport_rad);
+	list.Valuate(AITile.GetCargoAcceptance, GetMailCargoId(), airport_x, airport_y, airport_rad);
 	list.RemoveBelowValue(10);
-
-	//Info(list.Count());
 	
 	/* Couldn't find a suitable place for this town, skip to the next */
 	if (list.Count() == 0) return null;
@@ -227,7 +223,7 @@ return 750+desperation*50;
 
 function AirBuilder::GetMinDistance()
 {
-return maxi(200-this.desperation*10, 70);
+return Helper.Max(200-this.desperation*10, 70);
 }
 
 function AirBuilder::GetOptimalDistance()
@@ -277,7 +273,7 @@ function AirBuilder::CostEstimation()
 {
 	for(local i=1; i<400; i++)
 	   {
-	   local enginiatko = AirBuilder.FindAircraft(AIAirport.AT_LARGE, AIAI.GetPassengerCargoId(), 3, 30000*i);
+	   local enginiatko = AirBuilder.FindAircraft(AIAirport.AT_LARGE, GetPassengerCargoId(), 3, 30000*i);
 	   if(enginiatko!=null)
 	   if(AIEngine.IsBuildable(enginiatko))
 	       {
@@ -413,7 +409,7 @@ function AirBuilder::ValuateProducer(ID, cargo)
 			base*=100;
 			}
 		else{
-			base*=min(99, deinflate(TotalLastYearProfit()/1000))+1;
+			base*=min(99, TotalLastYearProfit()/1000)+1;
 			}
 		}
 	//Info(AIIndustry.GetName(ID) + " is " + base + " point producer of " + AICargo.GetCargoLabel(cargo));
@@ -430,7 +426,7 @@ function AirBuilder::distanceBetweenIndustriesValuator(distance)
 {
 if(distance>GetMaxDistance())return 0;
 if(distance<GetMinDistance()) return 0;
-return max(1, abs(400-distance)/20);
+return max(1, Helper.Abs(400-distance)/20);
 }
 
 function AirBuilder::BuildCargoAircraft(tile_1, tile_2, engine, cargo, nazwa)
@@ -482,8 +478,8 @@ local y1 = AIMap.GetTileY(tile_1);
 local x2 = AIMap.GetTileX(tile_2);
 local y2 = AIMap.GetTileY(tile_2);
 
-local x_delta = abs(x1 - x2);
-local y_delta = abs(y1 - y2);
+local x_delta = Helper.Abs(x1 - x2);
+local y_delta = Helper.Abs(y1 - y2);
 
 local longer = max(x_delta, y_delta);
 local shorter = min(x_delta, y_delta);
@@ -518,7 +514,7 @@ if(airport_type==AIAirport.AT_METROPOLITAN ) maksimum = 2000; //1 l¹dowaie miesi
 if(airport_type==AIAirport.AT_COMMUTER) maksimum = 500; //1 l¹dowanie miesiêcznie - 250 //4 na ma³ym
 if(airport_type==AIAirport.AT_SMALL) maksimum = 750; //1 l¹dowanie miesiêcznie - 250 //4 na ma³ym
  
-if(AIAI.GetSetting("debug_signs_for_airports_load")) AISign.BuildSign(AIStation.GetLocation(airport_id), total + " (" + maksimum + ")");
+if(AIAI.GetSetting("debug_signs_for_airports_load")) Helper.SetSign(AIStation.GetLocation(airport_id), total + " (" + maksimum + ")");
 
 if(tile != null && engine != null) total+=ile*this.Burden(AIStation.GetLocation(airport_id), tile, engine);
 
@@ -538,7 +534,7 @@ for (local airport = list.Begin(); list.HasNext(); airport = list.Next())
 		{
 		if(AIStation.GetCargoWaiting(airport, cargo)>100)
 			{																						//protection from flood of mail planes
-			if((GetAverageCapacity(airport, cargo)*3 < AIStation.GetCargoWaiting(airport, cargo) &&  AIStation.GetCargoWaiting(airport, cargo)>200) 
+			if((GetAverageCapacity(airport, cargo)*2 < AIStation.GetCargoWaiting(airport, cargo) &&  AIStation.GetCargoWaiting(airport, cargo)>200) 
 			|| AIStation.GetCargoRating(airport, cargo)<30 ) //HARDCODED OPTION
 				{
 				//teraz trzeba znaleŸæ lotnisko docelowe
@@ -568,9 +564,9 @@ for (local airport = list.Begin(); list.HasNext(); airport = list.Next())
 						if(this.IsItPossibleToAddBurden(airport, tile_2, engine, 1)
 						&& this.IsItPossibleToAddBurden(goal_airport, tile_1, engine, 1))
 							{
-							if( rodzic.GetPassengerCargoId()==cargo )
+							if( GetPassengerCargoId()==cargo )
 								this.BuildPassengerAircraft(tile_1, tile_2, engine, cargo);
-							else if(rodzic.GetMailCargoId()==cargo)
+							else if(GetMailCargoId()==cargo)
 								this.BuildExpressAircraft(tile_1, tile_2, engine, cargo);
 							break;
 							}
@@ -591,8 +587,8 @@ for (local airport = list.Begin(); list.HasNext(); airport = list.Next()){
 	local cargo_list = AICargoList();
 	for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next())
 		if(AIStation.GetCargoWaiting(airport, cargo)>1){
-		if(cargo != AIAI.GetPassengerCargoId())
-			if(cargo != AIAI.GetMailCargoId())
+		if(cargo != GetPassengerCargoId())
+			if(cargo != GetMailCargoId())
 				if(IsItNeededToImproveThatStation(airport, cargo))
 				{
 				local airport_type = AIAirport.GetAirportType(AIStation.GetLocation(airport));
@@ -619,18 +615,18 @@ for (local airport = list.Begin(); list.HasNext(); airport = list.Next()){
 
 function CzyToPassengerCargoValuator(veh)
 {
-   if(AIVehicle.GetCapacity(veh, AIAI.GetPassengerCargoId())>0)return 1;
+   if(AIVehicle.GetCapacity(veh, GetPassengerCargoId())>0)return 1;
    return 0;
    }
 
 function AirBuilder::Skipper()
 {
-local list = AIStationList(AIStation.STATION_AIRPORT);
-if(list.Count()==0)return;
+local airport_list = AIStationList(AIStation.STATION_AIRPORT);
+if(airport_list.Count()==0)return;
 
 local list = AIList();
 
-for (local airport = list.Begin(); list.HasNext(); airport = list.Next())
+for (local airport = airport_list.Begin(); airport_list.HasNext(); airport = airport_list.Next())
    {
    local pozycja=AIStation.GetLocation(airport)
    local airlist=AIVehicleList_Station(airport);
@@ -642,8 +638,8 @@ for (local airport = list.Begin(); list.HasNext(); airport = list.Next())
    for (local plane = airlist.Begin(); airlist.HasNext(); plane = airlist.Next()){
 	  if(AIVehicle.GetState(plane)==AIVehicle.VS_AT_STATION)
 	     if(AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(plane), pozycja)<30)
-		    if(AIVehicle.GetCapacity(plane, rodzic.GetPassengerCargoId())>0){
-			local percent = ( 100 * AIVehicle.GetCargoLoad(plane, rodzic.GetPassengerCargoId()))/(AIVehicle.GetCapacity(plane, rodzic.GetPassengerCargoId()));
+		    if(AIVehicle.GetCapacity(plane, GetPassengerCargoId())>0){
+			local percent = ( 100 * AIVehicle.GetCargoLoad(plane, GetPassengerCargoId()))/(AIVehicle.GetCapacity(plane, GetPassengerCargoId()));
 		    //Info(percent + " %");
 			if(percent < minimum)
 			   {
@@ -659,9 +655,26 @@ for (local airport = list.Begin(); list.HasNext(); airport = list.Next())
    }
 local count=0;
 for (local plane = list.Begin(); list.HasNext(); plane = list.Next())
-   {
-   if(AIOrder.SkipToOrder(plane, (AIOrder.ORDER_CURRENT+1)%AIOrder.GetOrderCount(plane)))count++;
-   }
+	{
+	for(local i=0; i<AIOrder.GetOrderCount(plane); i++)
+		{
+		if(AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(plane), AIOrder.GetOrderDestination(plane, i))<30)
+			{
+			if(AIOrder.SkipToOrder(plane, (i+1)%AIOrder.GetOrderCount(plane)))
+				{
+				count++;
+				//AISign.BuildSign(AIVehicle.GetLocation(plane), "here+");
+				//Error("OK: "+AIError.GetLastErrorString() +" dump: "+AIOrder.GetOrderCount(plane) +" "+ AIOrder.ORDER_CURRENT);
+				break;
+				}
+			else { 
+				//AISign.BuildSign(AIVehicle.GetLocation(plane), "here-");
+				//Error("fail: "+AIError.GetLastErrorString() +" dump: "+AIOrder.GetOrderCount(plane) +" "+ AIOrder.ORDER_CURRENT);
+				break;
+				} 
+			}
+		}
+	}
 Info(count+" planes skipped to next destination!");
 }
 
@@ -678,10 +691,13 @@ if(distance<0)distance*=-1;
 return distance + rand;
 }
 
-function AirBuilder::IsItPossibleToHaveAirport(a, b, c)
+function AirBuilder::IsItPossibleToHaveAirport(tile, airport_type, c)
 {
-local test = AITestMode();
-if(AIAirport.BuildAirport(a, b, c)) return true;
-return (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH);
+	local test = AITestMode();
+	if(AIAirport.BuildAirport(tile, airport_type, c)) return true;
+	Warning("IsItImossibleToHaveAirport: "+AIError.GetLastErrorString())
+	local error = AIError.GetLastError()
+	rodzic.HandleFailedStationConstruction(tile, error);
+	return (error == AIError.ERR_NOT_ENOUGH_CASH);
 }
 

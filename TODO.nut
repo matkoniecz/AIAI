@@ -1,5 +1,14 @@
+DONE: bribes
+DONE: SuperLib updateed to v15
+DONE: ConvertRailCrossingToBridge is imported in proper way
+DONE: better debug output (still terrible)
+FIXED: YA crash bug
+
+DONE: Tree planting (from AdmiralAI)
+ 
 class Station - multiplatforms
 
+TODO: cargo planes reusing industry
 TODO: reuse roads http://www.tt-forums.net/viewtopic.php?p=958414#p958414
 TODO: $ menag during pf
 TODO: sprawdziæ jak (i czy) dzia³a lista zbanowanych

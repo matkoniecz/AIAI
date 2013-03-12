@@ -310,8 +310,8 @@ function Rail::_Estimate(cur_tile, cur_direction, goal_tiles, self)
 	/* As estimate we multiply the lowest possible cost for a single tile with
 	 *  with the minimum number of tiles we need to traverse. */
 	foreach (tile in goal_tiles) {
-		local dx = abs(AIMap.GetTileX(cur_tile) - AIMap.GetTileX(tile[0]));
-		local dy = abs(AIMap.GetTileY(cur_tile) - AIMap.GetTileY(tile[0]));
+		local dx = Helper.Abs(AIMap.GetTileX(cur_tile) - AIMap.GetTileX(tile[0]));
+		local dy = Helper.Abs(AIMap.GetTileY(cur_tile) - AIMap.GetTileY(tile[0]));
 		min_cost = min(min_cost, min(dx, dy) * self._cost_diagonal_tile * 2 + (max(dx, dy) - min(dx, dy)) * self._cost_tile);
 	}
 	

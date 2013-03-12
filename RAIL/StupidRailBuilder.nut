@@ -149,8 +149,8 @@ local cargo = project.cargo;
 project.first_station.location = null; 
 for(; project.station_size>=this.GetMinimalStationSize(); project.station_size--)
 {
-project.first_station = this.ZnajdzStacjeProducentaStupidRail(producer, cargo, project.station_size);
-project.second_station = this.ZnajdzStacjeKonsumentaStupidRail(consumer, cargo, project.station_size);
+project.first_station = this.FindStationProducentaStupidRail(producer, cargo, project.station_size);
+project.second_station = this.FindStationKonsumentaStupidRail(consumer, cargo, project.station_size);
 if(project.StationsAllocated())break;
 }
 
@@ -166,8 +166,8 @@ project.station_size = 7;
 project.first_station.location = null; 
 for(; project.station_size>=this.GetMinimalStationSize(); project.station_size--)
 {
-project.first_station = this.ZnajdzStacjeProducentaStupidRail(project.start, project.cargo, project.station_size);
-project.second_station = this.ZnajdzStacjeMiejskaStupidRail(project.end, project.cargo, project.station_size);
+project.first_station = this.FindStationProducentaStupidRail(project.start, project.cargo, project.station_size);
+project.second_station = this.FindStationMiejskaStupidRail(project.end, project.cargo, project.station_size);
 if(project.StationsAllocated())break;
 }
 
@@ -175,7 +175,7 @@ project.second_station.location = project.second_station.location;
 return project;
 }
 
-function StupidRailBuilder::ZnajdzStacjeMiejskaStupidRail(town, cargo, size)
+function StupidRailBuilder::FindStationMiejskaStupidRail(town, cargo, size)
 {
 local tile = AITown.GetLocation(town);
 local list = AITileList();
@@ -184,28 +184,28 @@ SafeAddRectangle(list, tile, range);
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
 list.KeepAboveValue(10);
 list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_DESCENDING);
-return this.ZnajdzStacjeStupidRail(list, size);
+return this.FindStationStupidRail(list, size);
 }
 
-function StupidRailBuilder::ZnajdzStacjeKonsumentaStupidRail(consumer, cargo, size)
+function StupidRailBuilder::FindStationKonsumentaStupidRail(consumer, cargo, size)
 {
 local list=AITileList_IndustryAccepting(consumer, 3);
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
 list.RemoveValue(0);
 list.Valuate(AIMap.DistanceSquare, trasa.end_tile); //pure eyecandy (station near industry)
 list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_ASCENDING);
-return this.ZnajdzStacjeStupidRail(list, size);
+return this.FindStationStupidRail(list, size);
 }
 
-function StupidRailBuilder::ZnajdzStacjeProducentaStupidRail(producer, cargo, size)
+function StupidRailBuilder::FindStationProducentaStupidRail(producer, cargo, size)
 {
 local list=AITileList_IndustryProducing(producer, 3);
 list.Valuate(AIMap.DistanceSquare, trasa.start_tile); //pure eyecandy (station near industry)
 list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_ASCENDING);
-return this.ZnajdzStacjeStupidRail(list, size);
+return this.FindStationStupidRail(list, size);
 }
 
-function StupidRailBuilder::ZnajdzStacjeStupidRail(list, length)
+function StupidRailBuilder::FindStationStupidRail(list, length)
 {
 for(local station = list.Begin(); list.HasNext(); station = list.Next())
 	{
@@ -239,15 +239,19 @@ if(direction == StationDirection.y_is_constant__vertical)
    local tile_b = station_tile + AIMap.GetTileIndex(length, 0);
    if(!(AITile.IsBuildable(tile_a) || AITile.IsBuildable(tile_b)))return false;
 	if ( AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NE_SW, 1, length, AIStation.STATION_NEW) )return true;
-	return (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH);
+	local error = AIError.GetLastError();
+	rodzic.HandleFailedStationConstruction(station_tile, error);
+	return (error == AIError.ERR_NOT_ENOUGH_CASH);
 	}
 else
    {
    local tile_a = station_tile + AIMap.GetTileIndex(0, -1);
    local tile_b = station_tile + AIMap.GetTileIndex(0, length);
    if (!(AITile.IsBuildable(tile_a) || AITile.IsBuildable(tile_b)))return false;
-	if (AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NW_SE, 1, length, AIStation.STATION_NEW) )return true;
-	return (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH);
+	if( AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NW_SE, 1, length, AIStation.STATION_NEW)) return true;
+	local error = AIError.GetLastError();
+	rodzic.HandleFailedStationConstruction(station_tile, error);
+	return (error == AIError.ERR_NOT_ENOUGH_CASH);
    }
 }
    

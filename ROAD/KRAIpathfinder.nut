@@ -49,11 +49,11 @@ function Fast()
 _cost_level_crossing = 30;
 cost.tile = 10;
 cost.max_cost = 4000;          // = equivalent of 400 tiles
-cost.no_existing_road = 1;     // changed//don't care about reusing existing roads
+cost.no_existing_road = AIAI.GetSetting("no_road_cost");     // changed//don't care about reusing existing roads
 cost.turn = 1;                 // minor penalty for turns
 cost.slope =   10;             //changed //  don't care about slopes
-cost.bridge_per_tile = 4;      // bridges / tunnels are 50% more expensive per tile than normal tiles
-cost.tunnel_per_tile = 4;
+cost.bridge_per_tile = 4+AIAI.GetSetting("no_road_cost");      // bridges / tunnels are 50% more expensive per tile than normal tiles
+cost.tunnel_per_tile = 4+AIAI.GetSetting("no_road_cost");
 cost.coast =   0;              // don't care about coast tiles
 cost.max_bridge_length = 15;   // The maximum length of a bridge that will be build.
 cost.max_tunnel_length = 15;   // The maximum length of a tunnel that will be build.

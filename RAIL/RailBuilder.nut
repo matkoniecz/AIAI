@@ -67,8 +67,8 @@ b = null;
 
 function RailBuilder::Maintenance() 
 {
+if(AIStationList(AIStation.STATION_TRAIN).Count()==0)return;
 local new_trains = this.AddTrains();
-//if(new_trains!=0) 
 Info(new_trains + " new train(s)");
 }
 
@@ -397,6 +397,7 @@ function RailBuilder::BuildTrain(route, string) //from denver & RioGrande
 	SetNameOfVehicle(engineId, "in construction");
 	
 	AIVehicle.RefitVehicle(engineId, trasa.cargo);
+
 	local max_number_of_wagons = 1000;
 	local maximal_weight = AIEngine.GetMaxTractiveEffort(bestEngine) * 3;
 	local capacity_of_engine = AIVehicle.GetCapacity(engineId, cargoIndex);	
@@ -795,7 +796,7 @@ function RailBuilder::ValuateProducer(ID, cargo)
 			base*=100;
 			}
 		else{
-			base*=min(99, deinflate(TotalLastYearProfit()/1000))+1;
+			base*=min(99, TotalLastYearProfit())+1;
 			}
 		}
 	//Info(AIIndustry.GetName(ID) + " is " + base + " point producer of " + AICargo.GetCargoLabel(cargo));

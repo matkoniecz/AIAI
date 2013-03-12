@@ -13,11 +13,11 @@ function BusRoadBuilder::FindBusPair()
 {
 trasa.start = GetRatherBigRandomTown();
 trasa.end = GetNiceRandomTown(AITown.GetLocation(trasa.start))
-trasa.cargo = rodzic.GetPassengerCargoId();
+trasa.cargo = GetPassengerCargoId();
 
 if(trasa.end == null) return false;
 Info("From " + AITown.GetName(trasa.start) + "  to " +  AITown.GetName(trasa.end) );
-trasa.cargo = rodzic.GetPassengerCargoId();
+trasa.cargo = GetPassengerCargoId();
 
 trasa = BusStationAllocator(trasa);
 
@@ -78,18 +78,5 @@ return this.ConstructionOfRVRoute();
 
 function BusRoadBuilder::ZbudujStacjeAutobusow()
 {
-if(!AIRoad.BuildDriveThroughRoadStation(trasa.first_station.location, trasa.start_otoczka[0], AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)) 
-   {
-   Info("   Producer station placement impossible due to " + AIError.GetLastErrorString());
-   if(rodzic.GetSetting("other_debug_signs")) AISign.BuildSign(trasa.first_station.location, AIError.GetLastErrorString());
-   return false;
-   }
-if(!AIRoad.BuildDriveThroughRoadStation(trasa.second_station.location, trasa.koniec_otoczka[0], AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)) 
-   {
-   Info("   Consumer station placement impossible due to " + AIError.GetLastErrorString());
-   AIRoad.RemoveRoadStation(trasa.first_station.location);
-   if(rodzic.GetSetting("other_debug_signs")) AISign.BuildSign(trasa.second_station.location, AIError.GetLastErrorString());
-   return false;
-   }
-return RoadToStation();
+	return this.BuildRVStation(AIRoad.ROADVEHTYPE_BUS);
 }

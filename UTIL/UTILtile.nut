@@ -215,7 +215,7 @@ function Utils_Tile::FlattenLandForStation(tile, width, height, tile_height, for
 		for (local y = min_y; y <= max_y; y++) {
 			local t = AIMap.GetTileIndex(x, y);
 			local h = Utils_Tile.GetRealHeight(t);
-			if (abs(tile_height - h) >= 2) {
+			if (Helper.Abs(tile_height - h) >= 2) {
 				Error("Utils_Tile::FlattenLandForStation(): Difference in tile height is too big");
 				return false;
 			}

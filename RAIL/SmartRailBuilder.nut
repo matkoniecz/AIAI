@@ -35,7 +35,7 @@ return false;
 
 function GetDirection(X, Y)
 {
-if(AIBase.RandRange(abs(X)+abs(Y))+1<=abs(X)) return "X";
+if(AIBase.RandRange(Helper.Abs(X)+Helper.Abs(Y))+1<=Helper.Abs(X)) return "X";
 return "Y";
 }
 
@@ -105,11 +105,11 @@ while(!IsOKJunctionSeedTile(tile))
 	local dir = GetDirection(X, Y);
 	if (dir=="X")
 		{
-		loc_startX+=X/abs(X);
+		loc_startX+=X/Helper.Abs(X);
 		}
 	else
 		{
-		loc_startY+=Y/abs(Y);
+		loc_startY+=Y/Helper.Abs(Y);
 		}
 	tile=AIMap.GetTileIndex(loc_startX, loc_startY);
 	AISign.BuildSign(tile, ".");
@@ -128,10 +128,10 @@ local endX=(AIMap.GetTileX(end[0][0])+AIMap.GetTileX(end[1][0]))/2;
 local deltaY = endY-startY;
 local deltaX = endX-startX;
 
-local skipX=skip*deltaX/(abs(deltaX)+abs(deltaY)); //TODO deltaX == 0
-local skipY=skip*deltaY/(abs(deltaX)+abs(deltaY));
-if(skipX==0) skipX=deltaX/abs(deltaX);
-if(skipY==0) skipY=deltaY/abs(deltaY);
+local skipX=skip*deltaX/(Helper.Abs(deltaX)+Helper.Abs(deltaY)); //TODO deltaX == 0
+local skipY=skip*deltaY/(Helper.Abs(deltaX)+Helper.Abs(deltaY));
+if(skipX==0) skipX=deltaX/Helper.Abs(deltaX);
+if(skipY==0) skipY=deltaY/Helper.Abs(deltaY);
 local junction_startX = startX+skipX;
 local junction_startY = startY+skipY;
 local junction_endX = endX-skipX;
@@ -154,34 +154,34 @@ segment_start = start_junction;
 	if (dir=="X")
 		{
 		for(i=10; i<100; i++)
-			if(IsOKJunctionSeedTile(segment_start+AIMap.GetTileIndex(skipX/abs(skipX)*i, 0)))
+			if(IsOKJunctionSeedTile(segment_start+AIMap.GetTileIndex(skipX/Helper.Abs(skipX)*i, 0)))
 				break;
 
 		segment_start=start_junction
-		segment_start_in=segment_start+AIMap.GetTileIndex(-skipX/abs(skipX), 0);
-		segment_end=segment_start+AIMap.GetTileIndex(skipX/abs(skipX)*(i-1), 0);
-		segment_end_in=segment_start+AIMap.GetTileIndex(skipX/abs(skipX)*(i), 0);
+		segment_start_in=segment_start+AIMap.GetTileIndex(-skipX/Helper.Abs(skipX), 0);
+		segment_end=segment_start+AIMap.GetTileIndex(skipX/Helper.Abs(skipX)*(i-1), 0);
+		segment_end_in=segment_start+AIMap.GetTileIndex(skipX/Helper.Abs(skipX)*(i), 0);
 		
 		segment_start2=segment_start+AIMap.GetTileIndex(0, -1);
-		segment_start_in2=segment_start+AIMap.GetTileIndex(-skipX/abs(skipX), -1);
-		segment_end2=segment_start+AIMap.GetTileIndex(skipX/abs(skipX)*(i-1), -1);
-		segment_end_in2=segment_start+AIMap.GetTileIndex(skipX/abs(skipX)*(i), -1);
+		segment_start_in2=segment_start+AIMap.GetTileIndex(-skipX/Helper.Abs(skipX), -1);
+		segment_end2=segment_start+AIMap.GetTileIndex(skipX/Helper.Abs(skipX)*(i-1), -1);
+		segment_end_in2=segment_start+AIMap.GetTileIndex(skipX/Helper.Abs(skipX)*(i), -1);
 		}
 	else
 		{
 		for(i=10; i<100; i++)
-			if(IsOKJunctionSeedTile(segment_start+AIMap.GetTileIndex(0, skipY/abs(skipY)*i)))
+			if(IsOKJunctionSeedTile(segment_start+AIMap.GetTileIndex(0, skipY/Helper.Abs(skipY)*i)))
 				break;
 
 		segment_start
-		segment_start_in=segment_start+AIMap.GetTileIndex(0, -skipY/abs(skipY));
-		segment_end=segment_start+AIMap.GetTileIndex(0, skipY/abs(skipY)*(i-1));
-		segment_end_in=segment_start+AIMap.GetTileIndex(0, skipY/abs(skipY)*(i));
+		segment_start_in=segment_start+AIMap.GetTileIndex(0, -skipY/Helper.Abs(skipY));
+		segment_end=segment_start+AIMap.GetTileIndex(0, skipY/Helper.Abs(skipY)*(i-1));
+		segment_end_in=segment_start+AIMap.GetTileIndex(0, skipY/Helper.Abs(skipY)*(i));
 		
 		segment_start2=segment_start+AIMap.GetTileIndex(-1, 0);
-		segment_start_in2=segment_start+AIMap.GetTileIndex(-1, -skipY/abs(skipY));
-		segment_end2=segment_start+AIMap.GetTileIndex(-1, skipY/abs(skipY)*(i-1));
-		segment_end_in2=segment_start+AIMap.GetTileIndex(-1, skipY/abs(skipY)*(i));
+		segment_start_in2=segment_start+AIMap.GetTileIndex(-1, -skipY/Helper.Abs(skipY));
+		segment_end2=segment_start+AIMap.GetTileIndex(-1, skipY/Helper.Abs(skipY)*(i-1));
+		segment_end_in2=segment_start+AIMap.GetTileIndex(-1, skipY/Helper.Abs(skipY)*(i));
 		}
 
 AISign.BuildSign(segment_start_in, "A");
@@ -676,8 +676,8 @@ local cargo = project.cargo;
 project.first_station.location = null; 
 for(; project.station_size>=this.GetMinimalStationSize(); project.station_size--)
 {
-project.first_station = this.ZnajdzStacjeProducentaSmartRail(producer, cargo, project.station_size);
-project.second_station = this.ZnajdzStacjeKonsumentaSmartRail(consumer, cargo, project.station_size);
+project.first_station = this.FindStationProducentaSmartRail(producer, cargo, project.station_size);
+project.second_station = this.FindStationKonsumentaSmartRail(consumer, cargo, project.station_size);
 if(project.StationsAllocated())break;
 }
 
@@ -693,8 +693,8 @@ project.station_size = 7;
 project.first_station.location = null; 
 for(; project.station_size>=this.GetMinimalStationSize(); project.station_size--)
 {
-project.first_station = this.ZnajdzStacjeProducentaSmartRail(project.start, project.cargo, project.station_size);
-project.second_station = this.ZnajdzStacjeMiejskaSmartRail(project.end, project.cargo, project.station_size);
+project.first_station = this.FindStationProducentaSmartRail(project.start, project.cargo, project.station_size);
+project.second_station = this.FindStationMiejskaSmartRail(project.end, project.cargo, project.station_size);
 if(project.StationsAllocated())break;
 }
 
@@ -702,7 +702,7 @@ project.second_station.location = project.second_station.location;
 return project;
 }
 
-function SmartRailBuilder::ZnajdzStacjeMiejskaSmartRail(town, cargo, size)
+function SmartRailBuilder::FindStationMiejskaSmartRail(town, cargo, size)
 {
 local tile = AITown.GetLocation(town);
 local list = AITileList();
@@ -711,28 +711,28 @@ SafeAddRectangle(list, tile, range);
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
 list.KeepAboveValue(10);
 list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_DESCENDING);
-return this.ZnajdzStacjeSmartRail(list, size);
+return this.FindStationSmartRail(list, size);
 }
 
-function SmartRailBuilder::ZnajdzStacjeKonsumentaSmartRail(consumer, cargo, size)
+function SmartRailBuilder::FindStationKonsumentaSmartRail(consumer, cargo, size)
 {
 local list=AITileList_IndustryAccepting(consumer, 3);
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
 list.RemoveValue(0);
 list.Valuate(AIMap.DistanceSquare, trasa.end_tile); //pure eyecandy (station near industry)
 list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_ASCENDING);
-return this.ZnajdzStacjeSmartRail(list, size);
+return this.FindStationSmartRail(list, size);
 }
 
-function SmartRailBuilder::ZnajdzStacjeProducentaSmartRail(producer, cargo, size)
+function SmartRailBuilder::FindStationProducentaSmartRail(producer, cargo, size)
 {
 local list=AITileList_IndustryProducing(producer, 3);
 list.Valuate(AIMap.DistanceSquare, trasa.start_tile); //pure eyecandy (station near industry)
 list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_ASCENDING);
-return this.ZnajdzStacjeSmartRail(list, size);
+return this.FindStationSmartRail(list, size);
 }
 
-function SmartRailBuilder::ZnajdzStacjeSmartRail(list, length)
+function SmartRailBuilder::FindStationSmartRail(list, length)
 {
 for(local station = list.Begin(); list.HasNext(); station = list.Next())
 	{
@@ -787,7 +787,10 @@ if(direction == StationDirection.y_is_constant__vertical)
    //AISign.BuildSign(tile_a, "tile_a");
    //AISign.BuildSign(tile_b, "tile_b");
 	if ( AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NE_SW, 1, length, AIStation.STATION_NEW) )return true;
-	return (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH);
+	Warning("IsGreatPlaceForRailStationSmartRail? No: "+AIError.GetLastErrorString())
+	local error = AIError.GetLastError();
+	rodzic.HandleFailedStationConstruction(station_tile, error);
+	return (error == AIError.ERR_NOT_ENOUGH_CASH);
 	}
 else
    {
@@ -798,7 +801,9 @@ else
    //AISign.BuildSign(tile_a, "tile_a");
    //AISign.BuildSign(tile_b, "tile_b");
 	if( AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NW_SE, 1, length, AIStation.STATION_NEW)) return true;
-	return (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH);
+	local error = AIError.GetLastError();
+	rodzic.HandleFailedStationConstruction(station_tile, error);
+	return (error == AIError.ERR_NOT_ENOUGH_CASH);
    }
 }
 
@@ -806,45 +811,52 @@ function SmartRailBuilder::IsOKPlaceForRailStationSmartRail(station_tile, direct
 {
 local test = AITestMode();
 /* Test Mode */
-if(direction == StationDirection.y_is_constant__vertical)
-   {
-   local tile_a = station_tile + AIMap.GetTileIndex(-1, 0);
-   local tile_b = station_tile + AIMap.GetTileIndex(length, 0);
-   if(!(AITile.IsBuildable(tile_a) && AITile.IsBuildable(tile_b)))return false;
-   //AISign.BuildSign(tile_a, "tile_a");
-   //AISign.BuildSign(tile_b, "tile_b");
-	return AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NE_SW, 1, length, AIStation.STATION_NEW);
+if(direction == StationDirection.y_is_constant__vertical) {
+	local tile_a = station_tile + AIMap.GetTileIndex(-1, 0);
+	local tile_b = station_tile + AIMap.GetTileIndex(length, 0);
+	if(!(AITile.IsBuildable(tile_a) && AITile.IsBuildable(tile_b)))return false;
+	if(AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NE_SW, 1, length, AIStation.STATION_NEW)){
+		return true;
+		}
+	else {
+		local error = AIError.GetLastError();
+		rodzic.HandleFailedStationConstruction(station_tile, error);
+		return AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NE_SW, 1, length, AIStation.STATION_NEW);
+		}
 	}
-else
-   {
-   local tile_a = station_tile + AIMap.GetTileIndex(0, -1);
-   local tile_b = station_tile + AIMap.GetTileIndex(0, length);
-   if(!(AITile.IsBuildable(tile_a) && AITile.IsBuildable(tile_b)))return false;
-   //AISign.BuildSign(tile_a, "tile_a");
-   //AISign.BuildSign(tile_b, "tile_b");
-	return AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NW_SE, 1, length, AIStation.STATION_NEW);
-   }
+else {
+	local tile_a = station_tile + AIMap.GetTileIndex(0, -1);
+	local tile_b = station_tile + AIMap.GetTileIndex(0, length);
+	if((AITile.IsBuildable(tile_a) && AITile.IsBuildable(tile_b)))return false;
+	if(AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NW_SE, 1, length, AIStation.STATION_NEW)) {
+		return true;
+		}
+	else {
+		local error = AIError.GetLastError();
+		rodzic.HandleFailedStationConstruction(station_tile, error);
+		return AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NW_SE, 1, length, AIStation.STATION_NEW);
+		}
+	}
 }
    
  function SmartRailBuilder::distanceBetweenIndustriesValuatorSmartRail(distance)
-{
-if(distance>GetMaxDistanceSmartRail())return 0;
-if(distance<GetMinDistanceSmartRail()) return 0;
+	{
+	if(distance>GetMaxDistanceSmartRail())return 0;
+	if(distance<GetMinDistanceSmartRail()) return 0;
 
-if(desperation>5)
-   {
-   if(distance>100+desperation*60)return 1;
-   return 4;
-   }
+	if(desperation>5){
+		if(distance>100+desperation*60)return 1;
+		return 4;
+	}
 
-if(distance>200+desperation*50)return 1;
-if(distance>185) return 2;
-if(distance>170) return 3;
-if(distance>155) return 4;
-if(distance>120) return 3;
-if(distance>80) return 2;
-if(distance>40) return 1;
-return 0;
+	if(distance>200+desperation*50)return 1;
+	if(distance>185) return 2;
+	if(distance>170) return 3;
+	if(distance>155) return 4;
+	if(distance>120) return 3;
+	if(distance>80) return 2;
+	if(distance>40) return 1;
+	return 0;
 }
 
 function SmartRailBuilder::GetMinDistanceSmartRail()
