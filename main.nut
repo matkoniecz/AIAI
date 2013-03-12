@@ -221,7 +221,7 @@ if(money<truck._koszt)
 function AIAI::IsConnectedIndustry(industry_id, cargo)
 {
 local returnik = realcodeofIsConnectedIndustry(industry_id, cargo);
-AISign.BuildSign(AIIndustry.GetLocation(industry_id), returnik+"");
+//AISign.BuildSign(AIIndustry.GetLocation(industry_id), returnik+"");
 return returnik;
 }
 

@@ -21,7 +21,7 @@ function KRAI::HandleNewLevelCrossing(ev) //from CluelessPlus
 
 function KRAI::HandleOldLevelCrossings() //from CluelessPlus
 {
-					this.detected_rail_crossings.Valuate(KRAI.ItemValuator);
+					this.detected_rail_crossings.Valuate(Helper.ItemValuator);
 					foreach(crash_tile, _ in this.detected_rail_crossings)
 					{
 						AILog.Info("Trying to fix a railway crossing that had an accident before");
@@ -262,9 +262,4 @@ function ConvertRailCrossingToBridge(rail_tile, prev_tile) //from CluelessPlus
 	}
 
 	return [tile_before, tile_after];
-}
-
-function KRAI::ItemValuator(item) //from CluelessPlus
-{
-	return item;
 }
