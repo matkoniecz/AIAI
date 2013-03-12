@@ -49,18 +49,18 @@ for(local i=0; i<retry_limit; i++)
 	  cost = 0;
 	  return false;
       }
-   Important("Scanning for bus route completed [ " + desperacja + " ] ");
+   Important("Scanning for bus route completed [ " + desperation + " ] ");
    if(this.PrepareRoute())
       {
 	  Info("   Contruction started on correct route.");
 	  if(this.ConstructionOfBusRoute())
 	  return true;
-	  else trasa.zakazane.AddItem(trasa.start, 0);
+	  else trasa.forbidden.AddItem(trasa.start, 0);
 	  }
    else
       {
 	  if(trasa.start==null)return false;
-	  else trasa.zakazane.AddItem(trasa.start, 0);
+	  else trasa.forbidden.AddItem(trasa.start, 0);
 	  }
    }
 return false;
@@ -70,7 +70,7 @@ function BusRoadBuilder::ConstructionOfBusRoute()
 {
 if(!this.ZbudujStacjeAutobusow())
    {
-   if(trasa.start!=null) trasa.zakazane.AddItem(trasa.start, 0);
+   if(trasa.start!=null) trasa.forbidden.AddItem(trasa.start, 0);
    return false;	  
    }
 return this.ConstructionOfRVRoute();
@@ -91,7 +91,5 @@ if(!AIRoad.BuildDriveThroughRoadStation(trasa.second_station.location, trasa.kon
    if(rodzic.GetSetting("other_debug_signs")) AISign.BuildSign(trasa.second_station.location, AIError.GetLastErrorString());
    return false;
    }
-rodzic.SetStationName(trasa.first_station.location);
-rodzic.SetStationName(trasa.second_station.location);
 return RoadToStation();
 }

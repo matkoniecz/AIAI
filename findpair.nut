@@ -2,7 +2,7 @@ class Route
 {
 start=null;
 end=null;
-zakazane=null;
+forbidden=null;
 start_otoczka=null;
 koniec_otoczka=null;
 depot_tile = null;
@@ -34,7 +34,7 @@ first_station = Station();
 second_station = Station();
 start=null;
 end=null;
-zakazane = AIList();
+forbidden = AIList();
 start_otoczka=null; //obsolete TODO //move to Station()
 koniec_otoczka=null; //obsolete TODO //move to Station()
 depot_tile = null;
@@ -130,23 +130,23 @@ local best=0;
 local new;
 
 for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start = industry_list.Next()) //from Chopper
-   {
-   if(IsProducerOK(traska.start)==false)continue;
-   if(traska.zakazane.HasItem(traska.start))continue;
-   local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(traska.start));
-   for (traska.cargo = cargo_list.Begin(); cargo_list.HasNext(); traska.cargo = cargo_list.Next())
-   {
-   traska.production = AIIndustry.GetLastMonthProduction(traska.start, traska.cargo)*(100-AIIndustry.GetLastMonthTransportedPercentage (traska.start, traska.cargo))/100;
+	{
+	if(IsProducerOK(traska.start)==false)continue;
+	if(traska.forbidden.HasItem(traska.start))continue;
+	local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(traska.start));
+	for (traska.cargo = cargo_list.Begin(); cargo_list.HasNext(); traska.cargo = cargo_list.Next())
+	{
+	traska.production = AIIndustry.GetLastMonthProduction(traska.start, traska.cargo)*(100-AIIndustry.GetLastMonthTransportedPercentage (traska.start, traska.cargo))/100;
 
-   if(IsConnectedIndustry(traska.start, traska.cargo))continue;
+	if(IsConnectedIndustry(traska.start, traska.cargo))continue;
    
-   local industry_list_accepting_current_cargo = rodzic.GetIndustryList_CargoAccepting(traska.cargo);
-   local base = ValuateProducer(traska.start, traska.cargo);
-   if(industry_list_accepting_current_cargo.Count()>0)
-   {
-   for(traska.end = industry_list_accepting_current_cargo.Begin(); industry_list_accepting_current_cargo.HasNext(); traska.end = industry_list_accepting_current_cargo.Next())
-        {
-		if(traska.zakazane.HasItem(traska.end))continue;
+	local industry_list_accepting_current_cargo = rodzic.GetIndustryList_CargoAccepting(traska.cargo);
+	local base = ValuateProducer(traska.start, traska.cargo);
+	if(industry_list_accepting_current_cargo.Count()>0)
+	{
+	for(traska.end = industry_list_accepting_current_cargo.Begin(); industry_list_accepting_current_cargo.HasNext(); traska.end = industry_list_accepting_current_cargo.Next())
+		{
+		if(traska.forbidden.HasItem(traska.end))continue;
 		if(!IsConsumerOK(traska.end))continue; 
 		
 	    new = ValuateConsumer(traska.end, traska.cargo, base)	
@@ -157,7 +157,6 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 			  if(rodzic.GetSetting("other_debug_signs"))AISign.BuildSign(AIIndustry.GetLocation(traska.end), AICargo.GetCargoLabel(traska.cargo) + "refused here");
 			  new=0;
 			  }
-		//Info(new + " (" + best + ")");	  
 		if(new>best)
 			{
 			traska.start_tile = AIIndustry.GetLocation(traska.start);
@@ -174,6 +173,8 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 					choise.second_station = clone traska.second_station;
 					choise.first_station.is_city = false;
 					choise.second_station.is_city = false;
+					choise.track_type = traska.track_type;
+					//Info(choise.track_type)
 					}
 				}
 			}
@@ -208,6 +209,7 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 				choise.end_tile = AITown.GetLocation(traska.end);
 				choise.first_station.is_city = false;
 				choise.second_station.is_city = true;
+				//Info(choise.track_type)
 					}
 				}
 			}
@@ -217,7 +219,9 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 NewLine();
 Info("(" + best + " points)");
 
-if(best==0) 
+   //Info(choise.track_type)
+
+  if(best==0) 
    {
    traska.OK=false;
    return traska;

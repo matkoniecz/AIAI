@@ -1,14 +1,14 @@
 class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
-  function GetDescription() { return "Automatic Idiot AI Version zeta (46). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
-  function GetVersion()     { return 46; }
+  function GetDescription() { return "Automatic Idiot AI Version eta (49). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
+  function GetVersion()     { return 49; }
   function GetAPIVersion() { return "1.0"; }
-  function GetDate()        { return "2010-05-21"; }
+  function GetDate()        { return "2011-10-23"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
-  function MinVersionToLoad() { return 0; } 
-  function GetURL() {return "http://tinyurl.com/ottdaiai or bulwersator@gmail.com. Thanks! [zeta (46)]";}
+  function MinVersionToLoad() { return 49; } 
+  function GetURL() {return "http://tinyurl.com/ottdaiai or bulwersator@gmail.com. Thanks! [eta (49)]";}
 
 	function GetSettings() {
 
@@ -75,6 +75,16 @@ class AIAI extends AIInfo {
 	AddSetting( {
 		name = "clear_signs",
 		description = "Clear company signs",
+		easy_value = 1,
+		medium_value = 1,
+		hard_value = 1,
+		custom_value = 1,
+		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
+	});
+
+	AddSetting( {
+		name = "try_networking",
+		description = "dev code",
 		easy_value = 0,
 		medium_value = 0,
 		hard_value = 0,
@@ -83,15 +93,25 @@ class AIAI extends AIInfo {
 	});
 
 	AddSetting( {
-		name = "debug_signs_for_planned_route",
-		description = "Build debug signs for planned route",
+		name = "use_patch_code",
+		description = "use_patch_code",
 		easy_value = 0,
 		medium_value = 0,
 		hard_value = 0,
 		custom_value = 0,
 		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
 	});
-  
+	
+	AddSetting( {
+		name = "use_trunk_code",
+		description = "use_trunk_code",
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
+		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
+	});
+	
 	AddSetting( {
 		name = "debug_signs_for_airports_load",
 		description = "Build debug signs for airports load",
@@ -111,26 +131,6 @@ class AIAI extends AIInfo {
 		custom_value = 0,
 		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
 	});
-
-	AddSetting( {
-		name = "deep_debugged_function_calling",
-		description = "deep_debugged_function_calling",
-		easy_value = 0,
-		medium_value = 0,
-		hard_value = 0,
-		custom_value = 0,
-		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
-	});
-	
-	AddSetting( {
-		name = "explode_on_eror_during_order_appending",
-		description = "explode_on_eror_during_order_appending",
-		easy_value = 0,
-		medium_value = 0,
-		hard_value = 0,
-		custom_value = 0,
-		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
-	});	
 	}
 }
 

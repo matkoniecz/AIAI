@@ -51,8 +51,8 @@ return AICompany.GetBankBalance(me) + AICompany.GetMaxLoanAmount() - AICompany.G
 
 function SetNameOfVehicle(vehicle_id, string)
 {
-if(!AIVehicle.IsValidVehicle(vehicle_id))return;
-local i = AIVehicleList().Count();
+if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle");
+local i = 1;
 for(;!AIVehicle.SetName(vehicle_id, string + " #" + i); i++)
 	{
 	//Error("SetNameOfVehicle: " + AIError.GetLastErrorString() + ": " + string);
@@ -71,14 +71,14 @@ for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper
 return suma;
 }
 
-function IsItNeededToImproveThatStation(aktualna, cargo)
+function IsItNeededToImproveThatStation(station, cargo)
 {
-return AIStation.GetCargoWaiting(aktualna, cargo)>50 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0) ;
+return AIStation.GetCargoWaiting(station, cargo)>50 || (AIStation.GetCargoRating(station, cargo)<40&&AIStation.GetCargoWaiting(station, cargo)>0) ;
 }
 
-function IsItNeededToImproveThatNoRawStation(aktualna, cargo)
+function IsItNeededToImproveThatNoRawStation(station, cargo)
 {
-return AIStation.GetCargoWaiting(aktualna, cargo)>150 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0) ;
+return AIStation.GetCargoWaiting(station, cargo)>150 || (AIStation.GetCargoRating(station, cargo)<40&&AIStation.GetCargoWaiting(station, cargo)>0) ;
 }
 
 function NewLine()
@@ -107,7 +107,10 @@ local date=AIDate.GetCurrentDate ();
 AILog.Error(AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date)  + " " + string);
 }
 
-function NajmlodszyPojazd(station)
+/////////////////////////////////////////////////
+/// Age of the youngest vehicle (in days)
+/////////////////////////////////////////////////
+function AgeOfTheYoungestVehicle(station)
 {
 local list = AIVehicleList_Station(station);
 local minimum = 10000;
@@ -138,162 +141,133 @@ if(ile==0)return 0;
 else return total/ile;
 }
 
-function GetDepot(vehicle)
+function abort(message)
 {
-for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) if(AIOrder.IsGotoDepotOrder(vehicle, i))return AIOrder.GetOrderDestination(vehicle, i);
-Warning("Explosion caused by vehicle " + AIVehicle.GetName(vehicle));
+Error(message + ", last error is " + AIError.GetLastErrorString());
 Warning("Please, post savegame");
 local zero=0/0;
 }
-function GetLoadStation(vehicle)
+
+function GetDepotLocation(vehicle)
 {
+if (!AIVehicle.IsValidVehicle(vehicle)) abort("invalid vehicle: " + vehicle);
+local new_style = LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(GetLoadStationLocation(vehicle)), "[]");
+if(AIMap.IsValidTile(new_style)) return new_style;
+//for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) if(AIOrder.IsGotoDepotOrder(vehicle, i))return AIOrder.GetOrderDestination(vehicle, i);
+abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle)+ "psudotile from station name is "+new_style);
+}
+
+function GetLoadStationLocation(vehicle)
+{
+if (!AIVehicle.IsValidVehicle(vehicle)) abort("invalid vehicle: " + vehicle);
 for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) if(AIOrder.IsGotoStationOrder(vehicle, i))return AIOrder.GetOrderDestination(vehicle, i);
-Warning("Explosion caused by vehicle " + AIVehicle.GetName(vehicle));
-Warning("Please, post savegame");
-local zero=0/0;
+abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle));
 }
 
-function GetUnLoadStation(vehicle)
+function GetUnloadStationLocation(vehicle)
 {
-local onoff = false;
+if (!AIVehicle.IsValidVehicle(vehicle)) abort("invalid vehicle: " + vehicle);
 
-for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) 
-   {
-   if(AIOrder.IsGotoStationOrder(vehicle, i))
-      {
+local onoff = false;
+for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) {
+   if(AIOrder.IsGotoStationOrder(vehicle, i)) {
 	  if(onoff==true)return AIOrder.GetOrderDestination(vehicle, i);
 	  onoff=true
 	  }
    }
-Warning("Explosion caused by vehicle " + AIVehicle.GetName(vehicle));
-Warning("Please, post savegame");
-local zero=0/0;
+abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle));
 }
 
 function GetVehicleType(vehicle_id)
 {
-return AIEngine.GetVehicleType(AIVehicle.GetEngineType(vehicle_id));
+	return AIEngine.GetVehicleType(AIVehicle.GetEngineType(vehicle_id));
 }
 
 function IsAllowedPAXPlane()
 {
-if(0 == AIAI.GetSetting("PAX_plane"))
-   {
-   return false;
-   }
-return IsAllowedPlane();
+	if(0 == AIAI.GetSetting("PAX_plane"))return false;
+	return IsAllowedPlane();
 }
 
 function IsAllowedCargoPlane()
 {
-if(0 == AIAI.GetSetting("cargo_plane"))
-   {
-   return false;
-   }
-return IsAllowedPlane();
+	if(0 == AIAI.GetSetting("cargo_plane"))return false;
+	return IsAllowedPlane();
 }
 
 function IsAllowedPlane()
 {
-if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_AIR))return false;
+	if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_AIR))return false;
 
-local ile;
-local veh_list = AIVehicleList();
-veh_list.Valuate(GetVehicleType);
-veh_list.KeepValue(AIVehicle.VT_AIR);
-ile = veh_list.Count();
-local allowed = AIGameSettings.GetValue("vehicle.max_aircraft");
-
-if(allowed==0)return false;
-if(ile==0)return true;
-
-if((allowed - ile)<4) return false;
-if(((ile*100)/(allowed))>90) return false;
-return true;
+	local ile;
+	local veh_list = AIVehicleList();
+	veh_list.Valuate(GetVehicleType);
+	veh_list.KeepValue(AIVehicle.VT_AIR);
+	ile = veh_list.Count();
+	local allowed = AIGameSettings.GetValue("vehicle.max_aircraft");
+	if(allowed==0)return false;
+	if(ile==0)return true;
+	if((allowed - ile)<4) return false;
+	if(((ile*100)/(allowed))>90) return false;
+	return true;
 }
 
 function IsAllowedTruck()
 {
-if(0 == AIAI.GetSetting("use_trucks"))
-   {
-   return false;
-   }
-return IsAllowedRV();
+	if(0 == AIAI.GetSetting("use_trucks"))return false;
+	return IsAllowedRV();
 }
 
 function IsAllowedSmartCargoTrain()
 {
-if(0 == AIAI.GetSetting("use_smart_freight_trains"))
-   {
-   return false;
-   }
-return IsAllowedTrain();
+	if(0 == AIAI.GetSetting("use_smart_freight_trains"))return false;
+	return IsAllowedTrain();
 }
 
 function IsAllowedStupidCargoTrain()
 {
-if(0 == AIAI.GetSetting("use_stupid_freight_trains"))
-   {
-   return false;
-   }
-return IsAllowedTrain();
+	if(0 == AIAI.GetSetting("use_stupid_freight_trains"))return false;
+	return IsAllowedTrain();
 }
 
 function IsAllowedBus()
 {
-if(0 == AIAI.GetSetting("use_busses"))
-   {
-   return false;
-   }
-return IsAllowedRV();
+	if(0 == AIAI.GetSetting("use_busses"))return false;
+	return IsAllowedRV();
 }
 
 function IsAllowedRV()
 {
-if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_ROAD))return false;
-local ile;
-local veh_list = AIVehicleList();
-veh_list.Valuate(GetVehicleType);
-veh_list.KeepValue(AIVehicle.VT_ROAD);
-ile = veh_list.Count();
-local allowed = AIGameSettings.GetValue("vehicle.max_roadveh");
+	if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_ROAD))return false;
 
-if(allowed==0)return false;
-if(ile==0)return true;
-
-if(((ile*100)/(allowed))>90) return false;
-if((allowed - ile)<5) return false;
-return true;
-/*
-max_trains = 500
-max_roadveh = 500
-max_aircraft = 200
-max_ships = 300
-*/
+	local ile;
+	local veh_list = AIVehicleList();
+	veh_list.Valuate(GetVehicleType);
+	veh_list.KeepValue(AIVehicle.VT_ROAD);
+	ile = veh_list.Count();
+	local allowed = AIGameSettings.GetValue("vehicle.max_roadveh");
+	if(allowed==0)return false;
+	if(ile==0)return true;
+	if(((ile*100)/(allowed))>90) return false;
+	if((allowed - ile)<5) return false;
+	return true;
 }
 
 function IsAllowedTrain()
 {
-if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_RAIL))return false;
-local ile;
-local veh_list = AIVehicleList();
-veh_list.Valuate(GetVehicleType);
-veh_list.KeepValue(AIVehicle.VT_RAIL);
-ile = veh_list.Count();
-local allowed = AIGameSettings.GetValue("vehicle.max_trains");
+	if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_RAIL))return false;
 
-if(allowed==0)return false;
-if(ile==0)return true;
-
-if(((ile*100)/(allowed))>90) return false;
-if((allowed - ile)<5) return false;
-return true;
-/*
-max_trains = 500
-max_roadveh = 500
-max_aircraft = 200
-max_ships = 300
-*/
+	local ile;
+	local veh_list = AIVehicleList();
+	veh_list.Valuate(GetVehicleType);
+	veh_list.KeepValue(AIVehicle.VT_RAIL);
+	ile = veh_list.Count();
+	local allowed = AIGameSettings.GetValue("vehicle.max_trains");
+	if(allowed==0)return false;
+	if(ile==0)return true;
+	if(((ile*100)/(allowed))>90) return false;
+	if((allowed - ile)<5) return false;
+	return true;
 }
 
 function BurnMoney()
@@ -386,4 +360,16 @@ return a;
 
 function RandomTile() { //from ChooChoo
 	return abs(AIBase.Rand()) % AIMap.GetMapSize();
+}
+
+function StringToInteger(string)
+{
+Info(string+"<-len")
+local result = 0;
+local i=0;
+while(i<string.len()){
+	result=result*10+string[i]-48;
+	i++;
+	}
+return result;
 }

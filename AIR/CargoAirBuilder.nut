@@ -42,19 +42,19 @@ if (!AIAirport.BuildAirport(trasa.second_station.location, trasa.station_size, A
 	return false;
 	}
 Info("Airport constructed");
-rodzic.SetStationName(trasa.first_station.location);
-rodzic.SetStationName(trasa.second_station.location);
+rodzic.SetStationName(trasa.first_station.location, "");
+rodzic.SetStationName(trasa.second_station.location, "");
 	
 	for(local i=0; i<trasa.engine_count; i++) 
 	   {
 	   while(!this.BuildCargoAircraft(trasa.first_station.location, trasa.second_station.location, trasa.engine, trasa.cargo, "null"))
           {
-		  Error("Aircraft construction failed due to " + AIError.GetLastErrorString()+".")
+		  Error("Cargo aircraft construction failed due to " + AIError.GetLastErrorString()+".")
 		  if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH) 
 		     {
 			 return true;
 			 }
- 		  rodzic.Konserwuj();
+ 		  rodzic.Maintenance();
 		  AIController.Sleep(500);
 		  }
        Info("We have " + i + " from " + trasa.engine_count + " aircrafts.");

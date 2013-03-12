@@ -1,9 +1,6 @@
-BLOCKER: railtypes
-BLOCKER: engine upgrading
-
+TODO: reuse roads http://www.tt-forums.net/viewtopic.php?p=958414#p958414
 TODO: $ menag during pf
 TODO: sprawdziæ jak (i czy) dzia³a lista zbanowanych
-TODO: brake van [tarin is failing to start and there is brake van wagon]
 TODO: foo supplies
 TODO: banuj na zawsze, jesli zbanowany zezwalaj z 1%szansy, jeœli lista przelecia³a to czyœæ listê
 TODO: networking
@@ -13,7 +10,6 @@ TODO: error stats
 
 TODO: during heavy competition (more companies that ind + towns) build statues after every connection
 TODO: error catherw w BuildTrain
-TODO: max number of trains in station name also: connected industries, cargo
 TODO: check during pathfinding is it still possible to have station
 TODO: supplies
 	- supplies - cagos accepted by raw industries
@@ -37,7 +33,6 @@ TODO: 6x ciê¿szy poci¹g jeœli podjazdy s¹ pojedyñcze????
 TODO: better findpair
 TODO: better busses (managing & construction)
 TODO: world scanner and rework main with dynamic strategy
-TODO: rework statues
 TODO: rebridger over valleys, debridger
 
 TODO: AIAI.GetLastError()

@@ -2,20 +2,20 @@ class Builder
 {
 cost = null;
 rodzic = null;
-desperacja = 0;
+desperation = 0;
 retry_limit = 2;
 pathfinding_time_limit = 10;
 };
 
-function Builder::SetDesperacja(new_desperacja)
+function Builder::SetDesperation(new_desperation)
 {
-desperacja = new_desperacja;
+desperation = new_desperation;
 }
 
-function Builder::constructor(parent_init, desperacja_init)
+function Builder::constructor(parent_init, desperation_init)
 {
 rodzic = parent_init;
-desperacja = desperacja_init;
+desperation = desperation_init;
 cost = 1;
 }
 
@@ -23,7 +23,7 @@ function Builder::CountVehicles(station)
 {
 local vehicle_list=AIVehicleList_Station(station);
 vehicle_list.Valuate(rodzic.CzyNaSprzedaz)
-vehicle_list.KeepValue(1);
+vehicle_list.KeepValue(0);
 return vehicle_list.Count();
 }
 

@@ -52,7 +52,7 @@ if((AIMap.GetTileX(tile_a)==AIMap.GetTileX(tile_b))&&(AIMap.GetTileY(tile_a)<AIM
    }
    else
    {
-   local zero = 0/0;
+   abort("");
    }
 RAIL.DumbBuilder(line_a);
 RAIL.DumbBuilder(line_b);
@@ -94,9 +94,6 @@ function RAIL::Go()
 {
 //RAIL.StupidRailConnection();
 return;
-local types = AIRailTypeList();
-AIRail.SetCurrentRailType(types.Begin());
-
 /*
 local tile_b;
 local tile_a;
@@ -112,7 +109,7 @@ local list=AITileList();
 */
 
 local wrzut = RAIL.GetStarter();
-RAIL.FlatPathfinder(wrzut.a, wrzut.b);
+RAIL.FlatPathfinder(wrzut.a, wrzut.b); //TODO inspect
 }
 
 function RAIL::IsItPossibleToConnectThatTilesWithRail(tile_b, start_tile)
@@ -146,8 +143,7 @@ else
    Error("IsItPossibleToConnectThatTilesWithRail with "
    + "( "+ AIMap.GetTileX(start_tile) + ", " + AIMap.GetTileY(start_tile) + ")" 
    + " ( "+ AIMap.GetTileX(tile_b) + ", " + AIMap.GetTileY(tile_b) + ")" );
-   Error("Booom");
-   local zero=0/0;
+   abort("Booom");
    }
 local path = pathfinder.FindPath(-1);
 return path;

@@ -1,6 +1,6 @@
 class AIAI extends AIController 
 {
-desperacja = null;
+desperation = null;
 generalna_konserwacja = null;
 root_tile = null;
 station_number = null;
@@ -11,74 +11,77 @@ require("headers.nut");
 
 function AIAI::Starter()
 {
-Name();
-HQ();
-station_number = 1; //TODO load it
-if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")!= 0) AICompany.SetAutoRenewStatus(true);
-else AICompany.SetAutoRenewStatus(false);
-AICompany.SetAutoRenewMonths(0);
-AICompany.SetAutoRenewMoney(100000); //from ChooChoo
+	//PaintMapWithHillData();
+	Name();
+	HQ();
+	station_number = 1; //TODO load it
+	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")!= 0) AICompany.SetAutoRenewStatus(true);
+	else AICompany.SetAutoRenewStatus(false);
+	AICompany.SetAutoRenewMonths(0);
+	AICompany.SetAutoRenewMoney(100000);
 
-NewLine();
-Info("Hi!!!");
+	NewLine();
+	Info("Hi!");
 
-detected_rail_crossings=AIList()
+	detected_rail_crossings=AIList()
 
-//TODO - LOAD IT
-desperacja = 0;
-generalna_konserwacja = GetDate();
-}
-
-function AIAI::Menagement()
-{
-root_tile = RandomTile();
-this.SignMenagement();
-this.MoneyMenagement();
-
-Info("<Statue contruction>");
-while(GetBankBalance()>inflate(500000)&&this.Statue()) Info("I Am Rich");
-Info("</Statue contruction>");
+	desperation = 0;					 	//TODO - LOAD IT
+	generalna_konserwacja = GetDate()-12;	//TODO - LOAD IT
 }
 
 function AIAI::Start()
 {
-this.Starter();
+	this.Starter();
+	local builders = strategyGenerator();
 
-local builders = strategyGenerator();
-
-while(true)
-	{
-	IdleMoneyMenagement();
-	Warning("Desperacja: " + desperacja);
-	this.Menagement();
-	this.Konserwuj();
-	if(this.EverythingFailed(builders))
-		{
-		Info("Nothing to do!");
-		Sleep(1000);
-		continue;
-		}
-	
-	this.InformationCenter(builders);
-		
-	if(!this.UberBuilder(builders)) desperacja++;
-	else desperacja = 0;
-	if((GetDate()-generalna_konserwacja)>12){ //once a year (12 months)
-		this.DeleteUnprofitable();
-		DeleteEmptyStations();
-		Autoreplace();
+	while(true){
+		Warning("Desperation: " + desperation);
+		root_tile = RandomTile();
+		if(AIVehicleList().Count()!=0){
+			BankruptProtector();
+			while((AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())<inflate(100000) && AICompany.GetLoanAmount()!=AICompany.GetMaxLoanAmount()){
+				while(AICompany.SetLoanAmount(AICompany.GetLoanAmount() - AICompany.GetLoanInterval()));
+				BankruptProtector();
+				local have = (AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())/1000;
+				local need = 100*GetInflationRate()/100;
+				if(have<=need){
+					Info("Waiting for more money: " + have + "k / " + need + "k");
+					Sleep(500);
+					this.Maintenance();
+					}
+				}
+			}
+		this.BankruptProtector();
+		while(GetBankBalance()>inflate(500000)&&this.Statue()) Info("I Am Rich! Statues!");
+		this.Maintenance();
+		if(this.EverythingFailed(builders)){
+			Info("Nothing to do!");
+			Sleep(100);
+			continue;
+			}
+		this.InformationCenter(builders);
+		if(!this.UberBuilder(builders)) desperation++;
+		else desperation = 0;
+		Sleep(100);
 		RailBuilder(this, 0).TrainReplace();
-		this.generalna_konserwacja = GetDate();
+		Info(GetDate()-generalna_konserwacja+" month from general check")
+		if((GetDate()-generalna_konserwacja)>=6){ //6 months
+			this.DeleteUnprofitable();
+			DeleteEmptyStations();
+			Autoreplace();
+			RailBuilder(this, 0).TrainReplace();
+			this.generalna_konserwacja = GetDate();
+			}
+		Info("===================================");
 		}
-	}
 }
 
 function AIAI::InformationCenter(builders)
 {
-for(local i = 0; i<builders.len(); i++)
-	{
-	builders[i].SetDesperacja(desperacja);
-	}
+	for(local i = 0; i<builders.len(); i++)
+		{
+		builders[i].SetDesperation(desperation);
+		}
 }
 
 function AIAI::EverythingFailed(builders)
@@ -131,7 +134,7 @@ for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next())
 		local cargo_list = AICargoList();
 		for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) suma+=AIStation.GetCargoWaiting(station, cargo);
 		if(suma<200) //HARDCODED
-		if(AIVehicle.GetVehicleType(veh)==AIVehicle.VT_RAIL || AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount() || desperacja>30)
+		if(AIVehicle.GetVehicleType(veh)==AIVehicle.VT_RAIL || AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount() || desperation>30)
 		   {
 		   if(AITown.PerformTownAction(AITile.GetClosestTown(location), AITown.TOWN_ACTION_BUILD_STATUE)) 
 		      {
@@ -153,29 +156,26 @@ return false;
 }
 
 function AIAI::SignMenagement()
-{
-if(AIAI.GetSetting("clear_signs"))
-{
-local sign_list = AISignList();
-for (local x = sign_list.Begin(); sign_list.HasNext(); x = sign_list.Next()) //from Chopper
-  {
-  AISign.RemoveSign(x);
-  }
-}
-
-if(AIAI.GetSetting("debug_signs_for_airports_load"))
-{
-local list = AIStationList(AIStation.STATION_AIRPORT);
-for (local x = list.Begin(); list.HasNext(); x = list.Next()) 
-   {
-   AirBuilder(0, this).GetBurden(x);
-   }
-}
-}
+	{
+	Info("SignMenagement")
+	if(AIAI.GetSetting("clear_signs"))
+		{
+		local sign_list = AISignList();
+		for (local x = sign_list.Begin(); sign_list.HasNext(); x = sign_list.Next()) AISign.RemoveSign(x);
+		}
+	
+	if(AIAI.GetSetting("debug_signs_for_airports_load"))
+		{
+		local list = AIStationList(AIStation.STATION_AIRPORT);
+		for (local x = list.Begin(); list.HasNext(); x = list.Next()) 
+			{	
+			AirBuilder(0, this).IsItPossibleToAddBurden(x);
+			}
+		}
+	}
 
 function BankruptProtector()
 {
-//Info("BankruptProtector");
 if(AIVehicleList().Count()==0) return;
 if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<AICompany.GetLoanInterval()*2)
 {
@@ -186,40 +186,17 @@ while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
 	else Error("We need money!");
 	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
 		{
-		AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
 		if(AICompany.GetLoanAmount()==AICompany.GetMaxLoanAmount())
 			{
-			Error("We are too big to fail! Remember, we employ " + (AIVehicleList().Count()*7+AIStationList(AIStation.STATION_ANY).Count()*3+23) + " people!!!");
+			Error("We are too big to fail! Remember, we employ " + (AIVehicleList().Count()*7+AIStationList(AIStation.STATION_ANY).Count()*3+23) + " people!");
+			DoomsdayMachine();
 			Sleep(1000);
 			}
+		AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
 		}
 	Info("End of financial problems!");
 	}
 }	   
-//Info("BankruptProtector-end");
-}
-
-function AIAI::IdleMoneyMenagement()
-{
-if(AIVehicleList().Count()==0) return;
-BankruptProtector();
-while((AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())<inflate(100000))
-	{
-	while(AICompany.SetLoanAmount(AICompany.GetLoanAmount() - AICompany.GetLoanInterval()));
-	BankruptProtector();
-	local have = (AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())/1000;
-	local need = 100*GetInflationRate()/100;
-	if(have<=need){
-		Info("Waiting for more money: " + have + "k / " + need + "k");
-		Sleep(500);
-		}
-	this.Konserwuj();
-	}
-}
-
-function AIAI::MoneyMenagement()
-{
-BankruptProtector();
 }
 
 function AIAI::IsConnectedIndustry(industry_id, cargo)
@@ -230,14 +207,12 @@ return (AirBuilder(this, 0)).IsConnectedIndustry(industry_id, cargo);
 
 function AIAI::IsConnectedDistrict(town_tile)
 {
-//if(AIAI.GetSetting("deep_debugged_function_calling"))Info("IsConnectedDistrict<");
 
 local list = AIStationList(AIStation.STATION_AIRPORT);
 if(list.Count()!=0)
   {
   list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
   list.KeepBelowValue(18);
-  //if(AIAI.GetSetting("deep_debugged_function_calling"))Info(">IsConnectedDistrict");
   if(!list.IsEmpty())return true;
   }
 
@@ -246,11 +221,9 @@ if(list.Count()!=0)
   {
   list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
   list.KeepBelowValue(8);
-  //if(AIAI.GetSetting("deep_debugged_function_calling"))Info(">IsConnectedDistrict");
   if(!list.IsEmpty())return true;
   }
 
-//if(AIAI.GetSetting("deep_debugged_function_calling"))Info(">IsConnectedDistrict");
 return false;
 }
 
@@ -281,16 +254,38 @@ if(name[i]!=forsell[i])return false;
 return true;
 }
 
-function AIAI::sellVehicle(main_vehicle_id, why)
+function AIAI::gentleSellVehicle(vehicle_id, why)
 {
-if(AIAI.CzyNaSprzedaz(main_vehicle_id)==true)return false;
+local tile_1 = GetLoadStationLocation(vehicle_id);
+local tile_2 = GetUnloadStationLocation(vehicle_id);
+if(AIAI.CzyNaSprzedaz(vehicle_id)==true)return false;
+SetNameOfVehicle(vehicle_id, "sell!" + why);
+local depot_location = GetDepotLocation(vehicle_id);
+if(!AIOrder.UnshareOrders(vehicle_id))
+	{
+	abort("WTF? Unshare impossible? "+AIVehicle.GetName(vehicle_id));
+	}
+if(!AIOrder.AppendOrder (vehicle_id, depot_location, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_STOP_IN_DEPOT)) //trains are not replaced by autoreplace!
+	{
+	abort("WTF? AppendOrder impossible? "+AIVehicle.GetName(vehicle_id));
+	}
+AIOrder.AppendOrder(vehicle_id, tile_1, AIOrder.AIOF_FULL_LOAD_ANY);
+AIOrder.AppendOrder(vehicle_id, tile_2, AIOrder.AIOF_NO_LOAD);
+}
 
-if(AIVehicle.SendVehicleToDepot(main_vehicle_id))
-   {
-   SetNameOfVehicle(main_vehicle_id, "for sell " + why);
-   return true;
-   }
-return false;
+function AIAI::sellVehicle(vehicle_id, why)
+{
+if(AIAI.CzyNaSprzedaz(vehicle_id)==true)return false;
+
+SetNameOfVehicle(vehicle_id, "sell!" + why);
+
+if(!AIVehicle.SendVehicleToDepot(vehicle_id)) 
+	{
+	Info("failed to sell vehicle! "+AIError.GetLastErrorString());
+	return false;
+	}
+SetNameOfVehicle(vehicle_id, "for sell " + why);
+return true;
 }
 
 function VehicleCounter(station)
@@ -338,7 +333,7 @@ function AIAI::DeleteUnprofitable()
 	
 	for (local veh = vehicle_list.Begin(); vehicle_list.HasNext(); veh = vehicle_list.Next()) 
 	   {
-	   if(AIVehicle.GetVehicleType(veh)!=AIVehicle.VT_RAIL || (AIVehicleList_Station(AIStation.GetStationID(GetLoadStation(veh)))).Count()>2)
+	   if(AIVehicle.GetVehicleType(veh)!=AIVehicle.VT_RAIL || (AIVehicleList_Station(AIStation.GetStationID(GetLoadStationLocation(veh)))).Count()>2)
 	      {
 		  if(AIAI.sellVehicle(veh, "unprofitable")) counter++;
 		  }
@@ -346,11 +341,8 @@ function AIAI::DeleteUnprofitable()
 	Info(counter + " vehicle(s) sold.");
 }
 
-function AIAI::Konserwuj()
+function AIAI::BuilderMaintenance()
 {
-this.MoneyMenagement();
-this.HandleOldLevelCrossings();
-
 local maintenance = array(3);
 maintenance[0] = RailBuilder(this, 0);
 maintenance[1] = RoadBuilder(this, 0);
@@ -358,9 +350,34 @@ maintenance[2] = AirBuilder(this, 0);
 
 for(local i = 0; i<maintenance.len(); i++)
 	{
-	maintenance[i].Konserwuj();
+	maintenance[i].Maintenance();
 	}
+}
 
+function DoomsdayMachine()
+{
+Info("DoomsdayMachine!");
+Info("Scrap useless vehicles!");
+this.DeleteVehiclesInDepots();
+Info("BuilderMaintenance!");
+this.BuilderMaintenance();
+Info("Scrap useless vehicles!");
+this.DeleteVehiclesInDepots();
+Sleep(500);
+Info("Scrap useless vehicles!");
+this.DeleteVehiclesInDepots();
+Sleep(500);
+Info("Scrap useless vehicles!");
+this.DeleteVehiclesInDepots();
+}
+
+
+function AIAI::Maintenance()
+{
+this.SignMenagement();
+this.BankruptProtector();
+this.HandleOldLevelCrossings();
+this.BuilderMaintenance();
 this.DeleteVehiclesInDepots();
 this.HandleEvents();
 }
@@ -428,7 +445,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			local company = event.GetCompanyID();
 			if (AICompany.IsMine(company)){
 			   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0) AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
-			   this.MoneyMenagement();
+			   this.BankruptProtector();
 			   }
 			}
 		else if(ev_type == AIEvent.AI_ET_INDUSTRY_OPEN){
@@ -455,23 +472,145 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 function IntToStrFill(int_val, num_digits) //from ClueHelper
 {
 	local str = int_val.tostring();
-
 	while(str.len() < num_digits)
-	{
+		{
 		str = "0" + str;
-	}
-
+		}
 	return str;
 }
 
-function AIAI::SetStationName(location)
+function LoadDataFromStationNameFoundByStationId(station, delimiters)
+{	
+	local start_code = delimiters[0]
+	local end_code = delimiters[1]
+	if(!AIStation.IsValidStation(station))
+		{
+		abort("");
+		}
+	local str = AIBaseStation.GetName(station)
+	local result = null;
+		
+	for(local i = 0; i < str.len(); ++i)
+		{
+		//Warning(result+" from "+str+" ["+i+"]="+str[i]);
+		if(str[i]==start_code)
+			{
+			result=0
+			}
+		else if(str[i]==end_code)
+			{
+			//Warning(result+" from "+str);
+			return result;
+			}
+		else if(result != null)
+			{
+			result=result*10+str[i]-48;
+			}
+		}
+	return null;
+}
+
+function LoadDataFromStationName(location)
 {
-local station = AIStation.GetStationID(location);
-local string;
-do
-	{
-	string = IntToStrFill(station_number, 9);
-	station_number++;
-	}
-while(!AIBaseStation.SetName(station, string))
+	local station = AIStation.GetStationID(location);
+	if(!AIBaseStation.IsValidBaseStation(station))
+		return null;
+	return LoadDataFromStationNameFoundByStationId(station, "{}");
+}
+
+function AIAI::SetStationName(location, data)
+{
+	local station = AIStation.GetStationID(location);
+	if(!AIBaseStation.IsValidBaseStation(station))
+		return;
+	local string;
+	do
+		{
+		string = IntToStrFill(station_number, 4)+data;
+		station_number++;
+		}
+	while(!AIBaseStation.SetName(station, string))
+}
+
+function AIAI::SetWaypointName(network, location)
+{
+	local waypoint = AIWaypoint.GetWaypointID(location);
+	if(!AIBaseStation.IsValidBaseStation(waypoint))
+		return;
+	local string;
+	local i=1;
+	do
+		{
+		string = "{"+network+"}  #"+IntToStrFill(i, 5);
+		i++;
+		Error(AIError.GetLastErrorString());
+		}
+	while(!AIBaseStation.SetName(waypoint, string))
+}
+
+function PaintMapWithHillData()
+{
+local rectangle_size = 5;
+for(local x_cluster=0; x_cluster*rectangle_size<AIMap.GetMapSizeX(); x_cluster++)
+	for(local y_cluster=0; y_cluster*rectangle_size<AIMap.GetMapSizeY(); y_cluster++)
+		{
+		local count=0;
+		for(local x=0; x<rectangle_size; x++)
+			for(local y=0; y<rectangle_size; y++)
+				{
+				local tile = AIMap.GetTileIndex(x_cluster*rectangle_size+x, y_cluster*rectangle_size+y);
+				local slope = AITile.GetSlope(tile);
+				count += AITile.IsSteepSlope(slope)? 2 : 0;
+				count += AITile.IsHalftileSlope(slope)? 1 : 0;
+				count += AITile.IsBuildable(tile)? 0 : 5;
+				}
+		for(local x=0; x<rectangle_size; x++)
+			for(local y=0; y<rectangle_size; y++)
+				{
+				local tile = AIMap.GetTileIndex(x_cluster*rectangle_size+x, y_cluster*rectangle_size+y);
+				AISign.BuildSign(tile, count+"");
+				}
+		}
+}
+
+function AIAI::BuildVehicle(depot_tile, engine_id)
+{		
+	AISign.BuildSign(depot_tile, "here");
+	if(!AIEngine.IsBuildable(engine_id))
+		abort("not buildable!");
+		
+	Info("BuildVehicle ("+AIEngine.GetName(engine_id)+")");
+	local newengineId = AIVehicle.BuildVehicle(depot_tile, engine_id);
+	if(AIError.GetLastError()!=AIError.ERR_NONE)
+		{
+		Error("Vehicle ("+AIEngine.GetName(engine_id)+") construction failed with "+AIError.GetLastErrorString())
+		if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH)
+			{
+			do {
+				//rodzic.Maintenance(); - to protect train from dletion during construction of wagon
+				ProvideMoney();
+				AIController.Sleep(10);
+				Info("retry");
+				newengineId = AIVehicle.BuildVehicle(depot_tile, engine_id);
+			} while(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH)
+			}
+		Error(AIError.GetLastErrorString());
+		if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_BUILD_DISABLED || AIError.GetLastError()==AIVehicle.ERR_VEHICLE_TOO_MANY )
+			{
+			AIAI.SignMenagement();
+			return false;
+			}
+		if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_WRONG_DEPOT) abort("depot nuked");
+		if(AIError.GetLastError()==AIError.ERR_PRECONDITION_FAILED) 
+			{
+			AISign.BuildSign(depot_tile, "ERR_PRECONDITION_FAILED");
+			abort("ERR_PRECONDITION_FAILED (before sign construction), engine: "+AIEngine.GetName(engine_id));
+			}
+		if(AIError.GetLastError()!=AIError.ERR_NONE) abort("wtf");
+		if(!AIVehicle.IsValidVehicle(newengineId)) abort("!!!");
+		}
+	Info(AIEngine.GetName(engine_id) + " constructed! ("+newengineId+")")
+	if(!AIVehicle.IsValidVehicle(newengineId)) abort("!!!!!!!!!!!!!!!");
+	AIAI.SignMenagement();
+	return newengineId;
 }

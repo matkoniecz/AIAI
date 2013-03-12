@@ -38,19 +38,19 @@ for(local i=0; i<retry_limit; i++)
       return false;
       }
 
-   Important("Scanning for truck route completed [ " + desperacja + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
+   Important("Scanning for truck route completed [ " + desperation + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
    if(this.PrepareRoute())
       {
 	  Info("   Contruction started on correct route.");
 	  if(this.ConstructionOfTruckRoute())
 	  return true;
-	  else trasa.zakazane.AddItem(trasa.start, 0);
+	  else trasa.forbidden.AddItem(trasa.start, 0);
 	  }
    else
       {
 	  Info("   Route preaparings failed.");	  
 	  if(trasa.start==null)return false;
-	  else trasa.zakazane.AddItem(trasa.start, 0);
+	  else trasa.forbidden.AddItem(trasa.start, 0);
 	  }
    }
 return false;
@@ -60,7 +60,7 @@ function TruckRoadBuilder::ConstructionOfTruckRoute()
 {
 if(!this.ZbudujStacjeCiezarowek())
    {
-   trasa.zakazane.AddItem(trasa.start, 0);
+   trasa.forbidden.AddItem(trasa.start, 0);
    return false;	  
    }
 return this.ConstructionOfRVRoute();

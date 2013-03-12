@@ -2,7 +2,7 @@ function AIAI::GetIndustryList()
 {
 local list = AIIndustryList();
 list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile);
-list.KeepTop(200);
+list.KeepBottom(200);
 return list;
 }
 
@@ -10,7 +10,7 @@ function AIAI::GetIndustryList_CargoAccepting(cargo)
 {
 local list = AIIndustryList_CargoAccepting(cargo);
 list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile);
-list.KeepTop(200);
+list.KeepBottom(200);
 return list;
 }
 
@@ -18,7 +18,7 @@ function AIAI::GetIndustryList_CargoProducing(cargo)
 {
 local list = AIIndustryList_CargoProducing(cargo);
 list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile);
-list.KeepTop(200);
+list.KeepBottom(200);
 return list;
 }
 
