@@ -1,14 +1,14 @@
 class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
-  function GetDescription() { return "Automatic Idiot AI Version iota (70). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
-  function GetVersion()     { return 70; }
+  function GetDescription() { return "Automatic Idiot AI Version iota (72). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
+  function GetVersion()     { return 72; }
   function GetAPIVersion() { return "1.1"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
   function MinVersionToLoad() { return 70; } 
-  function GetDate()        { return "2011-10-25"; }
-  function GetURL() {return "http://tinyurl.com/ottdaiai or bulwersator@gmail.com. Thanks! [iota (70)]";}
+  function GetDate()        { return "2012-01-07"; }
+  function GetURL() {return "http://tinyurl.com/ottdaiai or bulwersator@gmail.com. Thanks! [iota (72)]";}
 
     function GetSettings() {
 	AddSetting( {

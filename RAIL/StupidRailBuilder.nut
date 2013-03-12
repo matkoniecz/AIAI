@@ -92,9 +92,9 @@ ProvideMoney();
 local max_train_count = this.AddPassingLanes(path);
 
 if(max_train_count==0) max_train_count = 1;
-if(max_train_count>=2 && max_train_count < 10)max_train_count = 2 + (max_train_count-2)/2;
-if(max_train_count>=10 && max_train_count < 20)max_train_count = 5 + (max_train_count-9)/3;
-if(max_train_count>=20)max_train_count = 2 + (max_train_count-19)/4;
+else if(max_train_count>=2 && max_train_count < 10)max_train_count = 2 + (max_train_count-2)/2;
+else if(max_train_count>=10 && max_train_count < 20)max_train_count = 5 + (max_train_count-9)/3;
+else if(max_train_count>=20)max_train_count = 2 + (max_train_count-19)/4;
 
 rodzic.SetStationName(trasa.first_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
 rodzic.SetStationName(trasa.second_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");

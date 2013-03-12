@@ -96,7 +96,6 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
 				continue;
 				}
 			if(HowManyVehiclesFromThisStationAreStopped(station) != 0) continue;
-			return true;
 			local end = AIOrder.GetOrderDestination(original, AIOrder.GetOrderCount(original)-2);
 			//if(AITile.GetCargoAcceptance (end, cargo, 1, 7, 5)==0) //TODO: improve it to have real data
 			//   {
@@ -183,7 +182,7 @@ function RailBuilder::TrainReplace()
 			if(new_speed>old_speed && cost*2<GetAvailableMoney()){
 				if(AIAI.ForSell(vehicle)==false){
 					local train = 0;
-					if(HowManyVehiclesFromThisStationAreStopped(station_id) == 0)
+					if(HowManyVehiclesFromThisStationAreStopped(station_id) == 0 || vehicle_list.Count() == 1)
 						{
 						train = this.BuildTrain(wrzut, "replacing");
 						}
@@ -302,8 +301,11 @@ constructions = null;
 					if(AIError.GetLastError() == AIError.ERR_VEHICLE_IN_THE_WAY ){
 						AIController.Sleep(50);
 						if(!AIRail.BuildRail(prevprev, prev, path.GetTile())){
-							DumbRemover(copy, prev);
-							return false;
+							AIController.Sleep(150);
+							if(!AIRail.BuildRail(prevprev, prev, path.GetTile())){
+								DumbRemover(copy, prev);
+								return false;
+							}
 						}
 					}
 					else{
