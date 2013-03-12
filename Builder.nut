@@ -28,7 +28,7 @@ local count = 0;
 				{
 				if(AIVehicle.GetCurrentSpeed(vehicle_id) == 0){
 					if(AIVehicle.GetState(vehicle_id)!=AIVehicle.VS_AT_STATION){
-						Warning(AIVehicle.GetName(vehicle_id) + " is waiting");
+						//Warning(AIVehicle.GetName(vehicle_id) + " is waiting");
 						count++;
 						}						
 					}

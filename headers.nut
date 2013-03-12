@@ -1,3 +1,5 @@
+const INFINITE_DISTANCE = 4000000;
+
 import("util.superlib", "SuperLib", 24);
 Helper <- SuperLib.Helper
 Tile <- SuperLib.Tile

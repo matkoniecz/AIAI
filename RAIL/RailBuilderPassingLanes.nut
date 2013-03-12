@@ -202,9 +202,18 @@ if(!CheckTileForEvilTracks(path.GetTile(), stay_behind_path))
 	}
 local test = AITestMode();
 if(path != null && path.GetParent() != null && path.GetParent().GetParent() != null){
-	local returned =  AIRail.BuildRail(path.GetTile(), path.GetParent().GetTile(), path.GetParent().GetParent().GetTile());
-	if(AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH) returned = true;
-	if(AIError.GetLastError() == AIError.ERR_VEHICLE_IN_THE_WAY) returned = true;
+	local final_answer = false
+	local returned
+	while(!final_answer){
+		returned = AIRail.BuildRail(path.GetTile(), path.GetParent().GetTile(), path.GetParent().GetParent().GetTile())
+		if(AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH) returned = true
+		final_answer = true
+		if(AIError.GetLastError() == AIError.ERR_VEHICLE_IN_THE_WAY) final_answer = false //this error may hide other real ones (bad terrain etc)
+		if(!final_answer){
+			AIController.Sleep(20);
+			Warning("This answer is not final! (RailBuilder::testPath)");
+			}
+		}
 	if(path.GetParent().GetParent().GetParent() != null) {
 		local curve = path.GetTile() - path.GetParent().GetTile() != - (path.GetParent().GetParent().GetTile() - path.GetParent().GetParent().GetParent().GetTile())
 		return curve && returned;
@@ -279,34 +288,7 @@ else{
 if(after1tile != null) if(after1tile - path.GetTile() == - ( path.GetParent().GetTile() - path.GetParent().GetParent().GetTile() )) return false;
 if(after2tile != null) if(path.GetTile() - path.GetParent().GetTile() == - ( after2tile - after1tile )) return false;
 if(after3tile != null) if(after1tile - path.GetTile() == - ( after3tile - after2tile )) return false;
-/*
-{
-local mode = AIExecMode();
-AIAI.ClearSigns();
-if(after2tile != null)AISign.BuildSign(after2tile, "after2tile");
-if(after1tile != null)AISign.BuildSign(after1tile, "after1tile");
-if(after3tile != null)AISign.BuildSign(after3tile, "after3tile");
-AISign.BuildSign(aftertile, "aftertile");
-AISign.BuildSign(path.GetTile(), "path.GetTile()");
-AISign.BuildSign(path.GetParent().GetTile(), "path.GetParent().GetTile()");
-AISign.BuildSign(path.GetParent().GetParent().GetTile(), "path.Parent().Parent().Tile()");
-Info("*");
-}
-/*
-DumbBuilder(old_copy)
-Info("pre*");
-this.DumbRemover(old_copy, null)
-Info("pre*");
 
-
-local copy = path;
-DumbBuilder(copy)
-AISign.BuildSign(tile, "+ - end");
-Info("* - end");
-local copy = path;
-this.DumbRemover(copy, null)
-Info("post*");
-*/
 return path;
 }
 
@@ -342,17 +324,6 @@ if(prevprevtile!= null) {
 	if(change[0]== -change[2])return false;
 	if(change[0]== -change[3])return false;
 }
-
-/*
-local copy = path;
-DumbBuilder(copy)
-AISign.BuildSign(tile, "+ - start");
-Info("* - start");
-local copy = path;
-this.DumbRemover(copy, null)
-Info("post*");
-return path;
-*/
 return path;
 }
 
@@ -480,7 +451,8 @@ function process(path, stay_behind_path, tile, prevtile, prevprevtile, nextile, 
 
 function RailBuilder::AddPassingLanes(path)
 {
-local list = null;
+Info("AddPassingLanes");
+local list = [];
 local prevtile = null;
 local prevprevtile = null;
 local stay_behind_path = path;
@@ -526,17 +498,17 @@ while (path != null) {
 	left.process(path, stay_behind_path, tile, prevtile, prevprevtile, nextile, nextile_in_end, after1tile_in_end, after2tile_in_end, after3tile_in_end, i)
 
 	if(right.Finished() && (right.GetPositionOfStart() < left.GetPositionOfStart() || left.Failed())) {
-		list = addToArray(list, right.GetLane());
+		list.append(right.GetLane());
 		right = PassingLaneConstructor(true);
 		left = PassingLaneConstructor(false);
 		}
 	else if(left.Finished() && (left.GetPositionOfStart() < right.GetPositionOfStart() || right.Failed())) {
-		list = addToArray(list, left.GetLane());
+		list.append(left.GetLane());
 		right = PassingLaneConstructor(true);
 		left = PassingLaneConstructor(false);
 		}
 	if(left.Finished() && right.Finished()){
-		list = addToArray(list, right.GetLane());
+		list.append(right.GetLane());
 		right = PassingLaneConstructor(true);
 		left = PassingLaneConstructor(false);
 		}
@@ -547,16 +519,16 @@ while (path != null) {
 	}
 
 local count = 0;
-if(list!=null)
 for(local i=0; i<list.len(); i++)
 	{
 	Error("******************************** "+list.len())
 	local copy = list[i].path;
 	if(DumbBuilder(copy)) {
 		copy = list[i].path;
-		count+=SignalPathAdvanced(copy, 7, null, 9999);
-		count+=SignalPathAdvanced(list[i].start, 7, list[i].end, 9999);
+		count+=SignalPathAdvanced(copy, 7, null, 9999, false);
+		count+=SignalPathAdvanced(list[i].start, 7, list[i].end, 9999, false);
 		}
 	}
+Info("AddPassingLanes: " + count);
 return count;
 }

@@ -25,7 +25,7 @@ local ValuateProducer = this.ValuateProducer.bindenv(this);
 local ValuateConsumer = this.ValuateConsumer.bindenv(this);
 local distanceBetweenIndustriesValuator = this.distanceBetweenIndustriesValuator.bindenv(this);
 return FindPairWrapped(route, GetIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, 
-distanceBetweenIndustriesValuator, IndustryToIndustryTruckStationAllocator, GetNiceRandomTown, IndustryToCityTruckStationAllocator, WybierzRVForFindPair);
+distanceBetweenIndustriesValuator, IndustryToIndustryTruckStationAllocator, GetNiceRandomTown, IndustryToCityTruckStationAllocator, FindRVForFindPair);
 }
 
 function TruckRoadBuilder::Go()
@@ -48,7 +48,7 @@ for(local i=0; i<retry_limit; i++)
    if(this.PrepareRoute())
       {
 	  Info("   Contruction started on correct route.");
-	  if(this.ConstructionOfTruckRoute())
+	  if(this.ConstructionOfRVRoute(AIRoad.ROADVEHTYPE_TRUCK))
 	  return true;
 	  else trasa.forbidden.AddItem(trasa.start, 0);
 	  }
@@ -61,14 +61,3 @@ for(local i=0; i<retry_limit; i++)
    }
 return false;
 }
-
-function TruckRoadBuilder::ConstructionOfTruckRoute()
-{
-if(!this.BuildRVStation(AIRoad.ROADVEHTYPE_TRUCK))
-   {
-   trasa.forbidden.AddItem(trasa.start, 0);
-   return false;	  
-   }
-return this.ConstructionOfRVRoute();
-}
-

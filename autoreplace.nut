@@ -1,38 +1,34 @@
 function Autoreplace()
 {
-Info("Autoreplace started");
-AutoreplaceRV();
-AutoreplaceSmallPlane();
-AutoreplaceBigPlane();
-Info("Autoreplace list updated by Autoreplace()");
+	Info("Autoreplace started");
+	AutoreplaceRV();
+	AutoreplaceSmallPlane();
+	AutoreplaceBigPlane();
+	Info("Autoreplace list updated by Autoreplace()");
 }
 
 function AutoreplaceBigPlane()
 {
-local engine_list=AIEngineList(AIVehicle.VT_AIR);
-engine_list.Valuate(AIEngine.GetPlaneType);
-engine_list.KeepValue(AIAirport.PT_BIG_PLANE);
+	local engine_list=AIEngineList(AIVehicle.VT_AIR);
+	engine_list.Valuate(AIEngine.GetPlaneType);
+	engine_list.KeepValue(AIAirport.PT_BIG_PLANE);
 
-for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_existing = engine_list.Next()) //from Chopper 
-   {
-   local cargo_list=AICargoList();
-   local cargo;
-   for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) //from Chopper
-      {
-	  if(AIEngine.CanRefitCargo(engine_existing, cargo))break;
-	  }
+	for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_existing = engine_list.Next()){
+		local cargo_list=AICargoList();
+		local cargo;
+		for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()){
+			if(AIEngine.CanRefitCargo(engine_existing, cargo))break;
+		}
 	
-   if(AIEngine.IsBuildable(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
-      {
-	  local engine_best = (AirBuilder(this, 0)).FindAircraft(AIAirport.AT_LARGE, cargo, 1, 100000000)
-	  if(engine_best != engine_existing)
-	     {
-		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
-         Info(AIEngine.GetName(engine_existing) + " will be replaced with " + AIEngine.GetName(engine_best));
-		 }
-	  }
-   
-   }
+	local distance = AIEngine.GetMaximumOrderDistance(engine_existing);
+	if(AIEngine.IsBuildable(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false){
+		local engine_best = (AirBuilder(this, 0)).FindAircraft(AIAirport.AT_LARGE, cargo, 1, Money.Inflate(100000000), distance)
+		if(engine_best != engine_existing && engine_best != null){
+			AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
+			Info(AIEngine.GetName(engine_existing) + " will be replaced with " + AIEngine.GetName(engine_best));
+			}
+		}
+	}
 }
 
 function AutoreplaceSmallPlane()
@@ -52,9 +48,9 @@ for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_e
 	
    if(AIEngine.IsBuildable(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
       {
-	  local engine_best = (AirBuilder(this, 0)).FindAircraft(AIAirport.AT_SMALL, cargo, 1, 100000000)
+	  local engine_best = (AirBuilder(this, 0)).FindAircraft(AIAirport.AT_SMALL, cargo, 1, Money.Inflate(100000000), AIEngine.GetMaximumOrderDistance(engine_existing))
 	  if(engine_best != null)
-	  if(engine_best != engine_existing)
+	  if(engine_best != engine_existing && engine_best != null)
 	     {
 		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
          Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));
@@ -82,7 +78,7 @@ for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_e
    if(AIEngine.IsBuildable(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
       {
 	  local engine_best = (RoadBuilder(this, 0)).GetReplace(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing), cargo);
-	  if(engine_best != engine_existing)
+	  if(engine_best != engine_existing && engine_best != null)
 	     {
 		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
          Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));

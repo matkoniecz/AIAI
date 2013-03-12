@@ -4,29 +4,25 @@ class PAXAirBuilder extends AirBuilder
 
 function PAXAirBuilder::Possible()
 {
-if(!IsAllowedPAXPlane()) return false;
-Info("estimated cost of a PAX airplane connection: " + this.cost + " / available funds: " + GetAvailableMoney());
-return this.cost<GetAvailableMoney();
+	if(!IsAllowedPAXPlane()) return false;
+	Info("estimated cost of a PAX airplane connection: " + this.cost + " / available funds: " + GetAvailableMoney());
+	return this.cost<GetAvailableMoney();
 }
 
 function PAXAirBuilder::Go()
 {
 	cost = this.CostEstimation();
 	Info("Trying to build an airport route (city version)");
-	if(BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_METROPOLITAN))
-		{
+	if(BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_METROPOLITAN)){
 		return true;
 		}
-	else if(BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_LARGE))
-		{
+	else if(BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_LARGE)){
 		return true;
 		}
-	else if(BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_COMMUTER))
-		{
+	else if(BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_COMMUTER)){
 		return true;
 		}
-	else if(BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_SMALL))
-		{
+	else if(BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_SMALL)){
 		return true;
 		}
 	cost=0;
@@ -34,26 +30,23 @@ function PAXAirBuilder::Go()
 }
 
 function PAXAirBuilder::BuildAirportRouteBetweenCitiesWithAirportTypeSet(airport_type)
-{	
-if(!AIAirport.IsValidAirportType(airport_type)) return false;
-local engine=this.FindAircraft(airport_type, GetPAXCargoId(), 3, GetAvailableMoney());
-if(engine==null)
-    {
-	Info("Unfortunatelly no suitable aircraft found");
-	return false;
+{
+	local min_distance = 250 - 4*desperation;
+	if(!AIAirport.IsValidAirportType(airport_type)) return false;
+	local engine=this.FindAircraft(airport_type, GetPAXCargoId(), 3, GetAvailableMoney(), min_distance*min_distance);
+	if(engine==null){
+		Info("Unfortunatelly no suitable aircraft found");
+		return false;
 	}
 	
-ProvideMoney();
-
-local tile_1 = this.FindSuitableAirportSpotInTown(airport_type, 0);
-if (tile_1 < 0) 
-	{
-	Info("Unfortunatelly no suitable airport location");
-	return false;
+	ProvideMoney();
+	local tile_1 = this.FindSuitableAirportSpotInTown(airport_type, 0, 0);
+	if (tile_1 < 0){
+		Info("Unfortunatelly no suitable airport location");
+		return false;
 	}
-	local tile_2 = this.FindSuitableAirportSpotInTown(airport_type, tile_1);
-	if (tile_2 < 0) {
-		{
+	local tile_2 = this.FindSuitableAirportSpotInTown(airport_type, tile_1, Sqrt(AIEngine.GetMaximumOrderDistance(engine)));
+	if (tile_2 < 0){		{
 		Info("Unfortunatelly no suitable pair of airport locations");
 		return false;
 		}
@@ -78,12 +71,12 @@ local airport_y = AIAirport.GetAirportHeight(airport_type);
 local airport_rad = AIAirport.GetAirportCoverageRadius(airport_type);
 
 	Info("Airports constructed on distance " + AIMap.DistanceManhattan(tile_1, tile_2) + " but effective distanse is: " + GetEffectiveDistanceBetweenAirports(tile_1, tile_2));
-	local dystans = this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2);
+	local distance = this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2);
 	local speed = AIEngine.GetMaxSpeed(engine);
 	local production_at_first_airport = AITile.GetCargoAcceptance(tile_1, GetPAXCargoId(), airport_x, airport_y, airport_rad);
 	local production_at_second_airport = AITile.GetCargoAcceptance(tile_2, GetPAXCargoId(), airport_x, airport_y, airport_rad);
 	local production = min(production_at_first_airport, production_at_second_airport);
-	local licznik = this.HowManyAirplanes(dystans, speed, production, engine);
+	local licznik = this.HowManyAirplanes(distance, speed, production, engine);
 	for(local i=0; i<licznik; i++) 
 		{
 		while(!this.BuildPassengerAircraftWithRand(tile_1, tile_2, engine, GetPAXCargoId()))

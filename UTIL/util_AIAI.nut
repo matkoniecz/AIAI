@@ -57,10 +57,10 @@ return AIStation.GetCargoWaiting(station, cargo)>150 || (AIStation.GetCargoRatin
 function GetDepotLocation(vehicle)
 {
 if (!AIVehicle.IsValidVehicle(vehicle)) abort("invalid vehicle: " + vehicle);
-local new_style = LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(GetLoadStationLocation(vehicle)), "[]");
-if(AIMap.IsValidTile(new_style)) return new_style;
+local depot_location = LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(GetLoadStationLocation(vehicle)), "[]");
+if(AIMap.IsValidTile(depot_location)) return depot_location;
 //for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) if(AIOrder.IsGotoDepotOrder(vehicle, i)) return AIOrder.GetOrderDestination(vehicle, i);
-abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle)+ "psudotile from station name is "+new_style);
+abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle)+ " depot_location from station name is "+depot_location);
 }
 
 function GetLoadStationLocation(vehicle)

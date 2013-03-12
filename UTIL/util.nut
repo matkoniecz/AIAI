@@ -1,23 +1,3 @@
-function addToArray(arr, plus)
-{
-if(arr==null)
-	{
-	arr=array(1);
-	arr[0]=plus;
-	}
-else
-	{
-	local arr_new=array(arr.len()+1)
-	for(local i =0; i<arr.len(); i++)
-		{
-		arr_new[i]=arr[i]
-		}
-	arr_new[arr.len()]=plus;
-	arr=arr_new;
-	}
-return arr;
-}
-
 function RepayLoan()
 {
 while(AICompany.SetLoanAmount(AICompany.GetLoanAmount()-AICompany.GetLoanInterval()));
@@ -130,6 +110,7 @@ function GetVehicleType(vehicle_id)
 }
 
 function Sqrt(i) { //from Rondje
+	if(i<0)abort("sqrt supplied with "+i)
 	if (i == 0)
 		return 0;   // Avoid divide by zero
 	local n = (i / 2) + 1;       // Initial estimate, never low
@@ -171,7 +152,7 @@ return result;
 
 function IsTileFlatAndBuildable(tile)
 	{
-	return ((!AITile.IsBuildable(tile))||!(AITile.SLOPE_FLAT == AITile.GetSlope(tile)));
+	return (AITile.IsBuildable(tile) && AITile.SLOPE_FLAT == AITile.GetSlope(tile));
 	}
 
 function IsTileWithAuthorityRefuse(tile)

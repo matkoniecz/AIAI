@@ -41,29 +41,55 @@ AIWaypointList.HasNext <-
 AIWaypointList_Vehicle.HasNext <-
 function()
 {
-	return !this.IsEnd();
+	return !this.IsEnd(); //I have better things to do than changing HasNext to IsEnd all over my code because OpenTTD devs suddenly decided that former one is somehow better (IMHO it is worse due to more complex contruction - it requires !)
 }
 
 
-AILog.Info("API changing");
+AILog.Info("changing API");
 
 AIMap._IsValidTile <- AIMap.IsValidTile;
 AIMap.IsValidTile <- function(tile)
 {
-	if(tile == null) return false;
+	if(tile == null) return false; //AIMap.IsValidTile(null) will return false instead of crashing
 	return AIMap._IsValidTile(tile);
 }
 
 AISign._BuildSign <- AISign.BuildSign;
 AISign.BuildSign <- function(tile, text)
 {
-	text+="";
+	local test = AIExecMode(); //allow sign construction in test mode
+	text+=""; //allow AISign.BuildSign(tile, 42)
 	local returned = AISign._BuildSign(tile, text);
 	if(AIError.GetLastError()!=AIError.ERR_NONE)
 		{
 		Error(AIError.GetLastErrorString() + " - SIGN FAILED" );
 		if(!AIMap.IsValidTile(tile))Error("Tile invalid");
 		}
-	//Info("signSTOP!  ("+text+")")
 	return returned;
 }
+
+AISign._RemoveSign <- AISign.RemoveSign;
+AISign.RemoveSign <- function(id)
+{
+	local test = AIExecMode(); //allow sign destruction in test mode
+	local returned = AISign._RemoveSign(id);
+}
+
+AIEngine._GetMaximumOrderDistance <- AIEngine.GetMaximumOrderDistance;
+AIEngine.GetMaximumOrderDistance <- function(engine_id)
+{
+	local value = AIEngine._GetMaximumOrderDistance(engine_id);
+	if(value == 0) value = INFINITE_DISTANCE; //we prefer to get rid of 0 here, to allow KeepBelow etc in valuators
+	return value;
+}
+
+
+AIOrder._AppendOrder <- AIOrder.AppendOrder;
+AIOrder.AppendOrder <- function(vehicle_id, destination, order_flags)
+{
+	if(AIOrder._AppendOrder(vehicle_id, destination, order_flags)) return true;
+	Error(AIError.GetLastErrorString() + "in AppendOrder") //assertion
+	local boom  = 0/0;
+}
+
+AILog.Info("changing API finished");

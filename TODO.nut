@@ -1,24 +1,19 @@
-class Station - multiplatforms
-TODO: cargo planes reusing industry
 TODO: reuse roads http://www.tt-forums.net/viewtopic.php?p=958414#p958414
-TODO: $ menag during pf
 TODO: sprawdziæ jak (i czy) dzia³a lista zbanowanych
 TODO: foo supplies
 TODO: networking
 TODO: better engine choosing
-TODO: better RV choosing (problem with very small)
 TODO: error stats
 
 TODO: during heavy competition (more companies that ind + towns) build statues after every connection
 TODO: check during pathfinding is it still possible to have station
 TODO: supplies
-	- supplies - cagos accepted by raw industries
-	- big penalty for normal transport
+	- supplies - cargos accepted by raw industries
+	- giant penalty for normal transport
 	- special transport
 	- by truck, to industry serviced with profit by AIAI with statue with high rating (trains preffered?)
 
 TODO: remove empty railway tracks
-HasNext -> IsEnd 
 
 TODO: handle bus queues
 

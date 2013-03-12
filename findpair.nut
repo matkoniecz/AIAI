@@ -66,7 +66,7 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 		local distance = AITile.GetDistanceManhattanToTile(AIIndustry.GetLocation(traska.end), AIIndustry.GetLocation(traska.start)); 
 		new*= distanceBetweenIndustriesValuator(distance); 
 		if(AITile.GetCargoAcceptance (AIIndustry.GetLocation(traska.end), traska.cargo, 1, 1, 4)==0){
-			  if(rodzic.GetSetting("other_debug_signs"))Helper.SetSign(AIIndustry.GetLocation(traska.end), AICargo.GetCargoLabel(traska.cargo) + "refused here");
+			  if(AIAI.GetSetting("other_debug_signs"))Helper.SetSign(AIIndustry.GetLocation(traska.end), AICargo.GetCargoLabel(traska.cargo) + "refused here");
 			  new=0;
 			  }
 		if(new>best){

@@ -4,52 +4,53 @@ class AirBuilder extends Builder
 
 function AirBuilder::FindPairIndustryToTownAllocator(route)
 {
-route.first_station.location = null;
-route.second_station.location = null;
-return route;
+route.first_station.location = null
+route.second_station.location = null
+return route
 
-route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_METROPOLITAN, route.start);
-route.second_station.location = FindSuitableAirportSpotInTheTown(AIAirport.AT_METROPOLITAN, route.end, route.cargo);
-route.station_size = AIAirport.AT_METROPOLITAN;
-if(route.first_station.location != null && route.second_station.location != null ) return route;
+route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_METROPOLITAN, route.start)
+route.second_station.location = FindSuitableAirportSpotInTheTown(AIAirport.AT_METROPOLITAN, route.end, route.cargo)
+route.station_size = AIAirport.AT_METROPOLITAN
+if(route.first_station.location != null && route.second_station.location != null ) return route
 
-route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_LARGE, route.start);
-route.second_station.location = FindSuitableAirportSpotInTheTown(AIAirport.AT_LARGE, route.end, route.cargo);
-route.station_size = AIAirport.AT_LARGE;
-if(route.first_station.location != null && route.second_station.location != null ) return route;
+route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_LARGE, route.start)
+route.second_station.location = FindSuitableAirportSpotInTheTown(AIAirport.AT_LARGE, route.end, route.cargo)
+route.station_size = AIAirport.AT_LARGE
+if(route.first_station.location != null && route.second_station.location != null ) return route
 
-route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_COMMUTER, route.start);
-route.second_station.location = FindSuitableAirportSpotInTheTown(AIAirport.AT_COMMUTER, route.end, route.cargo);
-route.station_size = AIAirport.AT_COMMUTER;
-if(route.first_station.location != null && route.second_station.location != null ) return route;
+route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_COMMUTER, route.start)
+route.second_station.location = FindSuitableAirportSpotInTheTown(AIAirport.AT_COMMUTER, route.end, route.cargo)
+route.station_size = AIAirport.AT_COMMUTER
+if(route.first_station.location != null && route.second_station.location != null ) return route
 
-route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_SMALL, route.start);
-route.second_station.location = FindSuitableAirportSpotInTheTown(AIAirport.AT_SMALL, route.end, route.cargo);
-route.station_size = AIAirport.AT_SMALL;
-return route;
+route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_SMALL, route.start)
+route.second_station.location = FindSuitableAirportSpotInTheTown(AIAirport.AT_SMALL, route.end, route.cargo)
+route.station_size = AIAirport.AT_SMALL
+return route
 }
 
 function AirBuilder::FindPairDualIndustryAllocator(route)
 {
-route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_METROPOLITAN, route.start);
-route.second_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeConsumer(AIAirport.AT_METROPOLITAN, route.end, route.cargo);
-route.station_size = AIAirport.AT_METROPOLITAN;
-if(route.first_station.location != null && route.second_station.location != null ) return route;
 
-route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_LARGE, route.start);
-route.second_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeConsumer(AIAirport.AT_LARGE, route.end, route.cargo);
-route.station_size = AIAirport.AT_LARGE;
-if(route.first_station.location != null && route.second_station.location != null ) return route;
+route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_METROPOLITAN, route.start)
+route.second_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeConsumer(AIAirport.AT_METROPOLITAN, route.end, route.cargo)
+route.station_size = AIAirport.AT_METROPOLITAN
+if(route.first_station.location != null && route.second_station.location != null ) return route
 
-route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_COMMUTER, route.start);
-route.second_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeConsumer(AIAirport.AT_COMMUTER, route.end, route.cargo);
-route.station_size = AIAirport.AT_COMMUTER;
-if(route.first_station.location != null && route.second_station.location != null ) return route;
+route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_LARGE, route.start)
+route.second_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeConsumer(AIAirport.AT_LARGE, route.end, route.cargo)
+route.station_size = AIAirport.AT_LARGE
+if(route.first_station.location != null && route.second_station.location != null ) return route
 
-route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_SMALL, route.start);
-route.second_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeConsumer(AIAirport.AT_SMALL, route.end, route.cargo);
-route.station_size = AIAirport.AT_SMALL;
-return route;
+route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_COMMUTER, route.start)
+route.second_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeConsumer(AIAirport.AT_COMMUTER, route.end, route.cargo)
+route.station_size = AIAirport.AT_COMMUTER
+if(route.first_station.location != null && route.second_station.location != null ) return route
+
+route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_SMALL, route.start)
+route.second_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeConsumer(AIAirport.AT_SMALL, route.end, route.cargo)
+route.station_size = AIAirport.AT_SMALL
+return route
 }
 
 function AirBuilder::FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(airport_type, industry_id)
@@ -96,7 +97,13 @@ function AirBuilder::FindSuitableAirportSpotNearIndustryWithAirportType(tile_lis
 return null;
 }
 
-function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile)
+
+function AirBuilder::GetOrderDistance(tile_1, tile_2)
+{
+return AIOrder.GetOrderDistance(AIVehicle.VT_AIR, tile_1, tile_2);
+}
+
+function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile, max_distance=INFINITE_DISTANCE)
 	{
 	local airport_x, airport_y, airport_rad;
 
@@ -109,9 +116,12 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile)
 	town_list.KeepAboveValue(500-desperation);
 
 	if (center_tile != 0) {
-    town_list.Valuate(AITown.GetDistanceManhattanToTile, center_tile);
+	town_list.Valuate(AITown.GetDistanceManhattanToTile, center_tile);
 	town_list.KeepAboveValue(this.GetMinDistance());    
 	town_list.KeepBelowValue(this.GetMaxDistance());    
+
+	town_list.Valuate(AirBuilder.GetOrderDistance, center_tile);
+	town_list.KeepBelowValue(max_distance);    
 	}
 	
 	town_list.Valuate(this.DistanceWithRandValuator, center_tile);
@@ -133,6 +143,9 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile)
 		list.RemoveBelowValue(50);
 		list.Valuate(AITile.GetCargoAcceptance, GetMailCargoId(), airport_x, airport_y, airport_rad);
 		list.RemoveBelowValue(10);
+		// Handle order distance
+		town_list.Valuate(AirBuilder.GetOrderDistance, center_tile);
+		town_list.KeepBelowValue(max_distance);    
 		// Couldn't find a suitable place for this town, skip to the next 
 		if (list.Count() == 0) continue;
 		// Walk all the tiles and see if we can build the airport at all
@@ -214,22 +227,22 @@ return AITile.GetDistanceManhattanToTile( AIStation.GetLocation(station_id), AII
 }
 
 function AirBuilder::CostEstimation()
-{
-	for(local i=1; i<400; i++)
-	   {
-	   local enginiatko = AirBuilder.FindAircraft(AIAirport.AT_LARGE, GetPAXCargoId(), 3, 30000*i);
-	   if(enginiatko!=null)
-	   if(AIEngine.IsBuildable(enginiatko))
-	       {
-		   return i*30000;
-		   }
-	   }
-}
+	{
+	for(local i=1; i<100; i++)
+		{
+		local engine = AirBuilder.FindAircraft(AIAirport.AT_LARGE, GetPAXCargoId(), 3, Money.Inflate(30000)*i, 120-4*desperation);
+		if(engine!=null){
+			if(AIEngine.IsBuildable(engine)){
+				return i*Money.Inflate(30000);
+				}
+			}
+		}
+	}
 
 function AirBuilder::FindEngine(route)
 {
 route.engine_count = 3;
-route.engine = AirBuilder.FindAircraft(route.station_size, route.cargo, route.engine_count = 3, route.budget);
+route.engine = AirBuilder.FindAircraft(route.station_size, route.cargo, route.engine_count = 3, route.budget, AIOrder.GetOrderDistance(AIVehicle.VT_AIR, route.start_tile, route.end_tile));
 route.demand = AirBuilder.CostEstimation();
 return route;
 }
@@ -243,7 +256,7 @@ function FindAircraftValuator(engine_id)
 return AIEngine.GetCapacity(engine_id) * AIEngine.GetMaxSpeed(engine_id);
 }
 
-function AirBuilder::FindAircraft(airport_type, cargo, ile, balance)
+function AirBuilder::FindAircraft(airport_type, cargo, how_many, balance, distance)
 {
 local typical_minimal_capacity = 40
 local engine_list = AIEngineList(AIVehicle.VT_AIR);
@@ -254,15 +267,18 @@ if(airport_type==AIAirport.AT_SMALL || airport_type==AIAirport.AT_COMMUTER )
 	engine_list.RemoveValue(AIAirport.PT_BIG_PLANE);
 	}
 
-if(ile!=0)balance-=2*AIAirport.GetPrice(airport_type);
+if(how_many!=0)balance-=2*AIAirport.GetPrice(airport_type);
 if(balance<0) return null;
 engine_list.Valuate(AIEngine.GetPrice);
 
-if(ile==0) engine_list.KeepBelowValue(balance);
-else engine_list.KeepBelowValue(balance/ile);
+if(how_many==0) engine_list.KeepBelowValue(balance);
+else engine_list.KeepBelowValue(balance/how_many);
 
 engine_list.Valuate(AIEngine.CanRefitCargo, cargo);
 engine_list.KeepValue(1);
+
+engine_list.Valuate(AIEngine.GetMaximumOrderDistance); //note, function is modified and return INFINITE_DISTANCE instead of 0
+engine_list.RemoveBelowValue(distance);
 
 engine_list.Valuate(FindAircraftValuator);
 engine_list.KeepTop(1);
@@ -493,7 +509,7 @@ for (local airport = list.Begin(); list.HasNext(); airport = list.Next())
 					else
 						airport_type=AIAirport.AT_LARGE;
 
-					local engine=this.FindAircraft(airport_type, cargo, 1, GetAvailableMoney());
+					local engine=this.FindAircraft(airport_type, cargo, 1, GetAvailableMoney(), AIOrder.GetOrderDistance(AIVehicle.VT_AIR, tile_1, tile_2));
 					if(engine==null) continue;
 					local vehicle_list=AIVehicleList_Station(airport);
 					vehicle_list.Valuate(FindAircraftValuatorRunningOnVehicleIDs);
@@ -540,11 +556,13 @@ for (local airport = list.Begin(); list.HasNext(); airport = list.Next()){
 				local vehicle = AIVehicleList_Station(airport).Begin();
 				local another_station = AIOrder.GetOrderDestination(vehicle, 0);
 				if(AIStation.GetLocation(airport) == another_station) another_station = AIOrder.GetOrderDestination(vehicle, 1);
-				local engine=this.FindAircraft(airport_type, cargo, 1, GetAvailableMoney());
+				local engine=this.FindAircraft(airport_type, cargo, 1, GetAvailableMoney(), AIOrder.GetOrderDistance(AIVehicle.VT_AIR, another_station, AIBaseStation.GetLocation(airport)));
 				if(engine != null){
 					ProvideMoney();
 					if(IsItPossibleToAddBurden(airport, another_station, engine)) {
-						this.BuildCargoAircraft(AIStation.GetLocation(airport), another_station, engine, cargo, "uzupelniacz");
+						if(IsItPossibleToAddBurden(AIStation.GetStationID(another_station), AIBaseStation.GetLocation(airport), engine)) {
+							this.BuildCargoAircraft(AIStation.GetLocation(airport), another_station, engine, cargo, "uzupelniacz");
+							}
 						}
 					}
 				else {
