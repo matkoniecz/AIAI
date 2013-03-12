@@ -190,6 +190,7 @@ return true;
 function KRAI::IsProducerOK(ID)
 {
 local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(ID));
+if(cargo_list==null) return false;
 if(cargo_list.Count()==0) return false;
 if(AIIndustry.IsValidIndustry(ID)==false) //industry closed during preprocessing
    {
@@ -294,10 +295,10 @@ function KRAI::FindPair()
 //local industry_list = IndustryListSource(); //Why in is executed in another way than function below?
 											//And unable to use local rodzic's variables?
 
-local industry_list = rodzic.GetIndustryList(); //Working
+//local industry_list = rodzic.GetIndustryList(); //Working
 
-//local binded_f = rodzic.GetIndustryList.bindenv(rodzic);
-//industry_list = binded_f.GetIndustryList();
+local binded_f = rodzic.GetIndustryList.bindenv(rodzic);
+local industry_list = binded_f();
 
 Error(industry_list.Count()+"");
 local traska = Route();
@@ -496,8 +497,6 @@ trasa.koniec_otoczka[0]=maybe_end_station+AIMap.GetTileIndex(0, 1);
 trasa.koniec_otoczka[1]=maybe_end_station+AIMap.GetTileIndex(0, -1);
 return true;
 }
-
-
 
 function KRAI::BusRoute()
 {
@@ -889,7 +888,7 @@ local list = AITileList();
 local range = Sqrt(AITown.GetPopulation(town)/100) + 15;
 SafeAddRectangle(list, tile, range);
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
-list.KeepAboveValue(50);
+list.KeepAboveValue(max(25, 50-desperacja));
 
 if(start != null)
    {
