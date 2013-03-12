@@ -491,21 +491,23 @@ return max_speed*5-AIRail.GetBuildCost(rail_type_id, AIRail.BT_TRACK);
 
 function RailBuilder::GetRailTypeList() //modified //from DenverAndRioGrande
 	{
-	local types = AIRailTypeList();
-	if(types.Count() == 0){
+	local railTypes = AIRailTypeList();
+	if(railTypes.Count() == 0){
 		Error("No rail types!");
 		return null;
 		}
-	types.Valuate(AIRail.IsRailTypeAvailable);
-	types.KeepValue(1);
-	if(types.Count() == 0){
+	railTypes.Valuate(AIRail.IsRailTypeAvailable);
+	railTypes.KeepValue(1);
+
+	if(railTypes.Count() == 0){
 		Error("No available rail types!");
 		return null;
 		}
   
-	types.Valuate(this.ValuatorRailType);
-	types.Sort(AIAbstractList.SORT_BY_VALUE, false); //descending
-	return types;
+	railTypes.Valuate(this.ValuatorRailType);
+	railTypes.Sort(AIAbstractList.SORT_BY_VALUE, false); //descending
+
+	return railTypes;
 	}
 
 function RailBuilder::FindTrain(trasa)//from DenverAndRioGrande
@@ -521,7 +523,24 @@ return trasa;
 function RailBuilder::GetTrain(trasa)//from DenverAndRioGrande
 	{
 	local railTypes = GetRailTypeList();
+
+
+	/*
+	NewLine();
 	for(local rail_type = railTypes.Begin(); railTypes.HasNext(); rail_type = railTypes.Next()){
+		local max_speed = AIRail.GetMaxSpeed(rail_type);
+		local cost = AIRail.GetBuildCost(rail_type, AIRail.BT_TRACK);
+		Info("Railtype ("+rail_type+")with " + max_speed + " max speed and cost of " + cost + " has " + (max_speed*5-cost) + " points.");
+		}
+	NewLine();
+	*/
+
+	for(local rail_type = railTypes.Begin(); railTypes.HasNext(); rail_type = railTypes.Next()){		
+		/*
+		local max_speed = AIRail.GetMaxSpeed(rail_type);
+		local cost = AIRail.GetBuildCost(rail_type, AIRail.BT_TRACK);
+		Info("Railtype ("+rail_type+")with " + max_speed + " max speed and cost of " + cost + " has " + (max_speed*5-cost) + " points.");
+		*/
 		AIRail.SetCurrentRailType(rail_type);
 		trasa = RailBuilder.FindTrain(trasa);
 		if(AIEngine.IsBuildable(trasa.engine[0]) && AIEngine.IsBuildable(trasa.engine[1])) {
@@ -541,7 +560,7 @@ function RailBuilder::GetTrain(trasa)//from DenverAndRioGrande
 	}
 
 function RailBuilder::FindWagons(cargoIndex)//from DenverAndRioGrande
-{
+	{
     //Info("Looking for " + AICargo.GetCargoLabel(cargoIndex) + " wagons.");
     local wagons = AIEngineList(AIVehicle.VT_RAIL);
     wagons.Valuate(AIEngine.IsWagon);
@@ -558,138 +577,128 @@ function RailBuilder::FindWagons(cargoIndex)//from DenverAndRioGrande
     //print(wagons.Count() + " Can run on this." ); 
     //wagons.AddList(nonRefitWagons);
     if(wagons.Count() == 0){
-    Info("No wagons can pull or be refitted to this cargo on the current track.");
+    Error("No wagons can pull or be refitted to this cargo (" + AICargo.GetCargoLabel(cargoIndex) + ") on the current track (" + AIRail.GetCurrentRailType() + ").");
     }
     return wagons;
-}
+	}
 
 function RailBuilder::WagonValuator(engineId)//from DenverAndRioGrande
-{
-  return  AIEngine.GetCapacity(engineId) * AIEngine.GetMaxSpeed(engineId);
-}
+	{
+	return  AIEngine.GetCapacity(engineId) * AIEngine.GetMaxSpeed(engineId);
+	}
 
 function RailBuilder::FindBestWagon(cargoIndex)//from DenverAndRioGrande
-{   
+	{   
     local wagons = RailBuilder.FindWagons(cargoIndex);
     wagons.Valuate(RailBuilder.WagonValuator);
     return wagons.Begin();
-}
+	}
 
-function RailBuilder::FindBestEngine(wagonId, trainsize, cargoId)//from DenverAndRioGrande
-{
-    
-  local minHP = 175 * trainsize;
+function RailBuilder::FindBestEngine(wagonId, trainsize, cargoId)//from DenverAndRioGrande	
+	{
+	local minHP = 175 * trainsize;
   
-  local speed = AIEngine.GetMaxSpeed(wagonId);
-  if(speed == 0) {speed = 2500;}
-  local engines = AIEngineList(AIVehicle.VT_RAIL);
-  engines.Valuate(AIEngine.IsWagon);
-  engines.RemoveValue(1);
-  
-  engines.Valuate(AIEngine.IsBuildable);
-  engines.RemoveValue(0);
-  engines.Valuate(AIEngine.CanPullCargo, cargoId);
-  engines.RemoveValue(0);
-  engines.Valuate(AIEngine.HasPowerOnRail, AIRail.GetCurrentRailType());
-  engines.RemoveValue(0);
-  engines.Valuate(AIEngine.CanRunOnRail, AIRail.GetCurrentRailType());
-  engines.RemoveValue(0);
-  
-  engines.Valuate(AIEngine.GetPower);
-  
-  engines.Sort(AIAbstractList.SORT_BY_VALUE, false);
-  if(engines.GetValue(engines.Begin()) < minHP ) //no engine can pull the wagon at it's top speed.
-  {
-   //print("No engine has enough horsepower to pull all the wagons well.");
-  }
-  else
-  {
-    engines.RemoveBelowValue(minHP);
-  }
-  
-  
-  engines.Valuate(AIEngine.GetMaxSpeed);
-  engines.Sort(AIAbstractList.SORT_BY_VALUE, false);
-  
-  if(engines.GetValue(engines.Begin()) < speed ) //no engine can pull the wagon at it's top speed.
-  {
-   //Info("No engine has top speed of wagon. Checking Fastest.");
-   //Info("The fastest engine to pull '" + AIEngine.GetName(wagonId) + "'' at full speed ("+ speed +") is '" + AIEngine.GetName(engines.Begin()) +"'" );
-   local cash = GetAvailableMoney();
-   if(cash > AIEngine.GetPrice(engines.Begin()) * 2 || AIVehicleList().Count() > 10)//if there are 10 trains, just return the best one and let it fail.
-   {
-    return engines.Begin();
-   }
-   else
-   {
-    //Info("The company is poor. Picking a slower, cheaper engine.");
-    engines.Valuate(AIEngine.GetPrice);
-    engines.Sort(AIAbstractList.SORT_BY_VALUE, true);
-    //Info("The Cheapest engine to pull '" + AIEngine.GetName(wagonId) + "'  is '" + AIEngine.GetName(engines.Begin()) +"'" );
-    return engines.Begin();
-   }
-  }
-  
-  engines.RemoveBelowValue(speed);
-  engines.Valuate(AIEngine.GetPrice);
-  engines.Sort(AIAbstractList.SORT_BY_VALUE, true);
-  
-  //Info("The cheapest engine to pull '" + AIEngine.GetName(wagonId) + "'' at full speed ("+ speed +") is '" + AIEngine.GetName(engines.Begin()) +"'" );
-  return engines.Begin();
-}
-
-function RailBuilder::ValuateProducer(ID, cargo)
-{
-if(AIIndustry.GetLastMonthProduction(ID, cargo)<50-4*desperacja)return 0; //protection from tiny industries servised by giant trains
-
-   local base = AIIndustry.GetLastMonthProduction(ID, cargo);
-   base*=(100-AIIndustry.GetLastMonthTransportedPercentage (ID, cargo));
-   if(AIIndustry.GetLastMonthTransportedPercentage (ID, cargo)==0)base*=3;
-   base*=AICargo.GetCargoIncome(cargo, 10, 50);
-   if(base!=0)
-	  if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(ID)))
+	local speed = AIEngine.GetMaxSpeed(wagonId);
+	if(speed == 0) {speed = 2500;}
+	local engines = AIEngineList(AIVehicle.VT_RAIL);
+	engines.Valuate(AIEngine.IsWagon);
+	engines.RemoveValue(1);
+	
+	engines.Valuate(AIEngine.IsBuildable);
+	engines.RemoveValue(0);
+	engines.Valuate(AIEngine.CanPullCargo, cargoId);
+	engines.RemoveValue(0);
+	engines.Valuate(AIEngine.HasPowerOnRail, AIRail.GetCurrentRailType());
+	engines.RemoveValue(0);
+	engines.Valuate(AIEngine.CanRunOnRail, AIRail.GetCurrentRailType());
+	engines.RemoveValue(0);
+	
+	engines.Valuate(AIEngine.GetPower);
+	
+	engines.Sort(AIAbstractList.SORT_BY_VALUE, false);
+	
+	if(engines.GetValue(engines.Begin()) < minHP ) //no engine can pull the wagon at it's top speed.
 		{
-		//base*=3;
-	    //base/=2;
-		base+=10000;
-	    }
-	  else
-	    {
+		Error("No engine has enough horsepower to pull all the wagons well.");
 		}
-//Info(AIIndustry.GetName(ID) + " is " + base + " point producer of " + AICargo.GetCargoLabel(cargo));
-return base;
-}
+	else{
+		engines.RemoveBelowValue(minHP);
+		}
+	
+  
+	engines.Valuate(AIEngine.GetMaxSpeed);
+	engines.Sort(AIAbstractList.SORT_BY_VALUE, false);
+	
+	if(engines.GetValue(engines.Begin()) < speed ) //no engine can pull the wagon at it's top speed.
+		{
+		//Info("No engine has top speed of wagon. Checking Fastest.");
+		//Info("The fastest engine to pull '" + AIEngine.GetName(wagonId) + "'' at full speed ("+ speed +") is '" + AIEngine.GetName(engines.Begin()) +"'" );
+		local cash = GetAvailableMoney();
+		if(cash > AIEngine.GetPrice(engines.Begin()) * 2 || AIVehicleList().Count() > 10)//if there are 10 trains, just return the best one and let it fail.
+			{
+			return engines.Begin();
+			}
+		else{
+			//Info("The company is poor. Picking a slower, cheaper engine.");
+			engines.Valuate(AIEngine.GetPrice);
+			engines.Sort(AIAbstractList.SORT_BY_VALUE, true);
+			//Info("The Cheapest engine to pull '" + AIEngine.GetName(wagonId) + "'  is '" + AIEngine.GetName(engines.Begin()) +"'" );
+			return engines.Begin();
+			}
+		}
+  
+	engines.RemoveBelowValue(speed);
+	engines.Valuate(AIEngine.GetPrice);
+	engines.Sort(AIAbstractList.SORT_BY_VALUE, true);
+	
+	//Info("The cheapest engine to pull '" + AIEngine.GetName(wagonId) + "'' at full speed ("+ speed +") is '" + AIEngine.GetName(engines.Begin()) +"'" );
+	return engines.Begin();
+	}
+	
+function RailBuilder::ValuateProducer(ID, cargo)
+	{
+	if(AIIndustry.GetLastMonthProduction(ID, cargo)<50-4*desperacja)return 0; //protection from tiny industries servised by giant trains
+	local base = AIIndustry.GetLastMonthProduction(ID, cargo);
+	base*=(100-AIIndustry.GetLastMonthTransportedPercentage (ID, cargo));
+	if(AIIndustry.GetLastMonthTransportedPercentage (ID, cargo)==0)base*=3;
+	base*=AICargo.GetCargoIncome(cargo, 10, 50);
+	if(base!=0)
+		if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(ID))){
+			//base*=3;
+			//base/=2;
+			base+=10000;
+			}
+	//Info(AIIndustry.GetName(ID) + " is " + base + " point producer of " + AICargo.GetCargoLabel(cargo));
+	return base;
+	}
 
 function RailBuilder::ValuateConsumer(ID, cargo, score)
-{
-if(AIIndustry.GetStockpiledCargo(ID, cargo)==0) score*=2;
-//Info("   " + AIIndustry.GetName(ID) + " is " + score + " point consumer of " + AICargo.GetCargoLabel(cargo));
-return score;
-}
+	{
+	if(AIIndustry.GetStockpiledCargo(ID, cargo)==0) score*=2;
+	//Info("   " + AIIndustry.GetName(ID) + " is " + score + " point consumer of " + AICargo.GetCargoLabel(cargo));
+	return score;
+	}
 
 function RailBuilder::GetMinimalStationSize()
-{
-return max(1, min(4 - (desperacja/2), AIGameSettings.GetValue("station.station_spread")));
-}
+	{
+	return max(1, min(4 - (desperacja/2), AIGameSettings.GetValue("station.station_spread")));
+	}
 
 function RailBuilder::StationPreparation() 
-{
-ignore = [];
-if(trasa.first_station.direction != StationDirection.x_is_constant__horizontal)
-   {
-   start[0] = [trasa.first_station.location+AIMap.GetTileIndex(-1, 0), trasa.first_station.location] 
-   start[1] = [trasa.first_station.location+AIMap.GetTileIndex(trasa.station_size, 0), trasa.first_station.location+AIMap.GetTileIndex(trasa.station_size -1, 0)] 
-   for(local tile = trasa.first_station.location; tile!=trasa.first_station.location+AIMap.GetTileIndex(trasa.station_size, 0) ;tile+=AIMap.GetTileIndex(1, 0))
-		{
-		ignore.append(tile);
+	{
+	ignore = [];
+	if(trasa.first_station.direction != StationDirection.x_is_constant__horizontal){
+		start[0] = [trasa.first_station.location+AIMap.GetTileIndex(-1, 0), trasa.first_station.location] 
+		start[1] = [trasa.first_station.location+AIMap.GetTileIndex(trasa.station_size, 0), trasa.first_station.location+AIMap.GetTileIndex(trasa.station_size -1, 0)] 
+	for(local tile = trasa.first_station.location; tile!=trasa.first_station.location+AIMap.GetTileIndex(trasa.station_size, 0) ;tile+=AIMap.GetTileIndex(1, 0)){
+			ignore.append(tile);
+			}
 		}
-   }
-else
-   {
-   start[0] = [trasa.first_station.location + AIMap.GetTileIndex(0, -1), trasa.first_station.location] //TODO drugi koniedc
-   start[1] = [trasa.first_station.location+AIMap.GetTileIndex(0, trasa.station_size), trasa.first_station.location+AIMap.GetTileIndex(0, trasa.station_size -1)] 
-   for(local tile = trasa.first_station.location; tile!=trasa.first_station.location+AIMap.GetTileIndex(0, trasa.station_size); tile+=AIMap.GetTileIndex(0, 1))
+	else
 		{
+		start[0] = [trasa.first_station.location + AIMap.GetTileIndex(0, -1), trasa.first_station.location] //TODO drugi koniedc
+		start[1] = [trasa.first_station.location+AIMap.GetTileIndex(0, trasa.station_size), trasa.first_station.location+AIMap.GetTileIndex(0, trasa.station_size -1)] 
+	for(local tile = trasa.first_station.location; tile!=trasa.first_station.location+AIMap.GetTileIndex(0, trasa.station_size); tile+=AIMap.GetTileIndex(0, 1)){
 		ignore.append(tile);
 		}
    }

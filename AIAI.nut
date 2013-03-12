@@ -23,20 +23,17 @@ return list;
 }
 
 function AIAI::DeleteVehiclesInDepots()
-{
-local ile=0;
-
-local list=AIVehicleList();
-for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
-   {
-   if(AIVehicle.IsStoppedInDepot(q))
-      {
-	  AIVehicle.SellVehicle(q);
-	  ile++;
-	  }
-   }
-return ile;
-}
+	{
+	local counter=0;
+	local list=AIVehicleList();
+	for (local q = list.Begin(); list.HasNext(); q = list.Next()){ //from Chopper 
+		if(AIVehicle.IsStoppedInDepot(q)){
+			AIVehicle.SellVehicle(q);
+			counter++;
+		}
+	}
+	return counter;
+	}
 
 function AIAI::IsTileWrongToFullUse(tile)
 {

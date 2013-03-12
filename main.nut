@@ -34,7 +34,10 @@ function AIAI::Menagement()
 root_tile = RandomTile();
 this.SignMenagement();
 this.MoneyMenagement();
-this.Statua();
+
+Info("<Statue contruction>");
+while(GetBankBalance()>inflate(500000)&&this.Statue()) Info("I Am Rich");
+Info("</Statue contruction>");
 }
 
 function AIAI::Start()
@@ -60,6 +63,12 @@ while(true)
 		
 	if(!this.UberBuilder(builders)) desperacja++;
 	else desperacja = 0;
+	if((GetDate()-generalna_konserwacja)>12){ //once a year (12 months)
+		this.DeleteUnprofitable();
+		DeleteEmptyStations();
+		Autoreplace();
+		this.generalna_konserwacja = GetDate();
+		}
 	}
 }
 
@@ -100,7 +109,7 @@ for(local i = 0; i<builders.len(); i++)
 return false;
 }
 
-function AIAI::Statua()
+function AIAI::Statue()
 {
 local veh_list = AIVehicleList();
 if(veh_list.Count()==0)return false;
@@ -138,7 +147,7 @@ for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next())
 	  }
    }
 
-Info("Statua construction failed");
+Info("Statue construction failed");
 return false;
 }
 
@@ -193,7 +202,7 @@ function AIAI::IdleMoneyMenagement()
 {
 if(AIVehicleList().Count()==0) return;
 BankruptProtector();
-while((AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())<100000*GetInflationRate()/100)
+while((AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())<inflate(100000))
 	{
 	while(AICompany.SetLoanAmount(AICompany.GetLoanAmount() - AICompany.GetLoanInterval()));
 	BankruptProtector();
@@ -353,13 +362,6 @@ for(local i = 0; i<maintenance.len(); i++)
 
 this.DeleteVehiclesInDepots();
 this.HandleEvents();
-if((GetDate()-generalna_konserwacja)>12) //powinno raz na 12 miesiêcy
-    {
-	this.DeleteUnprofitable();
-	DeleteEmptyStations();
-	Autoreplace();
-	this.generalna_konserwacja = GetDate();
-	}
 }
 
 function AIAI::HandleEvents() //from CluelessPlus and simpleai

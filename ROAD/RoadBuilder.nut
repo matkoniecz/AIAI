@@ -78,24 +78,28 @@ return 0;
 }
 
 function RoadBuilder::ZbudujStacjeCiezarowek()
-{
-if(!AIRoad.BuildDriveThroughRoadStation(trasa.first_station.location, trasa.start_otoczka[0], AIRoad.ROADVEHTYPE_TRUCK, AIStation.STATION_NEW)) 
-   {
-   Info("   Producer station placement impossible due to " + AIError.GetLastErrorString());
-   if(rodzic.GetSetting("other_debug_signs")) AISign.BuildSign(trasa.first_station.location, AIError.GetLastErrorString());
-   return false;
-   }
-if(!AIRoad.BuildDriveThroughRoadStation(trasa.second_station.location, trasa.koniec_otoczka[0], AIRoad.ROADVEHTYPE_TRUCK, AIStation.STATION_NEW)) 
-   {
-   Info("   Consumer station placement impossible due to " + AIError.GetLastErrorString());
-   AIRoad.RemoveRoadStation(trasa.first_station.location);
-   if(rodzic.GetSetting("other_debug_signs")) AISign.BuildSign(trasa.second_station.location, AIError.GetLastErrorString());
-   return false;
-   }
-rodzic.SetStationName(trasa.first_station.location);
-rodzic.SetStationName(trasa.second_station.location);
-return RoadToStation();
-}
+	{
+	if(!AIRoad.BuildDriveThroughRoadStation(trasa.first_station.location, trasa.start_otoczka[0], AIRoad.ROADVEHTYPE_TRUCK, AIStation.STATION_NEW)){
+		Info("   Producer station placement impossible due to " + AIError.GetLastErrorString());
+		if(rodzic.GetSetting("other_debug_signs")) AISign.BuildSign(trasa.first_station.location, AIError.GetLastErrorString());
+		return false;
+		}
+	else{
+		Info("   Producer station constructed");
+		}
+	if(!AIRoad.BuildDriveThroughRoadStation(trasa.second_station.location, trasa.koniec_otoczka[0], AIRoad.ROADVEHTYPE_TRUCK, AIStation.STATION_NEW)){
+		Info("   Consumer station placement impossible due to " + AIError.GetLastErrorString());
+		AIRoad.RemoveRoadStation(trasa.first_station.location);
+		if(rodzic.GetSetting("other_debug_signs")) AISign.BuildSign(trasa.second_station.location, AIError.GetLastErrorString());
+		return false;
+		}
+	else{
+		Info("   Consumer station constructed");
+		}
+	rodzic.SetStationName(trasa.first_station.location);
+	rodzic.SetStationName(trasa.second_station.location);
+	return RoadToStation();
+	}
 
 function RoadBuilder::RoadToStation()
 {
@@ -553,8 +557,6 @@ local new_engine_id = null;
 local list = AIEngineList(AIVehicle.VT_ROAD);
 list.Valuate(AIEngine.GetRoadType);
 list.KeepValue(AIRoad.ROADTYPE_ROAD);
-//list.Valuate(AIEngine.IsArticulated); BuildDriveThroughRoadStation ;)
-//list.KeepValue(0);
 list.Valuate(AIEngine.CanRefitCargo, cargo);
 list.KeepValue(1);
 list.Valuate(AIEngine.GetMaxSpeed);
@@ -748,82 +750,100 @@ ile+=3;
 return ile;
 }
 
-function RoadBuilder::BudujPojazdy()
-{
-//trasa.type
-//0 proceed trasa.cargo
-//1 raw
-//2 passenger
-
-local zbudowano=0;
-
-if(trasa.engine==null)return null;
-
-local ile = trasa.engine_count;
-
-local vehicle_id = -1;
-
-vehicle_id=AIVehicle.BuildVehicle (trasa.depot_tile, trasa.engine);
-while(!AIVehicle.IsValidVehicle(vehicle_id)) 
+function RoadBuilder::sellVehicleStoppedInDepotDueToFoo(vehicle_id, foo)
 	{
+	Error("RV (" + AIVehicle.GetName(vehicle_id) + ") "+ foo + " failed due to " + AIError.GetLastErrorString()+".");
+	if(AIAI.GetSetting("explode_on_eror_during_order_appending"))local booom=0/0;
+	if(AIVehicle.SellVehicle(vehicle_id)) Info("Vehicle sold");
+	else Error("RV selling failed due to " + AIError.GetLastErrorString()+".");
+	return null;
+	}
+
+function RoadBuilder::BudujPojazdy()
+	{
+	//trasa.type
+	//0 proceed trasa.cargo
+	//1 raw
+	//2 passenger
+	local zbudowano=0;
+	if(trasa.engine==null)return null;
+	local ile = trasa.engine_count;	
+	local vehicle_id = -1;
 	vehicle_id=AIVehicle.BuildVehicle (trasa.depot_tile, trasa.engine);
-	Info("Vehicle building fail "+AIError.GetLastErrorString());
-	if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH)
+	while(!AIVehicle.IsValidVehicle(vehicle_id)){
+		vehicle_id=AIVehicle.BuildVehicle (trasa.depot_tile, trasa.engine);
+		Info("Vehicle building fail "+AIError.GetLastErrorString());
+		if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH){
+			Error("RV construction failed due to " + AIError.GetLastErrorString()+".")
+			return null;
+			}
+		AIController.Sleep(100);
+		}
+	{
+	zbudowano++;
+
+	if(trasa.type==1) //1 raw
 		{
-		Error("RV construction failed due to " + AIError.GetLastErrorString()+".")
+		if(!(AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE )&&
+		AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD )&&
+		AIOrder.AppendOrder (vehicle_id, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE ))){
+			this.sellVehicleStoppedInDepotDueToFoo(vehicle_id, "order appending");
+			return null;
+			}
+		}
+	else if(trasa.type==0) //0 proceed trasa.cargo
+		{
+		local pozycja_porownywacza=1;
+		local pozycja_przeskakiwacza=3;
+
+		if(!(AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.AIOF_NON_STOP_INTERMEDIATE )&&
+		AIOrder.AppendOrder (vehicle_id, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE )&&
+		AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD )&&
+		AIOrder.AppendOrder (vehicle_id, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE )&&
+	
+		AIOrder.InsertConditionalOrder (vehicle_id, pozycja_porownywacza, 2)&&
+		AIOrder.SetOrderCompareValue(vehicle_id, pozycja_porownywacza, 0)&&
+		AIOrder.SetOrderCondition (vehicle_id, pozycja_porownywacza, AIOrder.OC_LOAD_PERCENTAGE)&&
+		AIOrder.SetOrderCompareFunction(vehicle_id, pozycja_porownywacza, AIOrder.CF_MORE_THAN)&&
+	
+		AIOrder.InsertConditionalOrder (vehicle_id, pozycja_przeskakiwacza, 0)&&
+		AIOrder.SetOrderCompareValue(vehicle_id, pozycja_przeskakiwacza, 0)&&
+		AIOrder.SetOrderCondition (vehicle_id, pozycja_przeskakiwacza, AIOrder.OC_UNCONDITIONALLY))){
+			this.sellVehicleStoppedInDepotDueToFoo(vehicle_id, "order appending");
+			return null;
+			}
+		}
+	else if(trasa.type == 2) //2 passenger
+		{
+		if(!(AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE )&&
+		AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE )&&
+		AIOrder.AppendOrder (vehicle_id, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE ))){
+			this.sellVehicleStoppedInDepotDueToFoo(vehicle_id, "order appending");
+			return null;
+			}
+		}
+	else{
+		Error("Wrong value in trasa.type. (" + trasa.type + ") Prepare for explosion.");
+		local zero=0/0;
+		}
+	if(!AIVehicle.RefitVehicle (vehicle_id, trasa.cargo)){
+		this.sellVehicleStoppedInDepotDueToFoo(vehicle_id, "refitting");
 		return null;
 		}
-	AIController.Sleep(100);
+
+	if(!AIVehicle.StartStopVehicle (vehicle_id)){
+		this.sellVehicleStoppedInDepotDueToFoo(vehicle_id, "starting");
+		return null;
+		}
+
+	local string;
+	if(trasa.type==1) string = "Raw cargo";
+	else if(trasa.type==0) string = "Processed cargo"; 
+	else if(trasa.type==2) string = "Bus line";
+	else string = "WTF?"; 
+
+	SetNameOfVehicle(vehicle_id, string);
 	}
-{
-zbudowano++;
-
-if(trasa.type==1) //1 raw
-   {
-	AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD );
-	AIOrder.AppendOrder (vehicle_id, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	}
-else if(trasa.type==0) //0 proceed trasa.cargo
-   {
-	AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	AIOrder.AppendOrder (vehicle_id, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD );
-	AIOrder.AppendOrder (vehicle_id, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-
-	local pozycja_porownywacza=1;
-	AIOrder.InsertConditionalOrder (vehicle_id, pozycja_porownywacza, 2);
-	AIOrder.SetOrderCompareValue(vehicle_id, pozycja_porownywacza, 0); 
-	AIOrder.SetOrderCondition (vehicle_id, pozycja_porownywacza, AIOrder.OC_LOAD_PERCENTAGE);
-	AIOrder.SetOrderCompareFunction(vehicle_id, pozycja_porownywacza, AIOrder.CF_MORE_THAN);
-
-	local pozycja_porownywacza=3;
-	AIOrder.InsertConditionalOrder (vehicle_id, pozycja_porownywacza, 0);
-	AIOrder.SetOrderCompareValue(vehicle_id, pozycja_porownywacza, 0); 
-	AIOrder.SetOrderCondition (vehicle_id, pozycja_porownywacza, AIOrder.OC_UNCONDITIONALLY);
-	}
-else if(trasa.type == 2) //2 passenger
-   {
-	AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-	AIOrder.AppendOrder (vehicle_id, trasa.depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
-   }
-else
-   {
-   Error("Wrong value in trasa.type. (" + trasa.type + ") Prepare for explosion.");
-   local zero=0/0;
-   }
-AIVehicle.RefitVehicle (vehicle_id, trasa.cargo);
-AIVehicle.StartStopVehicle (vehicle_id);
-
-local string;
-if(trasa.type==1) string = "Raw cargo";
-else if(trasa.type==0) string = "Processed cargo"; 
-else if(trasa.type==2) string = "Bus line";
-else string = "WTF?"; 
-
-SetNameOfVehicle(vehicle_id, string);
-}
 
 for(local i = 0; i<ile; i++) if(this.copyVehicle(vehicle_id, trasa.cargo)) zbudowano++;
 
@@ -1104,7 +1124,9 @@ if(ile<maksymalnie)
    local vehicle_id = AIVehicle.CloneVehicle(depot_tile, main_vehicle_id, true);
    if(AIVehicle.IsValidVehicle(vehicle_id))
       {
- 	  AIVehicle.StartStopVehicle (vehicle_id);
+ 	  if(!AIVehicle.StartStopVehicle (vehicle_id)){
+		sellVehicleStoppedInDepotDueToFoo(vehicle_id, "starting");
+		}
 
 	  local string;
 	  //Warning(AIVehicle.GetName(main_vehicle_id) +" -X- " + AIVehicle.GetName(main_vehicle_id)[0]);
@@ -1125,13 +1147,13 @@ return false;
 function RoadBuilder::UsunNadmiarowePojazdy()
 {
 local station_list = AIStationList(AIStation.STATION_TRUCK_STOP);
-local ile = RoadBuilder.SprawdzTo(station_list);
+local ile = RoadBuilder.CheckIt(station_list);
 local station_list = AIStationList(AIStation.STATION_BUS_STOP);
-ile+=RoadBuilder.SprawdzTo(station_list);
+ile+=RoadBuilder.CheckIt(station_list);
 return ile;
 }
 
-function RoadBuilder::SprawdzTo(station_list)
+function RoadBuilder::CheckIt(station_list)
 {
 local ile=0;
 local cargo_list = AICargoList();

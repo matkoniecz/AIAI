@@ -189,7 +189,7 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 	   /*if(AIIndustry.GetStockpiledCargo(x, traska.cargo)==0)*/ new*=2;
 		if(new>best)
 			{
-	        Info("There is no industrial acceptor for " + AIIndustry.GetName(traska.start) + " . We will try send to " + AITown.GetName(traska.end));
+	        //Info("There is no industrial acceptor for " + AIIndustry.GetName(traska.start) + " . We will try send to " + AITown.GetName(traska.end));
 			traska.start_tile = AIIndustry.GetLocation(traska.start);
 			traska.end_tile = AITown.GetLocation(traska.end);
 			traska = ToCityStationAllocator(traska)

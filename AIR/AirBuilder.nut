@@ -98,8 +98,8 @@ return null;
 }
 
 function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile)
-{
-if(AIAI.GetSetting("deep_debugged_function_calling"))Info("FindSuitableAirportSpotInTown<");
+	{
+	if(AIAI.GetSetting("deep_debugged_function_calling"))Info("<FindSuitableAirportSpotInTown>");
 	local airport_x, airport_y, airport_rad;
 
 	airport_x = AIAirport.GetAirportWidth(airport_type);
@@ -109,7 +109,7 @@ if(AIAI.GetSetting("deep_debugged_function_calling"))Info("FindSuitableAirportSp
 
 	//Info(town_list.Count());
 	
-	town_list.Valuate(AITown.GetLocation);
+	//town_list.Valuate(AITown.GetLocation);
 	
 	town_list.Valuate(this.PopulationWithRandValuator);
 	town_list.KeepAboveValue(500-desperacja);
@@ -179,8 +179,7 @@ if(AIAI.GetSetting("deep_debugged_function_calling"))Info("FindSuitableAirportSp
 		}
 
 		Info("Found a good spot for an airport in town " + town + " at tile " + tile);
-if(AIAI.GetSetting("deep_debugged_function_calling"))Info(">FindSuitableAirportSpotInTown");
-
+		if(AIAI.GetSetting("deep_debugged_function_calling"))Info("</FindSuitableAirportSpotInTown>");
 		return tile;
 	}
 

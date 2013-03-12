@@ -1,7 +1,12 @@
+function inflate(money)
+	{
+	return money*GetInflationRate()/100;
+	}
+
 function GetInflationRate() //from simpleai
-{
+	{
 	return (100 * AICompany.GetMaxLoanAmount() / AIGameSettings.GetValue("difficulty.max_loan"));
-}
+	}
 
 enum StationDirection
 {
@@ -27,10 +32,16 @@ function RepayLoan()
 while(AICompany.SetLoanAmount(AICompany.GetLoanAmount()-AICompany.GetLoanInterval()));
 }
 
+function GetBankBalance()
+{
+local me = AICompany.ResolveCompanyID(AICompany.COMPANY_SELF);
+return AICompany.GetBankBalance(me)
+}
+
 function GetAvailableMoney()
 {
 local me = AICompany.ResolveCompanyID(AICompany.COMPANY_SELF);
-return AICompany.GetBankBalance(me) + AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount() - 10000; //TODO inflate that 10k
+return AICompany.GetBankBalance(me) + AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount() - inflate(10000);
 }
 
 function SetNameOfVehicle(vehicle_id, string)
@@ -306,32 +317,26 @@ while(true)
 }
 
 function Name()
-{
-AICompany.SetName("AIAI");
-if (AICompany.GetName(AICompany.COMPANY_SELF)!="AIAI") 
 	{
-	if(GetSetting("suicide"))
-	{
-	if (!AICompany.SetName("Suicide AIAI")) {
-    local i = 2;
-    while (!AICompany.SetName("Suicide AIAI #" + i)) {
-      i = i + 1;
-    }
+	AICompany.SetPresidentName("http://tinyurl.com/ottdaiai");
+	AICompany.SetName("AIAI");
+	if (AICompany.GetName(AICompany.COMPANY_SELF)!="AIAI"){
+		if(GetSetting("suicide")){
+			if(!AICompany.SetName("Suicide AIAI")){
+			local i = 2;
+			while (!AICompany.SetName("Suicide AIAI #" + i))i++;
+			}
+		BurnMoney();
+		while(true) Sleep(1000);
+		}
+		else{
+			if (!AICompany.SetName("Additional AIAI")){
+				local i = 2;
+				while (!AICompany.SetName("Additional AIAI #" + i))i++;
+				}
+			}
+		}
 	}
-	BurnMoney();
-	while(true) Sleep(1000);
-    }
-	else
-	  {
-	if (!AICompany.SetName("Additional AIAI")) {
-    local i = 2;
-    while (!AICompany.SetName("Additional AIAI #" + i)) {
-      i = i + 1;
-    }
-	}
-	  }
-	}
-}
 
 function Sqrt(i) { //from Rondje
 	if (i == 0)

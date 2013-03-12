@@ -1,14 +1,14 @@
 class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
-  function GetDescription() { return "Automatic Idiot AI Version epsilon (41). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
-  function GetVersion()     { return 41; }
-  function GetAPIVersion() { return "1.0.4"; }
+  function GetDescription() { return "Automatic Idiot AI Version zeta (45). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
+  function GetVersion()     { return 45; }
+  function GetAPIVersion() { return "1.0"; }
   function GetDate()        { return "2010-05-21"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
   function MinVersionToLoad() { return 0; } 
-  function GetURL() {return "[epsilon (41)] http://www.tt-forums.net/viewtopic.php?f=65&t=47298 or bulwersator@gmail.com. Thanks!";}
+  function GetURL() {return "http://tinyurl.com/ottdaiai or bulwersator@gmail.com. Thanks! [zeta (45)]";}
 
 	function GetSettings() {
 
@@ -122,6 +122,16 @@ class AIAI extends AIInfo {
 		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
 	});
 	
+	AddSetting( {
+		name = "explode_on_eror_during_order_appending",
+		description = "explode_on_eror_during_order_appending",
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
+		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
+	});
+
 	AddSetting( {
 		name = "suicide",
 		description = "suicide",
