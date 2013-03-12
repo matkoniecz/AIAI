@@ -8,28 +8,6 @@ for(local x=-10; x<=10; x++)
 return "?"
 }
 
-function RailBuilder::ConstructDumb(path)
-{
-local prev = null;
-local prevprev = null;
-while (path != null){ 
-	local tile = path.GetTile();
-	AISign.BuildSign(tile, path.GetRealLength()+"")
-	if (prevprev != null) {
-		AIRail.BuildRail(prevprev, prev, tile);
-		}
-	prevprev = prev;
-	prev = tile;
-	path = path.GetParent();
-	}
-return;
-while (path != null) {
-	if(path != null && path.GetParent() != null && path.GetParent().GetParent() != null)
-		AIRail.BuildRail(path.GetTile(), path.GetParent().GetTile(), path.GetParent().GetParent().GetTile());
-	path = path.GetParent();
-	}
-}
-
 function RailBuilder::GetTileOnTheSideOftrack(tile, prevtile, on_the_left)
 {
 if(prevtile == null) return AIMap.TILE_INVALID;
@@ -225,6 +203,8 @@ if(!CheckTileForEvilTracks(path.GetTile(), stay_behind_path))
 local test = AITestMode();
 if(path != null && path.GetParent() != null && path.GetParent().GetParent() != null){
 	local returned =  AIRail.BuildRail(path.GetTile(), path.GetParent().GetTile(), path.GetParent().GetParent().GetTile());
+	if(AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH) returned = true;
+	if(AIError.GetLastError() == AIError.ERR_VEHICLE_IN_THE_WAY) returned = true;
 	if(path.GetParent().GetParent().GetParent() != null) {
 		local curve = path.GetTile() - path.GetParent().GetTile() != - (path.GetParent().GetParent().GetTile() - path.GetParent().GetParent().GetParent().GetTile())
 		return curve && returned;
@@ -313,14 +293,14 @@ AISign.BuildSign(path.GetParent().GetParent().GetTile(), "path.Parent().Parent()
 Info("*");
 }
 /*
-ConstructDumb(old_copy)
+DumbBuilder(old_copy)
 Info("pre*");
 this.DumbRemover(old_copy, null)
 Info("pre*");
 
 
 local copy = path;
-ConstructDumb(copy)
+DumbBuilder(copy)
 AISign.BuildSign(tile, "+ - end");
 Info("* - end");
 local copy = path;
@@ -365,7 +345,7 @@ if(prevprevtile!= null) {
 
 /*
 local copy = path;
-ConstructDumb(copy)
+DumbBuilder(copy)
 AISign.BuildSign(tile, "+ - start");
 Info("* - start");
 local copy = path;
@@ -392,6 +372,7 @@ active_construction = null;
 start_tile = null;
 end_tile = null;
 number_of_start_tile = null;
+debug_side = null;
 
 constructor(side)
 {
@@ -435,18 +416,21 @@ return {path = copy_last_finished, start = start_tile, end = end_tile};
 }
 
 function process(path, stay_behind_path, tile, prevtile, prevprevtile, nextile, nextile_in_end, after1tile_in_end, after2tile_in_end, after3tile_in_end, number_of_tile)
-{
-if(status==PassingLaneFinderStatus.active) {
+	{
+	if(status==PassingLaneFinderStatus.active) {
 		active_construction=addTileToPath(active_construction, GetTileOnTheSideOftrack(tile, prevtile, side), stay_behind_path);
 		if(active_construction.OK && path != null) {
+			if(side == debug_side) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, longer");
 			active_construction=active_construction.path;
 			}
 		else {
 			if(last_finished!=null)	{
+				if(side == debug_side) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, ended");
 				status = PassingLaneFinderStatus.finished;
 				}
 			else {
 				status = PassingLaneFinderStatus.failed;
+				if(side == debug_side) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, failed");
 				}
 			active_construction=null;
 			}
@@ -454,10 +438,19 @@ if(status==PassingLaneFinderStatus.active) {
 	if(status==PassingLaneFinderStatus.active) {
 		local test = null;
 		test = IsItPossibleToEndPathWIthIt(active_construction, prevtile, tile, nextile_in_end, side, stay_behind_path, after1tile_in_end, after2tile_in_end, after3tile_in_end)
-		if(test != false && test.GetRealLength()>=7.0) 
+		if(test != false && test.GetRealLength()>9.0) //HACK, should be 7.0
 			{
+			if(side == debug_side) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, may end here "+test.GetRealLength());
 			last_finished=test;
 			end_tile = path;
+			}
+		else
+			{
+			if(side == debug_side) 
+				{
+				if(test != false) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, may NOT end here: "+test.GetRealLength());
+				else AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, may NOT end here: false active_construction len:"+active_construction.GetRealLength());
+				}
 			}
 		}
 	if(status==PassingLaneFinderStatus.failed && prevtile != null) {
@@ -466,15 +459,26 @@ if(status==PassingLaneFinderStatus.active) {
 			active_construction = test;
 			status = PassingLaneFinderStatus.active;
 			last_finished = null;
-			start_tile = path;
+			if( path.GetChildren() != null ) 
+				{
+				start_tile = path.GetChildren();
+				if( path.GetChildren().GetChildren() != null ) 
+					start_tile = path.GetChildren().GetChildren();
+				}
+			else start_tile = path;
 			number_of_start_tile = number_of_tile;
+			if(side == debug_side) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "failed, started");
+			}
+		else
+			{
+			if(side == debug_side) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "failed");
 			}
 		}
 }
 
 }
 
-function RailBuilder::DumbAdBuilder(path)
+function RailBuilder::AddPassingLanes(path)
 {
 local list = null;
 local prevtile = null;
@@ -517,18 +521,22 @@ while (path != null) {
 				}
 			}
 		}
+	
 	right.process(path, stay_behind_path, tile, prevtile, prevprevtile, nextile, nextile_in_end, after1tile_in_end, after2tile_in_end, after3tile_in_end, i)
 	left.process(path, stay_behind_path, tile, prevtile, prevprevtile, nextile, nextile_in_end, after1tile_in_end, after2tile_in_end, after3tile_in_end, i)
-	if(right.Finished() && (right.GetPositionOfStart() <= left.GetPositionOfStart() || left.Failed())) {
+
+	if(right.Finished() && (right.GetPositionOfStart() < left.GetPositionOfStart() || left.Failed())) {
 		list = addToArray(list, right.GetLane());
 		right = PassingLaneConstructor(true);
 		left = PassingLaneConstructor(false);
 		}
-	else if(left.Finished() && (left.GetPositionOfStart() <= right.GetPositionOfStart() || right.Failed())) {
+	else if(left.Finished() && (left.GetPositionOfStart() < right.GetPositionOfStart() || right.Failed())) {
 		list = addToArray(list, left.GetLane());
 		right = PassingLaneConstructor(true);
 		left = PassingLaneConstructor(false);
 		}
+	if(left.Finished()) left.GetLane();
+	if(right.Finished()) right.GetLane();
 	prevprevtile = prevtile;
 	prevtile = tile;
 	}
@@ -540,8 +548,8 @@ for(local i=0; i<list.len(); i++)
 	local copy = list[i].path;
 	if(DumbBuilder(copy)) {
 		copy = list[i].path;
-		count+=SignalPathAdvanced(copy, false, 7, null, 9999);
-		count+=SignalPathAdvanced(list[i].start, false, 7, list[i].end, 9999);
+		count+=SignalPathAdvanced(copy, 7, null, 9999);
+		count+=SignalPathAdvanced(list[i].start, 7, list[i].end, 9999);
 		}
 	}
 return count;

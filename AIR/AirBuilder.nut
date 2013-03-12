@@ -466,8 +466,8 @@ ile = veh_list.Count();
 local allowed = AIGameSettings.GetValue("vehicle.max_aircraft");
 if(allowed==ile) return;
 
-this.Uzupelnij();
-this.UzupelnijCargo();
+this.addPAXAircrafts();
+this.AddCargoAircrafts();
 }
 
 function AirBuilder::GetEffectiveDistanceBetweenAirports(tile_1, tile_2)
@@ -521,7 +521,7 @@ if(tile != null && engine != null) total+=ile*this.Burden(AIStation.GetLocation(
 return total <= maksimum;
 }
 
-function AirBuilder::Uzupelnij()
+function AirBuilder::addPAXAircrafts()
 {
 local airport_type;
 local list = AIStationList(AIStation.STATION_AIRPORT);
@@ -578,7 +578,7 @@ for (local airport = list.Begin(); list.HasNext(); airport = list.Next())
 	}
 }
 
-function AirBuilder::UzupelnijCargo()
+function AirBuilder::AddCargoAircrafts()
 {
 local list = AIStationList(AIStation.STATION_AIRPORT);
 if(list.Count()==0) return;
@@ -695,7 +695,6 @@ function AirBuilder::IsItPossibleToHaveAirport(tile, airport_type, c)
 {
 	local test = AITestMode();
 	if(AIAirport.BuildAirport(tile, airport_type, c)) return true;
-	Warning("IsItImossibleToHaveAirport: "+AIError.GetLastErrorString())
 	local error = AIError.GetLastError()
 	rodzic.HandleFailedStationConstruction(tile, error);
 	return (error == AIError.ERR_NOT_ENOUGH_CASH);

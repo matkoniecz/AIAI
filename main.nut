@@ -6,12 +6,17 @@ root_tile = null;
 station_number = null;
 detected_rail_crossings = null;
 loaded_game = false;
+bridge_list = null;
 }
 
 require("headers.nut");
 
 function AIAI::Starter()
 {
+	Info("AIAI loaded!");
+	NewLine();
+	Info("Hi!");
+	
 	//PaintMapWithHillData();
 	Name();
 	HQ();
@@ -21,8 +26,6 @@ function AIAI::Starter()
 	AICompany.SetAutoRenewMonths(0);
 	AICompany.SetAutoRenewMoney(100000);
 
-	NewLine();
-	Info("Hi!");
 
 	detected_rail_crossings=AIList()
 
@@ -30,6 +33,9 @@ function AIAI::Starter()
 		{
 		desperation = 0;
 		GeneralInspection = GetDate()-12;
+		}
+	else
+		{
 		}
 }
 
@@ -65,16 +71,45 @@ function AIAI::Start()
 		RailBuilder(this, 0).TrainReplace();
 		Info(GetDate()-GeneralInspection+" month from general check")
 		if((GetDate()-GeneralInspection)>=6){ //6 months
-			this.DeleteUnprofitable();
-			DeleteEmptyStations();
-			Autoreplace();
-			RailBuilder(this, 0).TrainReplace();
+			this.RunGeneralInspection();
 			this.GeneralInspection = GetDate();
 			}
 		Info("===================================");
 		}
 }
 
+function AIAI::RunGeneralInspection()
+{
+			this.DeleteUnprofitable();
+			DeleteEmptyStations();
+			Autoreplace();
+			RailBuilder(this, 0).TrainReplace();
+			this.UpgradeBridges();
+}
+
+function AIAI::UpgradeBridges()
+{
+		if(bridge_list==null)return;
+		for(local i = 0; i<bridge_list.len() && AICompany.GetBankBalance(AICompany.COMPANY_SELF)>Money.Inflate(500000); i++)
+			{
+			local tile = bridge_list[i];
+			if(!AIBridge.IsBridgeTile(tile))continue;
+			//AISign.BuildSign(tile, i);
+			local old_bridge_type = AIBridge.GetBridgeID (tile);
+			local new_bridge_type = AIAI.GetMaxSpeedBridge(tile, AIBridge.GetOtherBridgeEnd(tile));
+			if( AIBridge.GetMaxSpeed(new_bridge_type) > AIBridge.GetMaxSpeed(old_bridge_type) )
+				{
+				local vehicle_type = AIVehicle.VT_ROAD;
+				if( AITile.HasTransportType( tile, AITile.TRANSPORT_RAIL )) 
+					{
+					vehicle_type = AIVehicle.VT_RAIL;
+					AIRail.SetCurrentRailType(AIRail.GetRailType( tile ));
+					}
+				if(!AIBridge.BuildBridge ( vehicle_type, new_bridge_type, tile, AIBridge.GetOtherBridgeEnd(tile)))
+					Error(AIError.GetLastErrorString() + " - unable to upgrade bridge")
+				}
+			}
+}
 function AIAI::InformationCenter(builders)
 {
 	for(local i = 0; i<builders.len(); i++)
@@ -165,7 +200,7 @@ function AIAI::ClearSigns()
 
 function AIAI::SignMenagement()
 	{
-	Info("SignMenagement")
+	//Info("SignMenagement")
 	if(AIAI.GetSetting("clear_signs"))
 		{
 		AIAI.ClearSigns();
@@ -245,6 +280,7 @@ function AIAI::Save()
   local table = {
 	desperation = this.desperation
 	GeneralInspection = this.GeneralInspection
+	BridgeList = this.bridge_list
 				};
   return table;
 }
@@ -253,9 +289,11 @@ function AIAI::Load(version, data)
 {
   if (data.rawin("desperation")) 
   if (data.rawin("GeneralInspection")) 
+  if (data.rawin("BridgeList")) 
   {
     this.desperation = data.rawget("desperation");
     this.GeneralInspection = data.rawget("GeneralInspection");
+	this.bridge_list =  data.rawget("BridgeList");
 	this.loaded_game = true;
 	return;
   }
@@ -624,7 +662,7 @@ function AIAI::BuildVehicle(depot_tile, engine_id)
 	if(!AIEngine.IsBuildable(engine_id))
 		abort("not buildable!");
 		
-	Info("BuildVehicle ("+AIEngine.GetName(engine_id)+")");
+	//Info("BuildVehicle ("+AIEngine.GetName(engine_id)+")");
 	local newengineId = AIVehicle.BuildVehicle(depot_tile, engine_id);
 	if(AIError.GetLastError()!=AIError.ERR_NONE)
 		{
@@ -656,4 +694,20 @@ function AIAI::BuildVehicle(depot_tile, engine_id)
 	Info(AIEngine.GetName(engine_id) + " constructed! ("+newengineId+")")
 	if(!AIVehicle.IsValidVehicle(newengineId)) abort("!!!!!!!!!!!!!!!");
 	return newengineId;
+}
+
+function AIAI::GetMaxSpeedBridge(start, end)
+{
+local bridge_list = AIBridgeList_Length(AIMap.DistanceManhattan(start, end) + 1);
+bridge_list.Valuate(AIBridge.GetMaxSpeed);
+bridge_list.Sort(AIList.SORT_BY_VALUE, false);
+return bridge_list.Begin()
+}
+
+function AIAI::BuildBridge(vehicle_type, start, end)
+{
+local bridge_type_id = GetMaxSpeedBridge(start, end);
+local result = AIBridge.BuildBridge(vehicle_type, bridge_type_id, start, end);
+if(result) bridge_list = addToArray(bridge_list, start);
+return result;
 }

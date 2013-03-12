@@ -66,49 +66,37 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
 		if(AgeOfTheYoungestVehicle(station)>110) // -spam
 		if(IsItNeededToImproveThatNoRawStation(station, cargo))
 			{
+			Info("IsItNeededToImproveThatNoRawStation (" +AIBaseStation.GetName(station) + ")? YES!");
 			local vehicle_list=AIVehicleList_Station(station);
 			local how_many = vehicle_list.Count();
 			vehicle_list.Valuate(rodzic.ForSell);
 			vehicle_list.KeepValue(0);
-			if(how_many != vehicle_list.Count()) continue; //wait for sell
+			if(how_many != vehicle_list.Count()) {
+				Info("wait for sell");
+				continue; 
+				}
+			if(vehicle_list.Count()==0) {
+				Warning("Dead station");
+				continue;
+				}
 			local max_train_count=LoadDataFromStationNameFoundByStationId(station, "{}");
-
-			Warning(max_train_count+"<>"+how_many)
-			if(how_many>=max_train_count)continue;
-
+			if(how_many>=max_train_count)
+				{
+				Warning(max_train_count+"<max_train_count how_many>"+how_many)
+				continue;
+				}
+			Info(max_train_count+"<max_train_count how_many>"+how_many)
 			vehicle_list.Valuate(AIBase.RandItem);
 			vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
-			if(vehicle_list.Count()==0)continue;
 			local original=vehicle_list.Begin();
 			if(AIStation.GetLocation(station)!=GetLoadStationLocation(original))abort("wtf");
 		 
-			local loaded_and_empty=0;
-			if(AIVehicle.GetProfitLastYear(original)<0)continue;
-			for (local vehicle = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle = vehicle_list.Next())
-				{
-				if(rodzic.ForSell(vehicle)) loaded_and_empty=-1001;
-				if(AIVehicle.GetCargoLoad(vehicle, cargo)==0){
-					loaded_and_empty--;
-					if(AITile.GetDistanceManhattanToTile(GetLoadStationLocation(vehicle), AIVehicle.GetLocation(vehicle))<30)
-						{
-						loaded_and_empty-=100;
-						}
-					}
-				else { 
-					if(AITile.GetDistanceManhattanToTile(GetUnloadStationLocation(vehicle), AIVehicle.GetLocation(vehicle))<30)
-						{
-						loaded_and_empty-=100;
-						}
-					else
-						{
-						loaded_and_empty++;
-						}
-					}
-				Info(loaded_and_empty+" - loaded_and_empty")
+			if(AIVehicle.GetProfitLastYear(original)<0){
+				Warning("Unprofiatble leader");
+				continue;
 				}
-			Warning(loaded_and_empty+"loaded_and_empty")
-			if(loaded_and_empty<1)continue; //station may be filled with cargo, but trains may still wait (poor station design/hills)
-
+			if(HowManyVehiclesFromThisStationAreStopped(station) != 0) continue;
+			return true;
 			local end = AIOrder.GetOrderDestination(original, AIOrder.GetOrderCount(original)-2);
 			//if(AITile.GetCargoAcceptance (end, cargo, 1, 7, 5)==0) //TODO: improve it to have real data
 			//   {
@@ -121,6 +109,7 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
 	}
 return ile;
 }
+
 
 function RailBuilder::copyVehicle(main_vehicle_id, cargo)
 {
@@ -193,7 +182,11 @@ function RailBuilder::TrainReplace()
 			local cost = AIEngine.GetPrice(engine)+10*AIEngine.GetPrice(wagon);
 			if(new_speed>old_speed && cost*2<GetAvailableMoney()){
 				if(AIAI.ForSell(vehicle)==false){
-					local train = this.BuildTrain(wrzut, "replacing");
+					local train = 0;
+					if(HowManyVehiclesFromThisStationAreStopped(station_id) == 0)
+						{
+						train = this.BuildTrain(wrzut, "replacing");
+						}
 					if(train != null){
 						if(AIOrder.ShareOrders(train, vehicle)){
 							AIAI.gentleSellVehicle(vehicle, "replaced");
@@ -241,6 +234,7 @@ return DumbBuilder(path);
 
 function RailBuilder::DumbRemover(path, goal)
 {
+Error("DumbRemover (probably after) " + AIError.GetLastErrorString());
 local prev = null;
 local prevprev = null;
 while (path != null) {
@@ -278,8 +272,9 @@ legal_next = null;
 constructions = null;
 }
 
-	function RailBuilder::DumbBuilder(path, var=0)
+	function RailBuilder::DumbBuilder(path)
 	{
+	Info("DumbBuilder");
 	local copy = path;
 	local prev = null;
 	local prevprev = null;
@@ -293,10 +288,7 @@ constructions = null;
 						}
 					} 
 				else{
-					local bridge_list = AIBridgeList_Length(AIMap.DistanceManhattan(path.GetTile(), prev) + 1);
-					bridge_list.Valuate(AIBridge.GetMaxSpeed);
-					bridge_list.Sort(AIList.SORT_BY_VALUE, false);
-					if(!AIBridge.BuildBridge(AIVehicle.VT_RAIL, bridge_list.Begin(), prev, path.GetTile())){
+					if(!rodzic.BuildBridge(AIVehicle.VT_RAIL, prev, path.GetTile())){
 						DumbRemover(copy, prev);
 						return false;
 						}
@@ -307,17 +299,26 @@ constructions = null;
 				}
 			else { //!AIMap.DistanceManhattan(prev, path.GetTile()) > 1
 				if(!AIRail.BuildRail(prevprev, prev, path.GetTile())){
-					DumbRemover(copy, prev);
-					return false;
+					if(AIError.GetLastError() == AIError.ERR_VEHICLE_IN_THE_WAY ){
+						AIController.Sleep(50);
+						if(!AIRail.BuildRail(prevprev, prev, path.GetTile())){
+							DumbRemover(copy, prev);
+							return false;
+						}
+					}
+					else{
+						DumbRemover(copy, prev);
+						return false;
 					}
 				}
 			}
+		}
 		if(path != null){
 			prevprev = prev;
 			prev = path.GetTile();
 			path = path.GetParent();
 			}
-		}
+	}
 	return true;
 	}
 
@@ -516,16 +517,18 @@ function RailBuilder::GetBrakeVan()
 		}
 	}
 	
-function RailBuilder::SignalPath(path, flip) //admiral
+function RailBuilder::SignalPath(path) //admiral
 {
-SignalPathAdvanced(path, flip, 0, null, 999999)
+SignalPathAdvanced(path, 0, null, 999999)
 }
 
-function RailBuilder::SignalPathAdvanced(path, flip, skip, end, signal_count_limit) //admiral
+function RailBuilder::SignalPathAdvanced(path, skip, end, signal_count_limit) //admiral
 {
 	local i = 0;
 	local prev = null;
 	local prevprev = null;
+	local prevprevprev = null;
+	local prevprevprevprev = null;
 	local tiles_skipped = 55-(skip)*10;
 	local lastbuild_tile = null;
 	local lastbuild_front_tile = null;
@@ -542,17 +545,8 @@ function RailBuilder::SignalPathAdvanced(path, flip, skip, end, signal_count_lim
 				//AISign.BuildSign(path.GetTile(), "tiles skipped: "+tiles_skipped)
 				if (AIRail.GetSignalType(prev, path.GetTile()) != AIRail.SIGNALTYPE_NONE) tiles_skipped = 0;
 				//AISign.BuildSign(path.GetTile(), tiles_skipped)
-				if (tiles_skipped >= 55 && path.GetParent() != null && signal_count_limit>0) {
-					local status=false;
-					if (!flip)
-						{
-						status=AIRail.BuildSignal(path.GetTile(), prev, AIRail.SIGNALTYPE_PBS_ONEWAY);
-						}
-					else
-						{
-						status=AIRail.BuildSignal(prev, path.GetTile(), AIRail.SIGNALTYPE_PBS_ONEWAY);
-						}
-					if (status) {
+				if (tiles_skipped > 55 && path.GetParent() != null && signal_count_limit>0) {
+					if (AIRail.BuildSignal(path.GetTile(), prev, AIRail.SIGNALTYPE_PBS_ONEWAY)) {
 						i++;
 						tiles_skipped = 0;
 						lastbuild_tile = prev;
@@ -562,6 +556,8 @@ function RailBuilder::SignalPathAdvanced(path, flip, skip, end, signal_count_lim
 				}
 			}
 		}
+		prevprevprevprev = prevprevprev;
+		prevprevprev = prevprev;
 		prevprev = prev;
 		prev = path.GetTile();
 		path = path.GetParent();
@@ -571,6 +567,14 @@ function RailBuilder::SignalPathAdvanced(path, flip, skip, end, signal_count_lim
 	if (tiles_skipped < 50 && lastbuild_tile != null) {
 		AIRail.RemoveSignal(lastbuild_tile, lastbuild_front_tile);
 	}*/
+
+if (AIRail.GetSignalType(prevprev, prevprevprev) == AIRail.SIGNALTYPE_NONE)
+	AIRail.BuildSignal(prevprev, prevprevprev, AIRail.SIGNALTYPE_PBS_ONEWAY );
+		if (AIRail.GetSignalType(prevprevprev, prevprevprevprev) == AIRail.SIGNALTYPE_NONE && AIRail.GetSignalType(prevprev, prevprevprev) == AIRail.SIGNALTYPE_NONE)
+			AIRail.BuildSignal(prevprevprev, prevprevprevprev, AIRail.SIGNALTYPE_PBS_ONEWAY);
+//AISign.BuildSign(prevprev, "prevprev "+AIRail.GetSignalType(prevprev, prevprevprev))
+//AISign.BuildSign(prevprevprev, "prevprevprev")
+//AISign.BuildSign(prevprevprevprev, "prevprevprevprev")
 return i;
 }
 
@@ -938,10 +942,14 @@ while (path == false) {
 }
 
 if(path == false || path == null){
-  Info("   Pathfinder failed to find route. ");
-  return false;
-  }
-Info("   Pathfinder found sth.");
+	Info("   Pathfinder failed to find route. ");
+	if(rodzic.GetSetting("log_rail_pathfinding_time"))
+		AISign.BuildSign(AIMap.GetTileIndex(1, 1), "- "+GetReadableDate() + "[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]")
+	return false;
+	}
+Info("   Rail pathfinder found sth.");
+if(rodzic.GetSetting("log_rail_pathfinding_time"))
+	AISign.BuildSign(AIMap.GetTileIndex(1, 1), guardian+" "+GetReadableDate() + "[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]")
 return true;
 }
 

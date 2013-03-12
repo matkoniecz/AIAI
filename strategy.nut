@@ -52,7 +52,7 @@ new = PAXAirBuilder(this, 0);
 builders[0] = new;
 
 new = StupidRailBuilder(this, 0);
-new.pathfinding_time_limit=10;
+new.pathfinding_time_limit=20;
 new.retry_limit=1;
 builders[1] = new; 
 

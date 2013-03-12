@@ -123,7 +123,7 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 	}
 	}
 NewLine();
-Info("(" + best + " points)");
+//Info("(" + best + " points)");
 
 if(best==0){
    traska.OK=false;

@@ -62,21 +62,25 @@ function NewLine()
 function Info(string)
 {
 local date=AIDate.GetCurrentDate ();
-AILog.Info(AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date)  + " " + string);
+AILog.Info(GetReadableDate()  + " " + string);
 }
 
 function Warning(string)
 {
 local date=AIDate.GetCurrentDate ();
-AILog.Warning(AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date)  + " " + string);
+AILog.Warning(GetReadableDate()  + " " + string);
 }
 
 function Error(string)
 {
-local date=AIDate.GetCurrentDate ();
-AILog.Error(AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date)  + " " + string);
+AILog.Error( GetReadableDate() + " " + string);
 }
 
+function GetReadableDate()
+{
+local date=AIDate.GetCurrentDate ();
+return AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date);
+}
 /////////////////////////////////////////////////
 /// Age of the youngest vehicle (in days)
 /// @pre AIStation.IsValidStation(station_id)

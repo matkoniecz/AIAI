@@ -12,7 +12,7 @@ class Rail
 {
 	estimate_multiplier = 1;
 	
-	_aystar_class = import("graph.aystar", "", 4);
+	_aystar_class = AyStar;
 	_max_cost = null;              ///< The maximum cost for a route.
 	_cost_tile = null;             ///< The cost for a single tile.
 	_cost_diagonal_tile = null;    ///< The cost for a diagonal tile.

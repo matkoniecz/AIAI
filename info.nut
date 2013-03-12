@@ -1,14 +1,14 @@
 class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
-  function GetDescription() { return "Automatic Idiot AI Version theta (62). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
-  function GetVersion()     { return 62; }
+  function GetDescription() { return "Automatic Idiot AI Version iota (70). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
+  function GetVersion()     { return 70; }
   function GetAPIVersion() { return "1.1"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
-  function MinVersionToLoad() { return 62; } 
+  function MinVersionToLoad() { return 70; } 
   function GetDate()        { return "2011-10-25"; }
-  function GetURL() {return "http://tinyurl.com/ottdaiai or bulwersator@gmail.com. Thanks! [theta (62)]";}
+  function GetURL() {return "http://tinyurl.com/ottdaiai or bulwersator@gmail.com. Thanks! [iota (70)]";}
 
     function GetSettings() {
 	AddSetting( {
@@ -132,13 +132,23 @@ class AIAI extends AIInfo {
 	});
 
 	AddSetting( {
+		name = "log_rail_pathfinding_time",
+		description = "log rail pathfinding time",
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
+		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME + CONFIG_DEVELOPER
+	});
+
+	AddSetting( {
 		name = "hide_ad",
 		description = "hide_ad",
 		easy_value = 0,
 		medium_value = 0,
 		hard_value = 0,
 		custom_value = 0,
-		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME + CONFIG_DEVELOPER
+		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
 	});
 
 	AddSetting( {
@@ -151,6 +161,26 @@ class AIAI extends AIInfo {
 		min_value = 0,
 		max_value = 1000,
 		flags = AICONFIG_INGAME + CONFIG_DEVELOPER
+	});
+
+	AddSetting( {
+		name = "show_pathfinding",
+		description = "show pathfinding (using 737474828920202 signs)",
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
+		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
+	});
+
+	AddSetting( {
+		name = "show_full_pathfinding",
+		description = "show full pathfinding (using 737474828273874374374747920202 signs)",
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
+		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
 	});
 
 	}

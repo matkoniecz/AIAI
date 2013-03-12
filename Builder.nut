@@ -19,15 +19,23 @@ desperation = desperation_init;
 cost = 1;
 }
 
-function Builder::CountVehicles(station)
+function Builder::HowManyVehiclesFromThisStationAreStopped(station)
 {
-local vehicle_list=AIVehicleList_Station(station);
-vehicle_list.Valuate(rodzic.ForSell)
-vehicle_list.KeepValue(0);
-return vehicle_list.Count();
+local count = 0;
+			local vehicle_list=AIVehicleList_Station(station);
+			for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next())
+				{
+				if(AIVehicle.GetCurrentSpeed(vehicle_id) == 0){
+					if(AIVehicle.GetState(vehicle_id)!=AIVehicle.VS_AT_STATION){
+						Warning(AIVehicle.GetName(vehicle_id) + " is waiting");
+						count++;
+						}						
+					}
+				}
+return count;
 }
 
 function Builder::GetPathfindingLimit()
 {
-return pathfinding_time_limit;
+return pathfinding_time_limit + desperation * 2;
 }

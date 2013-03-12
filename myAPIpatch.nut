@@ -6,7 +6,7 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-AILog.Info("1.0 API compatability in effect.");
+AILog.Info("fix HasNext -> !IsEnd change");
 
 AIBridgeList.HasNext <-
 AIBridgeList_Length.HasNext <-
@@ -42,4 +42,28 @@ AIWaypointList_Vehicle.HasNext <-
 function()
 {
 	return !this.IsEnd();
+}
+
+
+AILog.Info("API changing");
+
+AIMap._IsValidTile <- AIMap.IsValidTile;
+AIMap.IsValidTile <- function(tile)
+{
+	if(tile == null) return false;
+	return AIMap._IsValidTile(tile);
+}
+
+AISign._BuildSign <- AISign.BuildSign;
+AISign.BuildSign <- function(tile, text)
+{
+	text+="";
+	local returned = AISign._BuildSign(tile, text);
+	if(AIError.GetLastError()!=AIError.ERR_NONE)
+		{
+		Error(AIError.GetLastErrorString() + " - SIGN FAILED" );
+		if(!AIMap.IsValidTile(tile))Error("Tile invalid");
+		}
+	//Info("signSTOP!  ("+text+")")
+	return returned;
 }

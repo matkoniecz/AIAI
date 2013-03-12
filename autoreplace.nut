@@ -28,7 +28,7 @@ for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_e
 	  if(engine_best != engine_existing)
 	     {
 		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
-         Info(AIEngine.GetName(engine_existing) + " will be replaced by " + AIEngine.GetName(engine_best));
+         Info(AIEngine.GetName(engine_existing) + " will be replaced with " + AIEngine.GetName(engine_best));
 		 }
 	  }
    

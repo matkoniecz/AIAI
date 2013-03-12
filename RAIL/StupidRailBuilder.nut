@@ -5,7 +5,7 @@ class StupidRailBuilder extends RailBuilder
 function StupidRailBuilder::Possible()
 {
 if(!IsAllowedCargoTrain()) return false;
-Info("estimated cost of a stupid railway connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
+Info("estimated cost of a railway connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
 
@@ -16,7 +16,7 @@ AIRail.SetCurrentRailType(types.Begin()); //TODO FIXME - needed in IsGreatPlaceF
 for(local i=0; i<2; i++)
 	{
 	if(!Possible()) return false;
-	Info("Scanning for stupid rail route");
+	Info("Scanning for rail route");
 	trasa = this.FindPairForStupidRailRoute(trasa);  
 	if(!trasa.OK) 
 		{
@@ -26,7 +26,16 @@ for(local i=0; i<2; i++)
 		}
 	AIRail.SetCurrentRailType(trasa.track_type);
 
-	Info("Scanning for stupid rail route completed [ " + desperation + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
+	local main_part_of_message = "Scanning for rail route completed. Desperation: " + desperation + " cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start);
+	if(!trasa.second_station.is_city)
+		{
+		Info(main_part_of_message + " End: " + AIIndustry.GetName(trasa.end));
+		}
+	else if(trasa.second_station.is_city)
+		{
+		Info(main_part_of_message + " End: " + AITown.GetName(trasa.end));
+		}
+	else abort("wtf")
 	if(this.PrepareStupidRailRoute()) 
 		{
 	  Info("   Contruction started on correct route.");
@@ -79,20 +88,24 @@ if(new_engine == null) {
 this.TrainOrders(new_engine);
 Info("   Route constructed!");
 
-local max_train_count = this.DumbAdBuilder(path);
+ProvideMoney();
+local max_train_count = this.AddPassingLanes(path);
 
 if(max_train_count==0) max_train_count = 1;
+if(max_train_count>=2 && max_train_count < 10)max_train_count = 2 + (max_train_count-2)/2;
+if(max_train_count>=10 && max_train_count < 20)max_train_count = 5 + (max_train_count-9)/3;
+if(max_train_count>=20)max_train_count = 2 + (max_train_count-19)/4;
 
 rodzic.SetStationName(trasa.first_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
 rodzic.SetStationName(trasa.second_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
 
-if(max_train_count>10)max_train_count = 10 + (max_train_count-10)/2;
 if(max_train_count>1) 
-new_engine = this.BuildTrain(trasa, "muhahaha");
-if(new_engine != null) {
-	this.TrainOrders(new_engine);
+	{
+	new_engine = this.BuildTrain(trasa, "muhahaha");
+	if(new_engine != null) {
+		this.TrainOrders(new_engine);
+		}
 	}
-
 return true;
 }
    
@@ -106,6 +119,7 @@ if(estimated_cost==null){
   Info("   Pathfinder failed to find correct route.");
   return false;
   }
+Info("Route is OK!")
   
 estimated_cost+=AIEngine.GetPrice(trasa.engine[0])+trasa.station_size*2*AIEngine.GetPrice(trasa.engine[1]);
 cost=estimated_cost;
@@ -120,6 +134,7 @@ if(GetAvailableMoney()<estimated_cost+2000)  //TODO zamiast 2000 koszt stacji to
 		return false;
 		}
 	}
+Info("Route found!")
 return true;
 }
 
