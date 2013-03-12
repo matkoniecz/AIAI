@@ -7,27 +7,7 @@ station_number = null;
 detected_rail_crossings = null;
 }
 
-require("findpair.nut");
-require("util.nut");
-require("UTILtile.nut");
-require("AIAI.nut");
-
-require("Builder.nut");
-require("RAIL/RailBuilder.nut");
-require("RAIL/SmartRailBuilder.nut");
-require("RAIL/StupidRailBuilder.nut");
-require("ROAD/RoadBuilder.nut");
-require("ROAD/BusRoadBuilder.nut");
-require("ROAD/TruckRoadBuilder.nut");
-require("AIR/AirBuilder.nut");
-require("AIR/PAXAirBuilder.nut");
-require("AIR/CargoAirBuilder.nut");
-
-import("util.superlib", "SuperLib", 5);
-
-Helper <- SuperLib.Helper
-Tile <- SuperLib.Tile
-Direction <- SuperLib.Direction
+require("headers.nut");
 
 function AIAI::Starter()
 {
@@ -35,10 +15,11 @@ Name();
 HQ();
 station_number = 1; //TODO load it
 if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")!= 0) AICompany.SetAutoRenewStatus(true);
+else AICompany.SetAutoRenewStatus(false);
 AICompany.SetAutoRenewMonths(0);
 AICompany.SetAutoRenewMoney(100000); //from ChooChoo
 
-AILog.Info("");
+NewLine();
 Info("Hi!!!");
 
 detected_rail_crossings=AIList()
@@ -60,25 +41,14 @@ function AIAI::Start()
 {
 this.Starter();
 
-local builders = array(6);
-builders[0] = PAXAirBuilder(this, 0);
-builders[1] = SmartRailBuilder(this, 0);
-builders[2] = StupidRailBuilder(this, 0);
-builders[3] = TruckRoadBuilder(this, 0);
-builders[4] = BusRoadBuilder(this, 0);
-builders[5] = CargoAirBuilder(this, 0);
-
+local builders = strategyGenerator();
 
 while(true)
 	{
 	IdleMoneyMenagement();
-
-	Error("Desperacja: " + desperacja);
-
+	Warning("Desperacja: " + desperacja);
 	this.Menagement();
-	
 	this.Konserwuj();
-   
 	if(this.EverythingFailed(builders))
 		{
 		Info("Nothing to do!");
@@ -133,6 +103,8 @@ return false;
 function AIAI::Statua()
 {
 local veh_list = AIVehicleList();
+if(veh_list.Count()==0)return false;
+
 veh_list.Valuate(AIBase.RandItem);
 veh_list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_DESCENDING);
 for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next()) 
@@ -153,7 +125,7 @@ for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next())
 		   {
 		   if(AITown.PerformTownAction(AITile.GetClosestTown(location), AITown.TOWN_ACTION_BUILD_STATUE)) 
 		      {
-			  Warning("Statue for " + AIVehicle.GetName(veh));
+			  Info("Statue for " + AIVehicle.GetName(veh));
 			  return true;
 			  }
 		   else
@@ -166,7 +138,7 @@ for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next())
 	  }
    }
 
-Error("Statua construction failed");
+Info("Statua construction failed");
 return false;
 }
 
@@ -193,7 +165,7 @@ for (local x = list.Begin(); list.HasNext(); x = list.Next())
 
 function BankruptProtector()
 {
-Info("BankruptProtector");
+//Info("BankruptProtector");
 if(AIVehicleList().Count()==0) return;
 if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<AICompany.GetLoanInterval()*2)
 {
@@ -211,22 +183,26 @@ while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
 			Sleep(1000);
 			}
 		}
-	Warning("End of financial problems!");
+	Info("End of financial problems!");
 	}
 }	   
-Info("BankruptProtector-end");
+//Info("BankruptProtector-end");
 }
 
 function AIAI::IdleMoneyMenagement()
 {
 if(AIVehicleList().Count()==0) return;
 BankruptProtector();
-while((AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())<100000)
+while((AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())<100000*GetInflationRate()/100)
 	{
-	Info("Waiting for more money: " + (AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())/1000 + "k / 100k"); //TODO: inflate (also in while)
 	while(AICompany.SetLoanAmount(AICompany.GetLoanAmount() - AICompany.GetLoanInterval()));
 	BankruptProtector();
-	Sleep(500);
+	local have = (AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())/1000;
+	local need = 100*GetInflationRate()/100;
+	if(have<=need){
+		Info("Waiting for more money: " + have + "k / " + need + "k");
+		Sleep(500);
+		}
 	this.Konserwuj();
 	}
 }
@@ -238,17 +214,9 @@ BankruptProtector();
 
 function AIAI::IsConnectedIndustry(industry_id, cargo)
 {
-local returnik = realcodeofIsConnectedIndustry(industry_id, cargo);
-//AISign.BuildSign(AIIndustry.GetLocation(industry_id), returnik+"");
-return returnik;
-}
-
-function AIAI::realcodeofIsConnectedIndustry(industry_id, cargo)
-{
 if((RoadBuilder(this, 0)).IsConnectedIndustry(industry_id, cargo)==true)return true;
 return (AirBuilder(this, 0)).IsConnectedIndustry(industry_id, cargo);
 }
-
 
 function AIAI::IsConnectedDistrict(town_tile)
 {
@@ -280,18 +248,6 @@ function AIAI::GetDate()
 {
 local date=AIDate.GetCurrentDate ();
 return AIDate.GetYear(date)*12 + AIDate.GetMonth(date);
-}
-
-function AIAI::Info(string)
-{
-local date=AIDate.GetCurrentDate ();
-AILog.Info(AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date)  + " " + string);
-}
-
-function AIAI::Debug(string)
-{
-local date=AIDate.GetCurrentDate ();
-AILog.Info(AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date)  + "." + string);
 }
 
 function AIAI::Save()
@@ -407,29 +363,23 @@ if((GetDate()-generalna_konserwacja)>12) //powinno raz na 12 miesiêcy
 }
 
 function AIAI::HandleEvents() //from CluelessPlus and simpleai
-{
-	while(AIEventController.IsEventWaiting())
 	{
+	while(AIEventController.IsEventWaiting()){
 		local event = AIEventController.GetNextEvent();
-
-		if(event == null)
-			return;
-
+		if(event == null)return;
 		local ev_type = event.GetEventType();
-
-		if(ev_type == AIEvent.AI_ET_VEHICLE_LOST)//from CluelessPlus
-		{
-		
+		if(ev_type == AIEvent.AI_ET_VEHICLE_LOST){
     		Error("Vehicle lost event detected!");
 			local lost_event = AIEventVehicleLost.Convert(event);
 			local lost_veh = lost_event.GetVehicleID();
 
 			/*
+			TODO - do sth with that code
 			local connection = ReadConnectionFromVehicle(lost_veh);
 			
 			if(connection.station.len() >= 2 && connection.connection_failed != true)
 			{
-				AILog.Info("Try to connect the stations again");
+				Info("Try to connect the stations again");
 
 				if(!connection.RepairRoadConnection())
 					SellVehicle(lost_veh);
@@ -441,73 +391,61 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			*/
 			
 		}
-		else if(ev_type == AIEvent.AI_ET_VEHICLE_CRASHED)//from CluelessPlus
-		{
-
+		else if(ev_type == AIEvent.AI_ET_VEHICLE_CRASHED){
 			local crash_event = AIEventVehicleCrashed.Convert(event);
 			local crash_reason = crash_event.GetCrashReason();
 			//local vehicle_id = crash_event.GetVehicleID();
 			//local crash_tile = crash_event.GetCrashSite();
-			if(crash_reason == AIEventVehicleCrashed.CRASH_RV_LEVEL_CROSSING)
-			{
+			if(crash_reason == AIEventVehicleCrashed.CRASH_RV_LEVEL_CROSSING){
 				this.HandleNewLevelCrossing(event);
+				}
 			}
-		}
-		else if(ev_type == AIEvent.AI_ET_ENGINE_PREVIEW) //from simpleai
-		{
-		event = AIEventEnginePreview.Convert(event);
-		if (event.AcceptPreview()) 
-		   {
-		   Info("New engine available from preview: " + event.GetName());
-		   Autoreplace();
-			if(event.GetVehicleType() == AIVehicle.VT_RAIL)(RailBuilder(this, 0)).TrainReplace();
-		   }
-		}
-		else if(ev_type == AIEvent.AI_ET_ENGINE_AVAILABLE)//from simpleai
-		{
-		event = AIEventEngineAvailable.Convert(event);
-		local engine = event.GetEngineID();
-		Info("New engine available: " + AIEngine.GetName(engine));
-		Autoreplace();
-		if(AIEngine.GetVehicleType(engine) == AIVehicle.VT_RAIL)(RailBuilder(this, 0)).TrainReplace();
-		}
-		else if(ev_type == AIEvent.AI_ET_COMPANY_NEW)//from simpleai
-		{
-		event = AIEventCompanyNew.Convert(event);
-		local company = event.GetCompanyID();
-		Warning("Welcome " + AICompany.GetName(company));
-		}
-		else if(ev_type == AIEvent.AI_ET_COMPANY_IN_TROUBLE)//from simpleai
-		{
-				event = AIEventCompanyInTrouble.Convert(event);
-				local company = event.GetCompanyID();
-				if (AICompany.IsMine(company))
-				   {
-				   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0) AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
-				   this.MoneyMenagement();
-				   }
-		}
-		else if(ev_type == AIEvent.AI_ET_INDUSTRY_OPEN)//from simpleai
-		{
-		event = AIEventIndustryOpen.Convert(event);
-		local industry = event.GetIndustryID();
-		Info("New industry: " + AIIndustry.GetName(industry));
-		/* TODO: Handle it. */
-		}
+		else if(ev_type == AIEvent.AI_ET_ENGINE_PREVIEW){
+			event = AIEventEnginePreview.Convert(event);
+			if (event.AcceptPreview()){
+				Info("New engine available from preview: " + event.GetName());
+				Autoreplace();
+				if(event.GetVehicleType() == AIVehicle.VT_RAIL)(RailBuilder(this, 0)).TrainReplace();
+				}
+			}
+		else if(ev_type == AIEvent.AI_ET_ENGINE_AVAILABLE){
+			event = AIEventEngineAvailable.Convert(event);
+			local engine = event.GetEngineID();
+			Info("New engine available: " + AIEngine.GetName(engine));
+			Autoreplace();
+			if(AIEngine.GetVehicleType(engine) == AIVehicle.VT_RAIL)(RailBuilder(this, 0)).TrainReplace();
+			}
+		else if(ev_type == AIEvent.AI_ET_COMPANY_NEW){
+			event = AIEventCompanyNew.Convert(event);
+			local company = event.GetCompanyID();
+			Info("Welcome " + AICompany.GetName(company));
+			}
+		else if(ev_type == AIEvent.AI_ET_COMPANY_IN_TROUBLE){
+			event = AIEventCompanyInTrouble.Convert(event);
+			local company = event.GetCompanyID();
+			if (AICompany.IsMine(company)){
+			   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0) AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
+			   this.MoneyMenagement();
+			   }
+			}
+		else if(ev_type == AIEvent.AI_ET_INDUSTRY_OPEN){
+			event = AIEventIndustryOpen.Convert(event);
+			local industry = event.GetIndustryID();
+			Info("New industry: " + AIIndustry.GetName(industry));
+			/* TODO: Handle it. */
+			}
 		else if(ev_type == AIEvent.AI_ET_INDUSTRY_CLOSE)//from simpleai
-		{
-		event = AIEventIndustryClose.Convert(event);
-		local industry = event.GetIndustryID();
-		if (AIIndustry.IsValidIndustry(industry))
-		    {
-			Info("Closing industry: " + AIIndustry.GetName(industry));
-			/* Handling is useless. */
+			{
+			event = AIEventIndustryClose.Convert(event);
+			local industry = event.GetIndustryID();
+			if (AIIndustry.IsValidIndustry(industry)){
+				Info("Closing industry: " + AIIndustry.GetName(industry));
+				/* Handling is useless. */
+				}
 			}
-		}
-		else
-		{
-		;
-		}
+		/*events left
+		
+		*/
 	}
 }
 

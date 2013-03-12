@@ -170,7 +170,6 @@ if(AIAI.GetSetting("deep_debugged_function_calling"))Info("FindSuitableAirportSp
 				   //AISign.BuildSign(tile, "X");
 				   continue;
 				   }
-			   Error("OK");
 				good_tile = tile;
 				break;
 			}
@@ -179,13 +178,13 @@ if(AIAI.GetSetting("deep_debugged_function_calling"))Info("FindSuitableAirportSp
 			if (good_tile == 0) continue;
 		}
 
-		AILog.Info("Found a good spot for an airport in town " + town + " at tile " + tile);
+		Info("Found a good spot for an airport in town " + town + " at tile " + tile);
 if(AIAI.GetSetting("deep_debugged_function_calling"))Info(">FindSuitableAirportSpotInTown");
 
 		return tile;
 	}
 
-	AILog.Info("Couldn't find a suitable town to build an airport in");
+	Info("Couldn't find a suitable town to build an airport in");
 if(AIAI.GetSetting("deep_debugged_function_calling"))Info(">FindSuitableAirportSpotInTown");
 	return -1;
 }
@@ -302,7 +301,7 @@ return route;
 
 function AirBuilder::FindAircraft(airport_type, cargo, ile, balance)
 {
-//Error(balance+"");
+//Error("Balance" + balance);
 local engine_list = AIEngineList(AIVehicle.VT_AIR);
 
 //Error("engine_list.Count() I " + engine_list.Count());
@@ -313,7 +312,7 @@ if(airport_type==AIAirport.AT_SMALL || airport_type==AIAirport.AT_COMMUTER )
 	engine_list.RemoveValue(AIAirport.PT_BIG_PLANE);
 	}
 
-//AILog.Error("engine_list.Count() II " + engine_list.Count());
+//Error("engine_list.Count() II " + engine_list.Count());
 	
 balance-=2000;
 if(ile!=0)balance-=2*AIAirport.GetPrice(airport_type);
@@ -323,24 +322,24 @@ engine_list.Valuate(AIEngine.GetPrice);
 if(ile==0) engine_list.KeepBelowValue(balance);
 else engine_list.KeepBelowValue(balance/ile);
 
-//AILog.Error("engine_list.Count() III " + engine_list.Count());
+//Error("engine_list.Count() III " + engine_list.Count());
 
 engine_list.Valuate(AIEngine.CanRefitCargo, cargo);
 engine_list.KeepValue(1);
 
-//AILog.Error("engine_list.Count() IV " + engine_list.Count());
+//Error("engine_list.Count() IV " + engine_list.Count());
 
 engine_list.Valuate(AIEngine.GetMaxSpeed);
 engine_list.KeepAboveValue(100);
 
-//AILog.Error("engine_list.Count() V " + engine_list.Count());
+//Error("engine_list.Count() V " + engine_list.Count());
 
 engine_list.Valuate(AIEngine.GetCapacity);
 //Error("Desperacja: " + this.desperacja);
 engine_list.KeepAboveValue(40 - this.desperacja); //HARDCODED OPTION
 engine_list.KeepTop(1);
 
-//AILog.Error("engine_list.Count() VI " + engine_list.Count());
+//Error("engine_list.Count() VI " + engine_list.Count());
 
 if(engine_list.Count()==0)return null;
 return engine_list.Begin();
@@ -400,7 +399,7 @@ local vehicle = AIVehicle.BuildVehicle(hangar, engine);
 
 if(!AIVehicle.RefitVehicle(vehicle, cargo)) 
    {
-   AILog.Error("Couldn't refit the aircraft " + AIError.GetLastErrorString());
+   Error("Couldn't refit the aircraft " + AIError.GetLastErrorString());
    AIVehicle.SellVehicle(vehicle);
    return -1;
    }
@@ -410,13 +409,13 @@ return vehicle;
 function AirBuilder::HowManyAirplanes(dystans, speed, production, engine)
 {
 local ile = (3*dystans)/(2*speed);
-Error(ile + "&^%");
+Info(ile + "aircrafts needed; based on distance");
 
 ile *= 10 * production;
-Error(ile + "&^%***********");
+//Info(ile + "&^%***********");
 
 ile /= AIEngine.GetCapacity(engine);
-Error(ile + "&^%************************");
+Info(ile + "aircrafts needed after production (" + production + ") and capacity (" +  AIEngine.GetCapacity(engine) +") adjustment");
 ile = max(ile, 3);
 return ile;
 }
@@ -618,35 +617,31 @@ function AirBuilder::UzupelnijCargo()
 local list = AIStationList(AIStation.STATION_AIRPORT);
 if(list.Count()==0)return;
 
-for (local aktualna = list.Begin(); list.HasNext(); aktualna = list.Next())
-   {
-   local cargo_list = AICargoList();
-   for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next())
-	   if(AIStation.GetCargoWaiting(aktualna, cargo)>1)
-       {
-	   if(cargo != AIAI.GetPassengerCargoId())
-	   if(cargo != AIAI.GetMailCargoId())
-	   if(IsItNeededToImproveThatStation(aktualna, cargo))
-		  {
-		 local airport_type = AIAirport.GetAirportType(AIStation.GetLocation(aktualna));
-		 if(airport_type==AIAirport.AT_SMALL || airport_type==AIAirport.AT_COMMUTER) 
-		    {
-			airport_type=AIAirport.AT_SMALL;
-			}
-		  local vehicle = AIVehicleList_Station(aktualna).Begin();
-		  local another_station = AIOrder.GetOrderDestination(vehicle, 0);
-		  if(AIStation.GetLocation(aktualna) == another_station) another_station = AIOrder.GetOrderDestination(vehicle, 1);
-
-		  local engine=this.FindAircraft(airport_type, cargo, 1, GetAvailableMoney());
-		  if(engine != null)
-		  {
-		  ProvideMoney();
-		  if(IsItPossibleToAddBurden(aktualna, another_station, engine)) this.BuildCargoAircraft(AIStation.GetLocation(aktualna), another_station, engine, cargo, "uzupelniacz");
-		  }
-		  else 
-		  {
-		  Error("Aajjajaja");
-		  }
+for (local aktualna = list.Begin(); list.HasNext(); aktualna = list.Next()){
+	local cargo_list = AICargoList();
+	for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next())
+		if(AIStation.GetCargoWaiting(aktualna, cargo)>1){
+		if(cargo != AIAI.GetPassengerCargoId())
+			if(cargo != AIAI.GetMailCargoId())
+				if(IsItNeededToImproveThatStation(aktualna, cargo))
+				{
+				local airport_type = AIAirport.GetAirportType(AIStation.GetLocation(aktualna));
+				if(airport_type==AIAirport.AT_SMALL || airport_type==AIAirport.AT_COMMUTER){
+					airport_type=AIAirport.AT_SMALL;
+					}
+				local vehicle = AIVehicleList_Station(aktualna).Begin();
+				local another_station = AIOrder.GetOrderDestination(vehicle, 0);
+				if(AIStation.GetLocation(aktualna) == another_station) another_station = AIOrder.GetOrderDestination(vehicle, 1);
+				local engine=this.FindAircraft(airport_type, cargo, 1, GetAvailableMoney());
+				if(engine != null){
+					ProvideMoney();
+					if(IsItPossibleToAddBurden(aktualna, another_station, engine)) {
+						this.BuildCargoAircraft(AIStation.GetLocation(aktualna), another_station, engine, cargo, "uzupelniacz");
+						}
+					}
+				else {
+					Error("Plane not found for " + AICargo.GetCargoLabel(cargo) + " cargo.");
+					}
 		  }
 	   }   
    }

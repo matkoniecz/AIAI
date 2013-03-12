@@ -5,7 +5,7 @@ class SmartRailBuilder extends RailBuilder
 function SmartRailBuilder::Possible()
 {
 if(!IsAllowedSmartCargoTrain())return false;
-Warning("$: " + this.cost + " / " + GetAvailableMoney());
+Info("$: " + this.cost + " / " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
 
@@ -13,10 +13,10 @@ function SmartRailBuilder::Go()
 {
 local types = AIRailTypeList();
 AIRail.SetCurrentRailType(types.Begin());
-for(local i=0; i<20; i++)
+for(local i=0; i<retry_limit; i++)
    {
    if(!Possible())return false;
-   Warning("<==scanning=for=Smart=rail=route=");
+   Important("Scanning for smart rail route");
    trasa = this.FindPairForSmartRailRoute(trasa);  
    if(!trasa.OK) 
       {
@@ -25,11 +25,8 @@ for(local i=0; i<20; i++)
       return false;
       }
 
-   Warning("==scanning=for=Smart=rail=route=completed=> [ " + desperacja + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
-   if(this.SmartRailRoute()) 
-      {
-	  return true;
-	  }
+   Important("Scanning for smart rail route completed [ " + desperacja + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
+   if(this.SmartRailRoute())return true;
    else trasa.zakazane.AddItem(trasa.start, 0);
    }
 return false;
@@ -37,14 +34,14 @@ return false;
 
 function SmartRailBuilder::SmartRailRoute()
 {
-this.Info("   Company started route on distance: " + AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile));
+Info("   Company started route on distance: " + AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile));
 this.StationPreparation();   
 
-if(!this.LinkFinder(false))return false;
+if(!this.PathFinder(false, this.GetPathfindingLimit()))return false;
 
 local koszt = this.GetCostOfRoute(path); 
 if(koszt==null){
-  this.Info("   Pathfinder failed to find correct route.");
+  Info("   Pathfinder failed to find correct route.");
   return false;
   }
 
@@ -75,13 +72,13 @@ if(GetAvailableMoney()<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w R
 	}
 else
 	{
-	Info("OK")
+	Info("money OK")
 	}
 ProvideMoney();
 if(!this.StationConstruction()) return false;   
 if(!this.RailwayLinkConstruction(path)){
    //AIRail.RemoveRailStationTileRect(trasa.first_station); ........... //TODO DO IT
-   this.Info("   But stopped by error");
+   Info("   But stopped by error");
   AITile.DemolishTile(trasa.first_station.location);
   AITile.DemolishTile(trasa.second_station.location);
    return false;	  
@@ -90,14 +87,13 @@ if(!this.RailwayLinkConstruction(path)){
 trasa.depot_tile = this.BuildDepot(path, false);
    
 if(trasa.depot_tile==null){
-   this.Info("   Depot placement error");
+   Info("   Depot placement error");
   AITile.DemolishTile(trasa.first_station.location);
   AITile.DemolishTile(trasa.second_station.location);
   this.DumbRemover(path, null)
    return false;	  
    }
 
-Error("this.BuildTrain(wrzut) 2");
 local new_engine = this.BuildTrain(trasa, "smart uno");
 
 if(new_engine == null)
@@ -115,33 +111,37 @@ local date=AIDate.GetCurrentDate ();
    
 local old_path = path;
 
-if(!this.LinkFinder(true))return true; //passing lanes
-
+if(!this.PathFinder(true, this.GetPathfindingLimit()*4))return true; //TODO: passing lanes
 ProvideMoney();
 local date=AIDate.GetCurrentDate ();
-
-local koszt = this.GetCostOfRoute(path); 
-if(koszt==null){
-  this.Info("   Pathfinder failed to find correct route.");
-  //TODO passing lanes
-  return true;
-  }
-
-cost=koszt;
-
-if(GetAvailableMoney()<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w RV
+cost = this.GetCostOfRoute(path); 
+if(cost==null){
+	Info("   Pathfinder failed to find correct route.");
+	Info("Retry");
+	if(!this.PathFinder(true, this.GetPathfindingLimit()*4))return true; //TODO: passing lanes
+		ProvideMoney();
+		local date=AIDate.GetCurrentDate ();
+		cost = this.GetCostOfRoute(path); 
+		if(cost==null){
+		Info("   Pathfinder failed again to find correct route.");{
+			//TODO passing lanes
+			return true;
+			}
+		}
+	}
+if(GetAvailableMoney()<cost+2000)  //TODO replace 2000 with real station costs
     {
 	rodzic.MoneyMenagement();
-    while(GetAvailableMoney()<koszt+2000) 
+    while(GetAvailableMoney()<cost+2000) 
 	   {
-	   Info("too expensivee, we have only " + GetAvailableMoney() + " And we need " + koszt);
+	   Info("too expensivee, we have only " + GetAvailableMoney() + " And we need " + cost);
 	   rodzic.Konserwuj(); //TODO bez wydawania kasy
 	   AIController.Sleep(1000);
 	   }
 	}
 
 if(!this.RailwayLinkConstruction(path)){
-   this.Info("   But stopped by error");
+   Info("   But stopped by error");
   //TODO passing lanes
    return true;	  
    }
@@ -161,7 +161,6 @@ if(GetAvailableMoney() <koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w 
 	   }
 	}
 
-Error("this.BuildTrain(wrzut) 3");
 new_engine = this.BuildTrain(trasa, "smart duo");
 if(new_engine != null)
    {
@@ -261,7 +260,7 @@ return this.ZnajdzStacjeSmartRail(list, size);
 
 function SmartRailBuilder::ZnajdzStacjeSmartRail(list, length)
 {
-for(local station = list.Begin(); !list.HasNext(); station = list.Next())
+for(local station = list.Begin(); list.HasNext(); station = list.Next())
 	{
 	if(this.IsGreatPlaceForRailStationSmartRail(station, StationDirection.y_is_constant__vertical, length))
 		{
@@ -278,7 +277,7 @@ for(local station = list.Begin(); !list.HasNext(); station = list.Next())
 		return returnik;
 		}
 	}
-for(local station = list.Begin(); !list.HasNext(); station = list.Next())
+for(local station = list.Begin(); list.HasNext(); station = list.Next())
 	{
 	if(this.IsOKPlaceForRailStationSmartRail(station, StationDirection.y_is_constant__vertical, length))
 		{

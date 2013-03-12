@@ -4,7 +4,7 @@ function AIAI::HandleNewLevelCrossing(ev) //from CluelessPlus
 			   local crash_reason = crash_event.GetCrashReason();
 			   local vehicle_id = crash_event.GetVehicleID();
 			   local crash_tile = crash_event.GetCrashSite();
-			   Warning("Vehicle " + AIVehicle.GetName(vehicle_id) + " crashed at level crossing");				
+			   Info("Vehicle " + AIVehicle.GetName(vehicle_id) + " crashed at level crossing");				
 
 				local neighbours = Tile.GetNeighbours4MainDir(crash_tile);
 				neighbours.Valuate(AIRoad.AreRoadTilesConnected, crash_tile);
@@ -30,7 +30,7 @@ if(AIBase.RandRange(6)==0)
 					this.detected_rail_crossings.Valuate(Helper.ItemValuator);
 					foreach(crash_tile, _ in this.detected_rail_crossings)
 					{
-						AILog.Info("Trying to fix a railway crossing that had an accident before (one of" + this.detected_rail_crossings.Count() + ")" );
+						Info("Trying to fix a railway crossing that had an accident before (one of" + this.detected_rail_crossings.Count() + ")" );
 						local neighbours = Tile.GetNeighbours4MainDir(crash_tile);
 						neighbours.Valuate(AIRoad.AreRoadTilesConnected, crash_tile);
 						neighbours.KeepValue(1);
@@ -80,7 +80,7 @@ function ConvertRailCrossingToBridge(rail_tile, prev_tile) //from CluelessPlus
 			AIBridge.IsBridgeTile(tile_before) ||
 			AITunnel.IsTunnelTile(tile_before))
 	{
-		AILog.Info("Fail 1");
+		Info("Fail 1");
 		return null;
 	}
 
@@ -89,7 +89,7 @@ function ConvertRailCrossingToBridge(rail_tile, prev_tile) //from CluelessPlus
 			AIBridge.IsBridgeTile(tile_after) ||
 			AITunnel.IsTunnelTile(tile_after))
 	{
-		AILog.Info("Fail 2");
+		Info("Fail 2");
 		return null;
 	}
 
@@ -103,8 +103,8 @@ function ConvertRailCrossingToBridge(rail_tile, prev_tile) //from CluelessPlus
 	if ( (tile_before_owner != -1 && !AICompany.IsMine(tile_before_owner)) || 
 			(tile_after_owner != -1 && !AICompany.IsMine(tile_after_owner)) )
 	{
-		AILog.Info("Not my road - owned by " + tile_before_owner + ": " + AICompany.GetName(tile_before_owner) + " and " + tile_after_owner + ":" + AICompany.GetName(tile_after_owner));
-		AILog.Info("Fail 3");
+		Info("Not my road - owned by " + tile_before_owner + ": " + AICompany.GetName(tile_before_owner) + " and " + tile_after_owner + ":" + AICompany.GetName(tile_after_owner));
+		Info("Fail 3");
 		return null;
 	}
 
@@ -120,7 +120,7 @@ function ConvertRailCrossingToBridge(rail_tile, prev_tile) //from CluelessPlus
 
 		if (AIRoad.AreRoadTilesConnected(end_tile, left_tile) || AIRoad.AreRoadTilesConnected(end_tile, right_tile))
 		{
-			AILog.Info("Fail 4");
+			Info("Fail 4");
 			return null;
 		}
 	}
@@ -135,7 +135,7 @@ function ConvertRailCrossingToBridge(rail_tile, prev_tile) //from CluelessPlus
 	local before_dn_slope = Tile.IsDownSlope(tile_before, backward_dir);
 	local same_height = AITile.GetMaxHeight(tile_after) == AITile.GetMaxHeight(tile_before);
 
-	AILog.Info("after_dn_slope = " + after_dn_slope + " | before_dn_slope = " + before_dn_slope + " | same_height = " + same_height);
+	Info("after_dn_slope = " + after_dn_slope + " | before_dn_slope = " + before_dn_slope + " | same_height = " + same_height);
 
 	if (Tile.IsDownSlope(tile_after, forward_dir) && Tile.IsDownSlope(tile_before, backward_dir) &&
 		AITile.GetMaxHeight(tile_after) == AITile.GetMaxHeight(tile_before)) // Make sure the tunnel entrances are at the same height
@@ -183,7 +183,7 @@ function ConvertRailCrossingToBridge(rail_tile, prev_tile) //from CluelessPlus
 	if (!tunnel && !bridge)
 	{
 		// Can neither make tunnel or build bridge
-		AILog.Info("Fail 5");
+		Info("Fail 5");
 		return null;
 	}
 
@@ -193,7 +193,7 @@ function ConvertRailCrossingToBridge(rail_tile, prev_tile) //from CluelessPlus
 	{
 		if (bridge_list.IsEmpty())
 		{
-			AILog.Info("Fail 6");
+			Info("Fail 6");
 			return null; // There is no bridge for this length
 		}
 	}
@@ -204,8 +204,8 @@ function ConvertRailCrossingToBridge(rail_tile, prev_tile) //from CluelessPlus
 	AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
 	if (AICompany.GetBankBalance(AICompany.COMPANY_SELF) < 20000)
 	{
-		AILog.Info("Found railway crossing that can be replaced, but bail out because of low founds.");
-		AILog.Info("Fail 7");
+		Info("Found railway crossing that can be replaced, but bail out because of low founds.");
+		Info("Fail 7");
 		return null;
 	}
 
@@ -219,12 +219,12 @@ function ConvertRailCrossingToBridge(rail_tile, prev_tile) //from CluelessPlus
 			local last_error = AIError.GetLastError();
 			if(last_error == AIError.ERR_VEHICLE_IN_THE_WAY || last_error == AIError.ERR_NOT_ENOUGH_CASH)
 			{
-				AILog.Info("Couldn't remove road over rail because of vehicle in the way or low cash -> wait and try again");
+				Info("Couldn't remove road over rail because of vehicle in the way or low cash -> wait and try again");
 				AIController.Sleep(5);
 			}
 			else
 			{
-				AILog.Info("Couldn't remove road because " + AIError.GetLastErrorString());
+				Info("Couldn't remove road because " + AIError.GetLastErrorString());
 				break;
 			}
 			i++;
@@ -232,8 +232,8 @@ function ConvertRailCrossingToBridge(rail_tile, prev_tile) //from CluelessPlus
 
 		if (AIRoad.AreRoadTilesConnected(tile_before, tile_after))
 		{
-			AILog.Info("Tried to remove road over rail for a while, but failed");
-			AILog.Info("Fail 8");
+			Info("Tried to remove road over rail for a while, but failed");
+			Info("Fail 8");
 			return null;
 		}
 	}
@@ -257,13 +257,13 @@ function ConvertRailCrossingToBridge(rail_tile, prev_tile) //from CluelessPlus
 	if (build_failed)
 	{
 		local what = tunnel == true? "tunnel" : "bridge";
-		AILog.Warning("Failed to build " + what + " to cross rail because " + AIError.GetLastErrorString() + ". Now try to build road to repair the road.");
+		Info("Failed to build " + what + " to cross rail because " + AIError.GetLastErrorString() + ". Now try to build road to repair the road.");
 		if(AIRoad.BuildRoadFull(tile_before, tile_after))
 		{
-			AILog.Error("Failed to repair road crossing over rail by building road because " + AIError.GetLastErrorString());
+			Error("Failed to repair road crossing over rail by building road because " + AIError.GetLastErrorString());
 		}
 
-		AILog.Info("Fail 9");
+		Info("Fail 9");
 		return null;
 	}
 

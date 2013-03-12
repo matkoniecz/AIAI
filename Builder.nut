@@ -3,6 +3,8 @@ class Builder
 cost = null;
 rodzic = null;
 desperacja = 0;
+retry_limit = 2;
+pathfinding_time_limit = 10;
 };
 
 function Builder::SetDesperacja(new_desperacja)
@@ -23,4 +25,9 @@ local vehicle_list=AIVehicleList_Station(station);
 vehicle_list.Valuate(rodzic.CzyNaSprzedaz)
 vehicle_list.KeepValue(1);
 return vehicle_list.Count();
+}
+
+function Builder::GetPathfindingLimit()
+{
+return pathfinding_time_limit;
 }

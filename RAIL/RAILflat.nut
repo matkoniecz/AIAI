@@ -98,7 +98,6 @@ local types = AIRailTypeList();
 AIRail.SetCurrentRailType(types.Begin());
 
 /*
-AILog.Info("@@@@@@@@@@@@@@@@@@");
 local tile_b;
 local tile_a;
 

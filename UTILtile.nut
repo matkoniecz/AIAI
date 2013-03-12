@@ -216,7 +216,7 @@ function Utils_Tile::FlattenLandForStation(tile, width, height, tile_height, for
 			local t = AIMap.GetTileIndex(x, y);
 			local h = Utils_Tile.GetRealHeight(t);
 			if (abs(tile_height - h) >= 2) {
-				AILog.Error("Utils_Tile::FlattenLandForStation(): Difference in tile height is too big");
+				Error("Utils_Tile::FlattenLandForStation(): Difference in tile height is too big");
 				return false;
 			}
 			/* AITile.GetComplementSlope can't handle steep slopes, so raise

@@ -5,7 +5,7 @@ class BusRoadBuilder extends RoadBuilder
 function BusRoadBuilder::Possible()
 {
 if(!IsAllowedBus())return false;
-Warning("$: " + this.cost + " / " + GetAvailableMoney());
+Info("$: " + this.cost + " / " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
 
@@ -40,16 +40,16 @@ function BusRoadBuilder::Go()
 AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
 trasa = Route();
 
-for(local i=0; i<20; i++)
+for(local i=0; i<retry_limit; i++)
    {
-   Warning("<==scanning=for=bus=route=");
+   Important("Scanning for bus route");
    if(!this.FindBusPair())
       {
 	  Info("Nothing found!");
 	  cost = 0;
 	  return false;
       }
-   Warning("==scanning=for=bus=route=completed=> [ " + desperacja + " ] ");
+   Important("Scanning for bus route completed [ " + desperacja + " ] ");
    if(this.PrepareRoute())
       {
 	  Info("   Contruction started on correct route.");
@@ -80,13 +80,13 @@ function BusRoadBuilder::ZbudujStacjeAutobusow()
 {
 if(!AIRoad.BuildDriveThroughRoadStation(trasa.first_station.location, trasa.start_otoczka[0], AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)) 
    {
-   this.Info("   Producer station placement impossible due to " + AIError.GetLastErrorString());
+   Info("   Producer station placement impossible due to " + AIError.GetLastErrorString());
    if(rodzic.GetSetting("other_debug_signs")) AISign.BuildSign(trasa.first_station.location, AIError.GetLastErrorString());
    return false;
    }
 if(!AIRoad.BuildDriveThroughRoadStation(trasa.second_station.location, trasa.koniec_otoczka[0], AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)) 
    {
-   this.Info("   Consumer station placement impossible due to " + AIError.GetLastErrorString());
+   Info("   Consumer station placement impossible due to " + AIError.GetLastErrorString());
    AIRoad.RemoveRoadStation(trasa.first_station.location);
    if(rodzic.GetSetting("other_debug_signs")) AISign.BuildSign(trasa.second_station.location, AIError.GetLastErrorString());
    return false;

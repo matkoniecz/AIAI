@@ -5,7 +5,7 @@ class PAXAirBuilder extends AirBuilder
 function PAXAirBuilder::Possible()
 {
 if(!IsAllowedPAXPlane())return false;
-Warning("$: " + this.cost + " / " + GetAvailableMoney());
+Info("$: " + this.cost + " / " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
 

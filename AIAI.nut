@@ -2,7 +2,7 @@ function AIAI::GetIndustryList()
 {
 local list = AIIndustryList();
 list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile);
-list.KeepTop(300);
+list.KeepTop(200);
 return list;
 }
 
@@ -10,7 +10,7 @@ function AIAI::GetIndustryList_CargoAccepting(cargo)
 {
 local list = AIIndustryList_CargoAccepting(cargo);
 list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile);
-list.KeepTop(300);
+list.KeepTop(200);
 return list;
 }
 
@@ -18,7 +18,7 @@ function AIAI::GetIndustryList_CargoProducing(cargo)
 {
 local list = AIIndustryList_CargoProducing(cargo);
 list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile);
-list.KeepTop(300);
+list.KeepTop(200);
 return list;
 }
 
@@ -91,10 +91,11 @@ Debug("No possible HQ location found");
 
 function AIAI::Autoreplace()
 {
+Info("Autoreplace started");
 AutoreplaceRV();
 AutoreplaceSmallPlane();
 AutoreplaceBigPlane();
-Warning("Autoreplace list updated by Autoreplace() from util.nut");
+Info("Autoreplace list updated by Autoreplace() from AIAI.nut");
 }
 
 function AIAI::AutoreplaceBigPlane()
@@ -129,7 +130,7 @@ function AIAI::AutoreplaceSmallPlane()
 {
 local engine_list=AIEngineList(AIVehicle.VT_AIR);
 engine_list.Valuate(AIEngine.GetPlaneType);
-engine_list.RemoveValue(AIAirport.PT_BIG_PLANE);
+engine_list.KeepValue(AIAirport.PT_SMALL_PLANE);
 
 for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_existing = engine_list.Next()) //from Chopper 
    {

@@ -1,6 +1,22 @@
-TODO: error catherw w BuildTrain
+TODO: sprawdziæ jak (i czy) dzia³a lista zbanowanych
+
+BUG:puste rozkazy skutkuj¹ce errorami
+	- wyjaœniæ powody
+	- wyeliminowaæ crashe
+TODO: better strategy
 TODO: limit 25 jest z³y: zazwyczaj za wysoki jeœli jednak faile nastêpuj¹ z powodu za krótkiego czasu skanowania to trzeba zwiêkszyæ
+
+TODO: during heavy competition (more companies that ind + towns) build statues after every connection
+TODO: error catherw w BuildTrain
 TODO: max number of trains in station name also: connected industries, cargo
+TODO: check during pathfinding is it still possible to have station
+TODO: supplies
+	- supplies - cagos accepted by raw industries
+	- big penalty for normal transport
+	- special transport
+	- by truck, to industry serviced with profit by AIAI with statue with high rating (trains preffered?)
+TODO: check jams before RV/train building
+ 
 TODO: check cost before train replacing
 TODO: remove empty railway tracks
 
@@ -9,9 +25,7 @@ TODO: dead ends for busses
 TODO: handle bus queues
 
 TODO: long term average for secondaries
-TODO: replace helis by helis or nothing
 TODO: bridge upgrading
-TODO: try to clear road in RAILbuilder
 TODO: allow replacing small planes by big on big airports!
 
 TODO: 6x ciê¿szy poci¹g jeœli podjazdy s¹ pojedyñcze????
@@ -26,7 +40,6 @@ TODO: tourist support
 TODO: terminus RV station
 TODO: better RV depot placing (replace double flat by test mode)
 TODO: more working depots
-TODO: check jams before RV building
 TODO: reuse existing roads constructed by another players
 TODO: For all newly build routes, check both ways. This way, if one-way roads are build, another road is build next to it so vehicles can go back. //from admiralai
 TODO: long bridges sometimes are unavailable!
@@ -47,9 +60,3 @@ TODO: bus scanner
 		- route construction is needed
 	- vehicle is profitable - we parasited succesfully
 	limitation: real players rarely construct intercity routes
-
-ideas 
-function Banker::GetInflationRate() //from simpleai
-{
-	return (100 * AICompany.GetMaxLoanAmount() / AIGameSettings.GetValue("difficulty.max_loan"));
-}

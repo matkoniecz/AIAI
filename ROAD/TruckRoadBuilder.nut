@@ -24,13 +24,12 @@ distanceBetweenIndustriesValuator, IndustryToIndustryTruckStationAllocator, GetN
 
 function TruckRoadBuilder::Go()
 {
-Error("==================================");
 AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
 trasa = Route();
 
-for(local i=0; i<20; i++)
+for(local i=0; i<retry_limit; i++)
    {
-   Warning("<==scanning=for=truck=route=");
+   Important("Scanning for truck route");
    trasa = this.FindPair(trasa); 
    if(!trasa.OK) 
       {
@@ -39,7 +38,7 @@ for(local i=0; i<20; i++)
       return false;
       }
 
-   Warning("==scanning=for=truck=route=completed=> [ " + desperacja + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
+   Important("Scanning for truck route completed [ " + desperacja + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
    if(this.PrepareRoute())
       {
 	  Info("   Contruction started on correct route.");

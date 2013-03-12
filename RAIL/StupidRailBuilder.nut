@@ -5,7 +5,7 @@ class StupidRailBuilder extends RailBuilder
 function StupidRailBuilder::Possible()
 {
 if(!IsAllowedStupidCargoTrain())return false;
-Warning("$: " + this.cost + " / " + GetAvailableMoney());
+Info("$: " + this.cost + " / " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
 
@@ -13,10 +13,10 @@ function StupidRailBuilder::Go()
 {
 local types = AIRailTypeList();
 AIRail.SetCurrentRailType(types.Begin());
-for(local i=0; i<20; i++)
+for(local i=0; i<2; i++)
    {
    if(!Possible())return false;
-   Warning("<==scanning=for=stupid=rail=route=");
+   Important("Scanning for stupid rail route");
    trasa = this.FindPairForStupidRailRoute(trasa);  
    if(!trasa.OK) 
       {
@@ -25,7 +25,7 @@ for(local i=0; i<20; i++)
       return false;
       }
 
-   Warning("==scanning=for=stupid=rail=route=completed=> [ " + desperacja + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
+   Important("Scanning for stupid rail route completed [ " + desperacja + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
    if(this.PrepareStupidRailRoute()) 
       {
 	  Info("   Contruction started on correct route.");
@@ -51,7 +51,7 @@ if(!this.StationConstruction()) return false;
 
 if(!this.RailwayLinkConstruction(path)){
    //AIRail.RemoveRailStationTileRect(trasa.first_station); ........... //TODO DO IT
-   this.Info("   But stopped by error");
+   Info("   But stopped by error");
   AITile.DemolishTile(trasa.first_station.location);
   AITile.DemolishTile(trasa.second_station.location);
    return false;	  
@@ -60,14 +60,13 @@ if(!this.RailwayLinkConstruction(path)){
 trasa.depot_tile = this.BuildDepot(path, true);
    
 if(trasa.depot_tile==null){
-   this.Info("   Depot placement error");
+   Info("   Depot placement error");
   AITile.DemolishTile(trasa.first_station.location);
   AITile.DemolishTile(trasa.second_station.location);
   this.DumbRemover(path, null)
    return false;	  
    }
 
-Error("this.BuildTrain(wrzut) 4");
 local new_engine = this.BuildTrain(trasa, "stupid");
 
 if(new_engine == null)
@@ -84,12 +83,12 @@ return true;
    
 function StupidRailBuilder::PrepareStupidRailRoute()
 {
-this.Info("   Company started route on distance: " + AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile));
+Info("   Company started route on distance: " + AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile));
 this.StationPreparation();   
-if(!this.LinkFinder(false))return false;
+if(!this.PathFinder(false, this.GetPathfindingLimit()))return false;
 local koszt = this.GetCostOfRoute(path); 
 if(koszt==null){
-  this.Info("   Pathfinder failed to find correct route.");
+  Info("   Pathfinder failed to find correct route.");
   return false;
   }
   

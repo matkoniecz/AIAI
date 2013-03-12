@@ -1,3 +1,8 @@
+function GetInflationRate() //from simpleai
+{
+	return (100 * AICompany.GetMaxLoanAmount() / AIGameSettings.GetValue("difficulty.max_loan"));
+}
+
 enum StationDirection
 {
 x_is_constant__horizontal,
@@ -34,7 +39,7 @@ if(!AIVehicle.IsValidVehicle(vehicle_id))return;
 local i = AIVehicleList().Count();
 for(;!AIVehicle.SetName(vehicle_id, string + " #" + i); i++)
 	{
-	Error("SetNameOfVehicle: " + AIError.GetLastErrorString() + ": " + string);
+	//Error("SetNameOfVehicle: " + AIError.GetLastErrorString() + ": " + string);
 	if(AIError.GetLastError() == AIError.ERR_PRECONDITION_STRING_TOO_LONG) SetNameOfVehicle(vehicle_id, "PRECONDITION_FAILED");
 	}
 }
@@ -60,12 +65,20 @@ function IsItNeededToImproveThatNoRawStation(aktualna, cargo)
 return AIStation.GetCargoWaiting(aktualna, cargo)>150 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0) ;
 }
 
+function NewLine()
+	{
+	AILog.Info(" ");
+	} 
+
+function Debug(string){Info(string);} //redirect
 function Info(string)
 {
 local date=AIDate.GetCurrentDate ();
 AILog.Info(AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date)  + " " + string);
 }
 
+
+function Important(string){Info(string);} //redirect
 function Warning(string)
 {
 local date=AIDate.GetCurrentDate ();

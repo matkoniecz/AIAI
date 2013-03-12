@@ -28,8 +28,8 @@ budget = null;
 demand = null;
 OK = null;
 
-	constructor()
-	{
+constructor()
+{
 first_station = Station();
 second_station = Station();
 start=null;
@@ -47,37 +47,39 @@ station_size = null;
 engine = null;
 engine_count = null;
 budget = null;
-	}
+}
 
-	function StationsAllocated()
-	{
+function StationsAllocated()
+{
 return first_station.location != null && second_station.location != null
 }
 
-	function Print()
-	{
-	Info(" start " + AIIndustry.GetName(start));
-	Info(" end " + AIIndustry.GetName(end));
-	Info(" depot_tile " + depot_tile);
-	Info(" second_station.location " + second_station.location);
+function Print()
+{
+/*
+Info(" start " + AIIndustry.GetName(start));
+Info(" end " + AIIndustry.GetName(end));
+Info(" depot_tile " + depot_tile);
+Info(" second_station.location " + second_station.location);
+Info(" first_station.location " + first_station.location);
+Info(" first_station.direction " + first_station.direction);
+Info(" second_station.location " + second_station.location);
+Info(" second_station.direction " + second_station.direction);
 
-	Info(" first_station.location " + first_station.location);
-	Info(" first_station.direction " + first_station.direction);
-	Info(" second_station.location " + second_station.location);
-	Info(" second_station.direction " + second_station.direction);
+Info(" end_tile " + end_tile);
+Info(" cargo " + AICargo.GetCargoLabel(cargo));
+Info(" production " + production);
+Info(" type " + type);
+Info(" station_size " + station_size);
+Info(" engine " + engine);
+//Info(" engine " + AIEngine.GetName(engine));
+Info(" engine_count " + engine_count);
+Info(" budget " + budget);
+Info(" demand " + demand);
+NewLine();
+*/
+}
 
-	Info(" end_tile " + end_tile);
-	Info(" cargo " + AICargo.GetCargoLabel(cargo));
-	Info(" production " + production);
-	Info(" type " + type);
-	Info(" station_size " + station_size);
-	Info(" engine " + engine);
-	//Info(" engine " + AIEngine.GetName(engine));
-	Info(" engine_count " + engine_count);
-	Info(" budget " + budget);
-	Info(" demand " + demand);
-	Info("");
-	}
 }
 
 
@@ -122,7 +124,7 @@ distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForM
 {
 local industry_list = GetIndustryList();
 local choise = Route();
-Error(industry_list.Count()+"");
+Info("Industry list count: " + industry_list.Count());
 local best=0;
 local new;
 
@@ -158,27 +160,22 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 		if(new>best)
 			{
 			traska = DualIndustryStationAllocator(traska);
-			if(traska.StationsAllocated())
-			{
+			if(traska.StationsAllocated()){
 				traska = FindEngine(traska);
-				if(traska.engine != null)
-				   {
-				best = new;
-				traska.start_tile = AIIndustry.GetLocation(traska.start);
-				traska.end_tile = AIIndustry.GetLocation(traska.end);
-				//choise = traska;
-				
-				choise = clone traska;
-				choise.first_station = clone traska.first_station;
-				choise.second_station = clone traska.second_station;
-				choise.first_station.is_city = false;
-				choise.second_station.is_city = false;
+				if(traska.engine != null){
+					best = new;
+					traska.start_tile = AIIndustry.GetLocation(traska.start);
+					traska.end_tile = AIIndustry.GetLocation(traska.end);
+					choise = clone traska;
+					choise.first_station = clone traska.first_station;
+					choise.second_station = clone traska.second_station;
+					choise.first_station.is_city = false;
+					choise.second_station.is_city = false;
 					}
 				}
 			}
 		}
 	}
-
 	else 
 	   {
 	   traska.end = GetNiceTownForMe(AIIndustry.GetLocation(traska.start)); 
@@ -210,8 +207,8 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 		}
 	}
 	}
-this.Info("");
-this.Info("(" + best + " points)");
+NewLine();
+Info("(" + best + " points)");
 
 if(best==0) 
    {
