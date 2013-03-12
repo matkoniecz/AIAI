@@ -8,6 +8,7 @@ class Station
 {
 location = null;
 direction = null;
+is_city = null;
 }
 
 function ProvideMoney()
@@ -42,7 +43,7 @@ function TotalLastYearProfit()
 {
 local list = AIVehicleList();
 local suma =0;
-for (local q = list.Begin(); !list.IsEnd(); q = list.Next()) //from Chopper 
+for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
    {
    suma += AIVehicle.GetProfitLastYear(q);
    }
@@ -81,7 +82,7 @@ function NajmlodszyPojazd(station)
 {
 local list = AIVehicleList_Station(station);
 local minimum = 10000;
-for (local q = list.Begin(); !list.IsEnd(); q = list.Next()) //from Chopper 
+for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
    {
    local age=AIVehicle.GetAge(q);
    if(minimum>age)minimum=age;
@@ -95,7 +96,7 @@ function GetAverageCapacity(station, cargo)
 local list = AIVehicleList_Station(station);
 local total = 0;
 local ile = 0;
-for (local q = list.Begin(); !list.IsEnd(); q = list.Next()) //from Chopper 
+for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
    {
    local plus=AIVehicle.GetCapacity (q, cargo);
    if(plus>0)

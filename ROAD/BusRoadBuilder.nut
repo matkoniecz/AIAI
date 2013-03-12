@@ -25,9 +25,7 @@ if(!((trasa.first_station.location==null)||(trasa.second_station.location==null)
 	{
 	trasa.start_tile = AITown.GetLocation(trasa.start);
 	trasa.end_tile = AITown.GetLocation(trasa.end);
-	trasa.production = min(AITile.GetCargoAcceptance(trasa.first_station.location, trasa.cargo, 1, 1, 3), AITile.GetCargoAcceptance(trasa.end_station, trasa.cargo, 1, 1, 3));
-	Error("trasa.production: " + trasa.production);
-	Error("STOP");
+	trasa.production = min(AITile.GetCargoAcceptance(trasa.first_station.location, trasa.cargo, 1, 1, 3), AITile.GetCargoAcceptance(trasa.second_station.location, trasa.cargo, 1, 1, 3));
 	trasa.type = 2;
 	
 	trasa = WybierzRVForFindPair(trasa);
@@ -86,11 +84,11 @@ if(!AIRoad.BuildDriveThroughRoadStation(trasa.first_station.location, trasa.star
    if(rodzic.GetSetting("other_debug_signs")) AISign.BuildSign(trasa.first_station.location, AIError.GetLastErrorString());
    return false;
    }
-if(!AIRoad.BuildDriveThroughRoadStation(trasa.end_station, trasa.koniec_otoczka[0], AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)) 
+if(!AIRoad.BuildDriveThroughRoadStation(trasa.second_station.location, trasa.koniec_otoczka[0], AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)) 
    {
    this.Info("   Consumer station placement impossible due to " + AIError.GetLastErrorString());
    AIRoad.RemoveRoadStation(trasa.first_station.location);
-   if(rodzic.GetSetting("other_debug_signs")) AISign.BuildSign(trasa.end_station, AIError.GetLastErrorString());
+   if(rodzic.GetSetting("other_debug_signs")) AISign.BuildSign(trasa.second_station.location, AIError.GetLastErrorString());
    return false;
    }
 rodzic.SetStationName(trasa.first_station.location);

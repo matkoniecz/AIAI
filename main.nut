@@ -46,7 +46,6 @@ detected_rail_crossings=AIList()
 //TODO - LOAD IT
 desperacja = 0;
 generalna_konserwacja = GetDate();
-//Autoreplace(); TODO: when?
 }
 
 function AIAI::Menagement()
@@ -136,7 +135,7 @@ function AIAI::Statua()
 local veh_list = AIVehicleList();
 veh_list.Valuate(AIBase.RandItem);
 veh_list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_DESCENDING);
-for (local veh = veh_list.Begin(); !veh_list.IsEnd(); veh = veh_list.Next()) 
+for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next()) 
    {
    for(local i=0; i<AIOrder.GetOrderCount(veh); i++)
       {
@@ -148,7 +147,7 @@ for (local veh = veh_list.Begin(); !veh_list.IsEnd(); veh = veh_list.Next())
 		local station = AIStation.GetStationID(location);
 		local suma = 0;
 		local cargo_list = AICargoList();
-		for (local cargo = cargo_list.Begin(); !cargo_list.IsEnd(); cargo = cargo_list.Next()) suma+=AIStation.GetCargoWaiting(station, cargo);
+		for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) suma+=AIStation.GetCargoWaiting(station, cargo);
 		if(suma<200) //HARDCODED
 		if(AIVehicle.GetVehicleType(veh)==AIVehicle.VT_RAIL || AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount() || desperacja>30)
 		   {
@@ -176,7 +175,7 @@ function AIAI::SignMenagement()
 if(AIAI.GetSetting("clear_signs"))
 {
 local sign_list = AISignList();
-for (local x = sign_list.Begin(); !sign_list.IsEnd(); x = sign_list.Next()) //from Chopper
+for (local x = sign_list.Begin(); sign_list.HasNext(); x = sign_list.Next()) //from Chopper
   {
   AISign.RemoveSign(x);
   }
@@ -185,15 +184,16 @@ for (local x = sign_list.Begin(); !sign_list.IsEnd(); x = sign_list.Next()) //fr
 if(AIAI.GetSetting("debug_signs_for_airports_load"))
 {
 local list = AIStationList(AIStation.STATION_AIRPORT);
-for (local x = list.Begin(); !list.IsEnd(); x = list.Next()) 
+for (local x = list.Begin(); list.HasNext(); x = list.Next()) 
    {
-   air.GetBurden(x);
+   AirBuilder(0, this).GetBurden(x);
    }
 }
 }
 
 function BankruptProtector()
 {
+Info("BankruptProtector");
 if(AIVehicleList().Count()==0) return;
 if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<AICompany.GetLoanInterval()*2)
 {
@@ -211,9 +211,10 @@ while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
 			Sleep(1000);
 			}
 		}
+	Warning("End of financial problems!");
 	}
-Warning("End of financial problems!");
 }	   
+Info("BankruptProtector-end");
 }
 
 function AIAI::IdleMoneyMenagement()
@@ -337,18 +338,17 @@ local list;
 list = AIStationList(AIStation.STATION_TRUCK_STOP);
 list.Valuate(VehicleCounter);
 list.KeepValue(0);
-for (local spam = list.Begin(); !list.IsEnd(); spam = list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
+for (local spam = list.Begin(); list.HasNext(); spam = list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
 
 list = AIStationList(AIStation.STATION_BUS_STOP);
 list.Valuate(VehicleCounter);
 list.KeepValue(0);
-for (local spam = list.Begin(); !list.IsEnd(); spam = list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
+for (local spam = list.Begin(); list.HasNext(); spam = list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
 
-//TODO: station may be under construction: ADD it after hiding stations during construction, TODO: add ignore possibility to rail PF 
-//list = AIStationList(AIStation.STATION_TRAIN);
-//list.Valuate(VehicleCounter);
-//list.KeepValue(0);
-//for (local spam = list.Begin(); !list.IsEnd(); spam = list.Next()) AITile.DemolishTile(AIBaseStation.GetLocation(spam));
+list = AIStationList(AIStation.STATION_TRAIN); //TODO: remove also tracks
+list.Valuate(VehicleCounter);
+list.KeepValue(0);
+for (local spam = list.Begin(); list.HasNext(); spam = list.Next()) AITile.DemolishTile(AIBaseStation.GetLocation(spam));
 }
 
 function AIAI::DeleteUnprofitable()
@@ -370,7 +370,7 @@ function AIAI::DeleteUnprofitable()
    	
 	local counter = 0;
 	
-	for (local veh = vehicle_list.Begin(); !vehicle_list.IsEnd(); veh = vehicle_list.Next()) 
+	for (local veh = vehicle_list.Begin(); vehicle_list.HasNext(); veh = vehicle_list.Next()) 
 	   {
 	   if(AIVehicle.GetVehicleType(veh)!=AIVehicle.VT_RAIL || (AIVehicleList_Station(AIStation.GetStationID(GetLoadStation(veh)))).Count()>2)
 	      {
@@ -378,7 +378,6 @@ function AIAI::DeleteUnprofitable()
 		  }
 	   }
 	Info(counter + " vehicle(s) sold.");
-	generalna_konserwacja = GetDate();
 }
 
 function AIAI::Konserwuj()
@@ -402,6 +401,8 @@ if((GetDate()-generalna_konserwacja)>12) //powinno raz na 12 miesiêcy
     {
 	this.DeleteUnprofitable();
 	DeleteEmptyStations();
+	Autoreplace();
+	this.generalna_konserwacja = GetDate();
 	}
 }
 
@@ -500,7 +501,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 		if (AIIndustry.IsValidIndustry(industry))
 		    {
 			Info("Closing industry: " + AIIndustry.GetName(industry));
-			/* TODO: Handle it. */
+			/* Handling is useless. */
 			}
 		}
 		else

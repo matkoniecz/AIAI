@@ -45,6 +45,10 @@ return false;
 
 function StupidRailBuilder::ConstructionOfStupidRailRoute()
 {
+ProvideMoney();
+
+if(!this.StationConstruction()) return false;   
+
 if(!this.RailwayLinkConstruction(path)){
    //AIRail.RemoveRailStationTileRect(trasa.first_station); ........... //TODO DO IT
    this.Info("   But stopped by error");
@@ -81,112 +85,16 @@ return true;
 function StupidRailBuilder::PrepareStupidRailRoute()
 {
 this.Info("   Company started route on distance: " + AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile));
-
-local pathfinder = Rail();
-pathfinder.estimate_multiplier = 3;
-pathfinder.cost.bridge_per_tile = 500;
-pathfinder.cost.tunnel_per_tile = 35;
-pathfinder.cost.diagonal_tile = 35;
-pathfinder.cost.coast = 0;
-pathfinder.cost.max_bridge_length = 40;   // The maximum length of a bridge that will be build.
-pathfinder.cost.max_tunnel_length = 40;   // The maximum length of a tunnel that will be build.
-
-//local pathfinder = MyRailPF();
-//pathfinder.Fast();
-
-//[start_tile, tile_before_start]
-local start = array(2);
-local end = array(2);
-
-ProvideMoney();
-
-if(trasa.first_station.direction != StationDirection.x_is_constant__horizontal)
-   {
-   //BuildNewGRFRailStation (TileIndex tile, RailTrack direction, uint num_platforms, uint platform_length, StationID station_id, CargoID cargo_id, IndustryType source_industry, IndustryType goal_industry, int distance, bool source_station)
-   if(!AIRail.BuildNewGRFRailStation(trasa.first_station.location, AIRail.RAILTRACK_NE_SW, 1, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, 1, 1, 50, true)) //TODO to 1, 1 miasto (patrz tt moj temat)
-      {
-	  AISign.BuildSign(trasa.first_station.location, AIError.GetLastErrorString()+"Sa");
-	  trasa.zakazane.AddItem(trasa.start, 0);
-	  return false;
-	  }
-   start[0] = [trasa.first_station.location+AIMap.GetTileIndex(-1, 0), trasa.first_station.location] 
-   start[1] = [trasa.first_station.location+AIMap.GetTileIndex(trasa.station_size, 0), trasa.first_station.location+AIMap.GetTileIndex(trasa.station_size -1, 0)] 
-   }
-else
-   {
-   if(!AIRail.BuildNewGRFRailStation(trasa.first_station.location, AIRail.RAILTRACK_NW_SE, 1, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, 1, 1, 50, true)) 
-      {
-	  AISign.BuildSign(trasa.first_station.location, AIError.GetLastErrorString()+"Sb");
-	  trasa.zakazane.AddItem(trasa.start, 0);
-	  return false;
-	  }
-   start[0] = [trasa.first_station.location + AIMap.GetTileIndex(0, -1), trasa.first_station.location] //TODO drugi koniedc
-   start[1] = [trasa.first_station.location+AIMap.GetTileIndex(0, trasa.station_size), trasa.first_station.location+AIMap.GetTileIndex(0, trasa.station_size -1)] 
-   }
-
-if(trasa.second_station.direction != StationDirection.x_is_constant__horizontal)
-   {
-   if(!AIRail.BuildNewGRFRailStation(trasa.second_station.location, AIRail.RAILTRACK_NE_SW, 1, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, 1, 1, 50, false))
-      {
-	  AISign.BuildSign(trasa.second_station.location, AIError.GetLastErrorString()+"Ea");
-	  trasa.zakazane.AddItem(trasa.end, 0); //TODO a miasta?
-	  AITile.DemolishTile(trasa.first_station.location);
-	  return false;
-	  }
-   end[0] = [trasa.second_station.location+AIMap.GetTileIndex(-1, 0), trasa.second_station.location] //TODO drugi koniedc
-   end[1] = [trasa.second_station.location+AIMap.GetTileIndex(trasa.station_size, 0), trasa.second_station.location+AIMap.GetTileIndex(trasa.station_size -1, 0)] 
-   }
-else
-   {
-   if(!AIRail.BuildNewGRFRailStation(trasa.second_station.location, AIRail.RAILTRACK_NW_SE, 1, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, 1, 1, 50, false))
-      {
-	  AISign.BuildSign(trasa.second_station.location, AIError.GetLastErrorString()+"Eb");
-	  trasa.zakazane.AddItem(trasa.end, 0); //TODO a miasta?
-	  AITile.DemolishTile(trasa.first_station.location);
-	  return false;
-	  }
-   end[0] = [trasa.second_station.location+AIMap.GetTileIndex(0, -1), trasa.second_station.location] //TODO drugi koniedc
-   end[1] = [trasa.second_station.location+AIMap.GetTileIndex(0, trasa.station_size), trasa.second_station.location+AIMap.GetTileIndex(0, trasa.station_size -1)] 
-   }
- 
-RepayLoan();
-
-rodzic.SetStationName(trasa.first_station.location);
-rodzic.SetStationName(trasa.second_station.location);
-  
-pathfinder.InitializePath(end, start);
-path = false;
-local guardian=0;
-local limit = min((desperacja+20)*AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile)/20, 25);
-while (path == false) {
-  path = pathfinder.FindPath(2000);
-  rodzic.Konserwuj();
-  AIController.Sleep(1);
-  this.Info("   Pathfinding ("+guardian+" / " + limit + ")");
-  guardian++;
-  if(guardian>limit )break;
-}
-
-if(path == false || path == null){
-  Info("   Pathfinder failed to find route. ");
-  AITile.DemolishTile(trasa.first_station.location);
-  AITile.DemolishTile(trasa.second_station.location);
-  return false;
-  }
-  
-this.Info("   Pathfinder found sth.");
-
+this.StationPreparation();   
+if(!this.LinkFinder(false))return false;
 local koszt = this.GetCostOfRoute(path); 
 if(koszt==null){
   this.Info("   Pathfinder failed to find correct route.");
-  AITile.DemolishTile(trasa.first_station.location);
-  AITile.DemolishTile(trasa.second_station.location);
   return false;
   }
-
+  
 koszt+=AIEngine.GetPrice(trasa.engine[0])+trasa.station_size*2*AIEngine.GetPrice(trasa.engine[1]);
 cost=koszt;
-
 if(GetAvailableMoney()<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w RV
     {
 	rodzic.MoneyMenagement();
@@ -198,7 +106,6 @@ if(GetAvailableMoney()<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w R
 	   return false;
 	   }
 	}
-ProvideMoney();
 return true;
 }
 
@@ -243,7 +150,7 @@ project.second_station = this.ZnajdzStacjeKonsumentaStupidRail(consumer, cargo, 
 if(project.StationsAllocated())break;
 }
 
-project.end_station = project.second_station.location;
+project.second_station.location = project.second_station.location;
 
 return project;
 }
@@ -260,7 +167,7 @@ project.second_station = this.ZnajdzStacjeMiejskaStupidRail(project.end, project
 if(project.StationsAllocated())break;
 }
 
-project.end_station = project.second_station.location;
+project.second_station.location = project.second_station.location;
 return project;
 }
 
@@ -292,7 +199,7 @@ return this.ZnajdzStacjeStupidRail(list, size);
 
 function StupidRailBuilder::ZnajdzStacjeStupidRail(list, length)
 {
-for(local station = list.Begin(); !list.IsEnd(); station = list.Next())
+for(local station = list.Begin(); list.HasNext(); station = list.Next())
 	{
 	if(this.IsOKPlaceForRailStationStupidRail(station, StationDirection.y_is_constant__vertical, length))
 		{

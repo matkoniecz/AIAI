@@ -1,10 +1,7 @@
-!!!TODO: see findpair, 21
 TODO: error catherw w BuildTrain
 TODO: limit 25 jest z³y: zazwyczaj za wysoki jeœli jednak faile nastêpuj¹ z powodu za krótkiego czasu skanowania to trzeba zwiêkszyæ
-TODO: train management jest niefajny, trzeba mnieæ lepsz¹ netodê liczenia poci¹gów [do dodawania nowych] , te do sprzeda¿y siê nie licze
 TODO: max number of trains in station name also: connected industries, cargo
 TODO: check cost before train replacing
-TODO: remove empty train stations //TODO: rail PF with Ignore
 TODO: remove empty railway tracks
 
 TODO: passing lanes
@@ -15,6 +12,7 @@ TODO: long term average for secondaries
 TODO: replace helis by helis or nothing
 TODO: bridge upgrading
 TODO: try to clear road in RAILbuilder
+TODO: allow replacing small planes by big on big airports!
 
 TODO: 6x ciê¿szy poci¹g jeœli podjazdy s¹ pojedyñcze????
 TODO: better findpair
@@ -55,21 +53,3 @@ function Banker::GetInflationRate() //from simpleai
 {
 	return (100 * AICompany.GetMaxLoanAmount() / AIGameSettings.GetValue("difficulty.max_loan"));
 }
-
-Tested on 20027.
-Changelog
-[quote="Michiel"]But yeah, I think I see where some of the difficulty comes from. It's very crowded, and the trains are severely underpowered, crawling uphill at 9 km/h, which means they make little profit.[/quote]
-- Is is fixed!
-
-- credit list updated (ChooChoo)
-- single bus bug fix
-- licence updated (fixed Copyright (C) <year>  <name of author>)
-- better loan management
-- HasNext changed into IsEnd
-- Other updates to 1.1 NoAI API
-- train builders ignore small industries
-- control of minimal train station size
-- empty RV stations are removed
-- grammar error corrected
-- order bug fixed
-- autorenew enabled only for games with breakdowns

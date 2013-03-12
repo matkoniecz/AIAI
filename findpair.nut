@@ -6,8 +6,6 @@ zakazane=null;
 start_otoczka=null;
 koniec_otoczka=null;
 depot_tile = null;
-start_station = null;
-end_station = null;
 start_tile = null;
 end_tile = null;
 cargo = null;
@@ -18,7 +16,7 @@ station_direction = null;
 first_station = null;
 second_station = null;
 
-//track_type; //TODO: do it!
+track_type = null;
 
 //trasa.type
 //0 proceed trasa.cargo
@@ -40,13 +38,12 @@ zakazane = AIList();
 start_otoczka=null; //obsolete TODO //move to Station()
 koniec_otoczka=null; //obsolete TODO //move to Station()
 depot_tile = null;
-end_station = null;  //obsolete TODO //move to Station()
 start_tile = null;
 end_tile = null;
 cargo = null;
 production = null;
 type = null;
-station_size = null; //obsolete TODO //move to Station()
+station_size = null;
 engine = null;
 engine_count = null;
 budget = null;
@@ -62,7 +59,7 @@ return first_station.location != null && second_station.location != null
 	Info(" start " + AIIndustry.GetName(start));
 	Info(" end " + AIIndustry.GetName(end));
 	Info(" depot_tile " + depot_tile);
-	Info(" end_station " + end_station);
+	Info(" second_station.location " + second_station.location);
 
 	Info(" first_station.location " + first_station.location);
 	Info(" first_station.direction " + first_station.direction);
@@ -129,12 +126,12 @@ Error(industry_list.Count()+"");
 local best=0;
 local new;
 
-for (traska.start = industry_list.Begin(); !industry_list.IsEnd(); traska.start = industry_list.Next()) //from Chopper
+for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start = industry_list.Next()) //from Chopper
    {
    if(IsProducerOK(traska.start)==false)continue;
    if(traska.zakazane.HasItem(traska.start))continue;
    local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(traska.start));
-   for (traska.cargo = cargo_list.Begin(); !cargo_list.IsEnd(); traska.cargo = cargo_list.Next())
+   for (traska.cargo = cargo_list.Begin(); cargo_list.HasNext(); traska.cargo = cargo_list.Next())
    {
    traska.production = AIIndustry.GetLastMonthProduction(traska.start, traska.cargo)*(100-AIIndustry.GetLastMonthTransportedPercentage (traska.start, traska.cargo))/100;
 
@@ -144,7 +141,7 @@ for (traska.start = industry_list.Begin(); !industry_list.IsEnd(); traska.start 
    local base = ValuateProducer(traska.start, traska.cargo);
    if(industry_list_accepting_current_cargo.Count()>0)
    {
-   for(traska.end = industry_list_accepting_current_cargo.Begin(); !industry_list_accepting_current_cargo.IsEnd(); traska.end = industry_list_accepting_current_cargo.Next())
+   for(traska.end = industry_list_accepting_current_cargo.Begin(); industry_list_accepting_current_cargo.HasNext(); traska.end = industry_list_accepting_current_cargo.Next())
         {
 		if(traska.zakazane.HasItem(traska.end))continue;
 		if(!IsConsumerOK(traska.end))continue; 
@@ -171,27 +168,11 @@ for (traska.start = industry_list.Begin(); !industry_list.IsEnd(); traska.start 
 				traska.end_tile = AIIndustry.GetLocation(traska.end);
 				//choise = traska;
 				
-				choise.start = traska.start;
-				choise.end = traska.end;
-				choise.zakazane = traska.zakazane;
-				choise.start_otoczka = traska.start_otoczka;
-				choise.koniec_otoczka = traska.koniec_otoczka;
-				choise.depot_tile = traska.depot_tile;
-				choise.end_station = traska.end_station;
-				choise.start_tile = traska.start_tile;
-				choise.end_tile = traska.end_tile;
-				choise.cargo = traska.cargo;
-				choise.production = traska.production;
-				choise.type = traska.type;
-				choise.station_size = traska.station_size;
-				choise.engine = traska.engine;
-				choise.engine_count = traska.engine_count;
-				choise.budget = traska.budget;
-				choise.demand = traska.demand;
-				choise.first_station.direction = traska.first_station.direction;
-				choise.second_station.direction = traska.second_station.direction;
-				choise.first_station.location = traska.first_station.location;
-				choise.second_station.location = traska.second_station.location;
+				choise = clone traska;
+				choise.first_station = clone traska.first_station;
+				choise.second_station = clone traska.second_station;
+				choise.first_station.is_city = false;
+				choise.second_station.is_city = false;
 					}
 				}
 			}
@@ -216,30 +197,13 @@ for (traska.start = industry_list.Begin(); !industry_list.IsEnd(); traska.start 
 				if(traska.engine != null)
 				   {
 				best = new;
-				choise.start = traska.start;
-				choise.end = traska.end;
-				choise.zakazane = traska.zakazane;
-				choise.start_otoczka = traska.start_otoczka;
-				choise.koniec_otoczka = traska.koniec_otoczka;
-				choise.depot_tile = traska.depot_tile;
-				choise.end_station = traska.end_station;
-				choise.start_tile = traska.start_tile;
-				choise.end_tile = traska.end_tile;
-				choise.cargo = traska.cargo;
-				choise.production = traska.production;
-				choise.type = traska.type;
-				choise.station_size = traska.station_size;
-				choise.engine = traska.engine;
-				choise.engine_count = traska.engine_count;
-				choise.budget = traska.budget;
-				choise.demand = traska.demand;
-				choise.first_station.direction = traska.first_station.direction;
-				choise.second_station.direction = traska.second_station.direction;
-				choise.first_station.location = traska.first_station.location;
-				choise.second_station.location = traska.second_station.location;
-
+				choise = clone traska;
+				choise.first_station = clone traska.first_station;
+				choise.second_station = clone traska.second_station;
 				choise.start_tile = AIIndustry.GetLocation(traska.start);
 				choise.end_tile = AITown.GetLocation(traska.end);
+				choise.first_station.is_city = false;
+				choise.second_station.is_city = true;
 					}
 				}
 			}

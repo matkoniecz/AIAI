@@ -41,7 +41,6 @@ function PAXAirBuilder::BuildAirportRouteBetweenCitiesWithAirportTypeSet(airport
 {	
 if(!AIAirport.IsValidAirportType(airport_type))return false;
 local engine=this.FindAircraft(airport_type, rodzic.GetPassengerCargoId(), 3, GetAvailableMoney());
-	
 if(engine==null)
     {
 	Info("Unfortunatelly no suitable aircraft found");
@@ -55,10 +54,9 @@ if (tile_1 < 0)
    {
    return false;
    }
-	local tile_2 = this.FindSuitableAirportSpotInTown(airport_type, tile_1);
-	if (tile_2 < 0) {
+   local tile_2 = this.FindSuitableAirportSpotInTown(airport_type, tile_1);
+   if (tile_2 < 0) {
 	   {
-       if(AIAI.GetSetting("deep_debugged_function_calling"))Info(">BuildAirportRouteBetweenCitiesWithAirportTypeSet");
 	   return false;
 	   }
 	}
@@ -71,25 +69,36 @@ if (tile_1 < 0)
 	if (!AIAirport.BuildAirport(tile_2, airport_type, AIStation.STATION_NEW)) {
 		Error("Although the testing told us we could build 2 airports, it still failed on the second airport at tile " + tile_2 + ".");
 		//AIAirport.RemoveAirport(tile_1);
+		rodzic.SetStationName(tile_2);
 		return false;
 	}
+	rodzic.SetStationName(tile_1);
+	rodzic.SetStationName(tile_2);
 	
-	Info("Airports constructed on distance " + AIMap.DistanceManhattan(tile_1, tile_2));
-	local dystans = AITile.GetDistanceManhattanToTile(tile_1, tile_2);
+local airport_x = AIAirport.GetAirportWidth(airport_type);
+local airport_y = AIAirport.GetAirportHeight(airport_type);
+local airport_rad = AIAirport.GetAirportCoverageRadius(airport_type);
+
+	Info("Airports constructed on distance " + AIMap.DistanceManhattan(tile_1, tile_2) + " but effective distanse is: " + GetEffectiveDistanceBetweenAirports(tile_1, tile_2));
+	local dystans = this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2);
 	local speed = AIEngine.GetMaxSpeed(engine);
-	local licznik = this.IleSamolotow(dystans, speed);
+	local production_at_first_airport = AITile.GetCargoAcceptance(tile_1, AIAI.GetPassengerCargoId(), airport_x, airport_y, airport_rad);
+	local production_at_second_airport = AITile.GetCargoAcceptance(tile_2, AIAI.GetPassengerCargoId(), airport_x, airport_y, airport_rad);
+	local production = min(production_at_first_airport, production_at_second_airport);
+	local licznik = this.HowManyAirplanes(dystans, speed, production, engine);
 	for(local i=0; i<licznik; i++) 
 	   {
-	   for(local i=0; !this.BuildPassengerAircraftWithRand(tile_1, tile_2, engine, rodzic.GetPassengerCargoId()); i++)
+	   while(!this.BuildPassengerAircraftWithRand(tile_1, tile_2, engine, rodzic.GetPassengerCargoId()))
           {
-	  Error("Aircraft construction failed due to " + AIError.GetLastErrorString()+".")
+			Error("Aircraft construction failed due to " + AIError.GetLastErrorString()+".")
 		  if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH) 
 		     {
 			 return true;
 			 }
 		  rodzic.Konserwuj();
-		  AIController.Sleep(100);
+		  AIController.Sleep(500);
 		  }
+       Info("We have " + i + " from " + licznik + " aircrafts.");
   	   }
 
 	Info("Done building a route");
