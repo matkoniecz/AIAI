@@ -27,7 +27,7 @@ require("KRAIutil.nut");
 require("KRAI_level_crossing_menagement_from_clueless_plus.nut");
 require("KRAIpathfinder.nut");
 
-function KRAI::CzyJuzZlinkowane(i, cargo)
+function KRAI::IsConnectedIndustry(i, cargo)
 {
 if(AIStationList(AIStation.STATION_ANY).IsEmpty())return false;
 
@@ -167,7 +167,7 @@ if(AIIndustry.IsValidIndustry(i)==false) //industry closed during preprocessing
    }
 if(forbidden.HasItem(i))return false;
 
-if(this.CzyJuzZlinkowane(i, cargo))
+if(rodzic.IsConnectedIndustry(i, cargo))
    {
    forbidden.AddItem(i, 0);
    return false;
@@ -813,14 +813,14 @@ if(type==1)
    {
 	AIOrder.AppendOrder (vehicle_id, start_station, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
 	AIOrder.AppendOrder (vehicle_id, end_station, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD );
-	AIOrder.AppendOrder (vehicle_id, depot_tile,  AIOrder.AIOF_SERVICE_IF_NEEDED | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
+	AIOrder.AppendOrder (vehicle_id, depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
 	}
 else if(type==0)
    {
 	AIOrder.AppendOrder (vehicle_id, start_station, AIOrder.AIOF_NON_STOP_INTERMEDIATE );
 	AIOrder.AppendOrder (vehicle_id, depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
 	AIOrder.AppendOrder (vehicle_id, end_station, AIOrder.AIOF_NON_STOP_INTERMEDIATE | AIOrder.AIOF_NO_LOAD );
-	AIOrder.AppendOrder (vehicle_id, depot_tile,  AIOrder.AIOF_SERVICE_IF_NEEDED | AIOrder.AIOF_NON_STOP_INTERMEDIATE );
+	AIOrder.AppendOrder (vehicle_id, depot_tile,  AIOrder.AIOF_NON_STOP_INTERMEDIATE );
 
 	local pozycja_porownywacza=1;
 	AIOrder.InsertConditionalOrder (vehicle_id, pozycja_porownywacza, 2);

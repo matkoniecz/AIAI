@@ -73,11 +73,13 @@ while(true)
 	AILog.Warning("truck: " + truck._koszt);
    
    if(
-     (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > truck._koszt && IsAllowedTruck() && truck._koszt!=0)||
-     (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedPlane() && air._koszt!=0)
+     //(AICompany.GetBankBalance(AICompany.COMPANY_SELF) > truck._koszt && IsAllowedTruck() && truck._koszt!=0)||
+     //(AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedPlane() && air._koszt!=0)
+     (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > truck._koszt && IsAllowedTruck())||
+     (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedPlane())
 	 )
       {
-	  Info("Normal");
+	  Info("Normalna obsluga");
 	  local air_city = false; 
 	  local air_cargo = false; 
 	  local truck_cargo = false;
@@ -216,9 +218,19 @@ if(money<truck._koszt)
 	   
 }
 
-function AIAI::IsConnectedIndustry(industry_id)
+function AIAI::IsConnectedIndustry(industry_id, cargo)
 {
+local returnik = realcodeofIsConnectedIndustry(industry_id, cargo);
+AISign.BuildSign(AIIndustry.GetLocation(industry_id), returnik+"");
+return returnik;
 }
+
+function AIAI::realcodeofIsConnectedIndustry(industry_id, cargo)
+{
+if(truck.IsConnectedIndustry(industry_id, cargo)==true)return true;
+return air.IsConnectedIndustry(industry_id, cargo);
+}
+
 
 function AIAI::IsConnectedDistrict(town_tile)
 {

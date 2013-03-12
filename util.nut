@@ -148,8 +148,8 @@ max_ships = 300
 
 function Name()
 {
-if (!AICompany.SetName("AIAI")) 
-    if(AIError.GetLastError==AIError.ERR_NAME_IS_NOT_UNIQUE)
+AICompany.SetName("AIAI");
+if (AICompany.GetName(AICompany.COMPANY_SELF)!="AIAI") 
 	{
 	if (!AICompany.SetName("Suicide AIAI")) {
     local i = 2;
