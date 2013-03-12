@@ -3,9 +3,15 @@ class CargoAirBuilder extends AirBuilder
 	trasa = null;
 }
 
+function CargoAirBuilder::IsAllowed()
+{
+	if(0 == AIAI.GetSetting("cargo_plane")) return false;
+	return AirBuilder.IsAllowed();
+}
+
 function CargoAirBuilder::Possible()
 {
-	if(!IsAllowedCargoPlane()) return false;
+	if(!this.IsAllowed()) return false;
 	return this.cost<GetAvailableMoney();
 }
 

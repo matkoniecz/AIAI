@@ -2,9 +2,15 @@ class TruckRoadBuilder extends RoadBuilder
 {
 }
 
+function TruckRoadBuilder::IsAllowed()
+{
+	if(0 == AIAI.GetSetting("use_trucks")) return false;
+	return RoadBuilder.IsAllowed();
+}
+
 function TruckRoadBuilder::Possible()
 {
-if(!IsAllowedTruck()) return false;
+if(!this.IsAllowed()) return false;
 Warning("estimated cost of a truck connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
 return this.cost<GetAvailableMoney();
 }
@@ -50,13 +56,13 @@ for(local i=0; i<retry_limit; i++)
 	  Info("   Contruction started on correct route.");
 	  if(this.ConstructionOfRVRoute(AIRoad.ROADVEHTYPE_TRUCK))
 	  return true;
-	  else trasa.forbidden.AddItem(trasa.start, 0);
+	  else trasa.forbidden_industries.AddItem(trasa.start, 0);
 	  }
    else
       {
 	  Info("   Route preaparings failed.");	  
 	  if(trasa.start==null) return false;
-	  else trasa.forbidden.AddItem(trasa.start, 0);
+	  else trasa.forbidden_industries.AddItem(trasa.start, 0);
 	  }
    }
 return false;

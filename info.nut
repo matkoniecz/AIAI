@@ -1,12 +1,12 @@
 class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
-  function GetVersion()     { return 85; }
+  function GetVersion()     { return 87; }
   function GetDescription() { return "Automatic Idiot AI Version iota (" + GetVersion() + "). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
   function GetAPIVersion()  { return "1.2"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
-  function MinVersionToLoad() { return 83; } 
+  function MinVersionToLoad() { return 87; } 
   function GetDate()        { return "2012-10-1"; }
   function GetURL() {return "http://tinyurl.com/ottdaiai (redirects to http://www.tt-forums.net/viewtopic.php?f=65&t=47298) or bulwersator@gmail.com. Thanks! [iota (" + GetVersion() +")]";}
 
@@ -32,24 +32,24 @@ class AIAI extends AIInfo {
 	});
 
 	AddSetting( {
-		name = "max_train_station_platform_count_city",
-		description = "max_train_station_platform_count_city",
-		easy_value = 4,
-		medium_value = 4,
-		hard_value = 4,
-		custom_value = 4,
+		name = "max_train_station_platform_count_city_start",
+		description = "max_train_station_platform_count_city_start",
+		easy_value = 2,
+		medium_value = 2,
+		hard_value = 2,
+		custom_value = 2,
 		min_value = 0,
 		max_value = 1000,
 		flags = CONFIG_DEVELOPER + CONFIG_INGAME
 	});
 
 	AddSetting( {
-		name = "max_train_station_platform_count_city",
-		description = "max_train_station_platform_count_city",
-		easy_value = 2,
-		medium_value = 2,
-		hard_value = 2,
-		custom_value = 2,
+		name = "max_train_station_platform_count_city_end",
+		description = "max_train_station_platform_count_city_end",
+		easy_value = 1,
+		medium_value = 1,
+		hard_value = 1,
+		custom_value = 1,
 		min_value = 0,
 		max_value = 1000,
 		flags = CONFIG_DEVELOPER + CONFIG_INGAME
@@ -58,10 +58,10 @@ class AIAI extends AIInfo {
 	AddSetting( {
 		name = "max_train_station_platform_count_end_industry",
 		description = "max_train_station_platform_count_end_industry",
-		easy_value = 2,
-		medium_value = 2,
-		hard_value = 2,
-		custom_value = 2,
+		easy_value = 1,
+		medium_value = 1,
+		hard_value = 1,
+		custom_value = 1,
 		min_value = 0,
 		max_value = 1000,
 		flags = CONFIG_DEVELOPER + CONFIG_INGAME
@@ -70,10 +70,10 @@ class AIAI extends AIInfo {
 	AddSetting( {
 		name = "max_train_station_platform_count_start_industry",
 		description = "max_train_station_platform_count_start_industry",
-		easy_value = 3,
-		medium_value = 3,
-		hard_value = 3,
-		custom_value = 3,
+		easy_value = 2,
+		medium_value = 2,
+		hard_value = 2,
+		custom_value = 2,
 		min_value = 0,
 		max_value = 1000,
 		flags = CONFIG_DEVELOPER + CONFIG_INGAME
@@ -122,11 +122,11 @@ class AIAI extends AIInfo {
 	AddSetting( {
 		name = "cargo_plane",
 		description = "Cargo planes allowed",
-		easy_value = 1,
-		medium_value = 1,
-		hard_value = 1,
-		custom_value = 1,
-		flags = CONFIG_BOOLEAN + CONFIG_INGAME
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
+		flags = CONFIG_BOOLEAN + CONFIG_INGAME + CONFIG_DEVELOPER
 	});
 	AddSetting( {
 		name = "use_freight_trains",
@@ -240,6 +240,15 @@ class AIAI extends AIInfo {
 	AddSetting( {
 		name = "pause_game_on_calling_abort_funtion_and_activated_ai_developer_tools",
 		description = "pause_game_on_calling_abort_funtion_and_activated_ai_developer_tools",
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
+		flags = CONFIG_BOOLEAN + CONFIG_INGAME + CONFIG_DEVELOPER
+	});
+	AddSetting( {
+		name = "crash_AI_in_strange_situations",
+		description = "crash_AI_in_strange_situations",
 		easy_value = 0,
 		medium_value = 0,
 		hard_value = 0,

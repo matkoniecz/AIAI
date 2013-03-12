@@ -46,7 +46,7 @@ local new;
 for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start = industry_list.Next()) //from Chopper
 	{
 	if(IsProducerOK(traska.start)==false)continue;
-	if(traska.forbidden.HasItem(traska.start))continue;
+	if(traska.forbidden_industries.HasItem(traska.start))continue;
 	local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(traska.start));
 	for (traska.cargo = cargo_list.Begin(); cargo_list.HasNext(); traska.cargo = cargo_list.Next())
 	{
@@ -59,7 +59,7 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 	if(industry_list_accepting_current_cargo.Count()>0){
 	for(traska.end = industry_list_accepting_current_cargo.Begin(); industry_list_accepting_current_cargo.HasNext(); traska.end = industry_list_accepting_current_cargo.Next())
 		{
-		if(traska.forbidden.HasItem(traska.end))continue;
+		if(traska.forbidden_industries.HasItem(traska.end))continue;
 		if(!IsConsumerOK(traska.end))continue; 
 		
 	    new = ValuateConsumer(traska.end, traska.cargo, base)	
@@ -94,7 +94,7 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 	   traska.end = GetNiceTownForMe(AIIndustry.GetLocation(traska.start)); 
 	   if(traska.end == null)continue;
 	   local distance = AITile.GetDistanceManhattanToTile(AITown.GetLocation(traska.end), AIIndustry.GetLocation(traska.start));
-	   new=base;
+	   new=ValuateConsumerTown(traska.end, traska.cargo, base);
 	   new*= distanceBetweenIndustriesValuator(distance);
 	   /*if(AIIndustry.GetStockpiledCargo(x, traska.cargo)==0)*/ new*=2;
 		if(new>best){
@@ -131,6 +131,5 @@ if(best==0){
 choise.OK=true;
 if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(choise.start))) choise.type=1;
 else choise.type=0;
-choise.Print();
 return choise;
 }

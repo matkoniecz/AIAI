@@ -449,9 +449,9 @@ function process(path, stay_behind_path, tile, prevtile, prevprevtile, nextile, 
 
 }
 
-function RailBuilder::AddPassingLanes(path)
+function RailBuilder::GeneratePassingLanes(path)
 {
-Info("AddPassingLanes");
+Info("GeneratePassingLanes");
 local list = [];
 local prevtile = null;
 local prevprevtile = null;
@@ -522,6 +522,11 @@ while (path != null) {
 	prevtile = tile;
 	}
 
+return list;
+}
+
+function RailBuilder::ConstructionOfPassingLanes(list)
+{
 local count = 0;
 for(local i=0; i<list.len(); i++)
 	{
@@ -554,6 +559,6 @@ for(local i=0; i<list.len(); i++)
 			}
 		}
 	}
-Info("AddPassingLanes: " + count);
+Info("ConstructionOfPassingLanes: " + count);
 return count;
 }

@@ -1,16 +1,11 @@
 /* $Id: main.nut 15101 2009-01-16 00:05:26Z truebrain $ */
 
-function BuildSign(tile, text) {
-	local mode = AIExecMode();
-	AISign.BuildSign(tile, text);
-}
-	
 /**
  * A Rail Pathfinder.
  */
 class Rail
 {
-	estimate_multiplier = 1;
+	estimate_multiplier = 3;
 	
 	_aystar_class = AyStar;
 	_max_cost = null;              ///< The maximum cost for a route.
@@ -21,8 +16,6 @@ class Rail
 	_cost_bridge_per_tile = null;  ///< The cost per tile of a new bridge, this is added to _cost_tile.
 	_cost_tunnel_per_tile = null;  ///< The cost per tile of a new tunnel, this is added to _cost_tile.
 	_cost_coast = null;            ///< The extra cost for a coast tile.
-	_cost_adj_rail = null;         ///< The extra cost for a rail in an adjacent tile.
-	_cost_adj_obstacle = null;     ///< The extra cost for an obstacle in an adjacent tile.
 	_pathfinder = null;            ///< A reference to the used AyStar object.
 	_max_bridge_length = null;     ///< The maximum length of a bridge that will be build.
 	_max_tunnel_length = null;     ///< The maximum length of a tunnel that will be build.
@@ -41,8 +34,6 @@ class Rail
 		this._cost_bridge_per_tile = 150;
 		this._cost_tunnel_per_tile = 120;
 		this._cost_coast = 20;
-		this._cost_adj_rail = 0;
-		this._cost_adj_obstacle = 0;
 		this._max_bridge_length = 6;
 		this._max_tunnel_length = 6;
 		this._pathfinder = this._aystar_class(this._Cost, this._Estimate, this._Neighbours, this._CheckDirection, this, this, this, this);
@@ -101,8 +92,6 @@ class Rail.Cost
 			case "bridge_per_tile":   this._main._cost_bridge_per_tile = val; break;
 			case "tunnel_per_tile":   this._main._cost_tunnel_per_tile = val; break;
 			case "coast":             this._main._cost_coast = val; break;
-			case "adj_rail":          this._main._cost_adj_rail = val; break;
-			case "adj_obstacle":      this._main._cost_adj_obstacle = val; break;
 			case "max_bridge_length": this._main._max_bridge_length = val; break;
 			case "max_tunnel_length": this._main._max_tunnel_length = val; break;
 			default: throw("the index '" + idx + "' does not exist");
@@ -122,8 +111,6 @@ class Rail.Cost
 			case "bridge_per_tile":   return this._main._cost_bridge_per_tile;
 			case "tunnel_per_tile":   return this._main._cost_tunnel_per_tile;
 			case "coast":             return this._main._cost_coast;
-			case "adj_rail":          return this._main._cost_adj_rail;
-			case "adj_obstacle":      return this._main._cost_adj_obstacle;
 			case "max_bridge_length": return this._main._max_bridge_length;
 			case "max_tunnel_length": return this._main._max_tunnel_length;
 			default: throw("the index '" + idx + "' does not exist");
@@ -192,7 +179,6 @@ function Rail::_Cost(path, new_tile, new_direction, self)
 			if (path.GetParent() != null && path.GetParent().GetTile() - prev_tile != prev_tile - new_tile) cost += self._cost_turn;
 			return cost;
 		}
-		
 		return path.GetCost() + AIMap.DistanceManhattan(new_tile, prev_tile) * self._cost_tile + self._GetBridgeNumSlopes(new_tile, prev_tile) * self._cost_slope;
 	}
 	if (AITunnel.IsTunnelTile(new_tile)) {
@@ -201,7 +187,6 @@ function Rail::_Cost(path, new_tile, new_direction, self)
 			if (path.GetParent() != null && path.GetParent().GetTile() - prev_tile != prev_tile - new_tile) cost += self._cost_turn;
 			return cost;
 		}
-		
 		return path.GetCost() + AIMap.DistanceManhattan(new_tile, prev_tile) * self._cost_tile;
 	}
 
@@ -219,7 +204,6 @@ function Rail::_Cost(path, new_tile, new_direction, self)
 				path.GetParent().GetParent().GetTile() - path.GetParent().GetTile() != max(AIMap.GetTileX(prev_tile) - AIMap.GetTileX(new_tile), AIMap.GetTileY(prev_tile) - AIMap.GetTileY(new_tile)) / AIMap.DistanceManhattan(new_tile, prev_tile)) {
 			cost += self._cost_turn;
 		}
-		
 		return cost;
 	}
 
@@ -248,40 +232,6 @@ function Rail::_Cost(path, new_tile, new_direction, self)
 		cost += 5*self._cost_turn;
 	}
 	
-	/* Check for track and obstacles in neighbour tiles. */
-	local offsets = [
-		AIMap.GetTileIndex(0, 1), AIMap.GetTileIndex(0, -1),
-		AIMap.GetTileIndex(1, 0), AIMap.GetTileIndex(-1, 0)];
-	local hasNeighbourRail = false;
-	foreach (offset in offsets) {
-		local neighbour = new_tile + offset;
-		if (AIRail.IsRailTile(neighbour)) {
-			hasNeighbourRail = true;
-			break;
-		}
-	}
-	
-	offsets.extend([
-		AIMap.GetTileIndex(0, 2), AIMap.GetTileIndex(0, -2),
-		AIMap.GetTileIndex(2, 0), AIMap.GetTileIndex(-2, 0)]);
-	local hasObstacle = false;
-	foreach (offset in offsets) {
-		local neighbour = new_tile + offset;
-		if (!AITile.IsBuildable(neighbour)) {
-			hasObstacle = true;
-			break;
-		}
-	}
-	
-	if (hasNeighbourRail) {
-		// can be made a bonus
-		cost += self._cost_adj_rail;
-	}
-	
-	if (hasObstacle) {
-		cost += self._cost_adj_obstacle;
-	}
-	
 	/* Check if the new tile is a coast tile. */
 	if (AITile.IsCoastTile(new_tile)) {
 		cost += self._cost_coast;
@@ -300,7 +250,7 @@ function Rail::_Cost(path, new_tile, new_direction, self)
 		cost += self._cost_no_existing_rail;
 	}
 	*/
-	
+
 	return path.GetCost() + cost;
 }
 
@@ -310,8 +260,8 @@ function Rail::_Estimate(cur_tile, cur_direction, goal_tiles, self)
 	/* As estimate we multiply the lowest possible cost for a single tile with
 	 *  with the minimum number of tiles we need to traverse. */
 	foreach (tile in goal_tiles) {
-		local dx = Helper.Abs(AIMap.GetTileX(cur_tile) - AIMap.GetTileX(tile[0]));
-		local dy = Helper.Abs(AIMap.GetTileY(cur_tile) - AIMap.GetTileY(tile[0]));
+		local dx = abs(AIMap.GetTileX(cur_tile) - AIMap.GetTileX(tile[0]));
+		local dy = abs(AIMap.GetTileY(cur_tile) - AIMap.GetTileY(tile[0]));
 		min_cost = min(min_cost, min(dx, dy) * self._cost_diagonal_tile * 2 + (max(dx, dy) - min(dx, dy)) * self._cost_tile);
 	}
 	

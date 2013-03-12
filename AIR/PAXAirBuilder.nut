@@ -2,9 +2,15 @@ class PAXAirBuilder extends AirBuilder
 {
 }
 
+function PAXAirBuilder::IsAllowed()
+{
+	if(0 == AIAI.GetSetting("PAX_plane")) return false;
+	return AirBuilder.IsAllowed();
+}
+
 function PAXAirBuilder::Possible()
 {
-	if(!IsAllowedPAXPlane()) return false;
+	if(!this.IsAllowed()) return false;
 	Info("estimated cost of a PAX airplane connection: " + this.cost + " / available funds: " + GetAvailableMoney());
 	return this.cost<GetAvailableMoney();
 }
@@ -45,7 +51,7 @@ function PAXAirBuilder::BuildAirportRouteBetweenCitiesWithAirportTypeSet(airport
 		Info("Unfortunatelly no suitable airport location");
 		return false;
 	}
-	local tile_2 = this.FindSuitableAirportSpotInTown(airport_type, tile_1, Sqrt(AIEngine.GetMaximumOrderDistance(engine)));
+	local tile_2 = this.FindSuitableAirportSpotInTown(airport_type, tile_1, AIEngine.GetMaximumOrderDistance(engine));
 	if (tile_2 < 0){		{
 		Info("Unfortunatelly no suitable pair of airport locations");
 		return false;

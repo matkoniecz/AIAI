@@ -21,7 +21,7 @@ function RailBuilder::BuildDepot(path, reverse) //from adimral
 				local offsets = [AIMap.GetTileIndex(0, 1), AIMap.GetTileIndex(0, -1),
 				                 AIMap.GetTileIndex(1, 0), AIMap.GetTileIndex(-1, 0)];
 				foreach (offset in offsets) {
-					if (Utils_Tile.GetRealHeight(ppp + offset) != Utils_Tile.GetRealHeight(ppp)) continue;
+					if (AITile.GetMaxHeight(ppp + offset) != AITile.GetMaxHeight(ppp)) continue;
 					local depot_build = false;
 					if (AIRail.IsRailDepotTile(ppp + offset)) {
 						if (AIRail.GetRailDepotFrontTile(ppp + offset) != ppp) continue;
@@ -104,17 +104,17 @@ function ConnectDepotDiagonal(tile_a, tile_b, tile_c)
 		tiles.append([tile_a + offset1, tile_c, tile_c + offset2]);
 		tiles.append([tile_b + offset2, tile_c, tile_c + offset2]);
 	} else if (AITile.IsBuildable(tile_c + offset1)) {
-		if (Utils_Tile.GetRealHeight(tile_c) != Utils_Tile.GetRealHeight(tile_a) &&
+		if (AITile.GetMaxHeight(tile_c) != AITile.GetMaxHeight(tile_a) &&
 			!AITile.RaiseTile(tile_c, AITile.GetComplementSlope(AITile.GetSlope(tile_c)))) return null;
-		if (Utils_Tile.GetRealHeight(tile_c) != Utils_Tile.GetRealHeight(tile_a) &&
+		if (AITile.GetMaxHeight(tile_c) != AITile.GetMaxHeight(tile_a) &&
 			!AITile.RaiseTile(tile_c, AITile.GetComplementSlope(AITile.GetSlope(tile_c)))) return null;
 		depot_tile = tile_c + offset1;
 		tiles.append([tile_a + offset1, tile_c, tile_c + offset1]);
 		tiles.append([tile_b + offset2, tile_c, tile_c + offset1]);
 	} else if (AITile.IsBuildable(tile_c + offset2)) {
-		if (Utils_Tile.GetRealHeight(tile_c) != Utils_Tile.GetRealHeight(tile_a) &&
+		if (AITile.GetMaxHeight(tile_c) != AITile.GetMaxHeight(tile_a) &&
 			!AITile.RaiseTile(tile_c, AITile.GetComplementSlope(AITile.GetSlope(tile_c)))) return null;
-		if (Utils_Tile.GetRealHeight(tile_c) != Utils_Tile.GetRealHeight(tile_a) &&
+		if (AITile.GetMaxHeight(tile_c) != AITile.GetMaxHeight(tile_a) &&
 			!AITile.RaiseTile(tile_c, AITile.GetComplementSlope(AITile.GetSlope(tile_c)))) return null;
 		depot_tile = tile_c + offset2;
 		tiles.append([tile_a + offset1, tile_c, tile_c + offset2]);

@@ -105,4 +105,19 @@ AIVehicleList_Station <- function(station_id)
 	return vehicle_list;
 }
 
-AILog.Info("changing API finished");
+AIVehicle.SetName_ <- AIVehicle.SetName
+AIVehicle.SetName <- function (vehicle_id, string)
+{
+if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle " + vehicle_id);
+local i = 1;
+for(;!AIVehicle.SetName_(vehicle_id, string + " #" + i); i++)
+	{
+	if(AIError.GetLastError() == AIError.ERR_PRECONDITION_STRING_TOO_LONG){
+		if(AIAI.GetSetting("crash_AI_in_strange_situations") == 1) abort("ops?")
+		else AIVehicle.SetName_(vehicle_id, "PRECONDITION_FAILED");
+		
+	}
+}
+}
+
+Info("changing API finished");

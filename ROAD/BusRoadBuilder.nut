@@ -2,9 +2,15 @@ class BusRoadBuilder extends RoadBuilder
 {
 }
 
+function BusRoadBuilder::IsAllowed()
+{
+	if(0 == AIAI.GetSetting("use_busses")) return false;
+	return RoadBuilder.IsAllowed();
+}
+
 function BusRoadBuilder::Possible()
 {
-	if(!IsAllowedBus()) return false;
+	if(!this.IsAllowed()) return false;
 	Info("estimated cost of a bus connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
 	return this.cost<GetAvailableMoney();
 }
@@ -52,12 +58,12 @@ function BusRoadBuilder::Go()
 	  Info("   Contruction started on correct route.");
 	  if(this.ConstructionOfRVRoute(AIRoad.ROADVEHTYPE_BUS))
 	  return true;
-	  else trasa.forbidden.AddItem(trasa.start, 0);
+	  else trasa.forbidden_industries.AddItem(trasa.start, 0);
 	  }
    else
       {
 	  if(trasa.start==null) return false;
-	  else trasa.forbidden.AddItem(trasa.start, 0);
+	  else trasa.forbidden_industries.AddItem(trasa.start, 0);
 	  }
    }
 return false;

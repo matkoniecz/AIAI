@@ -2,6 +2,24 @@ class AirBuilder extends Builder
 {
 }
 
+function AirBuilder::IsAllowed()
+{
+	if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_AIR)) return false;
+	if(AIGameSettings.GetValue("economy.infrastructure_maintenance")) return false; //TODO - replace by estimating profits
+
+	local ile;
+	local veh_list = AIVehicleList();
+	veh_list.Valuate(AIVehicle.GetVehicleType);
+	veh_list.KeepValue(AIVehicle.VT_AIR);
+	ile = veh_list.Count();
+	local allowed = AIGameSettings.GetValue("vehicle.max_aircraft");
+	if(allowed==0) return false;
+	if(ile==0) return true;
+	if((allowed - ile)<4) return false;
+	if(((ile*100)/(allowed))>90) return false;
+	return true;
+}
+
 function AirBuilder::FindPairIndustryToTownAllocator(route)
 {
 route.first_station.location = null
@@ -9,22 +27,22 @@ route.second_station.location = null
 return route
 
 route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_METROPOLITAN, route.start)
-route.second_station.location = FindSuitableAirportSpotInTheTown(AIAirport.AT_METROPOLITAN, route.end, route.cargo)
+route.second_station.location = FindSuitableAirportSpotInTownThatAcceptsThisWeirdCargo(AIAirport.AT_METROPOLITAN, route.end, route.cargo)
 route.station_size = AIAirport.AT_METROPOLITAN
 if(route.first_station.location != null && route.second_station.location != null ) return route
 
 route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_LARGE, route.start)
-route.second_station.location = FindSuitableAirportSpotInTheTown(AIAirport.AT_LARGE, route.end, route.cargo)
+route.second_station.location = FindSuitableAirportSpotInTownThatAcceptsThisWeirdCargo(AIAirport.AT_LARGE, route.end, route.cargo)
 route.station_size = AIAirport.AT_LARGE
 if(route.first_station.location != null && route.second_station.location != null ) return route
 
 route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_COMMUTER, route.start)
-route.second_station.location = FindSuitableAirportSpotInTheTown(AIAirport.AT_COMMUTER, route.end, route.cargo)
+route.second_station.location = FindSuitableAirportSpotInTownThatAcceptsThisWeirdCargo(AIAirport.AT_COMMUTER, route.end, route.cargo)
 route.station_size = AIAirport.AT_COMMUTER
 if(route.first_station.location != null && route.second_station.location != null ) return route
 
 route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_SMALL, route.start)
-route.second_station.location = FindSuitableAirportSpotInTheTown(AIAirport.AT_SMALL, route.end, route.cargo)
+route.second_station.location = FindSuitableAirportSpotInTownThatAcceptsThisWeirdCargo(AIAirport.AT_SMALL, route.end, route.cargo)
 route.station_size = AIAirport.AT_SMALL
 return route
 }
@@ -68,7 +86,7 @@ tile_list.KeepValue(1);
 return FindSuitableAirportSpotNearIndustryWithAirportType(tile_list, airport_type);
 }
 
-function AirBuilder::FindSuitableAirportSpotNearIndustryWithAirportTypeConsumer(airport_type, consumer, cargo)
+function AirBuilder::FindSuitableAirportSpotNearIndustryWithAirportTypeConsumer(airport_type, consumer, cargo, center_tile=null, max_distance=INFINITE_DISTANCE)
 {
 local airport_x, airport_y, airport_rad;
 local good_tile = 0;
@@ -83,6 +101,10 @@ list.KeepValue(1);
 
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
 list.RemoveValue(0);
+
+list.Valuate(AirBuilder.GetOrderDistance, center_tile);
+list.KeepBelowValue(max_distance);    
+
 return FindSuitableAirportSpotNearIndustryWithAirportType(list, airport_type);
 }
 
@@ -105,7 +127,6 @@ return AIOrder.GetOrderDistance(AIVehicle.VT_AIR, tile_1, tile_2);
 
 function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile=null, max_distance=INFINITE_DISTANCE)
 	{
-	Error(max_distance)
 	local airport_x, airport_y, airport_rad;
 
 	airport_x = AIAirport.GetAirportWidth(airport_type);
@@ -121,8 +142,8 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile=nul
 		town_list.KeepAboveValue(this.GetMinDistance());    
 		town_list.KeepBelowValue(this.GetMaxDistance());    
 
-		town_list.Valuate(AirBuilder.GetOrderDistance, center_tile);
-		town_list.KeepBelowValue(max_distance*max_distance);    
+		town_list.Valuate(AirBuilder.GetOrderDistance, center_tile); //TODO - is this correct - GetOrderDistance requires tile, not city id 
+		town_list.KeepBelowValue(max_distance);    
 
 		town_list.Valuate(this.DistanceWithRandValuator, center_tile);
 		//TODO - wed³ug dystansu optimum to 500
@@ -148,7 +169,7 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile=nul
 		// Handle order distance
 		if(center_tile != null){
 			town_list.Valuate(AirBuilder.GetOrderDistance, center_tile);
-			town_list.KeepBelowValue(max_distance*max_distance);
+			town_list.KeepBelowValue(max_distance);
 		}
 		// Couldn't find a suitable place for this town, skip to the next 
 		if (list.Count() == 0) continue;
@@ -178,7 +199,7 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile=nul
 	return -1;
 }
 
-function AirBuilder::FindSuitableAirportSpotInTheTown(town, cargo)
+function AirBuilder::FindSuitableAirportSpotInTownThatAcceptsThisWeirdCargo(town, cargo, center_tile=null, max_distance=INFINITE_DISTANCE)
 {
  	local tile = AITown.GetLocation(town);
 	local list = AITileList();
@@ -191,6 +212,9 @@ function AirBuilder::FindSuitableAirportSpotInTheTown(town, cargo)
 	/* Sort on acceptance, remove places that don't have acceptance */
 	list.Valuate(AITile.GetCargoAcceptance, Helper.GetPAXCargo(), airport_x, airport_y, airport_rad);
 	list.RemoveBelowValue(50);
+
+	list.Valuate(AirBuilder.GetOrderDistance, center_tile);
+	list.KeepBelowValue(max_distance);    
 
 	list.Valuate(AITile.GetCargoAcceptance, Helper.GetMailCargo(), airport_x, airport_y, airport_rad);
 	list.RemoveBelowValue(10);
@@ -262,6 +286,8 @@ return AIEngine.GetCapacity(engine_id) * AIEngine.GetMaxSpeed(engine_id);
 
 function AirBuilder::FindAircraft(airport_type, cargo, how_many, balance, distance)
 {
+distance = AIOrder.GetOrderDistance(AIVehicle.VT_AIR, AIMap.GetTileIndex(1, 1), AIMap.GetTileIndex(Helper.Clamp(distance, 1, AIMap.GetMapSizeX() - 2), 1))
+
 local typical_minimal_capacity = 40
 local engine_list = AIEngineList(AIVehicle.VT_AIR);
 
@@ -282,15 +308,11 @@ engine_list.Valuate(AIEngine.CanRefitCargo, cargo);
 engine_list.KeepValue(1);
 
 engine_list.Valuate(AIEngine.GetMaximumOrderDistance); //note, function is modified and return INFINITE_DISTANCE instead of 0
-engine_list.RemoveBelowValue(distance*distance); //AIEngine.GetMaximumOrderDistance return distance squared
+engine_list.RemoveBelowValue(distance);
 
 engine_list.Valuate(FindAircraftValuator);
 engine_list.KeepTop(1);
 if(engine_list.Count()==0) return null;
-Info("((((((")
-Info(AIEngine.GetName(engine_list.Begin()))
-Info(Sqrt(AIEngine.GetMaximumOrderDistance(engine_list.Begin())))
-Warning(distance)
 return engine_list.Begin();
 }
 
@@ -365,30 +387,8 @@ return ile;
 function AirBuilder::ValuateProducer(ID, cargo)
 	{
 	if(AIIndustry.GetLastMonthProduction(ID, cargo)<50-4*desperation) return 0; //protection from tiny industries servised by giant trains
-	local base = AIIndustry.GetLastMonthProduction(ID, cargo);
-	base*=(100-AIIndustry.GetLastMonthTransportedPercentage (ID, cargo));
-	if(AIIndustry.GetLastMonthTransportedPercentage (ID, cargo)==0)base*=3;
-	base*=AICargo.GetCargoIncome(cargo, 10, 50);
-	if(base!=0){
-		if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(ID))){
-			//base*=3;
-			//base/=2;
-			base+=10000;
-			base*=100;
-			}
-		else{
-			base*=100;
-			}
-		}
-	//Info(AIIndustry.GetName(ID) + " is " + base + " point producer of " + AICargo.GetCargoLabel(cargo));
-	return base;
+	return Builder.ValuateProducer(ID, cargo);
 	}
-
-function AirBuilder::ValuateConsumer(ID, cargo, score)
-{
-if(AIIndustry.GetStockpiledCargo(ID, cargo)==0) score*=2;
-return score;
-}
 
 function AirBuilder::distanceBetweenIndustriesValuator(distance)
 {
@@ -405,7 +405,7 @@ if(vehicle==-1) return false;
 AIOrder.AppendOrder(vehicle, tile_1, AIOrder.OF_FULL_LOAD_ANY);
 AIOrder.AppendOrder(vehicle, tile_2, AIOrder.OF_NO_LOAD);
 AIVehicle.StartStopVehicle(vehicle);
-SetNameOfVehicle(vehicle, nazwa);
+AIVehicle.SetName(vehicle, nazwa);
 return true;
 }
 
@@ -427,7 +427,7 @@ this.Skipper();
 
 if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_AIR)) return;
 local veh_list = AIVehicleList();
-veh_list.Valuate(GetVehicleType);
+veh_list.Valuate(AIVehicle.GetVehicleType);
 veh_list.KeepValue(AIVehicle.VT_AIR);
 local allowed = AIGameSettings.GetValue("vehicle.max_aircraft");
 if(allowed == veh_list.Count()) return;
@@ -500,7 +500,7 @@ for (local airport = list.Begin(); list.HasNext(); airport = list.Next())
 		{
 		if(AIStation.GetCargoWaiting(airport, cargo)>100)
 			{																						//protection from flood of mail planes
-			if((GetAverageCapacity(airport, cargo)*2 < AIStation.GetCargoWaiting(airport, cargo) &&  AIStation.GetCargoWaiting(airport, cargo)>200) 
+			if((GetAverageCapacityOfVehiclesFromStation(airport, cargo)*2 < AIStation.GetCargoWaiting(airport, cargo) &&  AIStation.GetCargoWaiting(airport, cargo)>200) 
 			|| AIStation.GetCargoRating(airport, cargo)<30 )
 				{
 				local airports_list = AIStationList(AIStation.STATION_AIRPORT);

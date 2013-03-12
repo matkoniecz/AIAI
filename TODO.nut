@@ -1,17 +1,15 @@
-[fix] fix attempting to clone first vehicle from the empty list
-[fix] copy-paste failure
-[fix] train refuses to be sold, goes mad
 
-Known bug: vehicles suddenly getting invalid (happens around once in 900 in-game years). Nothing new, I am trying to find how this happens for years.
-
+TODO: Use ProuctionCanIncrease in valuate producer
+TODO: cargo planes are disabled
+TODO: explain aystar mess (caused by passing lane generator)
 TODO: build depots to allow vehicle test
 TODO: properly handle economy.infrastructure_maintenance and av8 for planes
-TODO: fix IsItPossibleToAddBurden
+TODO: fix IsItPossibleToAddBurden (higher speed ratio than 1/4)
 TODO: reuse roads http://www.tt-forums.net/viewtopic.php?p=958414#p958414
 TODO: sprawdziæ jak (i czy) dzia³a lista zbanowanych przedsiêbiorstw
 TODO: foo supplies
 TODO: networking
-TODO: better engine choosing
+TODO: better eircraft ngine choosing
 TODO: error stats
 http://www.tt-forums.net/viewtopic.php?f=31&t=61429&view=unread#unread
 

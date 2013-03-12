@@ -1,14 +1,3 @@
-function IsForSell(vehicle_id)
-{
-if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle " + vehicle_id);
-local name=AIVehicle.GetName(vehicle_id)+"            ";
-local forsell="for sell";
-
-for(local i=0; i<forsell.len(); i++)
-if(name[i]!=forsell[i]) return false;
-return true;
-}
-
 function AIAI::GetIndustryList()
 {
 local list = AIIndustryList();
@@ -33,17 +22,6 @@ list.KeepBottom(200);
 return list;
 }
 
-function SetNameOfVehicle(vehicle_id, string)
-{
-if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle " + vehicle_id);
-local i = 1;
-for(;!AIVehicle.SetName(vehicle_id, string + " #" + i); i++)
-	{
-	//Error("SetNameOfVehicle: " + AIError.GetLastErrorString() + ": " + string);
-	if(AIError.GetLastError() == AIError.ERR_PRECONDITION_STRING_TOO_LONG) SetNameOfVehicle(vehicle_id, "PRECONDITION_FAILED");
-	}
-}
-
 function IsItNeededToImproveThatStation(station, cargo)
 {
 return AIStation.GetCargoWaiting(station, cargo)>50 || (AIStation.GetCargoRating(station, cargo)<40&&AIStation.GetCargoWaiting(station, cargo)>0) ;
@@ -51,35 +29,6 @@ return AIStation.GetCargoWaiting(station, cargo)>50 || (AIStation.GetCargoRating
 function IsItNeededToImproveThatNoRawStation(station, cargo)
 {
 return AIStation.GetCargoWaiting(station, cargo)>150 || (AIStation.GetCargoRating(station, cargo)<40&&AIStation.GetCargoWaiting(station, cargo)>0) ;
-}
-
-function GetDepotLocation(vehicle_id)
-{
-assert(AIVehicle.IsValidVehicle(vehicle_id))
-local depot_location = LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(GetLoadStationLocation(vehicle_id)), "[]");
-if(AIMap.IsValidTile(depot_location)) return depot_location;
-//for(local i=0; i<AIOrder.GetOrderCount(vehicle_id); i++) if(AIOrder.IsGotoDepotOrder(vehicle_id, i)) return AIOrder.GetOrderDestination(vehicle_id, i);
-abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle_id)+ " depot_location from station name is "+depot_location);
-}
-
-function GetLoadStationLocation(vehicle_id)
-{
-assert(AIVehicle.IsValidVehicle(vehicle_id))
-for(local i=0; i<AIOrder.GetOrderCount(vehicle_id); i++) if(AIOrder.IsGotoStationOrder(vehicle_id, i)) return AIOrder.GetOrderDestination(vehicle_id, i);
-abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle_id));
-}
-
-function GetUnloadStationLocation(vehicle_id)
-{
-assert(AIVehicle.IsValidVehicle(vehicle_id))
-local onoff = false;
-for(local i=0; i<AIOrder.GetOrderCount(vehicle_id); i++) {
-   if(AIOrder.IsGotoStationOrder(vehicle_id, i)) {
-	  if(onoff==true) return AIOrder.GetOrderDestination(vehicle_id, i);
-	  onoff=true
-	  }
-   }
-abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle_id));
 }
 
 function Name()

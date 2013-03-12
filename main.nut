@@ -45,17 +45,16 @@ function AIAI::Start()
 		Warning("Desperation: " + desperation);
 		root_tile = Tile.GetRandomTile();
 		if(AIVehicleList().Count()!=0){
-			local need = Money.Inflate(100000);
+			local need = this.GetMinimalCost(builders);
 			if(GetAvailableMoney()<need){
 				Info("Waiting for more money: " + GetAvailableMoney()/1000 + "k / " + need/1000 + "k");
-				Money.MakeMaximumPayback();
 				this.Maintenance();
 				BankruptProtector();
 				Sleep(500);
 				}
 			}
 		this.Maintenance();
-		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>Money.Inflate(500000) && this.Statue()) Info("I Am Rich! Statues!");
+		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>Money.Inflate(500000) && this.BuildStatues()) Info("I Am Rich! Statues!");
 		this.InformationCenter(builders);
 		if(this.TryEverything(builders)){
 			desperation = 0;
@@ -78,7 +77,7 @@ function AIAI::Start()
 
 function AIAI::RunGeneralInspection()
 {
-			this.DeleteUnprofitable();
+			DeleteUnprofitable();
 			DeleteEmptyStations();
 			Autoreplace();
 			this.UpgradeBridges();
@@ -93,7 +92,7 @@ function AIAI::UpgradeBridges()
 			if(!AIBridge.IsBridgeTile(tile))continue;
 			//AISign.BuildSign(tile, i);
 			local old_bridge_type = AIBridge.GetBridgeID (tile);
-			local new_bridge_type = AIAI.GetMaxSpeedBridge(tile, AIBridge.GetOtherBridgeEnd(tile));
+			local new_bridge_type = GetMaxSpeedBridge(tile, AIBridge.GetOtherBridgeEnd(tile));
 			if( AIBridge.GetMaxSpeed(new_bridge_type) > AIBridge.GetMaxSpeed(old_bridge_type) )
 				{
 				local vehicle_type = AIVehicle.VT_ROAD;
@@ -123,45 +122,32 @@ for(local i = 0; i<builders.len(); i++)
 	if(builders[i] != null){
 		if(builders[i].Possible()){
 			if(builders[i].Go()){
-				Money.MakeMaximumPayback();
 				return true;
 				}
-			Money.MakeMaximumPayback();
 			}
 		}
 	}
 return false;
 }
 
-function AIAI::Statue()
+function AIAI::GetMinimalCost(builders)
 {
-	local veh_list = AIVehicleList();
-	if(veh_list.Count()==0) return false;
-
-	veh_list.Valuate(AIBase.RandItem);
-	veh_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
-	for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next()){
-		for(local i=0; i<AIOrder.GetOrderCount(veh); i++){
-			local location = AIOrder.GetOrderDestination(veh, i);
-			if(AITile.IsStationTile(location)){
-				if((AIOrder.GetOrderFlags(veh, i) & AIOrder.OF_NO_LOAD) !=AIOrder.OF_NO_LOAD){
-					local station = AIStation.GetStationID(location);
-					local suma = 0;
-					if(AIVehicle.GetVehicleType(veh)==AIVehicle.VT_RAIL || AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount() || desperation>30){
-						if(AITown.PerformTownAction(AITile.GetClosestTown(location), AITown.TOWN_ACTION_BUILD_STATUE)){
-							Info("Statue for " + AIVehicle.GetName(veh));
-							return true;
-							}
-						else{
-							if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH) return false;
-							}
-						}
-					}
+local cost = 10000000000;
+			Info(cost);
+for(local i = 0; i<builders.len(); i++)
+	{
+	if(builders[i] != null){
+		if(builders[i].IsAllowed()){
+			if(builders[i].GetCost() < cost){
+				cost = builders[i].GetCost();
+				Info(cost);
 				}
 			}
 		}
-	Info("Statue construction failed");
-	return false;
+	}
+if(cost < Money.Inflate(100000)) cost = Money.Inflate(100000);
+			Info(cost);
+return cost;
 }
 
 function AIAI::SignMenagement()
@@ -182,41 +168,6 @@ function AIAI::SignMenagement()
 		}
 	}
 
-function BankruptProtector()
-{
-if(AIVehicleList().Count()==0) return;
-if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<AICompany.GetLoanInterval()*2)
-{
-BorrowOnePieceOfLoan();
-while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
-	{
-	if(AIBase.RandRange(10)==1)Error("We need bailout!");
-	else Error("We need money!");
-	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
-		{
-		if(AICompany.GetLoanAmount()==AICompany.GetMaxLoanAmount())
-			{
-			Error("We are too big to fail! Remember, we employ " + (AIVehicleList().Count()*7+AIStationList(AIStation.STATION_ANY).Count()*3+23) + " people!");
-			DoomsdayMachine();
-			Sleep(1000);
-			}
-		BorrowOnePieceOfLoan()
-		}
-	Info("End of financial problems!");
-	}
-}	   
-}
-
-
-function IsCargoLoadedOnThisStation(station_id, cargo_id)
-	{
-	local vehicle_list=AIVehicleList_Station(station_id);
-	if(vehicle_list.Count()!=0)
-		if(AIStation.GetStationID(GetLoadStationLocation(vehicle_list.Begin()))==station_id)
-			if(AIVehicle.GetCapacity(vehicle_list.Begin(), cargo_id)!=0)
-				return true;
-	return false;
-	}
 
 function AIAI::GetDate()
 {
@@ -294,7 +245,7 @@ if(!AIOrder.AppendOrder (vehicle_id, depot_location, AIOrder.OF_NON_STOP_INTERME
 	abort("WTF? AppendOrder impossible? "+AIVehicle.GetName(vehicle_id));
 	}
 AIOrder.SkipToOrder(vehicle_id, 1);
-SetNameOfVehicle(vehicle_id, "for sell!" + why);
+AIVehicle.SetName(vehicle_id, "for sell!" + why);
 }
 
 function AIAI::sellVehicle(vehicle_id, why)
@@ -314,7 +265,7 @@ local state_crashed_and_broken = AIVehicle.VS_CRASHED | AIVehicle.VS_BROKEN
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck1 " + vehicle_id);
 if(IsForSell(vehicle_id) == true) return false;
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck2 " + vehicle_id);
-SetNameOfVehicle(vehicle_id, "sell!" + why);
+AIVehicle.SetName(vehicle_id, "sell!" + why);
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck3 " + vehicle_id);
 if(!AIVehicle.SendVehicleToDepot(vehicle_id)) 
 	{
@@ -322,61 +273,8 @@ if(!AIVehicle.SendVehicleToDepot(vehicle_id))
 	return false;
 	}
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck4 " + vehicle_id);
-SetNameOfVehicle(vehicle_id, "for sell " + why);
+AIVehicle.SetName(vehicle_id, "for sell " + why);
 return true;
-}
-
-function VehicleCounter(station)
-{
-return AIVehicleList_Station(station).Count();
-}
-
-function AIAI::DeleteEmptyStations()
-{
-local station_id_list;
-station_id_list = AIStationList(AIStation.STATION_TRUCK_STOP);
-station_id_list.Valuate(VehicleCounter);
-station_id_list.KeepValue(0);
-for (local spam = station_id_list.Begin(); station_id_list.HasNext(); spam = station_id_list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
-
-station_id_list = AIStationList(AIStation.STATION_BUS_STOP);
-station_id_list.Valuate(VehicleCounter);
-station_id_list.KeepValue(0);
-for (local spam = station_id_list.Begin(); station_id_list.HasNext(); spam = station_id_list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
-
-station_id_list = AIStationList(AIStation.STATION_TRAIN); //TODO: remove also tracks
-station_id_list.Valuate(VehicleCounter);
-station_id_list.KeepValue(0);
-for (local spam = station_id_list.Begin(); station_id_list.HasNext(); spam = station_id_list.Next()) AITile.DemolishTile(AIBaseStation.GetLocation(spam));
-}
-
-function AIAI::DeleteUnprofitable()
-{
-	local vehicle_list = AIVehicleList();
-
-   	vehicle_list.Valuate(IsForSell);
-	vehicle_list.KeepValue(0);
-
-   	vehicle_list.Valuate(AIVehicle.GetAge);
-	vehicle_list.KeepAboveValue(800);
-
-   	vehicle_list.Valuate(AIVehicle.GetProfitThisYear);
-	vehicle_list.KeepBelowValue(0);
-   	vehicle_list.Valuate(AIVehicle.GetProfitLastYear);
-	vehicle_list.KeepBelowValue(0);
-
-	Info(vehicle_list.Count() + " vehicle(s) should be sold because are unprofitable");
-   	
-	local counter = 0;
-	
-	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()) 
-	   {
-	   if(AIVehicle.GetVehicleType(vehicle_id)!=AIVehicle.VT_RAIL || (AIVehicleList_Station(AIStation.GetStationID(GetLoadStationLocation(vehicle_id)))).Count()>2)
-	      {
-		  if(AIVehicle.IsValidVehicle(vehicle_id)) if(AIAI.sellVehicle(vehicle_id, "unprofitable")) counter++;
-		  }
-	   }
-	Info(counter + " vehicle(s) sold.");
 }
 
 function AIAI::BuilderMaintenance()
@@ -520,73 +418,6 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 	}
 }
 
-function LoadDataFromStationNameFoundByStationId(station_id, delimiters)
-{	
-	assert(AIStation.IsValidStation(station_id))
-	local start_code = delimiters[0]
-	local end_code = delimiters[1]
-	local str = AIBaseStation.GetName(station_id)
-	local result = null;
-		
-	for(local i = 0; i < str.len(); ++i)
-		{
-		//Warning(result+" from "+str+" ["+i+"]="+str[i]);
-		if(str[i]==start_code && result == null)
-			{
-			result=0
-			}
-		else if(str[i]==end_code)
-			{
-			//Warning(result+" from "+str);
-			return result;
-			}
-		else if(result != null)
-			{
-			result=result*10+str[i]-48;
-			}
-		}
-	return null;
-}
-
-function AIAI::TrySetStationName(station_id, data, leading_number)
-{
-	local string;
-	string = IntToStrFill(leading_number, 4)+data;
-	if(AIBaseStation.GetName(station_id) == string) return true;
-	return AIBaseStation.SetName(station_id, string)
-}
-
-function AIAI::SetStationName(location, data)
-{
-	local station_id = AIStation.GetStationID(location);
-	local current_number = LoadDataFromStationNameFoundByStationId(station_id, "0{");
-	if(current_number != null)
-		if(TrySetStationName(station_id, data, current_number))
-			return;
-	
-	if(!AIBaseStation.IsValidBaseStation(station_id))
-		abort("no station found");
-
-	while(!TrySetStationName(station_id, data, station_number))station_number++;
-	station_number++;
-}
-
-function AIAI::SetWaypointName(network, location)
-{
-	local waypoint = AIWaypoint.GetWaypointID(location);
-	if(!AIBaseStation.IsValidBaseStation(waypoint))
-		return;
-	local string;
-	local i=1;
-	do
-		{
-		string = "{"+network+"}  #"+IntToStrFill(i, 5);
-		i++;
-		Error(AIError.GetLastErrorString());
-		}
-	while(!AIBaseStation.SetName(waypoint, string))
-}
-
 function PaintMapWithHillData()
 {
 local tile_source = AIMap.GetTileIndex(1, 1)
@@ -621,11 +452,9 @@ function AIAI::BuildVehicle(depot_tile, engine_id)
 		
 	//Info("BuildVehicle ("+AIEngine.GetName(engine_id)+")");
 	local newengineId = AIVehicle.BuildVehicle(depot_tile, engine_id);
-	if(AIError.GetLastError()!=AIError.ERR_NONE)
-		{
+	if(AIError.GetLastError()!=AIError.ERR_NONE){
 		Warning("Vehicle ("+AIEngine.GetName(engine_id)+") construction failed with "+AIError.GetLastErrorString() + "(message from AIAI::BuildVehicle)")
-		if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH)
-			{
+		if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH){
 			do {
 				rodzic.SafeMaintenance();
 				ProvideMoney();
@@ -635,25 +464,24 @@ function AIAI::BuildVehicle(depot_tile, engine_id)
 			} while(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH)
 			}
 		Warning(AIError.GetLastErrorString());
-		if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_BUILD_DISABLED || AIError.GetLastError()==AIVehicle.ERR_VEHICLE_TOO_MANY )
-			{
+		if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_BUILD_DISABLED || AIError.GetLastError()==AIVehicle.ERR_VEHICLE_TOO_MANY ){
 			return AIVehicle.VEHICLE_INVALID;
 			}
 		if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_WRONG_DEPOT) abort("depot nuked");
-		if(AIError.GetLastError()==AIError.ERR_PRECONDITION_FAILED) 
-			{
+		if(AIError.GetLastError()==AIError.ERR_PRECONDITION_FAILED) {
 			AISign.BuildSign(depot_tile, "ERR_PRECONDITION_FAILED");
 			abort("ERR_PRECONDITION_FAILED (before sign construction), engine: "+AIEngine.GetName(engine_id));
 			}
 		if(AIError.GetLastError()!=AIError.ERR_NONE) abort("wtf");
 		if(!AIVehicle.IsValidVehicle(newengineId)) abort("!!!");
 		}
+	Info(AIError.GetLastErrorString());
 	Info(AIEngine.GetName(engine_id) + " constructed! ("+newengineId+")")
 	if(!AIVehicle.IsValidVehicle(newengineId)) abort("!!!!!!!!!!!!!!!");
 	return newengineId;
 }
 
-function AIAI::GetMaxSpeedBridge(start, end)
+function GetMaxSpeedBridge(start, end)
 {
 local bridge_list = AIBridgeList_Length(AIMap.DistanceManhattan(start, end) + 1);
 bridge_list.Valuate(AIBridge.GetMaxSpeed);
@@ -663,7 +491,7 @@ return bridge_list.Begin()
 
 function AIAI::BuildBridge(vehicle_type, start, end)
 {
-local bridge_type_id = this.GetMaxSpeedBridge(start, end);
+local bridge_type_id = GetMaxSpeedBridge(start, end);
 local result = AIBridge.BuildBridge(vehicle_type, bridge_type_id, start, end);
 if(result) bridge_list.append(start);
 return result;

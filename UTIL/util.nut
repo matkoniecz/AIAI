@@ -1,50 +1,40 @@
-function RepayOnePieceOfLoan()
+function AIAI::BuildStatues()
 {
-return AICompany.SetLoanAmount(AICompany.GetLoanAmount()-AICompany.GetLoanInterval())
+	local veh_list = AIVehicleList();
+	if(veh_list.Count()==0) return false;
+
+	veh_list.Valuate(AIBase.RandItem);
+	veh_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
+	for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next()){
+		for(local i=0; i<AIOrder.GetOrderCount(veh); i++){
+			local location = AIOrder.GetOrderDestination(veh, i);
+			if(AITile.IsStationTile(location)){
+				if((AIOrder.GetOrderFlags(veh, i) & AIOrder.OF_NO_LOAD) !=AIOrder.OF_NO_LOAD){
+					local station = AIStation.GetStationID(location);
+					local suma = 0;
+					if(AIVehicle.GetVehicleType(veh)==AIVehicle.VT_RAIL || AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount() || desperation>30){
+						if(AITown.PerformTownAction(AITile.GetClosestTown(location), AITown.TOWN_ACTION_BUILD_STATUE)){
+							Info("Statue for " + AIVehicle.GetName(veh));
+							return true;
+							}
+						else{
+							if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH) return false;
+							}
+						}
+					}
+				}
+			}
+		}
+	Info("Statue construction failed");
+	return false;
 }
 
-function BorrowOnePieceOfLoan()
-{
-return AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval())
+function GetWeightOfCargo(cargo_id){
+	if(AICargo.IsFreight(cargo_id)) return AIGameSettings.GetValue("vehicle.freight_trains");
+	if(AICargo.HasCargoClass(cargo_id, AICargo.CC_MAIL) || AICargo.HasCargoClass(cargo_id, AICargo.CC_PASSENGERS)) return 0;
+	return 1;
 }
 
-function IntToStrFill(int_val, num_digits)
-{
-   local str = int_val.tostring();
-   while(str.len() < num_digits)
-      {
-      str = "0" + str;
-      }
-   return str;
-}
-
-function GetAvailableMoney()
-{
-return AICompany.GetBankBalance(AICompany.COMPANY_SELF) + AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount() - Money.Inflate(10000);
-}
-
-function Info(string)
-{
-local date=AIDate.GetCurrentDate ();
-AILog.Info(GetReadableDate()  + " " + string);
-}
-
-function Warning(string)
-{
-local date=AIDate.GetCurrentDate ();
-AILog.Warning(GetReadableDate()  + " " + string);
-}
-
-function Error(string)
-{
-AILog.Error( GetReadableDate() + " " + string);
-}
-
-function GetReadableDate()
-{
-local date=AIDate.GetCurrentDate ();
-return AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date);
-}
 /////////////////////////////////////////////////
 /// Age of the youngest vehicle (in days)
 /// @pre AIStation.IsValidStation(station_id)
@@ -63,7 +53,7 @@ for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper
 return minimum;
 }
 
-function GetAverageCapacity(station, cargo)
+function GetAverageCapacityOfVehiclesFromStation(station, cargo)
 {
 local list = AIVehicleList_Station(station);
 local total = 0;
@@ -81,34 +71,6 @@ if(ile==0) return 0;
 else return total/ile;
 }
 
-function abort(message)
-{
-Error(message + ", last error is " + AIError.GetLastErrorString());
-Warning("Please, post savegame");
-if(AIAI.GetSetting("pause_game_on_calling_abort_funtion_and_activated_ai_developer_tools") == 1 ) AIController.Break("STOP!")
-local zero=0/0;
-}
-
-function GetVehicleType(vehicle_id)
-{
-	return AIEngine.GetVehicleType(AIVehicle.GetEngineType(vehicle_id));
-}
-
-//from Rondje, computes square root of i using Babylonian method
-function Sqrt(i) 
-{ 
-	assert(i>=0);
-	if (i == 0)
-		return 0;   // Avoid divide by zero
-	local n = (i / 2) + 1;       // Initial estimate, never low
-	local n1 = (n + (i / n)) / 2;
-	while (n1 < n) {
-		n = n1;
-		n1 = (n + (i / n)) / 2;
-	}
-	return n;
-}
-
 function SafeAddRectangle(list, tile, radius) { //from Rondje
 	local x1 = max(1, AIMap.GetTileX(tile) - radius);
 	local y1 = max(1, AIMap.GetTileY(tile) - radius);
@@ -119,17 +81,6 @@ function SafeAddRectangle(list, tile, radius) { //from Rondje
 	list.AddRectangle(AIMap.GetTileIndex(x1, y1), AIMap.GetTileIndex(x2, y2)); 
 }
 
-function StringToInteger(string)
-{
-Info(string+"<-len")
-local result = 0;
-local i=0;
-while(i<string.len()){
-	result=result*10+string[i]-48;
-	i++;
-	}
-return result;
-}
 
 function IsTileFlatAndBuildable(tile)
 	{
@@ -139,12 +90,11 @@ function IsTileFlatAndBuildable(tile)
 function IsTileWithAuthorityRefuse(tile)
 	{
 	local town_id=AITile.GetClosestTown (tile);
-	if(AITown.GetRating (town_id, AICompany.COMPANY_SELF) == AITown.TOWN_RATING_APPALLING) return true;
-	if(AITown.GetRating (town_id, AICompany.COMPANY_SELF) == AITown.TOWN_RATING_VERY_POOR) return true;
-	return false;
+	if(!Town.TownRatingAllowStationBuilding(town_id))return true;
+	else return false;
 	}
 
-	function DeleteVehiclesInDepots()
+function DeleteVehiclesInDepots()
 	{
 	//Info("DeleteVehiclesInDepots");
 	local counter=0;
@@ -158,7 +108,31 @@ function IsTileWithAuthorityRefuse(tile)
 	return counter;
 	}
 
-function ImproveTownRating(town_id, desperation) //from AdmiralAI
+function PlantTreesToImproveRating(town_id, min_rating) //from AdmiralAI
+{
+	/* Build trees to improve the rating. We build this tree in an expanding
+	 * circle starting around the town center. */
+	local location = AITown.GetLocation(town_id);
+	local list = Tile.GetTownTiles(town_id)
+	list.Valuate(AITile.IsBuildable);
+	list.KeepValue(1);
+	/* Don't build trees on tiles that already have trees, as this doesn't
+	 * give any town rating improvement. */
+	list.Valuate(AITile.HasTreeOnTile);
+	list.KeepValue(0);
+	foreach (tile, dummy in list) {
+		if(AITown.IsWithinTownInfluence(town_id, tile))
+			if(AITile.PlantTree(tile))
+				Info("Tree planted!");
+		/* Check whether the current rating is good enough. */
+		if (AITown.GetRating(town_id, AICompany.COMPANY_SELF) >= min_rating) return true;
+		if(GetAvailableMoney() < 0) return false;
+	}
+	if (AITown.GetRating(town_id, AICompany.COMPANY_SELF) >= min_rating) return true;
+	return true;	
+}
+
+function ImproveTownRating(town_id, desperation)
 {	
 	local mode = AIExecMode();
 	if(GetAvailableMoney()<Money.Inflate(200000) && desperation == 0) return false;
@@ -167,48 +141,20 @@ function ImproveTownRating(town_id, desperation) //from AdmiralAI
 	/* Check whether the current rating is good enough. */
 	local rating = AITown.GetRating(town_id, AICompany.COMPANY_SELF);
 	if (rating == AITown.TOWN_RATING_NONE || rating >= min_rating) return true;
-
-	/* Build trees to improve the rating. We build this tree in an expanding
-	 * circle starting around the town center. */
-	local location = AITown.GetLocation(town_id);
-	for (local size = 3; size <= 1000; size++) {
-		local list = AITileList();
-		SafeAddRectangle(list, location, size);
-		list.Valuate(AITile.IsBuildable);
-		list.KeepValue(1);
-		/* Don't build trees on tiles that already have trees, as this doesn't
-		 * give any town rating improvement. */
-		list.Valuate(AITile.HasTreeOnTile);
-		list.KeepValue(0);
-		foreach (tile, dummy in list) {
-			if(!AITown.IsWithinTownInfluence(town_id, tile))
-				{
-				if(GetAvailableMoney()> Money.Inflate(3000000 || desperation > 5)) {
-					if(AITown.PerformTownAction(town_id, AITown.TOWN_ACTION_BRIBE))
-						{
-						Info("Bribed "+AITown.GetName(town_id)+"!" + AIError.GetLastErrorString());
-						}
-					else{
-						Info("Bribe in "+AITown.GetName(town_id)+" failed!" + AIError.GetLastErrorString());
-						return false;
-						}
-					}
-				else{
-					return false;
-					}
-				}
-			else
-				{
-				if(AITile.PlantTree(tile))
-					{
-					Info("Tree planted!");
-					}
-				}
-			/* Check whether the current rating is good enough. */
-			if (AITown.GetRating(town_id, AICompany.COMPANY_SELF) >= min_rating) return true;
-			if(GetAvailableMoney()<Money.Inflate(200000)) return false;
+	PlantTreesToImproveRating(town_id, min_rating);
+	if (rating == AITown.TOWN_RATING_NONE || rating >= min_rating) return true;
+	while(GetAvailableMoney()> Money.Inflate(3000000 || desperation > 5)) {
+		if(AITown.PerformTownAction(town_id, AITown.TOWN_ACTION_BRIBE)){
+			Info("Bribed "+AITown.GetName(town_id)+"!" + AIError.GetLastErrorString());
+			}
+		else{
+			Info("Bribe in "+AITown.GetName(town_id)+" failed!" + AIError.GetLastErrorString());
+			return false;
+			}
+		if (rating == AITown.TOWN_RATING_NONE || rating >= min_rating) return true;
 		}
-	}
+	if (rating == AITown.TOWN_RATING_NONE || rating >= min_rating) return true;
+	return false;
 }
 
 function HandleFailedStationConstruction(location, error)
@@ -250,3 +196,67 @@ function IsConnectedDistrict(town_tile)
 	}
 	return false;
 }
+
+function IsCargoLoadedOnThisStation(station_id, cargo_id)
+	{
+	local vehicle_list=AIVehicleList_Station(station_id);
+	if(vehicle_list.Count()!=0)
+		if(AIStation.GetStationID(GetLoadStationLocation(vehicle_list.Begin()))==station_id)
+			if(AIVehicle.GetCapacity(vehicle_list.Begin(), cargo_id)!=0)
+				return true;
+	return false;
+	}
+
+function VehicleCounter(station)
+{
+return AIVehicleList_Station(station).Count();
+}
+
+function DeleteEmptyStations()
+{
+local station_id_list;
+station_id_list = AIStationList(AIStation.STATION_TRUCK_STOP);
+station_id_list.Valuate(VehicleCounter);
+station_id_list.KeepValue(0);
+for (local spam = station_id_list.Begin(); station_id_list.HasNext(); spam = station_id_list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
+
+station_id_list = AIStationList(AIStation.STATION_BUS_STOP);
+station_id_list.Valuate(VehicleCounter);
+station_id_list.KeepValue(0);
+for (local spam = station_id_list.Begin(); station_id_list.HasNext(); spam = station_id_list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
+
+station_id_list = AIStationList(AIStation.STATION_TRAIN); //TODO: remove also tracks
+station_id_list.Valuate(VehicleCounter);
+station_id_list.KeepValue(0);
+for (local spam = station_id_list.Begin(); station_id_list.HasNext(); spam = station_id_list.Next()) AITile.DemolishTile(AIBaseStation.GetLocation(spam));
+}
+
+function DeleteUnprofitable()
+{
+	local vehicle_list = AIVehicleList();
+
+   	vehicle_list.Valuate(IsForSell);
+	vehicle_list.KeepValue(0);
+
+   	vehicle_list.Valuate(AIVehicle.GetAge);
+	vehicle_list.KeepAboveValue(800);
+
+   	vehicle_list.Valuate(AIVehicle.GetProfitThisYear);
+	vehicle_list.KeepBelowValue(0);
+   	vehicle_list.Valuate(AIVehicle.GetProfitLastYear);
+	vehicle_list.KeepBelowValue(0);
+
+	Info(vehicle_list.Count() + " vehicle(s) should be sold because are unprofitable");
+   	
+	local counter = 0;
+	
+	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()) 
+	   {
+	   if(AIVehicle.GetVehicleType(vehicle_id)!=AIVehicle.VT_RAIL || (AIVehicleList_Station(AIStation.GetStationID(GetLoadStationLocation(vehicle_id)))).Count()>2)
+	      {
+		  if(AIVehicle.IsValidVehicle(vehicle_id)) if(AIAI.sellVehicle(vehicle_id, "unprofitable")) counter++;
+		  }
+	   }
+	Info(counter + " vehicle(s) sold.");
+}
+

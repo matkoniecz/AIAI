@@ -12,6 +12,23 @@ class RoadBuilder extends Builder
 require("KRAI_level_crossing_menagement_from_clueless_plus.nut");
 require("KRAIpathfinder.nut");
 
+function RoadBuilder::IsAllowed()
+{
+	if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_ROAD)) return false;
+
+	local ile;
+	local veh_list = AIVehicleList();
+	veh_list.Valuate(AIVehicle.GetVehicleType);
+	veh_list.KeepValue(AIVehicle.VT_ROAD);
+	ile = veh_list.Count();
+	local allowed = AIGameSettings.GetValue("vehicle.max_roadveh");
+	if(allowed==0) return false;
+	if(ile==0) return true;
+	if(((ile*100)/(allowed))>90) return false;
+	if((allowed - ile)<5) return false;
+	return true;
+}
+
 function RoadBuilder::Maintenance()
 {
 	local new = this.AddTruck() + this.AddBus();
@@ -123,30 +140,7 @@ return true;
 
 function RoadBuilder::ValuateProducer(ID, cargo)
 {
-   local base = AIIndustry.GetLastMonthProduction(ID, cargo);
-   base*=(100-AIIndustry.GetLastMonthTransportedPercentage (ID, cargo));
-   if(AIIndustry.GetLastMonthTransportedPercentage (ID, cargo)==0)base*=3;
-   base*=AICargo.GetCargoIncome(cargo, 10, 50);
-   if(base!=0)
-	  if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(ID)))
-		{
-		//base*=3;
-	    //base/=2;
-		base+=10000;
-	    }
-	  else
-	    {
-		base-=base/2;
-		}
-//Info(AIIndustry.GetName(ID) + " is " + base + " point producer of " + AICargo.GetCargoLabel(cargo));
-return base;
-}
-
-function RoadBuilder::ValuateConsumer(ID, cargo, score)
-{
-if(AIIndustry.GetStockpiledCargo(ID, cargo)==0) score*=2;
-//Info("   " + AIIndustry.GetName(ID) + " is " + score + " point consumer of " + AICargo.GetCargoLabel(cargo));
-return score;
+	return Builder.ValuateProducer(ID, cargo);
 }
 
 function RoadBuilder::GetBiggestNiceTown(location)
@@ -195,18 +189,18 @@ if((project.first_station.location==null)||(project.second_station.location==nul
   if((maybe_start_station==null)&&(project.second_station.location==null))
     {
 	Info("   Station placing near "+AITown.GetName(start)+" and "+AITown.GetName(town)+" is impossible.");
-    project.forbidden.AddItem(project.start, 0);
-    project.forbidden.AddItem(project.end, 0);
+    project.forbidden_industries.AddItem(project.start, 0);
+    project.forbidden_industries.AddItem(project.end, 0);
 	}
   if((maybe_start_station==null)&&(project.second_station.location!=null))
     {
     Info("   Station placing near "+AITown.GetName(start)+" is impossible.");
-    project.forbidden.AddItem(project.start, 0);
+    project.forbidden_industries.AddItem(project.start, 0);
  	}
   if((maybe_start_station!=null)&&(project.second_station.location==null)) 
     {
 	Info("   Station placing near "+AITown.GetName(town)+" is impossible.");
-    project.forbidden.AddItem(project.end, 0);
+    project.forbidden_industries.AddItem(project.end, 0);
  	}
   return project;
   }
@@ -279,11 +273,11 @@ if((project.first_station.location==null)||(project.second_station.location==nul
   {
   if((project.first_station.location==null)&&(project.second_station.location==null))
     {
-    project.forbidden.AddItem(project.start, 0);
+    project.forbidden_industries.AddItem(project.start, 0);
 	}
   if((project.first_station.location==null)&&(project.second_station.location!=null))
     {
-    project.forbidden.AddItem(project.start, 0);
+    project.forbidden_industries.AddItem(project.start, 0);
  	}
   if((project.first_station.location!=null)&&(project.second_station.location==null)) 
     {
@@ -368,12 +362,12 @@ if(GetAvailableMoney()<estimated_cost)
     Info("too expensivee, we have only " + GetAvailableMoney() + " And we need " + estimated_cost);
 	return false;
 	}
-ProvideMoney();
 return true;   
 }
 
 function RoadBuilder::ConstructionOfRVRoute(type)
 {
+ProvideMoney();
 if(!this.BuildRVStation(type)){
    return false;	  
    }
@@ -519,14 +513,13 @@ return route;
 function RoadBuilder::FindRVValuator(engine)
 {
 //rating points for station:  (Speed (km/h) - 85) / 4 
-//max rating points: 17% (255 points - 100%, 17% - 43,35) 
-//rating points more important than anything
-return min(43, max((AIEngine.GetMaxSpeed(engine) - 85) /4, 0)) * 10000 + AIEngine.GetCapacity(engine)*AIEngine.GetMaxSpeed(engine);
+//max rating points from speed: 17% (255 points - 100%, 17% - 43,35) 
+//rating points more important than anything (almost)
+return min(43, max((AIEngine.GetMaxSpeed(engine) - 85) /4, 0)) * 1500 + AIEngine.GetCapacity(engine)*AIEngine.GetMaxSpeed(engine);
 }
 
 function RoadBuilder::FindRV(cargo)
 {
-local new_engine_id = null;
 local list = AIEngineList(AIVehicle.VT_ROAD);
 
 list.Valuate(AIEngine.GetRoadType);
@@ -538,11 +531,20 @@ list.KeepValue(1);
 list.Valuate(this.FindRVValuator);
 list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
 
-if (list.Count() != 0) 
-   {
-   new_engine_id = list.Begin();
-   }
-return new_engine_id;
+if (list.Count() != 0) {
+	local first_engine_id = list.Begin();
+	local new_engine_id = first_engine_id
+	//Warning(AIEngine.GetName(first_engine_id))
+	for(local engine = list.Begin(); list.HasNext(); engine = list.Next()){
+		local speed_ratio_to_first = (AIEngine.GetMaxSpeed(engine)*100)/(AIEngine.GetMaxSpeed(first_engine_id));
+		//Info("speed_ratio_to_first "+speed_ratio_to_first+" capacity "+AIEngine.GetCapacity(engine)+" new_engine_id capacity "+AIEngine.GetCapacity(new_engine_id)+" "+AIEngine.GetName(engine))
+		if((speed_ratio_to_first>90) && AIEngine.GetCapacity(engine)/2 > AIEngine.GetCapacity(new_engine_id)) new_engine_id = engine;
+		if((speed_ratio_to_first>80) && AIEngine.GetCapacity(engine)/2 > AIEngine.GetCapacity(new_engine_id) && AIEngine.GetCapacity(new_engine_id) < 10) new_engine_id = engine;
+		if((speed_ratio_to_first>70) && AIEngine.GetCapacity(engine)/2 > AIEngine.GetCapacity(new_engine_id) && AIEngine.GetCapacity(new_engine_id) < 5) new_engine_id = engine;
+	}
+	return new_engine_id;
+	}
+return null;
 }
 
 function RoadBuilder::IsOKPlaceForRVStation(station_tile, direction)
@@ -801,7 +803,7 @@ function RoadBuilder::BuildVehicles()
 	else if(trasa.type==2) string = "Bus line";
 	else string = "WTF?"; 
 
-	SetNameOfVehicle(vehicle_id, string);
+	AIVehicle.SetName(vehicle_id, string);
 	}
 
 for(local i = 0; i<ile; i++) if(this.copyVehicle(vehicle_id, trasa.cargo)) constructed++;
@@ -1125,7 +1127,7 @@ if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")){
 	else {
 		return false; //TODO - cancel sell order
 	}
-	SetNameOfVehicle(vehicle_id, string);
+	AIVehicle.SetName(vehicle_id, string);
     return true;
 }
 
@@ -1143,8 +1145,7 @@ function RoadBuilder::RemoveRedundantRVFromStation(station_list)
 local full_delete_count=0;
 local cargo_list = AICargoList();
 
-for (local station = station_list.Begin(); station_list.HasNext(); station = station_list.Next())
-	{
+for (local station = station_list.Begin(); station_list.HasNext(); station = station_list.Next()){
 	local waiting_counter=0;
 	local active_counter=0;
 	local cargo;
@@ -1153,24 +1154,16 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 	if(vehicle_list.Count()==0)continue;
 	
 	for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next())
-		{
 		if(AIVehicle.GetCapacity (vehicle_list.Begin(), cargo)>0)
-			{
 			break;
-			}
-		}
 	
 	local front_vehicle = vehicle_list.Begin();
 	local station_id = AIStation.GetStationID(GetLoadStationLocation(front_vehicle)); 
-	if(station==station_id)
-		{
+	if(station==station_id){
 		//Info("Station with " + AIStation.GetCargoWaiting(station, cargo) + " of " + AICargo.GetCargoLabel(cargo));
-		if(!IsItNeededToImproveThatStation(station, cargo))
-			{
-			for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next())
-				{
-				if(IsForSell(vehicle_id) || AIVehicle.GetAge(vehicle_id)<60)
-					{
+		if(!IsItNeededToImproveThatStation(station, cargo)){
+			for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()){
+				if(IsForSell(vehicle_id) || AIVehicle.GetAge(vehicle_id)<60){
 					waiting_counter=0;
 					break;
 					}
@@ -1179,11 +1172,10 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 					//Info(AIVehicle.GetName(vehicle_id)+" *"+AIStation.GetDistanceManhattanToTile (station, AIVehicle.GetLocation(vehicle_id))+"* <"+counter);
 					if(AIVehicle.GetState(vehicle_id) == AIVehicle.VS_AT_STATION)
 					waiting_counter++;
-					if(AIVehicle.GetCurrentSpeed(vehicle_id)==0)waiting_counter++; //TODO - max speed <20!
+					if(AIVehicle.GetCurrentSpeed(vehicle_id)==0) waiting_counter++;
 					else waiting_counter--;
 					}
-				else
-					{
+				else{
 					active_counter++;
 					}
 				}		
@@ -1191,7 +1183,7 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 			local delete_count=0;
 
 			local delete1=waiting_counter-5; //OPTION
-			local delete2 =waiting_counter-active_counter;
+			local delete2 =waiting_counter-active_counter-1;
 			if(active_counter == 0)
 				local delete2=1;
 			if(delete2>delete1)delete_goal=delete2;
