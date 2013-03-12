@@ -1,4 +1,7 @@
 /*
+NEW
+Better RV seller
+
 long bridges sometimes are unavailable!
 
 more depots
@@ -25,6 +28,7 @@ require("KRAI.nut");
 require("AIAI.nut");
 require("util.nut");
 require("KWAI.nut");
+require("RAIL.nut");
 
 import("util.superlib", "SuperLib", 2);
 
@@ -37,6 +41,8 @@ function AIAI::Start()
 Error("WTTTTTTF");
 Name();
 HQ();
+
+//RAIL.Go();
 
 AICompany.SetAutoRenewStatus(true);
 AICompany.SetAutoRenewMonths(0);

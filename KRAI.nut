@@ -800,7 +800,7 @@ while(!AIVehicle.IsValidVehicle(vehicle_id))
    {
    vehicle_id=AIVehicle.BuildVehicle (depot_tile, new_engine_id);
    this.Info("Vehicle building fail "+AIError.GetLastErrorString());
-   if(AIError.GetLastError()!=AIVehicle.ERR_NOT_ENOUGH_CASH)
+   if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH)
       {
 	  AILog.Error(AIError.GetLastErrorString()+"++++++++++++")
 	  return null;

@@ -209,9 +209,36 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 		  
 		  if(counter>5) //OPTION
 	         {
-		     ile++;
-		     rodzic.sellVehicle(vehicle, "kolejkowicze");
-		     }
+		     local result = null;
+		     if(rodzic.sellVehicle(vehicle, "kolejkowicze"))
+			    {
+ 			    result = vehicle;
+				}
+			 else
+			    {
+				local scapegoat_vehicle_list = AIVehicleList_Station(station);
+				for (local scapegoat_vehicle = scapegoat_vehicle_list.Begin(); scapegoat_vehicle_list.HasNext(); scapegoat_vehicle = scapegoat_vehicle_list.Next()) 
+					{
+					if(AIVehicle.GetCargoLoad (scapegoat_vehicle, cargo)==0)
+					if(AIVehicle.GetAge(scapegoat_vehicle)>60)
+					if(!rodzic.CzyNaSprzedaz(scapegoat_vehicle))
+					if(rodzic.sellVehicle(scapegoat_vehicle, "kolejkowicze"))
+					   {
+					   result = scapegoat_vehicle;
+					   break;
+					   }
+					}
+				}
+ 	         if(result!=null)
+			    {
+				Info("KILL IT!: " + AIVehicle.GetName(result));
+				ile++;
+				}
+			 else
+				{
+				Warning("Oooops");
+				}
+			 }
 		  }
 	   }
 	  }

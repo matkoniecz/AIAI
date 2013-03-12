@@ -1,9 +1,10 @@
 class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
-  function GetDescription() { return "Automatic Idiot AI Version gamma with fix number 3. AIAI reuse code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje and AdmiralAI."; }
-  function GetVersion()     { return 10; }
-  function GetDate()        { return "2010-02-14"; }
+  function GetDescription() { return "Automatic Idiot AI Version gamma with fix number 4. AIAI reuse code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje and AdmiralAI."; }
+  function GetVersion()     { return 13; }
+  function GetAPIVersion() { return "0.7"; }
+  function GetDate()        { return "2010-05-21"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
   function MinVersionToLoad() { return 0; } 
