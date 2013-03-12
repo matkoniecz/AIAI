@@ -89,13 +89,6 @@ function IsAllowedPlane()
 if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_AIR))return false;
 if(0 == AIAI.GetSetting("use_planes"))return false;
 
-if(AIGameSettings.IsValid("vehicle.max_aircraft")==false) 
-   {
-   AILog.Error("ARGHH");
-   AILog.Error("NAME OF SETTING CHANGED, PLEASE REPORT IT, AIAI MAY BEHAVE STRANGE");
-   return true;
-   }
-
 local ile;
 local veh_list = AIVehicleList();
 veh_list.Valuate(GetVehicleType);
@@ -113,18 +106,25 @@ return true;
 
 function IsAllowedTruck()
 {
-if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_ROAD))return false;
 if(0 == AIAI.GetSetting("use_trucks"))
    {
    return false;
    }
-if(AIGameSettings.IsValid("vehicle.max_roadveh")==false) 
-   {
-   AILog.Error("ARGHH");
-   AILog.Error("NAME OF SETTING CHANGED, PLEASE REPORT IT, AIAI MAY BEHAVE STRANGE");
-   return true;
-   }
+return IsAllowedRV();
+}
 
+function IsAllowedBus()
+{
+if(0 == AIAI.GetSetting("use_busses"))
+   {
+   return false;
+   }
+return IsAllowedRV();
+}
+
+function IsAllowedRV()
+{
+if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_ROAD))return false;
 local ile;
 local veh_list = AIVehicleList();
 veh_list.Valuate(GetVehicleType);
@@ -174,11 +174,13 @@ function Sqrt(i) { //from Rondje
 }
 
 function SafeAddRectangle(list, tile, radius) { //from Rondje
-	local x1 = max(0, AIMap.GetTileX(tile) - radius);
-	local y1 = max(0, AIMap.GetTileY(tile) - radius);
+	local x1 = max(1, AIMap.GetTileX(tile) - radius);
+	local y1 = max(1, AIMap.GetTileY(tile) - radius);
 	
 	local x2 = min(AIMap.GetMapSizeX() - 2, AIMap.GetTileX(tile) + radius);
 	local y2 = min(AIMap.GetMapSizeY() - 2, AIMap.GetTileY(tile) + radius);
+	
+	//Error("(" + x1 + ", " + y1 + ")" + "(" + x2 + ", " + y2 + ")")
 	
 	list.AddRectangle(AIMap.GetTileIndex(x1, y1),AIMap.GetTileIndex(x2, y2)); 
 }

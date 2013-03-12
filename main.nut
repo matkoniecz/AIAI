@@ -5,7 +5,7 @@ Better RV seller
 long bridges sometimes are unavailable!
 
 more depots
-check jams before truck building
+check jams before RV building
 reuse existing roads constructed by another players
 For all newly build routes, check both ways. This way, if one-way roads are build, another road is build next to it so vehicles can go back. //from admiralai
 
@@ -21,7 +21,7 @@ desperacja = null;
 generalna_konserwacja = null;
 root_tile = null;
 air=null;
-truck=null;
+RV=null;
 }
 
 require("KRAI.nut");
@@ -38,11 +38,10 @@ Direction <- SuperLib.Direction
 
 function AIAI::Start()
 {
-Error("WTTTTTTF");
 Name();
 HQ();
 
-//RAIL.Go();
+RAIL.Go();
 
 AICompany.SetAutoRenewStatus(true);
 AICompany.SetAutoRenewMonths(0);
@@ -52,13 +51,13 @@ AILog.Info("");
 Info("Hi!!!");
 air = KWAI();
 air.rodzic=this;
-truck = KRAI();
-truck.rodzic=this;
-truck.detected_rail_crossings=AIList()
+RV = KRAI();
+RV.rodzic=this;
+RV.detected_rail_crossings=AIList()
 
 //TODO - LOAD IT
 desperacja = 0;
-truck._koszt = 1;
+RV._koszt = 1;
 air._koszt = 1;
 generalna_konserwacja = GetDate();
 Autoreplace();
@@ -69,19 +68,20 @@ while(true)
 	this.SignMenagement();
 
 	air.desperacja = desperacja;
-	truck.desperacja = desperacja;
+	RV.desperacja = desperacja;
 
 	this.MoneyMenagement();
 	this.Statua();
 
 	AILog.Warning("desperation: " + desperacja);
 	AILog.Warning("air: " + air._koszt);
-	AILog.Warning("truck: " + truck._koszt);
-   
+	AILog.Warning("RV: " + RV._koszt);
+	
+   if(desperacja>0)if(IsAllowedBus())if(AICompany.GetBankBalance(AICompany.COMPANY_SELF) > RV._koszt) if(RV.BusRoute()) desperacja = 0; else desperacja++;
    if(
-     //(AICompany.GetBankBalance(AICompany.COMPANY_SELF) > truck._koszt && IsAllowedTruck() && truck._koszt!=0)||
+     //(AICompany.GetBankBalance(AICompany.COMPANY_SELF) > RV._koszt && IsAllowedRV() && RV._koszt!=0)||
      //(AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedPlane() && air._koszt!=0)
-     (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > truck._koszt && IsAllowedTruck())||
+     (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > RV._koszt && IsAllowedRV())||
      (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedPlane())
 	 )
       {
@@ -91,7 +91,7 @@ while(true)
 	  local truck_cargo = false;
 	  
 	  if(IsAllowedPlane()) air_city = air.BuildAirportRouteBetweenCities();
-	  if(IsAllowedTruck()) truck_cargo = truck.TruckRoute();
+	  if(IsAllowedTruck()) truck_cargo = RV.TruckRoute();
 	  if(IsAllowedPlane()) air_cargo = air.CargoConnectionBuilder();
 
       if((air_cargo||air_city||truck_cargo)==false)
@@ -104,14 +104,14 @@ while(true)
 		 }
 	  }
 	else if(
-	       (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > truck._koszt && IsAllowedTruck())||
+	       (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > RV._koszt && IsAllowedTruck())||
            (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedPlane())
  	 	   )
 	   {
 	   desperacja++;
 	   Info("Cost estimations update");
 	   if(air._koszt==0) if(IsAllowedPlane()) air.BuildAirportRouteBetweenCities();
-	   if(truck._koszt==0) if(IsAllowedTruck()) truck.TruckRoute();
+	   if(RV._koszt==0) if(IsAllowedTruck()) RV.TruckRoute();
 	   if(air._koszt==0) if(IsAllowedPlane()) air.CargoConnectionBuilder();
 	   }
 	else 
@@ -129,6 +129,7 @@ while(true)
    this.Konserwuj();
    }
 }
+
 function AIAI::Statua()
 {
    if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount())
@@ -218,8 +219,8 @@ if(money<air._koszt)
 
 available_loan = AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount();
 money = AICompany.GetBankBalance(AICompany.COMPANY_SELF);
-if(money<truck._koszt)
-   if(available_loan+money>truck._koszt)
+if(money<RV._koszt)
+   if(available_loan+money>RV._koszt)
        AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
 	   
 }
@@ -233,14 +234,35 @@ return returnik;
 
 function AIAI::realcodeofIsConnectedIndustry(industry_id, cargo)
 {
-if(truck.IsConnectedIndustry(industry_id, cargo)==true)return true;
+if(RV.IsConnectedIndustry(industry_id, cargo)==true)return true;
 return air.IsConnectedIndustry(industry_id, cargo);
 }
 
 
 function AIAI::IsConnectedDistrict(town_tile)
 {
+//if(AIAI.GetSetting("deep_debugged_function_calling"))Info("IsConnectedDistrict<");
 
+local list = AIStationList(AIStation.STATION_AIRPORT);
+if(list.Count()!=0)
+  {
+  list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
+  list.KeepBelowValue(18);
+  //if(AIAI.GetSetting("deep_debugged_function_calling"))Info(">IsConnectedDistrict");
+  if(!list.IsEmpty())return true;
+  }
+
+list = AIStationList(AIStation.STATION_BUS_STOP);
+if(list.Count()!=0)
+  {
+  list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
+  list.KeepBelowValue(8);
+  //if(AIAI.GetSetting("deep_debugged_function_calling"))Info(">IsConnectedDistrict");
+  if(!list.IsEmpty())return true;
+  }
+
+//if(AIAI.GetSetting("deep_debugged_function_calling"))Info(">IsConnectedDistrict");
+return false;
 }
 
 function AIAI::GetDate()
@@ -340,7 +362,7 @@ function AIAI::Konserwuj()
 //Error("<");
 
 //Warning("<");
-truck.Konserwuj();
+RV.Konserwuj();
 //Warning(">");
 
 //Warning("<");
@@ -410,7 +432,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			//local crash_tile = crash_event.GetCrashSite();
 			if(crash_reason == AIEventVehicleCrashed.CRASH_RV_LEVEL_CROSSING)
 			{
-				truck.HandleNewLevelCrossing(event);
+				RV.HandleNewLevelCrossing(event);
 			}
 		}
 		else if(ev_type == AIEvent.AI_ET_ENGINE_PREVIEW) //from simpleai

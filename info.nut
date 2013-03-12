@@ -1,8 +1,8 @@
 class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
-  function GetDescription() { return "Automatic Idiot AI Version gamma with fix number 4. AIAI reuse code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje and AdmiralAI."; }
-  function GetVersion()     { return 13; }
+  function GetDescription() { return "Automatic Idiot AI Version delta. AIAI reuse code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje and AdmiralAI."; }
+  function GetVersion()     { return 14; }
   function GetAPIVersion() { return "0.7"; }
   function GetDate()        { return "2010-05-21"; }
   function CreateInstance() { return "AIAI"; }
@@ -15,6 +15,16 @@ class AIAI extends AIInfo {
 	AddSetting( {
 		name = "use_trucks",
 		description = "Trucks allowed",
+		easy_value = 1,
+		medium_value = 1,
+		hard_value = 1,
+		custom_value = 1,
+		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
+	});
+
+	AddSetting( {
+		name = "use_busses",
+		description = "Busses allowed",
 		easy_value = 1,
 		medium_value = 1,
 		hard_value = 1,
@@ -65,6 +75,16 @@ class AIAI extends AIInfo {
 	AddSetting( {
 		name = "other_debug_signs",
 		description = "Build other debug signs",
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
+		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
+	});
+
+	AddSetting( {
+		name = "deep_debugged_function_calling",
+		description = "deep_debugged_function_calling",
 		easy_value = 0,
 		medium_value = 0,
 		hard_value = 0,

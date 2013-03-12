@@ -37,6 +37,7 @@ for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper
    }
 return ile;
 }
+
 function AIAI::IsTileWrongToFullUse(tile)
 {
 return ((!AITile.IsBuildable(tile))||!(AITile.SLOPE_FLAT == AITile.GetSlope(tile)));
@@ -192,6 +193,28 @@ for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_e
    }
 }
 
+function AIAI::GetPassengerCargoId()
+{
+local cargo_list = AICargoList();
+cargo_list.Valuate(AICargo.HasCargoClass, AICargo.CC_PASSENGERS);
+cargo_list.KeepValue(1);
+cargo_list.Valuate(AICargo.GetTownEffect);
+cargo_list.KeepValue(AICargo.TE_PASSENGERS);
+cargo_list.Valuate(AICargo.GetTownEffect);
+cargo_list.KeepValue(AICargo.TE_PASSENGERS);
+
+if(!AICargo.IsValidCargo(cargo_list.Begin()))
+{
+	Error("PAX Cargo do not exist");
+}
+
+cargo_list.Valuate(AICargo.GetCargoIncome, 1, 1); //Elimination ECS tourists
+cargo_list.KeepBottom(1);
+
+return cargo_list.Begin();
+}
+
+
 function AIAI::AutoreplaceRV()
 {
 local engine_list=AIEngineList(AIVehicle.VT_ROAD);
@@ -209,7 +232,7 @@ for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_e
 	
    if(AIEngine.IsValidEngine(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
       {
-	  local engine_best = truck.GetReplace(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing), cargo);
+	  local engine_best = RV.GetReplace(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing), cargo);
 	  if(engine_best != engine_existing)
 	     {
 		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
