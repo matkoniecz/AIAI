@@ -168,6 +168,7 @@ function KRAI::ValuateProducer(ID, cargo)
 {
    local base = AIIndustry.GetLastMonthProduction(ID, cargo);
    base*=(100-AIIndustry.GetLastMonthTransportedPercentage (ID, cargo));
+   if(AIIndustry.GetLastMonthTransportedPercentage (ID, cargo)==0)base*=3;
    base*=AICargo.GetCargoIncome(cargo, 10, 50);
    if(base!=0)
 	  if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(ID)))
@@ -428,7 +429,7 @@ for(local i=0; i<20; i++)
 	  _koszt = 0;
 	  return false;
       }
-   Warning("==scanning=completed=>");
+   Warning("==scanning=for=bus=route=completed=>");
    if(this.PrepareRoute())
       {
 	  Info("   Contruction started on correct route.");
@@ -462,7 +463,7 @@ for(local i=0; i<20; i++)
       return false;
       }
 
-   Warning("==scanning=completed=> cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
+   Warning("==scanning=for=truck=route=completed=> cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
    if(this.PrepareRoute())
       {
 	  Info("   Contruction started on correct route.");
@@ -497,7 +498,7 @@ pathfinder.Fast();
 pathfinder.InitializePath(trasa.koniec_otoczka, trasa.start_otoczka, forbidden_tiles);
 path = false;
 local guardian=0;
-local limit = (desperacja*3+20)*((AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile)/50) + 1)/2;
+local limit = min((desperacja+10)*AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile)/40, 25);
 while (path == false) {
   path = pathfinder.FindPath(2000);
   rodzic.Konserwuj();
@@ -912,7 +913,7 @@ while(!AIVehicle.IsValidVehicle(vehicle_id))
    this.Info("Vehicle building fail "+AIError.GetLastErrorString());
    if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH)
       {
-	  Error(AIError.GetLastErrorString()+"++++++++++++")
+	  Error("RV construction failed due to " + AIError.GetLastErrorString()+".")
 	  return null;
 	  }
    AIController.Sleep(100);

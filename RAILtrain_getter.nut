@@ -4,7 +4,6 @@ class DenverAndRioGrande
 
 function DenverAndRioGrande::SetRailType(skip) //modified
 {
-Error("Skip: " + skip);
   local types = AIList();
   types.AddList(AIRailTypeList());
   if(types.Count() == 0)
@@ -35,7 +34,7 @@ for (local rail_type = types.Begin(); types.HasNext(); rail_type = types.Next())
    if(skip==0)
       {
 		AIRail.SetCurrentRailType(rail_type);
-		Info("Rail type selected.");
+		//Info("Rail type selected.");
 		return true;
 	  }
    skip--;
@@ -44,44 +43,41 @@ Error("Too many RailTypes failed");
 return false;
 }
 
+function DenverAndRioGrande::FindTrain(trasa)
+{
+local wagon = DenverAndRioGrande.FindBestWagon(trasa.cargo)
+local engine = DenverAndRioGrande.FindBestEngine(wagon, trasa.station_size, trasa.cargo);
+trasa.engine = array(2);
+trasa.engine[0] = engine;
+trasa.engine[1] = wagon;
+return trasa;
+}
+
 function DenverAndRioGrande::GetTrain(trasa)
 {
-local cargo = trasa.cargo;
-local size = trasa.station_size;
-local wagon;
-local engine;
 
 for(local i = 0; DenverAndRioGrande.SetRailType(i); i++)
 {
-Error("[[[[ " + i + " ]]]]");
-wagon = DenverAndRioGrande.FindBestWagon(cargo)
-engine = DenverAndRioGrande.FindBestEngine(wagon, size*2, cargo);
-//local wagon_how_many = 
-local train = array(2);
-train[0] = engine;
-train[1] = wagon;
-trasa.engine = train;
-if(AIEngine.IsValidEngine(engine) && AIEngine.IsValidEngine(wagon)) 
+trasa = DenverAndRioGrande.FindTrain(trasa);
+if(AIEngine.IsValidEngine(trasa.engine[0]) && AIEngine.IsValidEngine(trasa.engine[1])) 
    {
-   Warning("Return OK: " + trasa.engine);
-   Info("engine:" + engine + "wagon:" + wagon )
-   Info("engine:" + AIEngine.GetName(engine) + "wagon:" + AIEngine.GetName(wagon) )
+   //Warning("Return OK: " + trasa.engine);
+   //Info("engine:" + trasa.engine[0] + "wagon:" + trasa.engine[1] )
+   //Info("engine:" + AIEngine.GetName(trasa.engine[0]) + "wagon:" + AIEngine.GetName(trasa.engine[1]) )
    return trasa;
    }
 }
 
 trasa.engine = null;
-Warning("Return bad: " + trasa.engine);
-   Info("engine:" + engine + "wagon:" + wagon )
-   Info("engine:" + AIEngine.GetName(engine) + "wagon:" + AIEngine.GetName(wagon) )
+//Warning("Return bad: " + trasa.engine);
+//   Info("engine:" + engine + "wagon:" + wagon )
+//   Info("engine:" + AIEngine.GetName(engine) + "wagon:" + AIEngine.GetName(wagon) )
 return trasa;
 }
 
-
-
 function DenverAndRioGrande::FindWagons(cargoIndex)
 {
-    AILog.Info("Looking for " + AICargo.GetCargoLabel(cargoIndex) + " wagons.");
+    //AILog.Info("Looking for " + AICargo.GetCargoLabel(cargoIndex) + " wagons.");
     local wagons = AIEngineList(AIVehicle.VT_RAIL);
     wagons.Valuate(AIEngine.IsWagon);
     wagons.RemoveValue(0);
@@ -121,7 +117,7 @@ function DenverAndRioGrande::FindBestEngine(wagonId, trainsize, cargoId)
   local minHP = 175 * trainsize;
   
   local speed = AIEngine.GetMaxSpeed(wagonId);
-  if(speed == 0) {speed = 500;}
+  if(speed == 0) {speed = 2500;}
   local engines = AIEngineList(AIVehicle.VT_RAIL);
   engines.Valuate(AIEngine.IsWagon);
   engines.RemoveValue(1);
@@ -153,8 +149,8 @@ function DenverAndRioGrande::FindBestEngine(wagonId, trainsize, cargoId)
   
   if(engines.GetValue(engines.Begin()) < speed ) //no engine can pull the wagon at it's top speed.
   {
-   AILog.Info("No engine has top speed of wagon. Checking Fastest.");
-   AILog.Info("The fastest engine to pull '" + AIEngine.GetName(wagonId) + "'' at full speed ("+ speed +") is '" + AIEngine.GetName(engines.Begin()) +"'" );
+   //AILog.Info("No engine has top speed of wagon. Checking Fastest.");
+   //AILog.Info("The fastest engine to pull '" + AIEngine.GetName(wagonId) + "'' at full speed ("+ speed +") is '" + AIEngine.GetName(engines.Begin()) +"'" );
    //Util.GetMaxLoan(); TODO DO STH WITH IT
    local cash = AICompany.GetBankBalance(AICompany.COMPANY_SELF);
    if(cash > AIEngine.GetPrice(engines.Begin()) * 2 || AIVehicleList().Count() > 10)//if there are 10 trains, just return the best one and let it fail.
@@ -163,10 +159,10 @@ function DenverAndRioGrande::FindBestEngine(wagonId, trainsize, cargoId)
    }
    else
    {
-    AILog.Info("The company is poor. Picking a slower, cheaper engine.");
+    //AILog.Info("The company is poor. Picking a slower, cheaper engine.");
     engines.Valuate(AIEngine.GetPrice);
     engines.Sort(AIAbstractList.SORT_BY_VALUE, true);
-    AILog.Info("The Cheapest engine to pull '" + AIEngine.GetName(wagonId) + "'  is '" + AIEngine.GetName(engines.Begin()) +"'" );
+    //AILog.Info("The Cheapest engine to pull '" + AIEngine.GetName(wagonId) + "'  is '" + AIEngine.GetName(engines.Begin()) +"'" );
     return engines.Begin();
    }
   }
@@ -175,7 +171,7 @@ function DenverAndRioGrande::FindBestEngine(wagonId, trainsize, cargoId)
   engines.Valuate(AIEngine.GetPrice);
   engines.Sort(AIAbstractList.SORT_BY_VALUE, true);
   
-  AILog.Info("The cheapest engine to pull '" + AIEngine.GetName(wagonId) + "'' at full speed ("+ speed +") is '" + AIEngine.GetName(engines.Begin()) +"'" );
+  //AILog.Info("The cheapest engine to pull '" + AIEngine.GetName(wagonId) + "'' at full speed ("+ speed +") is '" + AIEngine.GetName(engines.Begin()) +"'" );
   return engines.Begin();
   
 }

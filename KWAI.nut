@@ -16,7 +16,7 @@ require("KWAI_station_allocators.nut");
 
 function KWAI::GetMaxDistance()
 {
-return 500+desperacja*50;
+return 750+desperacja*50;
 }
 
 function KWAI::GetMinDistance()
@@ -166,7 +166,7 @@ Info("Trying to build an airport route (city version)");
 	   {
 	   for(local i=0; !this.BuildPassengerAircraftWithRand(tile_1, tile_2, engine, rodzic.GetPassengerCargoId()); i++)
           {
-		  AILog.Error(AIError.GetLastErrorString()+"++++++++++++")
+	  Error("Aircraft construction failed due to " + AIError.GetLastErrorString()+".")
 		  if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH) 
 		     {
    if(AIAI.GetSetting("deep_debugged_function_calling"))Info(">BuildAirportRouteBetweenCitiesWithAirportTypeSet");
@@ -327,6 +327,7 @@ function KWAI::ValuateProducer(ID, cargo)
 {
    local base = AIIndustry.GetLastMonthProduction(ID, cargo);
    base*=(100-AIIndustry.GetLastMonthTransportedPercentage (ID, cargo));
+   if(AIIndustry.GetLastMonthTransportedPercentage (ID, cargo)==0)base*=3;
    base*=AICargo.GetCargoIncome(cargo, 10, 50);
    if(base!=0)
 	  if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(ID)))
@@ -421,13 +422,13 @@ else
 	   while(!this.BuildCargoAircraft(trasa.first_station.location, trasa.end_station, trasa.engine, trasa.cargo, "null"))
           {
 		  AIAI.Info("Next try");
-		  AILog.Error(AIError.GetLastErrorString()+"++++++++++++")
+		  Error("Aircraft construction failed due to " + AIError.GetLastErrorString()+".")
 		  if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH) 
 		     {
 			 return true;
 			 }
  		  rodzic.Konserwuj();
-		  AIController.Sleep(100);
+		  AIController.Sleep(1000);
 		  }
        //AIAI.Info("We have " + i + " from " + licznik + " aircrafts.");
   	   }

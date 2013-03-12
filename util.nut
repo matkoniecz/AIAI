@@ -17,7 +17,7 @@ return AIStation.GetCargoWaiting(aktualna, cargo)>50 || (AIStation.GetCargoRatin
 
 function IsItNeededToImproveThatNoRawStation(aktualna, cargo)
 {
-return AIStation.GetCargoWaiting(aktualna, cargo)>50 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0) ;
+return AIStation.GetCargoWaiting(aktualna, cargo)>150 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0) ;
 }
 
 function Info(string)
@@ -152,6 +152,15 @@ if(0 == AIAI.GetSetting("use_trucks"))
 return IsAllowedRV();
 }
 
+function IsAllowedSmartCargoTrain()
+{
+if(0 == AIAI.GetSetting("use_smart_freight_trains"))
+   {
+   return false;
+   }
+return IsAllowedTrain();
+}
+
 function IsAllowedStupidCargoTrain()
 {
 if(0 == AIAI.GetSetting("use_stupid_freight_trains"))
@@ -218,10 +227,37 @@ max_ships = 300
 */
 }
 
+function BurnMoney()
+{
+//clear water
+//tree planting
+local tile;
+do
+  {
+  tile = RandomTile();
+  }
+
+while(!AITile.IsWaterTile(tile))
+while(true)
+   {
+    AITile.DemolishTile(tile);
+	if(AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH)break;
+   }
+
+while(true)
+  {
+  tile = RandomTile();
+  AITile.PlantTree(tile);
+  if(AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH)return;
+  }
+}
+
 function Name()
 {
 AICompany.SetName("AIAI");
 if (AICompany.GetName(AICompany.COMPANY_SELF)!="AIAI") 
+	{
+	if(GetSetting("suicide"))
 	{
 	if (!AICompany.SetName("Suicide AIAI")) {
     local i = 2;
@@ -229,8 +265,19 @@ if (AICompany.GetName(AICompany.COMPANY_SELF)!="AIAI")
       i = i + 1;
     }
 	}
+	BurnMoney();
 	while(true) Sleep(1000);
     }
+	else
+	  {
+	if (!AICompany.SetName("Additional AIAI")) {
+    local i = 2;
+    while (!AICompany.SetName("Additional AIAI #" + i)) {
+      i = i + 1;
+    }
+	}
+	  }
+	}
 }
 
 function Sqrt(i) { //from Rondje

@@ -1,10 +1,23 @@
 /*
-TODO: remove empty stations
-TODO: protect trains from selling and cloning WTF
+TODO: train managing, autoreplace addding/removing trains on smart rotes
+TODO: protection vs very small stations
+TODO: try to clear road in RAILbuilder
+TODO: use loan for too expensive
 
-TODO: Autoreplace for trains
-TODO: terminus RV station=
-TODO: rework buspair
+TODO: reversing path for depot placing 
+TODO: better findpair
+TODO: better busses (managing & construction)
+TODO: world scanner and rework main with dynamic strategy
+TODO: better engine refinder based on route, wagons weight and number to protect from 1km/h on hills
+TODO: remove empty stations
+TODO: protect path from deleting precious results
+TODO: passing lanes
+TODO: rework statues
+TODO: station allocators: fail may be caused by low money
+TODO: rebridger over valleys, debridger
+TODO koszty podzieliæ
+
+TODO: terminus RV station
 TODO: better RV depot placing (replace double flat by test mode)
 TODO: more working depots
 TODO: check jams before RV building
@@ -25,17 +38,11 @@ TODO: bus scanner
 	limitation: real players rarely construct intercity routes
 
 Changelog
-- Cargo trains! [really stupid cargo trains]
-- Support for 2cc, NARS, default trains. Probably also other newgrf.
-- Removes useless railways
-- RV stations use both directions
-- industry to industry plane routes (av8 or other cargo planes needed)
-- Airport capacity bug fixed
-- Bus buying bug fixed
-- Passengers are no longer "processed cargo"
-- capping truck stations with depots, if circle around station failed
-- Fixed ignored "Trucks allowed" setting
-
+- Faster pathfinder(from ChooChoo)
+- train upgrader
+- smarter rail connection
+- suicide company will be closed below one year after starting (water destroying & tree planting) 
+- suicide controlled by option (but disabling it is unsupported feature and may result in multiple instances of AIAI building in the same place)
 */
 
 class AIAI extends AIController 
@@ -56,7 +63,7 @@ require("AIAI.nut");
 require("KWAI.nut");
 require("RAIL.nut");
 
-import("util.superlib", "SuperLib", 2);
+import("util.superlib", "SuperLib", 5);
 
 Helper <- SuperLib.Helper
 Tile <- SuperLib.Tile
@@ -87,6 +94,7 @@ OMGtrain.rodzic = this;
 desperacja = 0;
 RV._koszt = 1;
 air._koszt = 1;
+OMGtrain._koszt = 1;
 generalna_konserwacja = GetDate();
 Autoreplace();
 }
@@ -109,12 +117,19 @@ while(true)
    this.Menagement();
 
 	local StupidCargoRailConnection = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > OMGtrain._koszt && IsAllowedStupidCargoTrain();
+	local SmartCargoRailConnection = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > OMGtrain._koszt && IsAllowedSmartCargoTrain();
 	local truck = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > RV._koszt && IsAllowedTruck();
 	local PAX_plane = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedPAXPlane();
 	local bus = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > RV._koszt && IsAllowedBus();
 	local cargo_plane = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedCargoPlane();
+
 	local wszystkoszszlagtrafil = !(StupidCargoRailConnection || truck || PAX_plane || bus || cargo_plane);
-   if(wszystkoszszlagtrafil)continue;
+    if(wszystkoszszlagtrafil)
+	   {
+	   Error("Nothing to do!");
+	   Sleep(500);
+	   continue;
+	   }
 
 	air.desperacja = desperacja;
 	RV.desperacja = desperacja;
@@ -125,73 +140,142 @@ while(true)
 	AILog.Warning("RV: " + RV._koszt);
 	AILog.Warning("RAIL: " + OMGtrain._koszt);
 
-if(StupidCargoRailConnection) if(OMGtrain.StupidRailConnection()) 
+local StupidCargoRailConnection_result = false;
+local truck_result = false;
+local PAX_plane_result = false;
+local bus_result = false;
+local cargo_plane_result = false;
+local SmartRailConnection_result = false;
+	
+if(PAX_plane) PAX_plane_result = air.BuildAirportRouteBetweenCities();
+if(PAX_plane_result) 
     {
+	Info("PAX plane route constructed!");
 	desperacja = 0;
 	continue;
 	}
-if(truck) if(RV.TruckRoute()) 
+else if(PAX_plane)
+	{
+	Info("PAX plane route failed!");
+	}
+else
+	{
+	Info("PAX plane route impossible!");
+	}
+
+if(SmartCargoRailConnection) SmartRailConnection_result = OMGtrain.SmartRailConnection();
+if(SmartRailConnection_result) 
     {
+	Info("SmartCargoRailConnection plane route constructed!");
 	desperacja = 0;
 	continue;
 	}
-if(PAX_plane) if(air.BuildAirportRouteBetweenCities()) 
+else if(SmartCargoRailConnection)
+	{
+	Info("SmartCargoRailConnection plane route failed!");
+	}
+else
+	{
+	Info("SmartCargoRailConnection plane route impossible!");
+	}
+
+if(StupidCargoRailConnection) StupidCargoRailConnection_result = OMGtrain.StupidRailConnection();
+if(StupidCargoRailConnection_result)
     {
+	Info("StupidCargoRailConnection route constructed!");
 	desperacja = 0;
 	continue;
 	}
-if(bus) if(RV.BusRoute()) 
+	
+if((AICompany.GetBankBalance(AICompany.COMPANY_SELF)*2 > OMGtrain._koszt && IsAllowedStupidCargoTrain() && OMGtrain._koszt!=0)||
+  (AICompany.GetBankBalance(AICompany.COMPANY_SELF)*2 > air._koszt && IsAllowedPAXPlane() && air._koszt!=0))
+     {
+	 Info("Company is waiting for money to build sth more interesting than RV");
+	 Sleep(1000);
+	 continue;
+	 }
+	
+if(truck) truck_result = RV.TruckRoute();
+if(truck_result)
     {
+	Info("Truck route constructed!");
 	desperacja = 0;
 	continue;
 	}
-if(cargo_plane) if(air.CargoConnectionBuilder()) 
+
+if(bus) bus_result = RV.BusRoute(); 
+if(bus_result)
     {
+	Info("Bus route constructed!");
 	desperacja = 0;
 	continue;
 	}
-	Error("desperacja++;");
+
+	if(SmartRailConnection_result || StupidCargoRailConnection_result || truck_result || PAX_plane_result || bus_result)continue;
+
+if(cargo_plane) cargo_plane_result = air.CargoConnectionBuilder();
+if(cargo_plane_result)
+    {
+	Info("Cargo plane route constructed!");
+	desperacja = 0;
+	continue;
+	}
+   if(cargo_plane_result)continue;
+	
+   Error("desperacja++;");
    desperacja++;
    }
 }
 
 function AIAI::Statua()
 {
-   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount())
-        {
-		if(ZbudujStatue())
+local veh_list = AIVehicleList();
+veh_list.Valuate(AIBase.RandItem);
+veh_list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_DESCENDING);
+for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next()) 
+   {
+   for(local i=0; i<AIOrder.GetOrderCount(veh); i++)
+      {
+	  local location = AIOrder.GetOrderDestination(veh, i);
+	  if(AITile.IsStationTile(location))
+		{
+	    if(AIOrder.GetOrderFlags(veh, i)!=AIOrder.AIOF_NO_LOAD)
+		{
+		local station = AIStation.GetStationID(location);
+		local suma = 0;
+		local cargo_list = AICargoList();
+		for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) suma+=AIStation.GetCargoWaiting(station, cargo);
+		if(suma<200) //HARDCODED
+		if(AIVehicle.GetVehicleType(veh)==AIVehicle.VT_RAIL || AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount() || desperacja>30)
 		   {
-		   Info("Zbudowane statue!");
+		   if(AITown.PerformTownAction(AITile.GetClosestTown(location), AITown.TOWN_ACTION_BUILD_STATUE)) 
+		      {
+			  Warning("Statue for " + AIVehicle.GetName(veh));
+			  return true;
+			  }
+		   else
+		      {
+		      if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH) return false;
+			  }
 		   }
+		  }
 		}
-    else
-	  {
-      if(desperacja>30)
-        {
-		local save = AICompany.GetLoanAmount();
-		AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
-		if(ZbudujStatue())
-		   {
-		   Info("Zbudowane statue!");
-   		   desperacja=0;
-		   }
-		AICompany.SetLoanAmount(save);
-		}
-	   }
+	  }
+   }
+
+Error("Statua construction failed");
+return false;
 }
 
 function AIAI::SignMenagement()
 {
 if(AIAI.GetSetting("clear_signs"))
 {
-for(local i=0; true; i++)
-   {
-   local sign_list = AISignList();
-   for (local x = sign_list.Begin(); sign_list.HasNext(); x = sign_list.Next()) //from Chopper
-    {
-	AISign.RemoveSign(x);
-	}
-   }
+local sign_list = AISignList();
+for (local x = sign_list.Begin(); sign_list.HasNext(); x = sign_list.Next()) //from Chopper
+  {
+  AISign.RemoveSign(x);
+  }
 }
 
 if(AIAI.GetSetting("debug_signs_for_airports_load"))
@@ -382,8 +466,13 @@ function AIAI::DeleteUnprofitable()
    	
 	local counter = 0;
 	
-	for (local veh = vehicle_list.Begin(); vehicle_list.HasNext(); veh = vehicle_list.Next()) if(AIAI.sellVehicle(veh, "unprofitable")) counter++;
-	
+	for (local veh = vehicle_list.Begin(); vehicle_list.HasNext(); veh = vehicle_list.Next()) 
+	   {
+	   if(AIVehicle.GetVehicleType(veh)!=AIVehicle.VT_RAIL || (AIVehicleList_Station(AIStation.GetStationID(GetLoadStation(veh)))).Count()>2)
+	      {
+		  if(AIAI.sellVehicle(veh, "unprofitable")) counter++;
+		  }
+	   }
 	Info(counter + " vehicles sold.");
 	generalna_konserwacja = GetDate();
 }
@@ -399,6 +488,8 @@ RV.Konserwuj();
 //Warning("<");
 air.Konserwuj();
 //Warning(">");
+
+OMGtrain.Konserwuj();
 
 //Warning("<");
 this.DeleteVehiclesInDepots();
@@ -471,7 +562,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 		event = AIEventEnginePreview.Convert(event);
 		if (event.AcceptPreview()) 
 		   {
-		   Info("New engine available for preview: " + event.GetName());
+		   Info("New engine available from preview: " + event.GetName());
 		   Autoreplace();
 		   }
 		}
@@ -481,6 +572,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 		local engine = event.GetEngineID();
 		Info("New engine available: " + AIEngine.GetName(engine));
 		Autoreplace();
+		RAIL.TrainReplace();
 		}
 		else if(ev_type == AIEvent.AI_ET_COMPANY_NEW)//from simpleai
 		{
@@ -492,8 +584,10 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 		{
 				event = AIEventCompanyInTrouble.Convert(event);
 				local company = event.GetCompanyID();
-				if (AICompany.IsMine(company)) Error("I'm in trouble, I don't know what to do!");
-		/* TODO: Handle it. */
+				if (AICompany.IsMine(company))
+				   {
+				   this.MoneyMenagement();
+				   }
 		}
 		else if(ev_type == AIEvent.AI_ET_INDUSTRY_OPEN)//from simpleai
 		{

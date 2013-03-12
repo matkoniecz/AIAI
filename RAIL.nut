@@ -1,4 +1,5 @@
 import("pathfinder.rail", "RailPathFinder", 1);
+require("RAILchoochoopathfinder.nut"); //TODO MERGE!
 
 class MyRailPF extends RailPathFinder { //From SimpleAI
 	_cost_level_crossing = null;
@@ -14,7 +15,7 @@ function MyRailPF::Fast()
 {
 _cost_level_crossing = 400;
 cost.bridge_per_tile = 50;
-cost.tunnel_per_tile = 50;
+cost.tunnel_per_tile = 35;
 cost.coast = 0;
 cost.max_bridge_length = 20;   // The maximum length of a bridge that will be build.
 cost.max_tunnel_length = 20;   // The maximum length of a tunnel that will be build.
@@ -35,21 +36,154 @@ path = null; //TODO move it to RailStupid
 }
 
 require("RAILstupid.nut");
+require("RAILsmart.nut");
 require("RAILtrain_getter.nut");
 
-/*
-ost.max_cost 	 2000000000 	 The maximum cost for a route.
-cost.tile 	100 	The cost for a non-diagonal track.
-cost.diagonal_tile 	70 	The cost for a diagonal track.
-cost.turn 	50 	The cost that is added to _cost_tile / _cost_diagonal_tile if the direction changes.
-cost.slope 	100 	The extra cost if a rail tile is sloped.
-cost.bridge_per_tile 	150 	The cost per tile of a new bridge, this is added to _cost_tile.
-cost.tunnel_per_tile 	120 	The cost per tile of a new tunnel, this is added to _cost_tile.
-cost.coast 	20 	The extra cost for a coast tile.
-cost.max_bridge_length 	6 	The maximum length of a bridge that will be build.
-cost.max_tunnel_length 	6 	The maximum length of a tunnel that will be build.
-*/
+function RAIL::Konserwuj() 
+{
+if(AIBase.RandRange(10)==0)RAIL.TrainReplace();
+Info(RAIL.Uzupelnij() + " new trains");
+}
 
+function RAIL::Uzupelnij()
+{
+local ile=0;
+local cargo_list=AICargoList();
+for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) //from Chopper
+   {
+   local station_list=AIStationList(AIStation.STATION_TRAIN);
+   for (local aktualna = station_list.Begin(); station_list.HasNext(); aktualna = station_list.Next()) //from Chopper
+	  {
+	  if(NajmlodszyPojazd(aktualna)>20) //nie dodawaæ masowo
+	  if(IsItNeededToImproveThatNoRawStation(aktualna, cargo))
+	  {
+	     local vehicle_list=AIVehicleList_Station(aktualna);
+		 if(vehicle_list.Count()<2)continue; //TODO replace by data stored in station name
+		 if(vehicle_list.Count()>9)continue; //TODO replace by data stored in station name
+		 vehicle_list.Valuate(AIBase.RandItem);
+		 vehicle_list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_DESCENDING);
+		 local original=vehicle_list.Begin();
+		 
+		 if(AIVehicle.GetProfitLastYear(original)<0)continue;
+
+		 local end = AIOrder.GetOrderDestination(original, AIOrder.GetOrderCount(original)-2);
+
+	     //if(AITile.GetCargoAcceptance (end, cargo, 1, 7, 5)==0) //TODO: improve it to have real data
+		 //   {
+		 //	if(rodzic.GetSetting("other_debug_signs"))AISign.BuildSign(end, "ACCEPTATION STOPPED");
+		 //	continue;
+		 //	}
+		if(this.copyVehicle(original, cargo )) ile++;
+		}
+	  }
+   }
+return ile;
+}
+
+function RAIL::copyVehicle(main_vehicle_id, cargo)
+{
+if(AIVehicle.IsValidVehicle(main_vehicle_id)==false)return false;
+local depot_tile = GetDepot(main_vehicle_id);
+
+//local maksymalnie=11; //TODO - load data from station name
+//local ile = list.Count();
+
+//if(ile<maksymalnie)
+   {
+   local vehicle_id = AIVehicle.CloneVehicle(depot_tile, main_vehicle_id, true);
+   if(AIVehicle.IsValidVehicle(vehicle_id))
+      {
+ 	  if(AIVehicle.StartStopVehicle (vehicle_id))return true;
+	  //else sell TODO 
+	  }
+   }   
+return false;
+}
+
+function RAIL::TrainReplace()
+{
+Error("function RAIL::TrainReplace()");
+local station_list = AIStationList(AIStation.STATION_TRAIN);
+local i=1;
+for (local aktualna = station_list.Begin(); station_list.HasNext(); aktualna = station_list.Next()) //from Chopper
+	{
+	Error(i + " of " + station_list.Count());
+	i++;
+	
+	local vehicle_list=AIVehicleList_Station(aktualna);
+	if(vehicle_list.Count()==0)continue;
+	for (local vehicle = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle = vehicle_list.Next()) //from Chopper
+	{
+	local cargo_list = AICargoList();
+	local max = 0;
+	local max_cargo;
+	for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) 
+	   {
+	   if(AIVehicle.GetCapacity(vehicle, cargo)>max) 
+	      {
+		  max = AIVehicle.GetCapacity(vehicle, cargo);
+		  max_cargo = cargo;
+		  }
+	   }
+		  AIRail.SetCurrentRailType(AIRail.GetRailType(GetLoadStation(vehicle)));
+		  local wrzut = Route();
+		  wrzut.cargo = max_cargo;
+		  wrzut.station_size = RAIL.GetStationSize(GetLoadStation(vehicle));
+		  wrzut.depot_tile = GetDepot(vehicle);
+		  wrzut = DenverAndRioGrande.FindTrain(wrzut);
+		  local engine = wrzut.engine[0];
+		  local wagon = wrzut.engine[1];
+
+			
+		  local new_speed = RAIL.GetMaxSpeedOfTrain(engine, wagon);
+
+		  local old_engine = AIVehicle.GetEngineType(vehicle);
+		  local old_wagon = AIVehicle.GetWagonEngineType(vehicle, 0);
+	
+		  local old_speed = RAIL.GetMaxSpeedOfTrain(old_engine, old_wagon);
+
+		  if(new_speed>old_speed)
+		      {
+			  if(AIAI.CzyNaSprzedaz(vehicle)==false)
+			      {
+				  local train = RAIL.BuildTrain(wrzut);
+				  if(train != null)
+				     {
+					if(AIOrder.ShareOrders(train, vehicle)) AIAI.sellVehicle(vehicle, "replacing for new");
+					}
+				  }
+			  }	
+	}
+	}
+}
+
+function RAIL::GetStationSize(station_tile)
+{
+if(AIRail.GetRailStationDirection(station_tile)==AIRail.RAILTRACK_NE_SW) //x_is_constant__horizontal
+   {
+   for(local i = 0; true; i++)
+      {
+	  if(AIStation.GetStationID(station_tile + AIMap.GetTileIndex(i, 0))!=AIStation.GetStationID(station_tile))return i;
+	  }
+   }
+else
+   {
+   for(local i = 0; true; i++)
+      {
+	  if(AIStation.GetStationID(station_tile + AIMap.GetTileIndex(0, i))!=AIStation.GetStationID(station_tile))return i;
+	  }
+   }
+}
+
+function RAIL::GetMaxSpeedOfTrain(engine, wagon)
+{
+if(engine == null || wagon == null)return 0;
+  local speed_wagon = AIEngine.GetMaxSpeed(wagon);
+  if(speed_wagon == 0) {speed_wagon = 2500;}
+  local speed_engine = AIEngine.GetMaxSpeed(engine);
+  if(speed_wagon < speed_engine) return speed_wagon;
+  return speed_engine;
+}
 function RAIL::IsItPossibleToConnectThatTilesWithRail(tile_b, start_tile)
 {
 

@@ -21,10 +21,10 @@ function KRAI::HandleNewLevelCrossing(ev) //from CluelessPlus
 
 function KRAI::HandleOldLevelCrossings() //from CluelessPlus
 {
-if(AIBase.RandRange(3)==0)
+if(AIBase.RandRange(6)==0)
    {
    detected_rail_crossings = AIList();
-   Info("detected_rail_crossings cleared");
+   //Info("detected_rail_crossings cleared");
    return;
    }
 					this.detected_rail_crossings.Valuate(Helper.ItemValuator);
