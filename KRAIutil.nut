@@ -1,8 +1,8 @@
 function KRAI::RawVehicle(vehicle)
 {
-if(AIOrder.GetOrderCount(vehicle)==3)return true;
-return false;
+return AIVehicle.GetName(vehicle)[0]=='R';
 }
+
 function KRAI::sprawdz_droge(path)
 {
 local costs = AIAccounting();
@@ -81,7 +81,7 @@ function KRAI::IsItNeededToAddRVToThatStation(aktualna, cargo)
 {
 return AIStation.GetCargoWaiting(aktualna, cargo)>50 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0) ;
 }
-function KRAI::ZbudujDodatkowePojazdy()
+function KRAI::Uzupelnij()
 {
 local ile=0;
 local cargo_list=AICargoList();
@@ -128,7 +128,6 @@ return ile;
 function KRAI::copyVehicle(main_vehicle_id, cargo)
 {
 if(AIVehicle.IsValidVehicle(main_vehicle_id)==false)return false;
-
 local depot_tile = GetDepot(main_vehicle_id);
 
 local speed = AIEngine.GetMaxSpeed(this.WybierzRV(cargo));
@@ -138,7 +137,7 @@ local distance = AIMap.DistanceManhattan(GetLoadStation(main_vehicle_id), GetUnL
 //1 na tile przy 25 km/h
 
 local maksymalnie=distance*50/(speed+10);
-
+//
 local station_tile = GetLoadStation(main_vehicle_id);
 local station_id = AIStation.GetStationID(station_tile);
 local list = AIVehicleList_Station(station_id);   	
@@ -148,21 +147,20 @@ local ile = list.Count();
 
 if(ile<maksymalnie)
    {
-   local vehicle_id = AIVehicle.BuildVehicle (depot_tile, this.WybierzRV(cargo));
+   local vehicle_id = AIVehicle.CloneVehicle(depot_tile, main_vehicle_id, true);
    if(AIVehicle.IsValidVehicle(vehicle_id))
       {
-	  AIOrder.CopyOrders (vehicle_id, main_vehicle_id)
-	  if(AIVehicle.RefitVehicle(vehicle_id, cargo))
-	     {
-		 AIVehicle.StartStopVehicle (vehicle_id);
-		 }
-	  else
-	     {
-		 AIVehicle.SellVehicle(vehicle_id);
-		 }
+ 	  AIVehicle.StartStopVehicle (vehicle_id);
+
+	  local string;
+	  //Warning(AIVehicle.GetName(main_vehicle_id) +" -X- " + AIVehicle.GetName(main_vehicle_id)[0]);
+	  if(RawVehicle(main_vehicle_id)) string = "Raw cargo ";
+	  else string = "Processed cargo"; 
+	  local i = AIVehicleList().Count();
+	  for(;!AIVehicle.SetName(vehicle_id, string + " #" + i); i++) ; //Error(AIError.GetLastErrorString());
       return true;
 	  }
-   }
+   }   
 return false;
 }
 

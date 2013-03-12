@@ -1,17 +1,9 @@
 /*
-known problems
-n^2 is bad idea when n may be 5k (n = AIIndustryList().Count() ) In other words - searching for best industry on large maps is very, very slow.
-solution: change to amortized contant time (200)
-
 long bridges sometimes are unavailable!
-
-very high rotation of vehicles
 
 more depots
 check jams before truck building
-budowanie na drogach, nie tylko pustych polach
 reuse existing roads constructed by another players
-industry to city routes
 For all newly build routes, check both ways. This way, if one-way roads are build, another road is build next to it so vehicles can go back. //from admiralai
 
 Todo in air module
@@ -24,7 +16,7 @@ class AIAI extends AIController
 {
 desperacja = null;
 generalna_konserwacja = null;
-
+root_tile = null;
 air=null;
 truck=null;
 }
@@ -42,6 +34,7 @@ Direction <- SuperLib.Direction
 
 function AIAI::Start()
 {
+Error("WTTTTTTF");
 Name();
 HQ();
 
@@ -62,15 +55,18 @@ desperacja = 0;
 truck._koszt = 1;
 air._koszt = 1;
 generalna_konserwacja = GetDate();
+Autoreplace();
 
 while(true)
    {
+   root_tile = RandomTile();
 	this.SignMenagement();
 
 	air.desperacja = desperacja;
 	truck.desperacja = desperacja;
 
 	this.MoneyMenagement();
+	this.Statua();
 
 	AILog.Warning("desperation: " + desperacja);
 	AILog.Warning("air: " + air._koszt);
@@ -81,6 +77,7 @@ while(true)
      (AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedPlane() && air._koszt!=0)
 	 )
       {
+	  Info("Normal");
 	  local air_city = false; 
 	  local air_cargo = false; 
 	  local truck_cargo = false;
@@ -112,21 +109,29 @@ while(true)
 	else 
 	   {
        Info("We wait for better times.");
-	   this.Konserwuj();
-   	   Sleep(100);
-	   this.Konserwuj();
-   	   Sleep(100);
 	   if(desperacja==0)desperacja=1;
+	   this.Konserwuj();
+   	   Sleep(100);
+	   this.Konserwuj();
+   	   Sleep(100);
+	   this.Konserwuj();
+   	   Sleep(100);
 	   }
 
    this.Konserwuj();
-   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount()*2)
+   }
+}
+function AIAI::Statua()
+{
+   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount())
         {
-		ZbudujStatue();
+		if(ZbudujStatue())
+		   {
+		   Info("Zbudowane statue!");
+		   }
 		}
     else
 	  {
-	  if(AIBase.RandRange(10)==1)
       if(desperacja>30)
         {
 		local save = AICompany.GetLoanAmount();
@@ -139,8 +144,6 @@ while(true)
 		AICompany.SetLoanAmount(save);
 		}
 	   }
- 
-   }
 }
 
 function AIAI::SignMenagement()
@@ -301,7 +304,7 @@ function AIAI::DeleteUnprofitable()
 
    	vehicle_list.Valuate(AIVehicle.GetProfitThisYear);
 	vehicle_list.KeepBelowValue(0);
-   	vehicle_list.Valuate(AIVehicle.GetProfitThisYear);
+   	vehicle_list.Valuate(AIVehicle.GetProfitLastYear);
 	vehicle_list.KeepBelowValue(0);
 
 	Info(vehicle_list.Count() + " vehicles should be sold because are unprofitable");
@@ -316,35 +319,51 @@ function AIAI::DeleteUnprofitable()
 
 function AIAI::Konserwuj()
 {
-truck.Konserwuj();
-air.Konserwuj();
-this.DeleteVehiclesInDepots();
-this.HandleEvents();
+//Error("<");
 
+//Warning("<");
+truck.Konserwuj();
+//Warning(">");
+
+//Warning("<");
+air.Konserwuj();
+//Warning(">");
+
+//Warning("<");
+this.DeleteVehiclesInDepots();
+//Warning(">");
+
+//Warning("<");
+this.HandleEvents();
+//Warning(">");
+
+//Warning("<");
 if((GetDate()-generalna_konserwacja)>12) //powinno raz na 12 miesiêcy
     {
-    Autoreplace(); //TODO - wywo³aæ gdy pojawia siê nowy pojazd/przeglad pojazdu (ale do tego trzeba obs³ugi wydarzeñ)
 	this.DeleteUnprofitable();
 	//DeleteEmptyRVStations();
 	}
+//Warning(">");
+
+//Error(">");
 }
 
-function AIAI::HandleEvents() //from CluelessPlus
+function AIAI::HandleEvents() //from CluelessPlus and simpleai
 {
-	if(AIEventController.IsEventWaiting())
+	while(AIEventController.IsEventWaiting())
 	{
-		local ev = AIEventController.GetNextEvent();
+		local event = AIEventController.GetNextEvent();
 
-		if(ev == null)
+		if(event == null)
 			return;
 
-		local ev_type = ev.GetEventType();
+		local ev_type = event.GetEventType();
 
-		if(ev_type == AIEvent.AI_ET_VEHICLE_LOST)
+		if(ev_type == AIEvent.AI_ET_VEHICLE_LOST)//from CluelessPlus
 		{
 		
     		Error("Vehicle lost event detected!");
-			local lost_event = AIEventVehicleLost.Convert(ev);
+			local lost_event = AIEventVehicleLost.Convert(event);
 			local lost_veh = lost_event.GetVehicleID();
 
 			/*
@@ -364,17 +383,67 @@ function AIAI::HandleEvents() //from CluelessPlus
 			*/
 			
 		}
-		if(ev_type == AIEvent.AI_ET_VEHICLE_CRASHED)
+		else if(ev_type == AIEvent.AI_ET_VEHICLE_CRASHED)//from CluelessPlus
 		{
 
-			local crash_event = AIEventVehicleCrashed.Convert(ev);
+			local crash_event = AIEventVehicleCrashed.Convert(event);
 			local crash_reason = crash_event.GetCrashReason();
 			//local vehicle_id = crash_event.GetVehicleID();
 			//local crash_tile = crash_event.GetCrashSite();
 			if(crash_reason == AIEventVehicleCrashed.CRASH_RV_LEVEL_CROSSING)
 			{
-				truck.HandleNewLevelCrossing(ev);
+				truck.HandleNewLevelCrossing(event);
 			}
+		}
+		else if(ev_type == AIEvent.AI_ET_ENGINE_PREVIEW) //from simpleai
+		{
+		event = AIEventEnginePreview.Convert(event);
+		if (event.AcceptPreview()) 
+		   {
+		   Info("New engine available for preview: " + event.GetName());
+		   Autoreplace();
+		   }
+		}
+		else if(ev_type == AIEvent.AI_ET_ENGINE_AVAILABLE)//from simpleai
+		{
+		event = AIEventEngineAvailable.Convert(event);
+		local engine = event.GetEngineID();
+		Info("New engine available: " + AIEngine.GetName(engine));
+		Autoreplace();
+		}
+		else if(ev_type == AIEvent.AI_ET_COMPANY_NEW)//from simpleai
+		{
+		event = AIEventCompanyNew.Convert(event);
+		local company = event.GetCompanyID();
+		Warning("Welcome " + AICompany.GetName(company));
+		}
+		else if(ev_type == AIEvent.AI_ET_COMPANY_IN_TROUBLE)//from simpleai
+		{
+				event = AIEventCompanyInTrouble.Convert(event);
+				local company = event.GetCompanyID();
+				if (AICompany.IsMine(company)) Error("I'm in trouble, I don't know what to do!");
+		/* TODO: Handle it. */
+		}
+		else if(ev_type == AIEvent.AI_ET_INDUSTRY_OPEN)//from simpleai
+		{
+		event = AIEventIndustryOpen.Convert(event);
+		local industry = event.GetIndustryID();
+		Info("New industry: " + AIIndustry.GetName(industry));
+		/* TODO: Handle it. */
+		}
+		else if(ev_type == AIEvent.AI_ET_INDUSTRY_CLOSE)//from simpleai
+		{
+		event = AIEventIndustryClose.Convert(event);
+		local industry = event.GetIndustryID();
+		if (AIIndustry.IsValidIndustry(industry))
+		    {
+			Info("Closing industry: " + AIIndustry.GetName(industry));
+			/* TODO: Handle it. */
+			}
+		}
+		else
+		{
+		;
 		}
 	}
 }

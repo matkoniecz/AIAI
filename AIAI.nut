@@ -1,3 +1,27 @@
+function AIAI::GetIndustryList()
+{
+local list = AIIndustryList();
+list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile);
+list.KeepTop(300);
+return list;
+}
+
+function AIAI::GetIndustryList_CargoAccepting(cargo)
+{
+local list = AIIndustryList_CargoAccepting(cargo);
+list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile);
+list.KeepTop(300);
+return list;
+}
+
+function AIAI::GetIndustryList_CargoProducing(cargo)
+{
+local list = AIIndustryList_CargoProducing(cargo);
+list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile);
+list.KeepTop(300);
+return list;
+}
+
 function AIAI::DeleteVehiclesInDepots()
 {
 local ile=0;
@@ -67,7 +91,7 @@ local list = AIStationList(AIStation.STATION_ANY);
 for (local aktualna = list.Begin(); list.HasNext(); aktualna = list.Next()) 
     {
 	if(AITown.PerformTownAction(AITile.GetClosestTown (AIStation.GetLocation(aktualna)), AITown.TOWN_ACTION_BUILD_STATUE))return true;
-		   //jesli za malo kasy to return false;
+    if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH) return false;
 	}
 return false;
 }
@@ -96,7 +120,7 @@ Debug("Building company HQ...");
 for (local tile = HQArea.Begin(); HQArea.HasNext(); tile = HQArea.Next()) 
     {
 	if (AICompany.BuildCompanyHQ(tile)) {
-			AISign.BuildSign(tile, "AIAI HQ");
+			AISign.BuildSign(tile, "In case of strange or stupid AIAI behaviour send mail on bulwersator@gmail.com");
 			return;
 		} 
 	}

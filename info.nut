@@ -2,12 +2,12 @@ class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
   function GetDescription() { return "Automatic Idiot AI Version beta."; }
-  function GetVersion()     { return 6; }
+  function GetVersion()     { return 7; }
   function GetDate()        { return "2010-02-14"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
   function MinVersionToLoad() { return 0; } 
-  function GetURL() {return "http://www.tt-forums.net/viewtopic.php?f=65&t=47298";}
+  function GetURL() {return "http://www.tt-forums.net/viewtopic.php?f=65&t=47298 or bulwersator@gmail.com. Thanks!";}
 
 	function GetSettings() {
 

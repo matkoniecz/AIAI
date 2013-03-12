@@ -148,7 +148,9 @@ max_ships = 300
 
 function Name()
 {
-if (!AICompany.SetName("AIAI")) {
+if (!AICompany.SetName("AIAI")) 
+    if(AIError.GetLastError==AIError.ERR_NAME_IS_NOT_UNIQUE)
+	{
 	if (!AICompany.SetName("Suicide AIAI")) {
     local i = 2;
     while (!AICompany.SetName("Suicide AIAI #" + i)) {
@@ -159,7 +161,7 @@ if (!AICompany.SetName("AIAI")) {
     }
 }
 
-function Sqrt(i) {
+function Sqrt(i) { //from Rondje
 	if (i == 0)
 		return 0;   // Avoid divide by zero
 	local n = (i / 2) + 1;       // Initial estimate, never low
@@ -169,4 +171,36 @@ function Sqrt(i) {
 		n1 = (n + (i / n)) / 2;
 	}
 	return n;
+}
+
+function SafeAddRectangle(list, tile, radius) { //from Rondje
+	local x1 = max(0, AIMap.GetTileX(tile) - radius);
+	local y1 = max(0, AIMap.GetTileY(tile) - radius);
+	
+	local x2 = min(AIMap.GetMapSizeX() - 2, AIMap.GetTileX(tile) + radius);
+	local y2 = min(AIMap.GetMapSizeY() - 2, AIMap.GetTileY(tile) + radius);
+	
+	list.AddRectangle(AIMap.GetTileIndex(x1, y1),AIMap.GetTileIndex(x2, y2)); 
+}
+
+function mini(a, b)
+{
+if(a<b)return a;
+return b;
+}
+
+function maxi(a, b)
+{
+if(a>b)return a;
+return b;
+}
+
+function abs(a)
+{
+if(a<0)return -a;
+return a;
+}
+
+function RandomTile() { //from ChooChoo
+	return abs(AIBase.Rand()) % AIMap.GetMapSize();
 }

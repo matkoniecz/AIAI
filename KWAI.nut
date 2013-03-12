@@ -288,28 +288,45 @@ for (local aktualna = list.Begin(); list.HasNext(); aktualna = list.Next())
    local cargo_list = AICargoList();
    for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next())
       {
-	  //AILog.Info(AICargo.GetCargoLabel(cargo) +" "+AITile.GetCargoAcceptance(pozycja, cargo, airport_x, airport_y, airport_rad));
 	  if(AITile.GetCargoAcceptance(pozycja, cargo, airport_x, airport_y, airport_rad)>10)
 	     {
+	     //AILog.Info(AICargo.GetCargoLabel(cargo) +" "+AITile.GetCargoAcceptance(pozycja, cargo, airport_x, airport_y, airport_rad));
 
 		 //to szukamy czegos to transportu tego
 		 local engine = this.FindAircraft(airport_type, cargo, 3, AICompany.GetBankBalance(AICompany.COMPANY_SELF));
 
-	   if(engine==-1) continue;
+	     if(engine==-1) 
+		    {
+			//Warning("Engine failed");
+			continue;
+			}
 		 
 		 //to szukamy producenta tego syfu
-		 local industry_list = AIIndustryList_CargoProducing(cargo);
-		 if(industry_list.Count()==0) continue;
+		 local industry_list = rodzic.GetIndustryList_CargoProducing(cargo);
+		 if(industry_list.Count()==0)
+		    {
+			//Warning("Producer failed");
+			continue;
+			}
 
 		 //dobrych producentów
 		 industry_list.Valuate(AIIndustry.GetLastMonthProduction, cargo);
-		 industry_list.KeepAboveValue(100); //HARDCODED OPTION
-		 if(industry_list.Count()==0) continue;
+		 industry_list.KeepAboveValue(110-2*desperacja); //HARDCODED OPTION
+		 if(industry_list.Count()==0)
+		    {
+			//Warning(AICargo.GetCargoLabel(cargo) +" "+AITile.GetCargoAcceptance(pozycja, cargo, airport_x, airport_y, airport_rad) + " producer failed: "+ (110-2*desperacja) );
+			continue;
+			}
+		 //Error("@#@")
 
 		 //dalekich producentów
 		 industry_list.Valuate(AIIndustry.GetDistanceManhattanToTile, pozycja);
 		 industry_list.KeepAboveValue(this.GetMinimalDistance());
-		 if(industry_list.Count()==0) continue;
+		 if(industry_list.Count()==0)
+		    {
+			Warning("Good producer in distance failed");
+			continue;
+			}
 		 
 		 //szukamy miejsca na lotnisko
 		 for (local producent = industry_list.Begin(); industry_list.HasNext(); producent = industry_list.Next())
@@ -385,7 +402,7 @@ AIAI.Info("Trying to build an airport route from industry");
 
 local propozycja = this.FindRouteBetweenCityAndIndustry();
 
-AIAI.Info("Trying to build an airport route from industry - scanning completed");
+//Info("Trying to build an airport route from industry - scanning completed");
 
 if(propozycja == null) 
    {
@@ -416,7 +433,6 @@ else
 
 	for(local i=0; i<licznik; i++) 
 	   {
-       AIAI.Info("We have " + i + " from " + licznik + " aircrafts.");
 	   while(!this.BuildCargoAircraft(propozycja.tile_nowego_lotniska, tile_2, propozycja.engine, propozycja.cargo, propozycja.nazwa))
           {
 		  AIAI.Info("Next try");
@@ -428,34 +444,34 @@ else
  		  rodzic.Konserwuj();
 		  AIController.Sleep(100);
 		  }
+       //AIAI.Info("We have " + i + " from " + licznik + " aircrafts.");
   	   }
-
-	return true;
-}
-
-function KWAI::Skip(plane, stacja)
-{
-for(local i=0; i<AIOrder.GetOrderCount(plane); i++)
-   {
-   if(AIOrder.GetOrderFlags(plane, i)==AIOrder.AIOF_FULL_LOAD_ANY)
-      {
-	   AIOrder.SetOrderFlags(plane, i, AIOrder.AIOF_NO_LOAD);
-	   AIController.Sleep(10);
-	   AIOrder.SetOrderFlags(plane, i, AIOrder.AIOF_FULL_LOAD_ANY);	  	
-	  }
-   }
+return true;
 }
 
 function KWAI::Konserwuj()
 {
+//Info("<");
 this.Skipper();
+//Info(">");
+
+//Info("<");
 this.Uzupelnij();
-if(AIBase.RandRange(4)==1) this.DeadlockPrevention();
+//Info(">");
+
+//Info("<");
+if(AIBase.RandRange(20)==1) this.DeadlockPrevention();
+//Info(">");
+}
+
+function KWAI::GetEffectiveDistance(tile_1, tile_2)
+{
+return AITile.GetDistanceManhattanToTile(tile_1, tile_2);
 }
 
 function KWAI::Burden(tile_1, tile_2, engine)
 {
-return AIEngine.GetMaxSpeed(engine)*200/(AITile.GetDistanceManhattanToTile(tile_1, tile_2)+50);
+return AIEngine.GetMaxSpeed(engine)*200/(this.GetEffectiveDistance(tile_1, tile_2)+50);
 }
 
 function KWAI::GetBurden(stacja)
@@ -563,34 +579,66 @@ for (local aktualna = list.Begin(); list.HasNext(); aktualna = list.Next())
    }
 }
 
+function CzyToPassengerCargoValuator(veh)
+   {
+   if(AIVehicle.GetCapacity(veh, KWAI.GetPassengerCargoId())>0)return 1;
+   return 0;
+   }
+
 function KWAI::DeadlockPrevention()
 {
+Warning("DeadlockPrevention");
 local list = AIVehicleList();
 
-//samolot
-list.Valuate(AIVehicle.GetVehicleType);
-list.KeepValue(AIVehicle.VT_AIR);
+local list = AIStationList(AIStation.STATION_AIRPORT);
 
-//³aduje
-list.Valuate(AIVehicle.GetState);
-list.KeepValue(AIVehicle.VS_AT_STATION);
+for (local station = list.Begin(); list.HasNext(); station = list.Next())
+    {
+    local hangar = AIAirport.GetHangarOfAirport(AIStation.GetLocation(station));
+	local veh_list;
+	
+	veh_list = AIVehicleList_Station(station);
+	veh_list.Valuate(CzyToPassengerCargoValuator);
+	veh_list.KeepValue(0);
+	if(veh_list.Count()==0)continue;
 
-for (local veh = list.Begin(); list.HasNext(); veh = list.Next())
+	veh_list.Valuate(AIVehicle.GetLocation);
+	veh_list.KeepValue(hangar);
+	if(veh_list.Count()==0)continue;
+	
+	veh_list = AIVehicleList_Station(station);
+	veh_list.Valuate(CzyToPassengerCargoValuator);
+	veh_list.KeepValue(0);
+	if(veh_list.Count()==0)continue;
+	
+	local veh = veh_list.Begin();
+    Skip(veh, station);
+/*
+	AIVehicle.SendVehicleToDepot(veh)
+    AIController.Sleep(10);
+    AIVehicle.SendVehicleToDepot(veh);
+
+		 for ( veh_list.HasNext(); veh = veh_list.Next())
+		{
+         AIVehicle.SendVehicleToDepot(veh);
+	     AIController.Sleep(10);
+	     AIVehicle.SendVehicleToDepot(veh);
+	     continue;
+		 }
+*/
+   }
+}
+
+function KWAI::Skip(plane, stacja)
+{
+for(local i=0; i<AIOrder.GetOrderCount(plane); i++)
    {
-   //nie pasa¿erów
-   if(AIVehicle.GetCapacity(veh, this.GetPassengerCargoId())!=0)continue;
-   
-   local cargo_list = AICargoList();
-   for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next())
-       {
-	   if(AIVehicle.GetCapacity(veh, cargo)!=0)
-	      {
-		  AIVehicle.SendVehicleToDepot(veh);
-		  AIController.Sleep(10);
-		  AIVehicle.SendVehicleToDepot(veh);
-		  continue;
-		  }
-       }
+   if(AIOrder.GetOrderFlags(plane, i)==AIOrder.AIOF_FULL_LOAD_ANY)
+      {
+	   AIOrder.SetOrderFlags(plane, i, AIOrder.AIOF_NO_LOAD);
+	   AIController.Sleep(10);
+	   AIOrder.SetOrderFlags(plane, i, AIOrder.AIOF_FULL_LOAD_ANY);	  	
+	  }
    }
 }
 
@@ -599,6 +647,8 @@ function KWAI::Skipper()
 local list = AIStationList(AIStation.STATION_AIRPORT);
 if(list.Count()==0)return;
 
+local lista = AIList();
+
 for (local aktualna = list.Begin(); list.HasNext(); aktualna = list.Next())
    {
    local pozycja=AIStation.GetLocation(aktualna)
@@ -606,9 +656,8 @@ for (local aktualna = list.Begin(); list.HasNext(); aktualna = list.Next())
    if(airlist.Count()==0)continue;
    local counter=0;
    
-   local lista = AIList();
    local minimum = 101;
-   local pustak;
+   local pustak = null;
    for (local plane = airlist.Begin(); airlist.HasNext(); plane = airlist.Next())
       {
 	  if(AIVehicle.GetState(plane)==AIVehicle.VS_AT_STATION)
@@ -616,23 +665,32 @@ for (local aktualna = list.Begin(); list.HasNext(); aktualna = list.Next())
 		    if(AIVehicle.GetCapacity(plane, this.GetPassengerCargoId())>0)
 			{
 			local percent = ( 100 * AIVehicle.GetCargoLoad(plane, this.GetPassengerCargoId()))/(AIVehicle.GetCapacity(plane, this.GetPassengerCargoId()));
+		    //Info(percent + " %");
 			if(percent < minimum)
 			   {
+			   //Info(percent + " %%%")
 			   minimum=percent;
 			   pustak=plane;
 			   }
-  		    lista.AddItem(plane, plane);
+  		    lista.AddItem(plane, aktualna);
 			counter++;
 			}
 	  }
- 
-   for (local skipping = lista .Begin(); lista .HasNext(); skipping = lista.Next())
-      {
-	  if(skipping!=pustak) this.Skip(skipping, aktualna);
-	  }
+   if(pustak!=null)lista.RemoveItem(pustak); //airport may be empty
    }
+   
+for (local skipping = lista .Begin(); lista .HasNext(); skipping = lista.Next())
+   {
+   this.Skip(skipping, list.GetValue(skipping));
+   }
+
 }
 
+function KWAI::PopulationWithRandValuator(town_id)
+{
+return AITown.GetPopulation(town_id)-AIBase.RandRange(500);
+}
+	
 function KWAI::DistanceWithRandValuator(town_id, center_tile)
 {
 local rand = AIBase.RandRange(150);
@@ -653,8 +711,6 @@ function KWAI::FindSuitableAirportSpotInTown(airport_type, center_tile)
 	town_list.Valuate(AITown.GetLocation);
 	
 	/* Remove all the towns we already used */
-	/* Only for small towns */
-
 	local station_list=AIStationList(AIStation.STATION_AIRPORT);
 	for(local i=station_list.Begin(); station_list.HasNext(); i=station_list.Next())
 	    {
@@ -682,8 +738,7 @@ function KWAI::FindSuitableAirportSpotInTown(airport_type, center_tile)
 		town_list.RemoveValue(AITown.GetLocation(town));
 		}
 
-
-	town_list.Valuate(AITown.GetPopulation);
+	town_list.Valuate(this.PopulationWithRandValuator);
 	town_list.KeepAboveValue(500);
 
 	if (center_tile != 0) {
@@ -702,10 +757,11 @@ function KWAI::FindSuitableAirportSpotInTown(airport_type, center_tile)
 	for (local town = town_list.Begin(); town_list.HasNext(); town = town_list.Next()) {
 
     	local tile = AITown.GetLocation(town);
-		/* Create a 30x30 grid around the core of the town and see if we can find a spot for a small airport */
+
 		local list = AITileList();
-		/* XXX -- We assume we are more than 15 tiles away from the border! */
-		list.AddRectangle(tile - AIMap.GetTileIndex(15, 15), tile + AIMap.GetTileIndex(15, 15));
+		local range = Sqrt(AITown.GetPopulation(town)/100) + 15;
+		SafeAddRectangle(list, tile, range);
+
 		list.Valuate(AITile.IsBuildableRectangle, airport_x, airport_y);
 		list.KeepValue(1);
 		/* Sort on acceptance, remove places that don't have acceptance */
