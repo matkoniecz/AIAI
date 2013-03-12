@@ -10,14 +10,31 @@ location = null;
 direction = null;
 }
 
+function ProvideMoney()
+{
+if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>10*AICompany.GetMaxLoanAmount()) AICompany.SetLoanAmount(0);
+else AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
+}
+
+function RepayLoan()
+{
+while(AICompany.SetLoanAmount(AICompany.GetLoanAmount()-AICompany.GetLoanInterval()));
+}
+
+function GetAvailableMoney()
+{
+local me = AICompany.ResolveCompanyID(AICompany.COMPANY_SELF);
+return AICompany.GetBankBalance(me) + AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount() - 10000; //TODO inflate that 10k
+}
+
 function SetNameOfVehicle(vehicle_id, string)
 {
 if(!AIVehicle.IsValidVehicle(vehicle_id))return;
 local i = AIVehicleList().Count();
 for(;!AIVehicle.SetName(vehicle_id, string + " #" + i); i++)
 	{
-	if(AIError.GetLastError() == AIError.ERR_PRECONDITION_FAILED)
-	 SetNameOfVehicle(vehicle_id, "PRECONDITION_FAILED");
+	Error("SetNameOfVehicle: " + AIError.GetLastErrorString() + ": " + string);
+	if(AIError.GetLastError() == AIError.ERR_PRECONDITION_STRING_TOO_LONG) SetNameOfVehicle(vehicle_id, "PRECONDITION_FAILED");
 	}
 }
 
@@ -25,7 +42,7 @@ function TotalLastYearProfit()
 {
 local list = AIVehicleList();
 local suma =0;
-for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
+for (local q = list.Begin(); !list.IsEnd(); q = list.Next()) //from Chopper 
    {
    suma += AIVehicle.GetProfitLastYear(q);
    }
@@ -64,7 +81,7 @@ function NajmlodszyPojazd(station)
 {
 local list = AIVehicleList_Station(station);
 local minimum = 10000;
-for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
+for (local q = list.Begin(); !list.IsEnd(); q = list.Next()) //from Chopper 
    {
    local age=AIVehicle.GetAge(q);
    if(minimum>age)minimum=age;
@@ -78,7 +95,7 @@ function GetAverageCapacity(station, cargo)
 local list = AIVehicleList_Station(station);
 local total = 0;
 local ile = 0;
-for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
+for (local q = list.Begin(); !list.IsEnd(); q = list.Next()) //from Chopper 
    {
    local plus=AIVehicle.GetCapacity (q, cargo);
    if(plus>0)

@@ -107,7 +107,7 @@ class Utils_Tile
 
 function Utils_Tile::GetRealHeight(tile)
 {
-	local height = AITile.GetHeight(tile);
+	local height = AITile.GetCornerHeight(tile, AITile.CORNER_N); //API updated
 	local slope = AITile.GetSlope(tile);
 	if (AITile.IsSteepSlope(slope)) {
 		switch (slope) {

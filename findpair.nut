@@ -18,6 +18,8 @@ station_direction = null;
 first_station = null;
 second_station = null;
 
+//track_type; //TODO: do it!
+
 //trasa.type
 //0 proceed trasa.cargo
 //1 raw
@@ -127,12 +129,12 @@ Error(industry_list.Count()+"");
 local best=0;
 local new;
 
-for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start = industry_list.Next()) //from Chopper
+for (traska.start = industry_list.Begin(); !industry_list.IsEnd(); traska.start = industry_list.Next()) //from Chopper
    {
    if(IsProducerOK(traska.start)==false)continue;
    if(traska.zakazane.HasItem(traska.start))continue;
    local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(traska.start));
-   for (traska.cargo = cargo_list.Begin(); cargo_list.HasNext(); traska.cargo = cargo_list.Next())
+   for (traska.cargo = cargo_list.Begin(); !cargo_list.IsEnd(); traska.cargo = cargo_list.Next())
    {
    traska.production = AIIndustry.GetLastMonthProduction(traska.start, traska.cargo)*(100-AIIndustry.GetLastMonthTransportedPercentage (traska.start, traska.cargo))/100;
 
@@ -142,7 +144,7 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
    local base = ValuateProducer(traska.start, traska.cargo);
    if(industry_list_accepting_current_cargo.Count()>0)
    {
-   for(traska.end = industry_list_accepting_current_cargo.Begin(); industry_list_accepting_current_cargo.HasNext(); traska.end = industry_list_accepting_current_cargo.Next())
+   for(traska.end = industry_list_accepting_current_cargo.Begin(); !industry_list_accepting_current_cargo.IsEnd(); traska.end = industry_list_accepting_current_cargo.Next())
         {
 		if(traska.zakazane.HasItem(traska.end))continue;
 		if(!IsConsumerOK(traska.end))continue; 

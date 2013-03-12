@@ -1,4 +1,4 @@
-function KRAI::HandleNewLevelCrossing(ev) //from CluelessPlus
+function AIAI::HandleNewLevelCrossing(ev) //from CluelessPlus
 {
 			   local crash_event = AIEventVehicleCrashed.Convert(ev);
 			   local crash_reason = crash_event.GetCrashReason();
@@ -19,7 +19,7 @@ function KRAI::HandleNewLevelCrossing(ev) //from CluelessPlus
 				}
 }
 
-function KRAI::HandleOldLevelCrossings() //from CluelessPlus
+function AIAI::HandleOldLevelCrossings() //from CluelessPlus
 {
 if(AIBase.RandRange(6)==0)
    {

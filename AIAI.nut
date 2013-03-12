@@ -27,7 +27,7 @@ function AIAI::DeleteVehiclesInDepots()
 local ile=0;
 
 local list=AIVehicleList();
-for (local q = list.Begin(); list.HasNext(); q = list.Next()) //from Chopper 
+for (local q = list.Begin(); !list.IsEnd(); q = list.Next()) //from Chopper 
    {
    if(AIVehicle.IsStoppedInDepot(q))
       {
@@ -78,7 +78,7 @@ HQArea.Valuate(AIMap.DistanceManhattan, AITown.GetLocation(town));
 HQArea.Sort(AIList.SORT_BY_VALUE, true);
 
 Debug("Building company HQ...");
-for (local tile = HQArea.Begin(); HQArea.HasNext(); tile = HQArea.Next()) 
+for (local tile = HQArea.Begin(); !HQArea.IsEnd(); tile = HQArea.Next()) 
     {
 	if (AICompany.BuildCompanyHQ(tile)) {
 			AISign.BuildSign(tile, "In case of strange or stupid AIAI behaviour send mail on bulwersator@gmail.com");
@@ -103,18 +103,18 @@ local engine_list=AIEngineList(AIVehicle.VT_AIR);
 engine_list.Valuate(AIEngine.GetPlaneType);
 engine_list.KeepValue(AIAirport.PT_BIG_PLANE);
 
-for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_existing = engine_list.Next()) //from Chopper 
+for(local engine_existing = engine_list.Begin(); !engine_list.IsEnd(); engine_existing = engine_list.Next()) //from Chopper 
    {
    local cargo_list=AICargoList();
    local cargo;
-   for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) //from Chopper
+   for (cargo = cargo_list.Begin(); !cargo_list.IsEnd(); cargo = cargo_list.Next()) //from Chopper
       {
 	  if(AIEngine.CanRefitCargo(engine_existing, cargo))break;
 	  }
 	
-   if(AIEngine.IsValidEngine(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
+   if(AIEngine.IsBuildable(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
       {
-	  local engine_best = KWAI.FindAircraft(AIAirport.AT_LARGE, cargo, 1, 100000000)
+	  local engine_best = (AirBuilder(this, 0)).FindAircraft(AIAirport.AT_LARGE, cargo, 1, 100000000)
 	  if(engine_best != engine_existing)
 	     {
 		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
@@ -131,18 +131,18 @@ local engine_list=AIEngineList(AIVehicle.VT_AIR);
 engine_list.Valuate(AIEngine.GetPlaneType);
 engine_list.RemoveValue(AIAirport.PT_BIG_PLANE);
 
-for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_existing = engine_list.Next()) //from Chopper 
+for(local engine_existing = engine_list.Begin(); !engine_list.IsEnd(); engine_existing = engine_list.Next()) //from Chopper 
    {
    local cargo_list=AICargoList();
    local cargo;
-   for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) //from Chopper
+   for (cargo = cargo_list.Begin(); !cargo_list.IsEnd(); cargo = cargo_list.Next()) //from Chopper
       {
 	  if(AIEngine.CanRefitCargo(engine_existing, cargo))break;
 	  }
 	
-   if(AIEngine.IsValidEngine(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
+   if(AIEngine.IsBuildable(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
       {
-	  local engine_best = KWAI.FindAircraft(AIAirport.AT_SMALL, cargo, 1, 100000000)
+	  local engine_best = (AirBuilder(this, 0)).FindAircraft(AIAirport.AT_SMALL, cargo, 1, 100000000)
 	  if(engine_best != null)
 	  if(engine_best != engine_existing)
 	     {
@@ -157,7 +157,7 @@ for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_e
 function AIAI::GetMailCargoId()
 {
 local list = AICargoList();
-for (local i = list.Begin(); list.HasNext(); i = list.Next()) 
+for (local i = list.Begin(); !list.IsEnd(); i = list.Next()) 
 	{
 	if(AICargo.GetTownEffect(i)==AICargo.TE_MAIL)
 		{
@@ -195,18 +195,18 @@ local engine_list=AIEngineList(AIVehicle.VT_ROAD);
 engine_list.Valuate(AIEngine.GetRoadType);
 engine_list.KeepValue(AIRoad.ROADTYPE_ROAD);
 
-for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_existing = engine_list.Next()) //from Chopper 
+for(local engine_existing = engine_list.Begin(); !engine_list.IsEnd(); engine_existing = engine_list.Next()) //from Chopper 
    {
    local cargo_list=AICargoList();
    local cargo;
-   for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) //from Chopper
+   for (cargo = cargo_list.Begin(); !cargo_list.IsEnd(); cargo = cargo_list.Next()) //from Chopper
       {
 	  if(AIEngine.CanRefitCargo(engine_existing, cargo))break;
 	  }
 	
-   if(AIEngine.IsValidEngine(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
+   if(AIEngine.IsBuildable(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
       {
-	  local engine_best = RV.GetReplace(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing), cargo);
+	  local engine_best = (RoadBuilder(this, 0)).GetReplace(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing), cargo);
 	  if(engine_best != engine_existing)
 	     {
 		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);

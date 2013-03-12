@@ -1,68 +1,27 @@
-/*
-TODO: groups of trais / Unprofitable from x years / delete only from last category
-TODO: use loan for too expensive
-TODO: replace helis by helis or nothing
-TODO: stop invoking trainreplace after new no tarin engine
-
-TODO: bridge upgrading
-TODO: better engine construction (multiengines)
-TODO: protection vs very small stations
-TODO: try to clear road in RAILbuilder
-
-TODO: reversing path for depot placing 
-TODO: better findpair
-TODO: better busses (managing & construction)
-TODO: world scanner and rework main with dynamic strategy
-TODO: better engine refinder based on route, wagons weight and number to protect from 1km/h on hills
-TODO: remove empty stations
-TODO: protect path from deleting precious results
-TODO: passing lanes
-TODO: rework statues
-TODO: station allocators: fail may be caused by low money
-TODO: rebridger over valleys, debridger
-TODO koszty podzieliæ
-
-TODO: tourist support
-TODO: terminus RV station
-TODO: better RV depot placing (replace double flat by test mode)
-TODO: more working depots
-TODO: check jams before RV building
-TODO: reuse existing roads constructed by another players
-TODO: For all newly build routes, check both ways. This way, if one-way roads are build, another road is build next to it so vehicles can go back. //from admiralai
-TODO: long bridges sometimes are unavailable!
-TODO: helicopters
-TODO: dodawanie samolotów zale¿ne od pojemnoœci
-
-TODO: bus scanner
-	- construction of 2 bus stops
-	- 1 bus
-	- go on route WITHOUT pathfinding
-	- vehicle is lost
-		- route construction is needed
-	- vehicle is profitable - we parasited succesfully
-	limitation: real players rarely construct intercity routes
-
-Changelog
-[quote="Michiel"]But yeah, I think I see where some of the difficulty comes from. It's very crowded, and the trains are severely underpowered, crawling uphill at 9 km/h, which means they make little profit.[/quote]
-*/
-
 class AIAI extends AIController 
 {
 desperacja = null;
 generalna_konserwacja = null;
 root_tile = null;
-air=null;
-RV=null;
-OMGtrain = null;
+station_number = null;
+detected_rail_crossings = null;
 }
 
 require("findpair.nut");
 require("util.nut");
 require("UTILtile.nut");
-require("KRAI.nut");
 require("AIAI.nut");
-require("KWAI.nut");
-require("RAIL.nut");
+
+require("Builder.nut");
+require("RAIL/RailBuilder.nut");
+require("RAIL/SmartRailBuilder.nut");
+require("RAIL/StupidRailBuilder.nut");
+require("ROAD/RoadBuilder.nut");
+require("ROAD/BusRoadBuilder.nut");
+require("ROAD/TruckRoadBuilder.nut");
+require("AIR/AirBuilder.nut");
+require("AIR/PAXAirBuilder.nut");
+require("AIR/CargoAirBuilder.nut");
 
 import("util.superlib", "SuperLib", 5);
 
@@ -74,30 +33,20 @@ function AIAI::Starter()
 {
 Name();
 HQ();
-
-AICompany.SetAutoRenewStatus(true);
+station_number = 1; //TODO load it
+if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")!= 0) AICompany.SetAutoRenewStatus(true);
 AICompany.SetAutoRenewMonths(0);
 AICompany.SetAutoRenewMoney(100000); //from ChooChoo
 
 AILog.Info("");
 Info("Hi!!!");
 
-//TODO - do it in their constructors
-air = KWAI();
-air.rodzic=this;
-RV = KRAI();
-RV.rodzic=this;
-RV.detected_rail_crossings=AIList()
-OMGtrain = RAIL();
-OMGtrain.rodzic = this;
+detected_rail_crossings=AIList()
 
 //TODO - LOAD IT
 desperacja = 0;
-RV._koszt = 1;
-air._koszt = 1;
-OMGtrain._koszt = 1;
 generalna_konserwacja = GetDate();
-Autoreplace();
+//Autoreplace(); TODO: when?
 }
 
 function AIAI::Menagement()
@@ -106,126 +55,80 @@ root_tile = RandomTile();
 this.SignMenagement();
 this.MoneyMenagement();
 this.Statua();
-this.Konserwuj();
 }
 
 function AIAI::Start()
 {
 this.Starter();
 
+local builders = array(6);
+builders[0] = PAXAirBuilder(this, 0);
+builders[1] = SmartRailBuilder(this, 0);
+builders[2] = StupidRailBuilder(this, 0);
+builders[3] = TruckRoadBuilder(this, 0);
+builders[4] = BusRoadBuilder(this, 0);
+builders[5] = CargoAirBuilder(this, 0);
+
+
 while(true)
-   {
-   this.Menagement();
-
-	local StupidCargoRailConnection = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > OMGtrain._koszt && IsAllowedStupidCargoTrain();
-	local SmartCargoRailConnection = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > OMGtrain._koszt && IsAllowedSmartCargoTrain();
-	local truck = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > RV._koszt && IsAllowedTruck();
-	local PAX_plane = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedPAXPlane();
-	local bus = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > RV._koszt && IsAllowedBus();
-	local cargo_plane = AICompany.GetBankBalance(AICompany.COMPANY_SELF) > air._koszt && IsAllowedCargoPlane();
-
-	local wszystkoszszlagtrafil = !(StupidCargoRailConnection || SmartCargoRailConnection || truck || PAX_plane || bus || cargo_plane);
-    if(wszystkoszszlagtrafil)
-	   {
-	   Error("Nothing to do!");
-	   Sleep(500);
-	   continue;
-	   }
-
-	air.desperacja = desperacja;
-	RV.desperacja = desperacja;
-	OMGtrain.desperacja = desperacja;
-
-	AILog.Warning("desperation: " + desperacja);
-	AILog.Warning("air: " + air._koszt);
-	AILog.Warning("RV: " + RV._koszt);
-	AILog.Warning("RAIL: " + OMGtrain._koszt);
-
-local StupidCargoRailConnection_result = false;
-local truck_result = false;
-local PAX_plane_result = false;
-local bus_result = false;
-local cargo_plane_result = false;
-local SmartRailConnection_result = false;
-	
-if(PAX_plane) PAX_plane_result = air.BuildAirportRouteBetweenCities();
-if(PAX_plane_result) 
-    {
-	Info("PAX plane route constructed!");
-	desperacja = 0;
-	continue;
-	}
-else if(PAX_plane)
 	{
-	Info("PAX plane route failed!");
-	}
-else
-	{
-	Info("PAX plane route impossible!");
-	}
+	IdleMoneyMenagement();
 
-if(SmartCargoRailConnection) SmartRailConnection_result = OMGtrain.SmartRailConnection();
-if(SmartRailConnection_result) 
-    {
-	Info("SmartCargoRailConnection plane route constructed!");
-	desperacja = 0;
-	continue;
-	}
-else if(SmartCargoRailConnection)
-	{
-	Info("SmartCargoRailConnection plane route failed!");
-	}
-else
-	{
-	Info("SmartCargoRailConnection plane route impossible!");
-	}
+	Error("Desperacja: " + desperacja);
 
-if(StupidCargoRailConnection) StupidCargoRailConnection_result = OMGtrain.StupidRailConnection();
-if(StupidCargoRailConnection_result)
-    {
-	Info("StupidCargoRailConnection route constructed!");
-	desperacja = 0;
-	continue;
-	}
+	this.Menagement();
 	
-if((AICompany.GetBankBalance(AICompany.COMPANY_SELF)*2 > OMGtrain._koszt && IsAllowedStupidCargoTrain() && OMGtrain._koszt!=0)||
-  (AICompany.GetBankBalance(AICompany.COMPANY_SELF)*2 > air._koszt && IsAllowedPAXPlane() && air._koszt!=0))
-     {
-	 Info("Company is waiting for money to build sth more interesting than RV");
-	 Sleep(1000);
-	 continue;
-	 }
+	this.Konserwuj();
+   
+	if(this.EverythingFailed(builders))
+		{
+		Info("Nothing to do!");
+		Sleep(1000);
+		continue;
+		}
 	
-if(truck) truck_result = RV.TruckRoute();
-if(truck_result)
-    {
-	Info("Truck route constructed!");
-	desperacja = 0;
-	continue;
+	this.InformationCenter(builders);
+		
+	if(!this.UberBuilder(builders)) desperacja++;
+	else desperacja = 0;
 	}
+}
 
-if(bus) bus_result = RV.BusRoute(); 
-if(bus_result)
-    {
-	Info("Bus route constructed!");
-	desperacja = 0;
-	continue;
+function AIAI::InformationCenter(builders)
+{
+for(local i = 0; i<builders.len(); i++)
+	{
+	builders[i].SetDesperacja(desperacja);
 	}
+}
 
-	if(SmartRailConnection_result || StupidCargoRailConnection_result || truck_result || PAX_plane_result || bus_result)continue;
-
-if(cargo_plane) cargo_plane_result = air.CargoConnectionBuilder();
-if(cargo_plane_result)
-    {
-	Info("Cargo plane route constructed!");
-	desperacja = 0;
-	continue;
+function AIAI::EverythingFailed(builders)
+{
+for(local i = 0; i<builders.len(); i++)
+	{
+	if(builders[i].Possible())
+		{
+		return false;
+		}
 	}
-   if(cargo_plane_result)continue;
-	
-   Error("desperacja++;");
-   desperacja++;
-   }
+return true;
+}
+
+function AIAI::UberBuilder(builders)
+{
+for(local i = 0; i<builders.len(); i++)
+	{
+	if(builders[i].Possible())
+		{
+		if(builders[i].Go()) 
+			{
+			RepayLoan();
+			return true;
+			}
+		RepayLoan();
+		}
+	}
+return false;
 }
 
 function AIAI::Statua()
@@ -233,7 +136,7 @@ function AIAI::Statua()
 local veh_list = AIVehicleList();
 veh_list.Valuate(AIBase.RandItem);
 veh_list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_DESCENDING);
-for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next()) 
+for (local veh = veh_list.Begin(); !veh_list.IsEnd(); veh = veh_list.Next()) 
    {
    for(local i=0; i<AIOrder.GetOrderCount(veh); i++)
       {
@@ -245,7 +148,7 @@ for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next())
 		local station = AIStation.GetStationID(location);
 		local suma = 0;
 		local cargo_list = AICargoList();
-		for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) suma+=AIStation.GetCargoWaiting(station, cargo);
+		for (local cargo = cargo_list.Begin(); !cargo_list.IsEnd(); cargo = cargo_list.Next()) suma+=AIStation.GetCargoWaiting(station, cargo);
 		if(suma<200) //HARDCODED
 		if(AIVehicle.GetVehicleType(veh)==AIVehicle.VT_RAIL || AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetMaxLoanAmount() || desperacja>30)
 		   {
@@ -273,7 +176,7 @@ function AIAI::SignMenagement()
 if(AIAI.GetSetting("clear_signs"))
 {
 local sign_list = AISignList();
-for (local x = sign_list.Begin(); sign_list.HasNext(); x = sign_list.Next()) //from Chopper
+for (local x = sign_list.Begin(); !sign_list.IsEnd(); x = sign_list.Next()) //from Chopper
   {
   AISign.RemoveSign(x);
   }
@@ -282,63 +185,54 @@ for (local x = sign_list.Begin(); sign_list.HasNext(); x = sign_list.Next()) //f
 if(AIAI.GetSetting("debug_signs_for_airports_load"))
 {
 local list = AIStationList(AIStation.STATION_AIRPORT);
-for (local x = list.Begin(); list.HasNext(); x = list.Next()) 
+for (local x = list.Begin(); !list.IsEnd(); x = list.Next()) 
    {
    air.GetBurden(x);
    }
 }
 }
 
-function AIAI::MoneyMenagement()
+function BankruptProtector()
 {
-if(AIVehicleList().Count()==0)AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
-
-if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>AICompany.GetLoanInterval())
-	{
-    AICompany.SetLoanAmount(AICompany.GetLoanAmount()-AICompany.GetLoanInterval());
-    }
-
-if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
+if(AIVehicleList().Count()==0) return;
+if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<AICompany.GetLoanInterval()*2)
 {
-if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0) AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
+AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
 while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
 	{
-	if(AIBase.RandRange(10)==1)AILog.Error("We need bailout!");
-	else AILog.Error("We need money!");
+	if(AIBase.RandRange(10)==1)Error("We need bailout!");
+	else Error("We need money!");
 	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0)
 		{
 		AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
 		if(AICompany.GetLoanAmount()==AICompany.GetMaxLoanAmount())
 			{
-			AILog.Error("We are too big to fail! Remember, we employ " + (AIVehicleList().Count()*7+AIStationList(AIStation.STATION_ANY).Count()*3) + " people!!!");
+			Error("We are too big to fail! Remember, we employ " + (AIVehicleList().Count()*7+AIStationList(AIStation.STATION_ANY).Count()*3+23) + " people!!!");
 			Sleep(1000);
 			}
 		}
 	}
-AILog.Warning("End of financial problems!");
+Warning("End of financial problems!");
+}	   
 }
 
-local money;
-local available_loan;
+function AIAI::IdleMoneyMenagement()
+{
+if(AIVehicleList().Count()==0) return;
+BankruptProtector();
+while((AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())<100000)
+	{
+	Info("Waiting for more money: " + (AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount())/1000 + "k / 100k"); //TODO: inflate (also in while)
+	while(AICompany.SetLoanAmount(AICompany.GetLoanAmount() - AICompany.GetLoanInterval()));
+	BankruptProtector();
+	Sleep(500);
+	this.Konserwuj();
+	}
+}
 
-available_loan = AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount();
-money = AICompany.GetBankBalance(AICompany.COMPANY_SELF);
-if(money<air._koszt)
-   if(available_loan+money>air._koszt)
-       AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
-
-available_loan = AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount();
-money = AICompany.GetBankBalance(AICompany.COMPANY_SELF);
-if(money<RV._koszt)
-   if(available_loan+money>RV._koszt)
-       AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
-	   
-available_loan = AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount();
-money = AICompany.GetBankBalance(AICompany.COMPANY_SELF);
-if(money<OMGtrain._koszt)
-   if(available_loan+money>OMGtrain._koszt)
-       AICompany.SetLoanAmount(AICompany.GetMaxLoanAmount());
-	   
+function AIAI::MoneyMenagement()
+{
+BankruptProtector();
 }
 
 function AIAI::IsConnectedIndustry(industry_id, cargo)
@@ -350,8 +244,8 @@ return returnik;
 
 function AIAI::realcodeofIsConnectedIndustry(industry_id, cargo)
 {
-if(RV.IsConnectedIndustry(industry_id, cargo)==true)return true;
-return air.IsConnectedIndustry(industry_id, cargo);
+if((RoadBuilder(this, 0)).IsConnectedIndustry(industry_id, cargo)==true)return true;
+return (AirBuilder(this, 0)).IsConnectedIndustry(industry_id, cargo);
 }
 
 
@@ -432,16 +326,29 @@ if(AIVehicle.SendVehicleToDepot(main_vehicle_id))
 return false;
 }
 
-function AIAI::DeleteEmptyRVStations()
+function VehicleCounter(station)
 {
-list = AIStationList(AIStation.STATION_ANY);
-list.Valuate(AIStation.HasStationType, AIStation.STATION_TRAIN);
-list.RemoveValue(1);
-list.Valuate(AIStation.HasStationType, AIStation.STATION_AIRPORT);
-list.RemoveValue(1);
-list.Valuate(AIStation.HasStationType, AIStation.STATION_DOCK);
-list.RemoveValue(1);
-//TODO HOW TO PREVENT FROM DELETING STATION DURING CONSTRUCTION???
+return AIVehicleList_Station(station).Count();
+}
+
+function AIAI::DeleteEmptyStations()
+{
+local list;
+list = AIStationList(AIStation.STATION_TRUCK_STOP);
+list.Valuate(VehicleCounter);
+list.KeepValue(0);
+for (local spam = list.Begin(); !list.IsEnd(); spam = list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
+
+list = AIStationList(AIStation.STATION_BUS_STOP);
+list.Valuate(VehicleCounter);
+list.KeepValue(0);
+for (local spam = list.Begin(); !list.IsEnd(); spam = list.Next()) AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
+
+//TODO: station may be under construction: ADD it after hiding stations during construction, TODO: add ignore possibility to rail PF 
+//list = AIStationList(AIStation.STATION_TRAIN);
+//list.Valuate(VehicleCounter);
+//list.KeepValue(0);
+//for (local spam = list.Begin(); !list.IsEnd(); spam = list.Next()) AITile.DemolishTile(AIBaseStation.GetLocation(spam));
 }
 
 function AIAI::DeleteUnprofitable()
@@ -459,52 +366,43 @@ function AIAI::DeleteUnprofitable()
    	vehicle_list.Valuate(AIVehicle.GetProfitLastYear);
 	vehicle_list.KeepBelowValue(0);
 
-	Info(vehicle_list.Count() + " vehicles should be sold because are unprofitable");
+	Info(vehicle_list.Count() + " vehicle(s) should be sold because are unprofitable");
    	
 	local counter = 0;
 	
-	for (local veh = vehicle_list.Begin(); vehicle_list.HasNext(); veh = vehicle_list.Next()) 
+	for (local veh = vehicle_list.Begin(); !vehicle_list.IsEnd(); veh = vehicle_list.Next()) 
 	   {
 	   if(AIVehicle.GetVehicleType(veh)!=AIVehicle.VT_RAIL || (AIVehicleList_Station(AIStation.GetStationID(GetLoadStation(veh)))).Count()>2)
 	      {
 		  if(AIAI.sellVehicle(veh, "unprofitable")) counter++;
 		  }
 	   }
-	Info(counter + " vehicles sold.");
+	Info(counter + " vehicle(s) sold.");
 	generalna_konserwacja = GetDate();
 }
 
 function AIAI::Konserwuj()
 {
-//Error("<");
+this.MoneyMenagement();
+this.HandleOldLevelCrossings();
 
-//Warning("<");
-RV.Konserwuj();
-//Warning(">");
+local maintenance = array(3);
+maintenance[0] = RailBuilder(this, 0);
+maintenance[1] = RoadBuilder(this, 0);
+maintenance[2] = AirBuilder(this, 0);
 
-//Warning("<");
-air.Konserwuj();
-//Warning(">");
+for(local i = 0; i<maintenance.len(); i++)
+	{
+	maintenance[i].Konserwuj();
+	}
 
-OMGtrain.Konserwuj();
-
-//Warning("<");
 this.DeleteVehiclesInDepots();
-//Warning(">");
-
-//Warning("<");
 this.HandleEvents();
-//Warning(">");
-
-//Warning("<");
 if((GetDate()-generalna_konserwacja)>12) //powinno raz na 12 miesiêcy
     {
 	this.DeleteUnprofitable();
-	//DeleteEmptyRVStations();
+	DeleteEmptyStations();
 	}
-//Warning(">");
-
-//Error(">");
 }
 
 function AIAI::HandleEvents() //from CluelessPlus and simpleai
@@ -551,7 +449,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			//local crash_tile = crash_event.GetCrashSite();
 			if(crash_reason == AIEventVehicleCrashed.CRASH_RV_LEVEL_CROSSING)
 			{
-				RV.HandleNewLevelCrossing(event);
+				this.HandleNewLevelCrossing(event);
 			}
 		}
 		else if(ev_type == AIEvent.AI_ET_ENGINE_PREVIEW) //from simpleai
@@ -561,6 +459,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 		   {
 		   Info("New engine available from preview: " + event.GetName());
 		   Autoreplace();
+			if(event.GetVehicleType() == AIVehicle.VT_RAIL)(RailBuilder(this, 0)).TrainReplace();
 		   }
 		}
 		else if(ev_type == AIEvent.AI_ET_ENGINE_AVAILABLE)//from simpleai
@@ -569,7 +468,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 		local engine = event.GetEngineID();
 		Info("New engine available: " + AIEngine.GetName(engine));
 		Autoreplace();
-		RAIL.TrainReplace();
+		if(AIEngine.GetVehicleType(engine) == AIVehicle.VT_RAIL)(RailBuilder(this, 0)).TrainReplace();
 		}
 		else if(ev_type == AIEvent.AI_ET_COMPANY_NEW)//from simpleai
 		{
@@ -583,6 +482,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 				local company = event.GetCompanyID();
 				if (AICompany.IsMine(company))
 				   {
+				   if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0) AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval());
 				   this.MoneyMenagement();
 				   }
 		}
@@ -610,3 +510,26 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 	}
 }
 
+function IntToStrFill(int_val, num_digits) //from ClueHelper
+{
+	local str = int_val.tostring();
+
+	while(str.len() < num_digits)
+	{
+		str = "0" + str;
+	}
+
+	return str;
+}
+
+function AIAI::SetStationName(location)
+{
+local station = AIStation.GetStationID(location);
+local string;
+do
+	{
+	string = IntToStrFill(station_number, 9);
+	station_number++;
+	}
+while(!AIBaseStation.SetName(station, string))
+}

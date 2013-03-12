@@ -1,29 +1,41 @@
-function RAIL::SmartRailConnection()
+class SmartRailBuilder extends RailBuilder
+{
+};
+
+function SmartRailBuilder::Possible()
+{
+if(!IsAllowedSmartCargoTrain())return false;
+Warning("$: " + this.cost + " / " + GetAvailableMoney());
+return this.cost<GetAvailableMoney();
+}
+
+function SmartRailBuilder::Go()
 {
 local types = AIRailTypeList();
 AIRail.SetCurrentRailType(types.Begin());
 for(local i=0; i<20; i++)
    {
+   if(!Possible())return false;
    Warning("<==scanning=for=Smart=rail=route=");
    trasa = this.FindPairForSmartRailRoute(trasa);  
    if(!trasa.OK) 
       {
       Info("Nothing found!");
-      _koszt = 0;
+      cost = 0;
       return false;
       }
 
-   Warning("==scanning=for=Smart=rail=route=completed=> cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
+   Warning("==scanning=for=Smart=rail=route=completed=> [ " + desperacja + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
    if(this.SmartRailRoute()) 
       {
 	  return true;
 	  }
-  else trasa.zakazane.AddItem(trasa.start, 0);
+   else trasa.zakazane.AddItem(trasa.start, 0);
    }
 return false;
 }
 
-function RAIL::SmartRailRoute()
+function SmartRailBuilder::SmartRailRoute()
 {
 this.Info("   Company started route on distance: " + AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile));
 
@@ -43,12 +55,14 @@ pathfinder.cost.max_tunnel_length = 30;   // The maximum length of a tunnel that
 local start = array(2);
 local end = array(2);
 
+ProvideMoney();
+
 if(trasa.first_station.direction != StationDirection.x_is_constant__horizontal)
    {
    //BuildNewGRFRailStation (TileIndex tile, RailTrack direction, uint num_platforms, uint platform_length, StationID station_id, CargoID cargo_id, IndustryType source_industry, IndustryType goal_industry, int distance, bool source_station)
    if(!AIRail.BuildNewGRFRailStation(trasa.first_station.location, AIRail.RAILTRACK_NE_SW, 1, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, 1, 1, 50, true)) //TODO to 1, 1 miasto (patrz tt moj temat)
       {
-	  AISign.BuildSign(trasa.first_station.location, AIError.GetLastErrorString()+"Sa");
+	  AISign.BuildSign(trasa.first_station.location, AIError.GetLastErrorString()+" Smart Sa");
 	  trasa.zakazane.AddItem(trasa.start, 0);
 	  return false;
 	  }
@@ -59,7 +73,7 @@ else
    {
    if(!AIRail.BuildNewGRFRailStation(trasa.first_station.location, AIRail.RAILTRACK_NW_SE, 1, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, 1, 1, 50, true)) 
       {
-	  AISign.BuildSign(trasa.first_station.location, AIError.GetLastErrorString()+"Sb");
+	  AISign.BuildSign(trasa.first_station.location, AIError.GetLastErrorString()+" Smart Sb");
 	  trasa.zakazane.AddItem(trasa.start, 0);
 	  return false;
 	  }
@@ -71,7 +85,7 @@ if(trasa.second_station.direction != StationDirection.x_is_constant__horizontal)
    {
    if(!AIRail.BuildNewGRFRailStation(trasa.second_station.location, AIRail.RAILTRACK_NE_SW, 1, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, 1, 1, 50, false))
       {
-	  AISign.BuildSign(trasa.second_station.location, AIError.GetLastErrorString()+"Ea");
+	  AISign.BuildSign(trasa.second_station.location, AIError.GetLastErrorString()+" Smart Ea");
 	  trasa.zakazane.AddItem(trasa.end, 0); //TODO a miasta?
 	  AITile.DemolishTile(trasa.first_station.location);
 	  return false;
@@ -83,7 +97,7 @@ else
    {
    if(!AIRail.BuildNewGRFRailStation(trasa.second_station.location, AIRail.RAILTRACK_NW_SE, 1, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, 1, 1, 50, false))
       {
-	  AISign.BuildSign(trasa.second_station.location, AIError.GetLastErrorString()+"Eb");
+	  AISign.BuildSign(trasa.second_station.location, AIError.GetLastErrorString()+" Smart Eb");
 	  trasa.zakazane.AddItem(trasa.end, 0); //TODO a miasta?
 	  AITile.DemolishTile(trasa.first_station.location);
 	  return false;
@@ -91,7 +105,11 @@ else
    end[0] = [trasa.second_station.location+AIMap.GetTileIndex(0, -1), trasa.second_station.location] //TODO drugi koniedc
    end[1] = [trasa.second_station.location+AIMap.GetTileIndex(0, trasa.station_size), trasa.second_station.location+AIMap.GetTileIndex(0, trasa.station_size -1)] 
    }
-  
+   
+RepayLoan();
+
+rodzic.SetStationName(trasa.first_station.location);
+rodzic.SetStationName(trasa.second_station.location);
   
 pathfinder.InitializePath(end, start);
 path = false
@@ -118,7 +136,7 @@ if(path == false || path == null){
   
 this.Info("   Pathfinder found sth.");
 
-local koszt = RAIL.GetCostOfRoute(path); 
+local koszt = this.GetCostOfRoute(path); 
 if(koszt==null){
   this.Info("   Pathfinder failed to find correct route.");
   AITile.DemolishTile(trasa.first_station.location);
@@ -129,39 +147,36 @@ if(koszt==null){
 Info("Construction can start!")
   
 koszt+=AIEngine.GetPrice(trasa.engine[0])+trasa.station_size*2*AIEngine.GetPrice(trasa.engine[1]);
-_koszt=koszt;
+cost=koszt;
 
-if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w RV
+if(GetAvailableMoney()<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w RV
     {
-	rodzic.MoneyMenagement();
-	if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w RV
-		{
-		Error("WE NEED CASH TO BUILD OUR PRECIOUS ROUTE!")
-		local total_last_year_profit = TotalLastYearProfit();
-		if(total_last_year_profit>koszt)
+	Error("WE NEED MORE CASH TO BUILD OUR PRECIOUS ROUTE!")
+	local total_last_year_profit = TotalLastYearProfit();
+	if(total_last_year_profit>koszt)
 		{
 		Error("But we can wait!");
-		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000) 
+		while(GetAvailableMoney()<koszt+2000)  //TODO: inflate
 			{
-			Info("too expensivee, we have only " + AICompany.GetBankBalance(AICompany.COMPANY_SELF) + " And we need " + koszt);
+			Info("too expensivee, we have only " + GetAvailableMoney() + " And we need " + koszt);
 			rodzic.Konserwuj(); //TODO bez wydawania kasy
 			AIController.Sleep(1000);
 			}
 		}
 		else
-			{
+		{
 			Error("And we can not wait!");
+			this.cost = koszt;
 			AITile.DemolishTile(trasa.first_station.location);
 			AITile.DemolishTile(trasa.second_station.location);
 			return false;
-			}
 		}
 	}
 else
 	{
 	Info("OK")
 	}
-
+ProvideMoney();
 if(!this.RailwayLinkConstruction(path)){
    //AIRail.RemoveRailStationTileRect(trasa.first_station); ........... //TODO DO IT
    this.Info("   But stopped by error");
@@ -170,29 +185,33 @@ if(!this.RailwayLinkConstruction(path)){
    return false;	  
    }
 
-trasa.depot_tile = RAIL.BuildDepot(path, false);
+trasa.depot_tile = this.BuildDepot(path, false);
    
 if(trasa.depot_tile==null){
    this.Info("   Depot placement error");
   AITile.DemolishTile(trasa.first_station.location);
   AITile.DemolishTile(trasa.second_station.location);
-  RAIL.DumbRemover(path, null)
+  this.DumbRemover(path, null)
    return false;	  
    }
 
-Error("RAIL.BuildTrain(wrzut) 2");
-local new_engine = RAIL.BuildTrain(trasa, "smart uno");
+Error("this.BuildTrain(wrzut) 2");
+local new_engine = this.BuildTrain(trasa, "smart uno");
 
 if(new_engine == null)
    {
   AITile.DemolishTile(trasa.first_station.location);
   AITile.DemolishTile(trasa.second_station.location);
-  RAIL.DumbRemover(path, null)
+  this.DumbRemover(path, null)
    return false;
    }
 this.TrainOrders(new_engine);
    Info("   I stage completed");
+RepayLoan();
 
+local date=AIDate.GetCurrentDate ();
+AISign.BuildSign(trasa.first_station.location, "time: " + time + "     (I)   " + AIDate.GetYear(date));
+   
 local old_path = path;
 pathfinder.InitializePath(start, end);
 path = false
@@ -215,22 +234,25 @@ if(path == false || path == null){
   }
   
 this.Info("   Pathfinder found sth.");
+ProvideMoney();
+local date=AIDate.GetCurrentDate ();
+AISign.BuildSign(trasa.second_station.location, "time: " + guardian + "     (II)   " + AIDate.GetYear(date));
 
-local koszt = RAIL.GetCostOfRoute(path); 
+local koszt = this.GetCostOfRoute(path); 
 if(koszt==null){
   this.Info("   Pathfinder failed to find correct route.");
   //TODO passing lanes
   return true;
   }
 
-_koszt=koszt;
+cost=koszt;
 
-if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w RV
+if(GetAvailableMoney()<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w RV
     {
 	rodzic.MoneyMenagement();
-    while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000) 
+    while(GetAvailableMoney()<koszt+2000) 
 	   {
-	   Info("too expensivee, we have only " + AICompany.GetBankBalance(AICompany.COMPANY_SELF) + " And we need " + koszt);
+	   Info("too expensivee, we have only " + GetAvailableMoney() + " And we need " + koszt);
 	   rodzic.Konserwuj(); //TODO bez wydawania kasy
 	   AIController.Sleep(1000);
 	   }
@@ -242,33 +264,32 @@ if(!this.RailwayLinkConstruction(path)){
    return true;	  
    }
 
-RAIL.SignalPath(path);
-RAIL.SignalPath(old_path);
+this.SignalPath(path);
+this.SignalPath(old_path);
 koszt=AIEngine.GetPrice(trasa.engine[0])+trasa.station_size*2*AIEngine.GetPrice(trasa.engine[1]);
 
-if(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w RV
+if(GetAvailableMoney() <koszt+2000)  //TODO zamiast 2000 koszt stacji to samo w RV
     {
 	rodzic.MoneyMenagement();
-    while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<koszt+2000) 
+    while(GetAvailableMoney()<koszt+2000) 
 	   {
-	   Info("too expensivee, we have only " + AICompany.GetBankBalance(AICompany.COMPANY_SELF) + " And we need " + koszt);
+	   Info("too expensivee, we have only " +GetAvailableMoney() + " And we need " + koszt);
 	   rodzic.Konserwuj(); //TODO bez wydawania kasy
 	   AIController.Sleep(1000);
 	   }
 	}
 
-Error("RAIL.BuildTrain(wrzut) 3");
-new_engine = RAIL.BuildTrain(trasa, "smart duo");
-if(new_engine == null)
+Error("this.BuildTrain(wrzut) 3");
+new_engine = this.BuildTrain(trasa, "smart duo");
+if(new_engine != null)
    {
-   //TODO handle that
+   this.TrainOrders(new_engine);
+   AITown.PerformTownAction(trasa.first_station.location, AITown.TOWN_ACTION_BUILD_STATUE);
    }
-this.TrainOrders(new_engine);
-AITown.PerformTownAction(trasa.first_station.location, AITown.TOWN_ACTION_BUILD_STATUE);
 return true;
 }
 
-function RAIL::FindPairForSmartRailRoute(route)
+function SmartRailBuilder::FindPairForSmartRailRoute(route)
 {
 local GetIndustryList = rodzic.GetIndustryList.bindenv(rodzic);
 local IsProducerOK = null;
@@ -278,10 +299,10 @@ local ValuateProducer = this.ValuateProducer.bindenv(this);
 local ValuateConsumer = this.ValuateConsumer.bindenv(this);
 local distanceBetweenIndustriesValuatorSmartRail = this.distanceBetweenIndustriesValuatorSmartRail.bindenv(this);
 return FindPairWrapped(route, GetIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, 
-distanceBetweenIndustriesValuatorSmartRail, IndustryToIndustryTrainSmartRailStationAllocator, GetNiceRandomTownSmartRail, IndustryToCityTrainSmartRailStationAllocator, DenverAndRioGrande.GetTrain);
+distanceBetweenIndustriesValuatorSmartRail, IndustryToIndustryTrainSmartRailStationAllocator, GetNiceRandomTownSmartRail, IndustryToCityTrainSmartRailStationAllocator, RailBuilder.GetTrain);
 }
 
-function RAIL::GetNiceRandomTownSmartRail(location)
+function SmartRailBuilder::GetNiceRandomTownSmartRail(location)
 {
 local town_list = AITownList();
 town_list.Valuate(AITown.GetDistanceManhattanToTile, location);
@@ -293,7 +314,7 @@ if(town_list.Count()==0)return null;
 return town_list.Begin();
 }
 
-function RAIL::IndustryToIndustryTrainSmartRailStationAllocator(project)
+function SmartRailBuilder::IndustryToIndustryTrainSmartRailStationAllocator(project)
 {
 project.station_size = 7;
 
@@ -302,7 +323,7 @@ local consumer = project.end;
 local cargo = project.cargo;
 
 project.first_station.location = null; 
-for(; project.station_size>1; project.station_size--)
+for(; project.station_size>=this.GetMinimalStationSize(); project.station_size--)
 {
 project.first_station = this.ZnajdzStacjeProducentaSmartRail(producer, cargo, project.station_size);
 project.second_station = this.ZnajdzStacjeKonsumentaSmartRail(consumer, cargo, project.station_size);
@@ -314,12 +335,12 @@ project.end_station = project.second_station.location;
 return project;
 }
 
-function RAIL::IndustryToCityTrainSmartRailStationAllocator(project)
+function SmartRailBuilder::IndustryToCityTrainSmartRailStationAllocator(project)
 {
 project.station_size = 7;
 
 project.first_station.location = null; 
-for(; project.station_size>1; project.station_size--)
+for(; project.station_size>=this.GetMinimalStationSize(); project.station_size--)
 {
 project.first_station = this.ZnajdzStacjeProducentaSmartRail(project.start, project.cargo, project.station_size);
 project.second_station = this.ZnajdzStacjeMiejskaSmartRail(project.end, project.cargo, project.station_size);
@@ -330,7 +351,7 @@ project.end_station = project.second_station.location;
 return project;
 }
 
-function RAIL::ZnajdzStacjeMiejskaSmartRail(town, cargo, size)
+function SmartRailBuilder::ZnajdzStacjeMiejskaSmartRail(town, cargo, size)
 {
 local tile = AITown.GetLocation(town);
 local list = AITileList();
@@ -342,7 +363,7 @@ list.Sort(AIAbstractList.SORT_BY_VALUE, AIAbstractList.SORT_DESCENDING);
 return this.ZnajdzStacjeSmartRail(list, size);
 }
 
-function RAIL::ZnajdzStacjeKonsumentaSmartRail(consumer, cargo, size)
+function SmartRailBuilder::ZnajdzStacjeKonsumentaSmartRail(consumer, cargo, size)
 {
 local list=AITileList_IndustryAccepting(consumer, 3);
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
@@ -350,24 +371,24 @@ list.RemoveValue(0);
 return this.ZnajdzStacjeSmartRail(list, size);
 }
 
-function RAIL::ZnajdzStacjeProducentaSmartRail(producer, cargo, size)
+function SmartRailBuilder::ZnajdzStacjeProducentaSmartRail(producer, cargo, size)
 {
 local list=AITileList_IndustryProducing(producer, 3);
 return this.ZnajdzStacjeSmartRail(list, size);
 }
 
-function RAIL::ZnajdzStacjeSmartRail(list, length)
+function SmartRailBuilder::ZnajdzStacjeSmartRail(list, length)
 {
-for(local station = list.Begin(); list.HasNext(); station = list.Next())
+for(local station = list.Begin(); !list.IsEnd(); station = list.Next())
 	{
-	if(RAIL.IsGreatPlaceForRailStationSmartRail(station, StationDirection.y_is_constant__vertical, length))
+	if(this.IsGreatPlaceForRailStationSmartRail(station, StationDirection.y_is_constant__vertical, length))
 		{
 		local returnik = Station();
 		returnik.location = station;
 		returnik.direction = StationDirection.y_is_constant__vertical;
 		return returnik;
 		}
-	if(RAIL.IsGreatPlaceForRailStationSmartRail(station, StationDirection.x_is_constant__horizontal, length))
+	if(this.IsGreatPlaceForRailStationSmartRail(station, StationDirection.x_is_constant__horizontal, length))
 		{
 		local returnik = Station();
 		returnik.location = station;
@@ -375,16 +396,16 @@ for(local station = list.Begin(); list.HasNext(); station = list.Next())
 		return returnik;
 		}
 	}
-for(local station = list.Begin(); list.HasNext(); station = list.Next())
+for(local station = list.Begin(); !list.IsEnd(); station = list.Next())
 	{
-	if(RAIL.IsOKPlaceForRailStationSmartRail(station, StationDirection.y_is_constant__vertical, length))
+	if(this.IsOKPlaceForRailStationSmartRail(station, StationDirection.y_is_constant__vertical, length))
 		{
 		local returnik = Station();
 		returnik.location = station;
 		returnik.direction = StationDirection.y_is_constant__vertical;
 		return returnik;
 		}
-	if(RAIL.IsOKPlaceForRailStationSmartRail(station, StationDirection.x_is_constant__horizontal, length))
+	if(this.IsOKPlaceForRailStationSmartRail(station, StationDirection.x_is_constant__horizontal, length))
 		{
 		local returnik = Station();
 		returnik.location = station;
@@ -397,7 +418,7 @@ returnik.location = null;
 return returnik;
 }
 
-function RAIL::IsGreatPlaceForRailStationSmartRail(station_tile, direction, length)
+function SmartRailBuilder::IsGreatPlaceForRailStationSmartRail(station_tile, direction, length)
 {
 local test = AITestMode();
 /* Test Mode */
@@ -410,7 +431,8 @@ if(direction == StationDirection.y_is_constant__vertical)
    
    //AISign.BuildSign(tile_a, "tile_a");
    //AISign.BuildSign(tile_b, "tile_b");
-	return AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NE_SW, 1, length, AIStation.STATION_NEW);
+	if ( AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NE_SW, 1, length, AIStation.STATION_NEW) )return true;
+	return (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH);
 	}
 else
    {
@@ -420,11 +442,12 @@ else
    if(!(Utils_Tile.IsNearlyFlatTile(tile_a) && Utils_Tile.IsNearlyFlatTile(tile_b)))return false;
    //AISign.BuildSign(tile_a, "tile_a");
    //AISign.BuildSign(tile_b, "tile_b");
-	return AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NW_SE, 1, length, AIStation.STATION_NEW);
+	if( AIRail.BuildRailStation(station_tile, AIRail.RAILTRACK_NW_SE, 1, length, AIStation.STATION_NEW)) return true;
+	return (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH);
    }
 }
 
-function RAIL::IsOKPlaceForRailStationSmartRail(station_tile, direction, length)
+function SmartRailBuilder::IsOKPlaceForRailStationSmartRail(station_tile, direction, length)
 {
 local test = AITestMode();
 /* Test Mode */
@@ -448,7 +471,7 @@ else
    }
 }
    
- function RAIL::distanceBetweenIndustriesValuatorSmartRail(distance)
+ function SmartRailBuilder::distanceBetweenIndustriesValuatorSmartRail(distance)
 {
 if(distance>GetMaxDistanceSmartRail())return 0;
 if(distance<GetMinDistanceSmartRail()) return 0;
@@ -469,12 +492,12 @@ if(distance>40) return 1;
 return 0;
 }
 
-function RAIL::GetMinDistanceSmartRail()
+function SmartRailBuilder::GetMinDistanceSmartRail()
 {
 return 10;
 }
 
-function RAIL::GetMaxDistanceSmartRail()
+function SmartRailBuilder::GetMaxDistanceSmartRail()
 {
 if(desperacja>5) return 100+desperacja*75;
 return 250+desperacja*50;
