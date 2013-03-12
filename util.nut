@@ -1,3 +1,25 @@
+enum StationDirection
+{
+x_is_constant__horizontal,
+y_is_constant__vertical
+}
+
+class Station
+{
+location = null;
+direction = null;
+}
+
+function IsItNeededToImproveThatStation(aktualna, cargo)
+{
+return AIStation.GetCargoWaiting(aktualna, cargo)>50 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0) ;
+}
+
+function IsItNeededToImproveThatNoRawStation(aktualna, cargo)
+{
+return AIStation.GetCargoWaiting(aktualna, cargo)>50 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0) ;
+}
+
 function Info(string)
 {
 local date=AIDate.GetCurrentDate ();
@@ -84,10 +106,27 @@ function GetVehicleType(vehicle_id)
 return AIEngine.GetVehicleType(AIVehicle.GetEngineType(vehicle_id));
 }
 
+function IsAllowedPAXPlane()
+{
+if(0 == AIAI.GetSetting("PAX_plane"))
+   {
+   return false;
+   }
+return IsAllowedPlane();
+}
+
+function IsAllowedCargoPlane()
+{
+if(0 == AIAI.GetSetting("cargo_plane"))
+   {
+   return false;
+   }
+return IsAllowedPlane();
+}
+
 function IsAllowedPlane()
 {
 if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_AIR))return false;
-if(0 == AIAI.GetSetting("use_planes"))return false;
 
 local ile;
 local veh_list = AIVehicleList();
@@ -113,6 +152,15 @@ if(0 == AIAI.GetSetting("use_trucks"))
 return IsAllowedRV();
 }
 
+function IsAllowedStupidCargoTrain()
+{
+if(0 == AIAI.GetSetting("use_stupid_freight_trains"))
+   {
+   return false;
+   }
+return IsAllowedTrain();
+}
+
 function IsAllowedBus()
 {
 if(0 == AIAI.GetSetting("use_busses"))
@@ -131,6 +179,30 @@ veh_list.Valuate(GetVehicleType);
 veh_list.KeepValue(AIVehicle.VT_ROAD);
 ile = veh_list.Count();
 local allowed = AIGameSettings.GetValue("vehicle.max_roadveh");
+
+if(allowed==0)return false;
+if(ile==0)return true;
+
+if(((ile*100)/(allowed))>90) return false;
+if((allowed - ile)<5) return false;
+return true;
+/*
+max_trains = 500
+max_roadveh = 500
+max_aircraft = 200
+max_ships = 300
+*/
+}
+
+function IsAllowedTrain()
+{
+if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_RAIL))return false;
+local ile;
+local veh_list = AIVehicleList();
+veh_list.Valuate(GetVehicleType);
+veh_list.KeepValue(AIVehicle.VT_RAIL);
+ile = veh_list.Count();
+local allowed = AIGameSettings.GetValue("vehicle.max_trains");
 
 if(allowed==0)return false;
 if(ile==0)return true;

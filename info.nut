@@ -1,14 +1,14 @@
 class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
-  function GetDescription() { return "Automatic Idiot AI Version delta, fix 1. AIAI reuse code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje and AdmiralAI."; }
-  function GetVersion()     { return 15; }
+  function GetDescription() { return "Automatic Idiot AI Version epsilon. AIAI reuse code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI and Denver & Rio Grande."; }
+  function GetVersion()     { return 17; }
   function GetAPIVersion() { return "0.7"; }
   function GetDate()        { return "2010-05-21"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
   function MinVersionToLoad() { return 0; } 
-  function GetURL() {return "http://www.tt-forums.net/viewtopic.php?f=65&t=47298 or bulwersator@gmail.com. Thanks!";}
+  function GetURL() {return "[epsilon (17)] http://www.tt-forums.net/viewtopic.php?f=65&t=47298 or bulwersator@gmail.com. Thanks!";}
 
 	function GetSettings() {
 
@@ -33,8 +33,28 @@ class AIAI extends AIInfo {
 	});
 	
 	AddSetting( {
-		name = "use_planes",
-		description = "Planes allowed",
+		name = "PAX_plane",
+		description = "PAX planes allowed",
+		easy_value = 1,
+		medium_value = 1,
+		hard_value = 1,
+		custom_value = 1,
+		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
+	});
+
+	AddSetting( {
+		name = "cargo_plane",
+		description = "Cargo planes allowed",
+		easy_value = 1,
+		medium_value = 1,
+		hard_value = 1,
+		custom_value = 1,
+		flags = AICONFIG_BOOLEAN + AICONFIG_INGAME
+	});
+
+	AddSetting( {
+		name = "use_stupid_freight_trains",
+		description = "Stupid cargo trains allowed",
 		easy_value = 1,
 		medium_value = 1,
 		hard_value = 1,

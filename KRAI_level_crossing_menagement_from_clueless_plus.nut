@@ -21,10 +21,16 @@ function KRAI::HandleNewLevelCrossing(ev) //from CluelessPlus
 
 function KRAI::HandleOldLevelCrossings() //from CluelessPlus
 {
+if(AIBase.RandRange(3)==0)
+   {
+   detected_rail_crossings = AIList();
+   Info("detected_rail_crossings cleared");
+   return;
+   }
 					this.detected_rail_crossings.Valuate(Helper.ItemValuator);
 					foreach(crash_tile, _ in this.detected_rail_crossings)
 					{
-						AILog.Info("Trying to fix a railway crossing that had an accident before");
+						AILog.Info("Trying to fix a railway crossing that had an accident before (one of" + this.detected_rail_crossings.Count() + ")" );
 						local neighbours = Tile.GetNeighbours4MainDir(crash_tile);
 						neighbours.Valuate(AIRoad.AreRoadTilesConnected, crash_tile);
 						neighbours.KeepValue(1);

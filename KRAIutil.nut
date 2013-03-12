@@ -3,6 +3,16 @@ function KRAI::RawVehicle(vehicle)
 return AIVehicle.GetName(vehicle)[0]=='R';
 }
 
+function KRAI::ProcessedCargoVehicle(vehicle)
+{
+return AIVehicle.GetName(vehicle)[0]=='P';
+}
+
+function KRAI::PassengerCargoVehicle(vehicle)
+{
+return AIVehicle.GetName(vehicle)[0]=='B';
+}
+
 function KRAI::sprawdz_droge(path)
 {
 local costs = AIAccounting();
@@ -12,6 +22,12 @@ costs.ResetCosts ();
 {
 local test = AITestMode();
 /* Test Mode */
+
+if(KRAI.zbuduj_droge(path))
+   {
+   return costs.GetCosts();
+   }
+else return null;
 
 if(path==null)return false;
 while (path != null) {
@@ -77,16 +93,6 @@ while (path == false)
 return this.zbuduj_droge(path);
 }
 
-function KRAI::IsItNeededToAddRVToThatStation(aktualna, cargo)
-{
-return AIStation.GetCargoWaiting(aktualna, cargo)>50 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0) ;
-}
-
-function KRAI::IsItNeededToAddRVToThatNoRawStation(aktualna, cargo)
-{
-return AIStation.GetCargoWaiting(aktualna, cargo)>50 || (AIStation.GetCargoRating(aktualna, cargo)<40&&AIStation.GetCargoWaiting(aktualna, cargo)>0) ;
-}
-
 function KRAI::Uzupelnij()
 {
 local ile=0;
@@ -97,7 +103,7 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
    for (local aktualna = station_list.Begin(); station_list.HasNext(); aktualna = station_list.Next()) //from Chopper
 	  {
 	  if(NajmlodszyPojazd(aktualna)>20) //nie dodawaæ masowo
-	  if(IsItNeededToAddRVToThatStation(aktualna, cargo))
+	  if(IsItNeededToImproveThatStation(aktualna, cargo))
 	  {
 	     local vehicle_list=AIVehicleList_Station(aktualna);
 		 
@@ -120,7 +126,7 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
 			}
 		 else 
 		    {
-			if(IsItNeededToAddRVToThatNoRawStation(aktualna, cargo)) 
+			if(IsItNeededToImproveThatNoRawStation(aktualna, cargo)) 
 			   {
 			   if(this.copyVehicle(original, cargo)) ile++;
 			   }
@@ -141,7 +147,7 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
    for (local aktualna = station_list.Begin(); station_list.HasNext(); aktualna = station_list.Next()) //from Chopper
 	  {
 	  if(NajmlodszyPojazd(aktualna)>20) //nie dodawaæ masowo
-	  if(IsItNeededToAddRVToThatNoRawStation(aktualna, cargo))
+	  if(IsItNeededToImproveThatNoRawStation(aktualna, cargo))
 	  {
 	     local vehicle_list=AIVehicleList_Station(aktualna);
 		 
@@ -163,7 +169,7 @@ TODO DUAL END
 */
 		local another_station = AIStation.GetStationID(GetUnLoadStation(original));
 		if(aktualna == another_station ) another_station = AIStation.GetStationID(GetLoadStation(original));
-		if(IsItNeededToAddRVToThatStation(another_station, cargo))
+		if(IsItNeededToImproveThatStation(another_station, cargo))
 		   {
 		   if(this.copyVehicle(original, cargo )) ile++;
 		   }
@@ -182,13 +188,14 @@ return ile;
 
 function KRAI::DynamicFullLoadManagement(full_station, empty_station, RV)
 {
-if(AIBase.RandRange(3)!=0)return true; //To wait for effects of action and avoid RV flood
 local first_station_is_full = (AIStation.GetStationID(GetLoadStation(RV)) == full_station);
 
 if(first_station_is_full)
    {
    if(AIOrder.GetOrderFlags(RV, 0)!= (AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE))
       {
+	  if(AIBase.RandRange(3)!=0)return true; //To wait for effects of action and avoid RV flood
+
 	  Info(AIVehicle.GetName(RV) + "wykonano zmiane typu 1");
 	  AIOrder.SetOrderFlags(RV, 0, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE);
 	  return true;
@@ -197,6 +204,8 @@ if(first_station_is_full)
       {
       if(AIOrder.GetOrderFlags(RV, 1)== (AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE))
       {
+	  if(AIBase.RandRange(3)!=0)return true; //To wait for effects of action and avoid RV flood
+
 	  Info(AIVehicle.GetName(RV) + "wykonano zmiane typu 2");
 	  AIOrder.SetOrderFlags(RV, 1, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
 	  return true;
@@ -207,6 +216,8 @@ else
    {
    if(AIOrder.GetOrderFlags(RV, 1)!= (AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE))
       {
+	  if(AIBase.RandRange(3)!=0)return true; //To wait for effects of action and avoid RV flood
+
 	  Info(AIVehicle.GetName(RV) + "wykonano zmiane typu 3");
 	  AIOrder.SetOrderFlags(RV, 1, AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE);
 	  return true;
@@ -215,6 +226,8 @@ else
       {
       if(AIOrder.GetOrderFlags(RV, 0)== (AIOrder.AIOF_FULL_LOAD_ANY | AIOrder.AIOF_NON_STOP_INTERMEDIATE))
       {
+	  if(AIBase.RandRange(3)!=0)return true; //To wait for effects of action and avoid RV flood
+
 	  Info(AIVehicle.GetName(RV) + "wykonano zmiane typu 4");
 	  AIOrder.SetOrderFlags(RV, 0, AIOrder.AIOF_NON_STOP_INTERMEDIATE);
 	  return true;
@@ -264,7 +277,12 @@ if(ile<maksymalnie)
 	  local string;
 	  //Warning(AIVehicle.GetName(main_vehicle_id) +" -X- " + AIVehicle.GetName(main_vehicle_id)[0]);
 	  if(RawVehicle(main_vehicle_id)) string = "Raw cargo ";
-	  else string = "Processed cargo"; 
+	  else if(ProcessedCargoVehicle(main_vehicle_id)) string = "Processed cargo"; 
+	  else if(PassengerCargoVehicle(main_vehicle_id)) string = "Bus line";
+	  else 
+	     {
+		 return false; //TODO - cancel sell order
+		 }
 	  local i = AIVehicleList().Count();
 	  for(;!AIVehicle.SetName(vehicle_id, string + " #" + i); i++) ; //Error(AIError.GetLastErrorString());
       return true;
@@ -308,7 +326,7 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 	
    local station_id = AIStation.GetStationID(GetLoadStation(czy_load)); //!!!!!!!!!!!!!!
    if(station==station_id)	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   if(!IsItNeededToAddRVToThatStation(station, cargo))
+   if(!IsItNeededToImproveThatStation(station, cargo))
       {   
 	  for (local vehicle = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle = vehicle_list.Next()) //from Chopper 
        {
@@ -347,7 +365,7 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 				}
  	         if(result!=null)
 			    {
-				Info("KILL IT!: " + AIVehicle.GetName(result));
+				//Info("KILL IT!: " + AIVehicle.GetName(result));
 				ile++;
 				}
 			 else

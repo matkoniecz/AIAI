@@ -70,6 +70,12 @@ for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next())
 	  if(AITile.IsStationTile(location))
 		{
 	    if(AIOrder.GetOrderFlags(veh, i)!=AIOrder.AIOF_NO_LOAD)
+		{
+		local station = AIStation.GetStationID(location);
+		local suma = 0;
+		local cargo_list = AICargoList();
+		for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) suma+=AIStation.GetCargoWaiting(station, cargo);
+		if(suma<200) //HARDCODED
 		   {
 		   if(AITown.PerformTownAction(AITile.GetClosestTown(location), AITown.TOWN_ACTION_BUILD_STATUE)) 
 		      {
@@ -81,6 +87,7 @@ for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next())
 		      if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH) return false;
 			  }
 		   }
+		  }
 		}
 	  }
    }
@@ -183,6 +190,7 @@ for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_e
    if(AIEngine.IsValidEngine(AIGroup.GetEngineReplacement(AIGroup.GROUP_ALL, engine_existing))==false)
       {
 	  local engine_best = KWAI.FindAircraft(AIAirport.AT_SMALL, cargo, 1, 100000000)
+	  if(engine_best != null)
 	  if(engine_best != engine_existing)
 	     {
 		 AIGroup.SetAutoReplace(AIGroup.GROUP_ALL, engine_existing, engine_best);
@@ -191,6 +199,19 @@ for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_e
 	  }
    
    }
+}
+
+function AIAI::GetMailCargoId()
+{
+local list = AICargoList();
+for (local i = list.Begin(); list.HasNext(); i = list.Next()) 
+	{
+	if(AICargo.GetTownEffect(i)==AICargo.TE_MAIL)
+		{
+		return i;
+		}
+	}
+return null;
 }
 
 function AIAI::GetPassengerCargoId()
