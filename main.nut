@@ -397,6 +397,20 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 				Warning("Competitor is in trouble!");
 				}
 			}
+		else if(ev_type == AIEvent.ET_ROAD_RECONSTRUCTION ){
+			event = AIEventRoadReconstruction.Convert(event);
+			local town = event.GetTownID();
+			local company = event.GetCompanyID();
+			Info("Road reconstruction at " + AITown.GetName(town) + " caused by " + AICompany.GetName(company));
+			/* TODO: Handle it. */
+			}
+		else if(ev_type == AIEvent.ET_EXCLUSIVE_TRANSPORT_RIGHTS ){
+			event = AIEventExclusiveTransportRights.Convert(event);
+			local town = event.GetTownID();
+			local company = event.GetCompanyID();
+			Info("Exclusive rights at " + AITown.GetName(town) + " bought by " + AICompany.GetName(company));
+			/* TODO: Handle it. */
+			}
 		else if(ev_type == AIEvent.ET_INDUSTRY_OPEN){
 			event = AIEventIndustryOpen.Convert(event);
 			local industry = event.GetIndustryID();
