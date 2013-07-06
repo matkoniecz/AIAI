@@ -436,10 +436,40 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 
 function AIAI::BuildVehicle(depot_tile, engine_id)
 {		
-	if(!AIEngine.IsBuildable(engine_id)) {
-		abort("not buildable!");
+	if (!AIEngine.IsBuildable(engine_id)) {
+		abort("not buildable!")
 	}
-	
+	if (AITile.GetOwner(depot_tile) != AICompany.ResolveCompanyID(AICompany.COMPANY_SELF)) {
+		Error(AITile.GetOwner(depot_tile) + " != " + AICompany.ResolveCompanyID(AICompany.COMPANY_SELF))
+		AISign.BuildSign(depot_tile, "depot_tile")
+		abort("depot tile not owned by company")
+	}
+	type = AIEngine.GetVehicleType(engine_id)
+	if (type == AIVehicle.VT_RAIL) {
+		if(!AIRail.IsRailDepotTile(depot_tile)) {
+			AISign.BuildSign(depot_tile, "depot_tile")
+			abort ("no rail depot")
+		}
+	} else if (type == AIVehicle.VT_ROAD) {
+		if(!AIRoad.IsRoadDepotTile(depot_tile)) {
+			AISign.BuildSign(depot_tile, "depot_tile")
+			abort ("no RV depot")
+		}
+	} else if (type == AIVehicle.VT_WATER) {
+		if(!AIMarine.IsWaterDepotTile(depot_tile)) {
+			AISign.BuildSign(depot_tile, "depot_tile")
+			abort ("no water depot")
+		}
+	} else if (type == AIVehicle.VT_AIR) {
+		if(!AIAirport.IsHangarTile(depot_tile)) {
+			AISign.BuildSign(depot_tile, "depot_tile")
+			abort ("no hangar")
+		}
+	} else {
+		AISign.BuildSign(depot_tile, "depot_tile")
+		abort ("incorrect vehicle type (" + type + ")")
+	}
+
 	//Info("BuildVehicle ("+AIEngine.GetName(engine_id)+")");
 	local newengineId = AIVehicle.BuildVehicle(depot_tile, engine_id);
 	if(AIError.GetLastError() != AIError.ERR_NONE) {
