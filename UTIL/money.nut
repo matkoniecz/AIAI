@@ -20,7 +20,13 @@ return minimum
 
 function GetAvailableMoney()
 {
-return AICompany.GetBankBalance(AICompany.COMPANY_SELF) + AICompany.GetMaxLoanAmount() - AICompany.GetLoanAmount() - GetSafeBankBalance();
+	local money = AICompany.GetBankBalance(AICompany.COMPANY_SELF)
+	if (money > money + AICompany.GetMaxLoanAmount()) {
+		return 2147483647 //implied by _intsize_ = 4 on 32bit architecture
+	}
+	money = money + AICompany.GetMaxLoanAmount()
+	money = money - AICompany.GetLoanAmount() - GetSafeBankBalance()
+	return money;
 }
 
 function BankruptProtector()
