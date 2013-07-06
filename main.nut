@@ -461,14 +461,15 @@ for(local x_cluster=0; x_cluster*rectangle_size+1<AIMap.GetMapSizeX(); x_cluster
 
 function AIAI::BuildVehicle(depot_tile, engine_id)
 {		
-	if(!AIEngine.IsBuildable(engine_id))
+	if(!AIEngine.IsBuildable(engine_id)) {
 		abort("not buildable!");
-		
+	}
+	
 	//Info("BuildVehicle ("+AIEngine.GetName(engine_id)+")");
 	local newengineId = AIVehicle.BuildVehicle(depot_tile, engine_id);
-	if(AIError.GetLastError()!=AIError.ERR_NONE){
+	if(AIError.GetLastError() != AIError.ERR_NONE) {
 		Warning("Vehicle ("+AIEngine.GetName(engine_id)+") construction failed with "+AIError.GetLastErrorString() + "(message from AIAI::BuildVehicle)")
-		if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH){
+		if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH) {
 			do {
 				rodzic.SafeMaintenance();
 				ProvideMoney();
@@ -476,22 +477,29 @@ function AIAI::BuildVehicle(depot_tile, engine_id)
 				Info("retry: BuildVehicle");
 				newengineId = AIVehicle.BuildVehicle(depot_tile, engine_id);
 			} while(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH)
-			}
+		}
 		Warning(AIError.GetLastErrorString());
 		if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_BUILD_DISABLED || AIError.GetLastError()==AIVehicle.ERR_VEHICLE_TOO_MANY ){
 			return AIVehicle.VEHICLE_INVALID;
-			}
-		if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_WRONG_DEPOT) abort("depot nuked");
+		}
+		if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_WRONG_DEPOT) {
+			abort("depot nuked");
+		}
 		if(AIError.GetLastError()==AIError.ERR_PRECONDITION_FAILED) {
 			AISign.BuildSign(depot_tile, "ERR_PRECONDITION_FAILED");
 			abort("ERR_PRECONDITION_FAILED (before sign construction), engine: "+AIEngine.GetName(engine_id));
-			}
-		if(AIError.GetLastError()!=AIError.ERR_NONE) abort("wtf");
-		if(!AIVehicle.IsValidVehicle(newengineId)) abort("!!!");
 		}
-	Info(AIError.GetLastErrorString());
+		if(AIError.GetLastError()!=AIError.ERR_NONE) {
+			abort("wtf");
+		}
+	}
+	if(AIError.GetLastError() != AIError.ERR_NONE) {
+		Info(AIError.GetLastErrorString());
+	}
 	Info(AIEngine.GetName(engine_id) + " constructed! ("+newengineId+")")
-	if(!AIVehicle.IsValidVehicle(newengineId)) abort("!!!!!!!!!!!!!!!");
+	if(!AIVehicle.IsValidVehicle(newengineId)) {
+		abort("!!!!!!!!!!!!!!!");
+	}
 	return newengineId;
 }
 
