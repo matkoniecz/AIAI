@@ -26,10 +26,10 @@ function Builder::ValuateProducer(ID, cargo)
  
 function Builder::ValuateConsumer(ID, cargo, score)
 {
-if(AIIndustry.GetStockpiledCargo(ID, cargo)==0) score*=2;
-if(IsConnectedIndustry(ID, cargo)) score*=7;
-if(AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(ID)).Count()==0) score/=2;
-return score;
+	if(AIIndustry.GetStockpiledCargo(ID, cargo)==0) score*=2;
+	if(IsConnectedIndustry(ID, cargo)) score*=7;
+	if(AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(ID)).Count()==0) score/=2;
+	return score;
 }
 
 function Builder::ValuateConsumerTown(ID, cargo, score)
