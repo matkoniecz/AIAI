@@ -383,11 +383,14 @@ return weight;
 
 function RailBuilder::BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
 {
-	Info("Failed to build" + AIEngine.GetName(bestEngine) +"':" + AIError.GetLastErrorString() +" **@@*");
+	DeleteVehiclesInDepots()
+	Info("Failed to build '" + AIEngine.GetName(bestEngine) +"':" + AIError.GetLastErrorString() +" **@@*");
 	blacklisted_vehicles.AddItem(bestEngine, 0);
-	Error("blacklisted "+AIEngine.GetName(bestEngine))
-	if(!recover_from_failed_engine)return null;
-	Error("trying to find a new train")
+	Warning("blacklisted "+AIEngine.GetName(bestEngine))
+	if (!recover_from_failed_engine) {
+		return null;
+	}
+	Warning("trying to find a new train")
 	route = RailBuilder.FindTrain(route);
 	if(route.engine[0] != null && route.engine[1] != null ) {
 		return this.BuildTrain(route, name_of_train, true);
@@ -395,9 +398,28 @@ function RailBuilder::BuildTrainButNotWithThisEngine(route, name_of_train, bestE
 	return null;
 }
 
+function RailBuilder::AttachWagonToTheTrain(newWagon, engineId)
+{
+	assert(AIVehicle.IsValidVehicle(newWagon));
+	assert(AIVehicle.GetNumWagons(newWagon) > 0);
+	assert(AIVehicle.IsValidVehicle(engineId));
+	assert(AIVehicle.GetNumWagons(engineId) > 0);
+	if(!(AIVehicle.GetVehicleType(engineId) == AIVehicle.VT_RAIL)) {
+		abort("AIVehicle.GetVehicleType(engineId) != AIVehicle.VT_RAIL (" + AIVehicle.GetVehicleType(engineId) +")")
+	}
+	if(!AIVehicle.MoveWagon(newWagon, 0, engineId, 0)) {
+		Warning("Couldn't join wagon to train: " + AIError.GetLastErrorString());
+		if(AIError.GetLastError() == AIError.ERR_PRECONDITION_FAILED) {
+			abort("ERR_PRECONDITION_FAILED in MoveWagon")
+		}
+		AIVehicle.SellVehicle(newWagon);
+		return false
+	}
+	return true
+}
+
 function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engine)
-{	
-	Info("BuildTrain")
+{
 	local costs = AIAccounting();
 	costs.ResetCosts ();
 	local bestEngine = route.engine[0];
@@ -406,120 +428,126 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 	local stationSize = route.station_size;
 	local cargoIndex = route.cargo;
 
-	if(!AIEngine.IsBuildable(bestEngine))
-		return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
+	Info("BuildTrain (" + AIEngine.GetName(bestEngine) + " + " + AIEngine.GetName(bestWagon) + ")")
 
-	if(!AIEngine.IsBuildable(bestWagon))
+	if(!AIEngine.IsBuildable(bestEngine)) {
 		return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
+	}
 
-	if(AIEngine.GetPrice(bestEngine) + AIEngine.GetPrice(bestWagon) > AICompany.GetBankBalance(AICompany.COMPANY_SELF)) return null;
-	
-	local engineId = AIAI.BuildVehicle(depotTile, bestEngine);
-	if(!AIVehicle.IsValidVehicle(engineId)){	
+	if(!AIEngine.IsBuildable(bestWagon)) {
 		return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
-		}
+	}
+
+	if(AIEngine.GetPrice(bestEngine) + AIEngine.GetPrice(bestWagon) > AICompany.GetBankBalance(AICompany.COMPANY_SELF)) {
+		return null;
+	}
+
+	local engineId = AIAI.BuildVehicle(depotTile, bestEngine)
+	if (!AIVehicle.IsValidVehicle(engineId)) {
+		return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
+	}
+
 	AIVehicle.SetName(engineId, "in construction");
-	
 	AIVehicle.RefitVehicle(engineId, cargoIndex);
 
 	local max_number_of_wagons = 1000;
 	local maximal_weight = AIEngine.GetMaxTractiveEffort(bestEngine) * 3;
-	local capacity_of_engine = AIVehicle.GetCapacity(engineId, cargoIndex);	
+	local capacity_of_engine = AIVehicle.GetCapacity(engineId, cargoIndex);
 	local weight_of_engine = AIEngine.GetWeight(bestEngine) + (capacity_of_engine * GetWeightOfCargo(cargoIndex));
 	local length_of_engine = AIVehicle.GetLength(engineId);
 	local weight_of_wagon;
-	local length_of_wagon=null;
+	local length_of_wagon = null;
 
 	for(local i = 0; i<max_number_of_wagons; i++) {
 		if(i==1) {
 			weight_of_wagon = AIEngine.GetWeight(bestWagon);
-			weight_of_wagon += (AIVehicle.GetCapacity(engineId, cargoIndex) - capacity_of_engine) * GetWeightOfCargo(cargoIndex);		
-			if(AIGameSettings.GetValue("vehicle.train_acceleration_model")==1) max_number_of_wagons = (maximal_weight-weight_of_engine)/weight_of_wagon;
+			weight_of_wagon += (AIVehicle.GetCapacity(engineId, cargoIndex) - capacity_of_engine) * GetWeightOfCargo(cargoIndex);
+			if(AIGameSettings.GetValue("vehicle.train_acceleration_model")==1) {
+				max_number_of_wagons = (maximal_weight-weight_of_engine)/weight_of_wagon;
+			}
 			length_of_wagon = AIVehicle.GetLength(engineId) - length_of_engine;
-			Info("length_of_wagon "+length_of_wagon+"; length_of_engine "+length_of_engine);
-			if (max_number_of_wagons > (AIGameSettings.GetValue("max_train_length")*16-length_of_engine)/length_of_wagon) {
-				max_number_of_wagons = (AIGameSettings.GetValue("max_train_length")*16-length_of_engine)/length_of_wagon;
-				}
+			Info("length_of_wagon "+length_of_wagon+"; length_of_engine "+length_of_engine+";");
+			Info(AIGameSettings.GetValue("max_train_length"))
+			local length_limit = stationSize
+			if (length_limit > AIGameSettings.GetValue("max_train_length")) {
+				length_limit = AIGameSettings.GetValue("max_train_length")
+			}
+			length_limit = (length_limit*16-length_of_engine)/length_of_wagon
+			Info(length_limit)
+			if (max_number_of_wagons > length_limit)
+			max_number_of_wagons = length_limit
 			Info("Limit:"+max_number_of_wagons);
+			if (max_number_of_wagons == 0) {
+				max_number_of_wagons = 1
+				Error("WTF, it was supposed to be wagonless train!")
 			}
-		//Info("Train length: "+AIVehicle.GetLength(engineId));
-		local newWagon = AIAI.BuildVehicle(depotTile, bestWagon);        
-		if(!AIVehicle.IsValidVehicle(newWagon)){	
-			Info("Failed to build wagon '" + AIEngine.GetName(bestWagon) +"':" + AIError.GetLastErrorString());
-			}
-		AIVehicle.RefitVehicle(newWagon, cargoIndex);
-		assert(AIVehicle.IsValidVehicle(newWagon));
-		assert(AIVehicle.GetNumWagons(newWagon) > 0);
-		assert(AIVehicle.IsValidVehicle(engineId));
-		assert(AIVehicle.GetNumWagons(engineId) > 0);
-		assert(AIVehicle.GetVehicleType(engineId) == AIVehicle.VT_RAIL);
-		if(!AIVehicle.MoveWagon(newWagon, 0, engineId, 0)) {
-			Error("Couldn't join wagon to train: " + AIError.GetLastErrorString());
-			AIVehicle.SellVehicle(newWagon);
-			if(AIError.GetLastError() == AIError.ERR_PRECONDITION_FAILED) {
-				abort("ERR_PRECONDITION_FAILED in MoveWagon");
-				}
-			if(i==0) {
-				return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
-				}
-			}
-		if(AIVehicle.GetLength(engineId)>stationSize*16) {
-			if(!AIVehicle.SellWagon(engineId, AIVehicle.GetNumWagons(engineId)-1)) {
-				Abort("error on sell engine");
-				return null;
-				}
-			break;
-			}	
 		}
+		local newWagon = AIAI.BuildVehicle(depotTile, bestWagon);
+		if(!AIVehicle.IsValidVehicle(newWagon)) {
+			Info("Failed to build wagon '" + AIEngine.GetName(bestWagon) +"':" + AIError.GetLastErrorString());
+		}
+		AIVehicle.RefitVehicle(newWagon, cargoIndex);
+
+		if(!RailBuilder.AttachWagonToTheTrain(newWagon, engineId)) {
+			if(i==0) {
+				Error("And it was the first one!");
+				return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
+			}
+		}
+	}
+
+	if(AIVehicle.GetNumWagons(engineId) == 0){
+		abort("it was not supposed to happen - wagonless train")
+	}
 
 	//multiplier: for weak locos it may be possible to merge multiple trains ito one (2*loco + 10*wagon, instead of loco+5 wagons)
 	//multiplier = how many trains are merged into one
-   	local multiplier = min(GetAvailableMoney()/costs.GetCosts(), route.station_size*16/AIVehicle.GetLength(engineId));
+   	local multiplier = min(GetAvailableMoney()/costs.GetCosts(), route.station_size*16/AIVehicle.GetLength(engineId))
 	multiplier--; //one part of train is already constructed
-	for(local x=0; x<multiplier; x++){
-		local newengineId = AIAI.BuildVehicle(route.depot_tile, bestEngine);
-		AIVehicle.RefitVehicle(newengineId, route.cargo);
-		AIVehicle.MoveWagon(newengineId, 0, engineId, 0);
-		for(local i = 0; i<max_number_of_wagons; i++){
-			if(AIVehicle.GetLength(engineId)>route.station_size*16){
-				AIVehicle.SellWagon(engineId, AIVehicle.GetNumWagons(engineId)-1);
-				break;
-				}
+	for(local x=0; x<multiplier; x++) {
+		local newengineId = AIAI.BuildVehicle(route.depot_tile, bestEngine)
+		AIVehicle.RefitVehicle(newengineId, route.cargo)
+		AIVehicle.MoveWagon(newengineId, 0, engineId, 0)
+		for(local i = 0; i<max_number_of_wagons; i++) {
+			if(AIVehicle.GetLength(engineId)>route.station_size*16) {
+				AIVehicle.SellWagon(engineId, AIVehicle.GetNumWagons(engineId)-1)
+				break
+			}
 			local newWagon = AIAI.BuildVehicle(route.depot_tile, bestWagon);        
-			AIVehicle.RefitVehicle(newWagon, cargoIndex);
-			if(!AIVehicle.MoveWagon(newWagon, 0, engineId, AIVehicle.GetNumWagons(engineId)-1)){
-				Error("Couldn't join wagon to train: " + AIError.GetLastErrorString());
-				}
+			AIVehicle.RefitVehicle(newWagon, cargoIndex)
+			if(!AIVehicle.MoveWagon(newWagon, 0, engineId, AIVehicle.GetNumWagons(engineId)-1)) {
+				Error("Couldn't join wagon to train: " + AIError.GetLastErrorString())
 			}
 		}
+	}
 	if(AIVehicle.GetCapacity(engineId, route.cargo) == 0) return null;
-	if(AIVehicle.StartStopVehicle(engineId)){
+	if(AIVehicle.StartStopVehicle(engineId)) {
 		AIVehicle.SetName(engineId, name_of_train);
 		return engineId;
-		}
-	Error("StartStopVehicle failed! Evil newgrf?");
-	if(!AIVehicle.IsValidVehicle(engineId)){
+	}
+	Warning("StartStopVehicle failed! Evil newgrf?");
+	if(!AIVehicle.IsValidVehicle(engineId)) {
 		Error(depotTile, "Please, post savegame on ttforums - http://tinyurl.com/ottdaiai (or send mail on bulwersator@gmail.com)");
 		abort("Sth happened with train (invalid id)!");
-		}
-	if(error==AIVehicle.ERR_VEHICLE_NO_POWER)
-		{
+	}
+	if(error==AIVehicle.ERR_VEHICLE_NO_POWER) {
 		Error(depotTile, "Please, post savegame on ttforums - http://tinyurl.com/ottdaiai (or send mail on bulwersator@gmail.com)");
 		abort("Sth happened with train (no power)!");
-		}
-	Error("Brake van?");
-	AIVehicle.SellWagon(engineId, AIVehicle.GetNumWagons(engineId)-1);
-	Error("Last wagon sold");
+	}
+	Info("Brake van?")
+	AIVehicle.SellWagon(engineId, AIVehicle.GetNumWagons(engineId)-1)
+	Info("Last wagon sold")
 	
-	local newWagon = AIAI.BuildVehicle(route.depot_tile, GetBrakeVan());        
-	if(!AIVehicle.MoveWagon(newWagon, 0, engineId, AIVehicle.GetNumWagons(engineId)-1))
-		Error("Couldn't join brake van to train: " + AIError.GetLastErrorString());
+	local newWagon = AIAI.BuildVehicle(route.depot_tile, GetBrakeVan())
+	if(!AIVehicle.MoveWagon(newWagon, 0, engineId, AIVehicle.GetNumWagons(engineId)-1)) {
+		Error("Couldn't join brake van to train: " + AIError.GetLastErrorString())
+	}
 
 	if(AIVehicle.StartStopVehicle(engineId)){
-		AIVehicle.SetName(engineId, name_of_train);
+		AIVehicle.SetName(engineId, name_of_train)
 		return engineId;
-		}
-	Error("ARGHHHHHHHHHHHHHHHHHHHHHHHHHHHHH!");
+	}
+	Error("Train refuses to start, please report this problem.");
 	return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
 }
 
