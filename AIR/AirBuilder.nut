@@ -636,7 +636,11 @@ for (local plane = list.Begin(); list.HasNext(); plane = list.Next())
 			}
 		}
 	}
-Info(count+" planes skipped to next destination!");
+	local plural = "s"
+	if(count == 1) {
+		plural = ""
+	}
+	Info(count+" plane"+plural+" skipped to next destination!");
 }
 
 function AirBuilder::PopulationWithRandValuator(town_id)
