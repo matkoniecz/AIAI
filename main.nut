@@ -17,7 +17,6 @@ function AIAI::Starter()
 	Info("");
 	Info("Hi!");
 	
-	//PaintMapWithHillData();
 	Name();
 	HQ();
 	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")!= 0) AICompany.SetAutoRenewStatus(true);
@@ -430,33 +429,6 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 		
 		*/
 	}
-}
-
-function PaintMapWithHillData()
-{
-local tile_source = AIMap.GetTileIndex(1, 1)
-local rectangle_size = 5;
-for(local x_cluster=0; x_cluster*rectangle_size+1<AIMap.GetMapSizeX(); x_cluster++)
-	for(local y_cluster=0; y_cluster*rectangle_size+1<AIMap.GetMapSizeY(); y_cluster++)
-		{
-		local count=0;
-		for(local x=0; x<rectangle_size; x++)
-			for(local y=0; y<rectangle_size; y++)
-				{
-				local tile = AIMap.GetTileIndex(x_cluster*rectangle_size+x, y_cluster*rectangle_size+y);
-				local slope = AITile.GetSlope(tile);
-				count += AITile.IsSteepSlope(slope)? 2 : 0;
-				count += AITile.IsHalftileSlope(slope)? 1 : 0;
-				count += AITile.IsBuildable(tile)? 0 : 5;
-				}
-		for(local x=0; x<rectangle_size; x++)
-			for(local y=0; y<rectangle_size; y++)
-				{
-				local tile = AIMap.GetTileIndex(x_cluster*rectangle_size+x+1, y_cluster*rectangle_size+y+1);
-				//AISign.BuildSign(tile, "" + Sqrt(AIOrder.GetOrderDistance(AIVehicle.VT_AIR , tile_source, tile)) + " " + AIOrder.GetOrderDistance(AIVehicle.VT_ROAD , tile_source, tile) + " " + AIOrder.GetOrderDistance(AIVehicle.VT_RAIL , tile_source, tile) + " " + AIOrder.GetOrderDistance(AIVehicle.VT_WATER  , tile_source, tile))
-				AISign.BuildSign(tile, count+"");
-				}
-		}
 }
 
 function AIAI::BuildVehicle(depot_tile, engine_id)
