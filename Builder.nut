@@ -11,6 +11,9 @@ blacklisted_vehicles = AIList();
 
 function Builder::ValuateProducer(ID, cargo)
 {
+	if(!AIIndustry.IsValidIndustry(ID)) {
+		return -1;
+	}
 	local base = AIIndustry.GetLastMonthProduction(ID, cargo);
 	base*=(100-AIIndustry.GetLastMonthTransportedPercentage (ID, cargo));
 	if(AIIndustry.GetLastMonthTransportedPercentage (ID, cargo)==0)base*=3;
@@ -26,6 +29,9 @@ function Builder::ValuateProducer(ID, cargo)
  
 function Builder::ValuateConsumer(ID, cargo, score)
 {
+	if(!AIIndustry.IsValidIndustry(ID)) {
+		return -1;
+	}
 	if(AIIndustry.GetStockpiledCargo(ID, cargo)==0) score*=2;
 	if(IsConnectedIndustry(ID, cargo)) score*=7;
 	if(AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(ID)).Count()==0) score/=2;
