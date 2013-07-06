@@ -84,27 +84,30 @@ function AIAI::RunGeneralInspection()
 
 function AIAI::UpgradeBridges()
 {
-		if(bridge_list==null)return;
-		for(local i = 0; i<bridge_list.len() && AICompany.GetBankBalance(AICompany.COMPANY_SELF)>Money.Inflate(500000); i++)
-			{
-			local tile = bridge_list[i];
-			if(!AIBridge.IsBridgeTile(tile))continue;
-			//AISign.BuildSign(tile, i);
-			local old_bridge_type = AIBridge.GetBridgeID (tile);
-			local new_bridge_type = GetMaxSpeedBridge(tile, AIBridge.GetOtherBridgeEnd(tile));
-			if( AIBridge.GetMaxSpeed(new_bridge_type) > AIBridge.GetMaxSpeed(old_bridge_type) )
-				{
-				local vehicle_type = AIVehicle.VT_ROAD;
-				if( AITile.HasTransportType( tile, AITile.TRANSPORT_RAIL )) 
-					{
-					vehicle_type = AIVehicle.VT_RAIL;
-					AIRail.SetCurrentRailType(AIRail.GetRailType( tile ));
-					}
-				if(!AIBridge.BuildBridge ( vehicle_type, new_bridge_type, tile, AIBridge.GetOtherBridgeEnd(tile)))
-					Error(AIError.GetLastErrorString() + " - unable to upgrade bridge")
-				}
+	if(bridge_list==null) {
+		return
+	}
+	for(local i = 0; i<bridge_list.len() && AICompany.GetBankBalance(AICompany.COMPANY_SELF)>Money.Inflate(500000); i++) {
+		local tile = bridge_list[i]
+		if(!AIBridge.IsBridgeTile(tile)) {
+			continue
+		}
+		//AISign.BuildSign(tile, i)
+		local old_bridge_type = AIBridge.GetBridgeID (tile)
+		local new_bridge_type = GetMaxSpeedBridge(tile, AIBridge.GetOtherBridgeEnd(tile))
+		if(AIBridge.GetMaxSpeed(new_bridge_type) > AIBridge.GetMaxSpeed(old_bridge_type)) {
+			local vehicle_type = AIVehicle.VT_ROAD;
+			if(AITile.HasTransportType(tile, AITile.TRANSPORT_RAIL)) {
+				vehicle_type = AIVehicle.VT_RAIL;
+				AIRail.SetCurrentRailType(AIRail.GetRailType(tile))
 			}
+			if(!AIBridge.BuildBridge ( vehicle_type, new_bridge_type, tile, AIBridge.GetOtherBridgeEnd(tile))) {
+				Error(AIError.GetLastErrorString() + " - unable to upgrade bridge")
+			}
+		}
+	}
 }
+
 function AIAI::InformationCenter(builders)
 {
 	for(local i = 0; i<builders.len(); i++)
