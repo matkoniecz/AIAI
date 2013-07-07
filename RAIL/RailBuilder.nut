@@ -388,12 +388,25 @@ if(AICargo.IsFreight(cargo)) weight += capacity * AIGameSettings.GetValue("vehic
 return weight;
 }
 
+function RailBuilder::BuildTrainButNotWithThisEngineWagonCombination(route, name_of_train, engine, wagon, recover_from_failed_engine)
+{
+	Info("Failed to combine '" + AIEngine.GetName(engine) +"' and '" + AIEngine.GetName(wagon) + "':" + AIError.GetLastErrorString() +" *^@@*")
+	blacklisted_engine_wagon_combination.append([engine, wagon])
+	Warning("blacklisted '" + AIEngine.GetName(engine) +"' and '" + AIEngine.GetName(wagon) + "' combination'")
+	return this.BuildTrainRecoverAfterBlacklisting(route, name_of_train, recover_from_failed_engine)
+}
+
 function RailBuilder::BuildTrainButNotWithThisVehicle(route, name_of_train, bad_vehicle, recover_from_failed_engine)
 {
-	DeleteVehiclesInDepots()
-	Info("Failed to build '" + AIEngine.GetName(bad_vehicle) +"':" + AIError.GetLastErrorString() +" **@@*");
-	blacklisted_vehicles.AddItem(bad_vehicle, 0);
+	Info("Failed to build '" + AIEngine.GetName(bad_vehicle) +"':" + AIError.GetLastErrorString() +" **@@*")
+	blacklisted_vehicles.AddItem(bad_vehicle, 0)
 	Warning("blacklisted "+AIEngine.GetName(bad_vehicle))
+	return this.BuildTrainRecoverAfterBlacklisting(route, name_of_train, recover_from_failed_engine)
+}
+
+function RailBuilder::BuildTrainRecoverAfterBlacklisting(route, name_of_train, recover_from_failed_engine)
+{
+	DeleteVehiclesInDepots()
 	if (!recover_from_failed_engine) {
 		return null;
 	}
@@ -498,7 +511,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 		if(!RailBuilder.AttachWagonToTheTrain(newWagon, engineId)) {
 			if(i==0) {
 				Error("And it was the first one!");
-				return this.BuildTrainButNotWithThisVehicle(route, name_of_train, bestEngine, recover_from_failed_engine)
+				return this.BuildTrainButNotWithThisEngineWagonCombination(route, name_of_train, bestEngine, bestWagon, recover_from_failed_engine)
 			}
 		}
 	}
@@ -809,6 +822,17 @@ function RailBuilder::FindBestEngine(wagonId, trainsize, cargoId, track_type)//f
 	
 	engines.Valuate(AIEngine.IsBuildable);
 	engines.RemoveValue(0);
+
+	local blacklisted_engines = AIList();
+	//Info("===================================")
+	foreach(i, val in blacklisted_engine_wagon_combination) {
+		if(val[1] == wagonId) {
+			blacklisted_engines.AddItem(val[0], 0)
+		}
+		//Info(AIEngine.GetName(val[0]) + " " + AIEngine.GetName(val[1]))
+	}
+	engines.Valuate(this.IsThisThingBanned, cargoId, blacklisted_engines);
+	engines.RemoveValue(1);
 
 	engines.Valuate(this.IsThisThingBanned, cargoId, blacklisted_vehicles);
 	engines.RemoveValue(1);

@@ -6,6 +6,7 @@ desperation = 0;
 retry_limit = 2;
 pathfinding_time_limit = 10;
 blacklisted_vehicles = AIList();
+blacklisted_engine_wagon_combination = [];
 };
 
 
