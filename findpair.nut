@@ -54,7 +54,7 @@ for (traska.start = industry_list.Begin(); industry_list.HasNext(); traska.start
 
 	if(IsConnectedIndustry(traska.start, traska.cargo))continue;
    
-	local industry_list_accepting_current_cargo = rodzic.GetIndustryList_CargoAccepting(traska.cargo);
+	local industry_list_accepting_current_cargo = rodzic.GetLimitedIndustryList_CargoAccepting(traska.cargo);
 	local base = ValuateProducer(traska.start, traska.cargo);
 	if(industry_list_accepting_current_cargo.Count()>0){
 	for(traska.end = industry_list_accepting_current_cargo.Begin(); industry_list_accepting_current_cargo.HasNext(); traska.end = industry_list_accepting_current_cargo.Next())
