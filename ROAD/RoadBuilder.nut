@@ -741,7 +741,7 @@ function RoadBuilder::BuildVehicles()
 	if(trasa.engine==null) return null;
 	local ile = trasa.engine_count;	
 	local vehicle_id = -1;
-	vehicle_id=AIAI.BuildVehicle (trasa.depot_tile, trasa.engine);
+	vehicle_id=AIVehicle.BuildVehicle (trasa.depot_tile, trasa.engine);
 	if(!AIVehicle.IsValidVehicle(vehicle_id)) return null;
 	{
 	constructed++;

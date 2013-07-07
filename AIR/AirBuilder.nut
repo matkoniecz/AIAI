@@ -355,7 +355,7 @@ function AirBuilder::BuildAircraft(tile_1, tile_2, engine, cargo)
 	/* Build an aircraft */
 	local hangar = AIAirport.GetHangarOfAirport(tile_1);
 
-	local vehicle = AIAI.BuildVehicle(hangar, engine);
+	local vehicle = AIVehicle.BuildVehicle(hangar, engine);
 
 	if (!AIVehicle.IsValidVehicle(vehicle)) {
 		return -1;

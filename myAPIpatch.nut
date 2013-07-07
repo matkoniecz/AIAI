@@ -108,16 +108,114 @@ AIVehicleList_Station <- function(station_id)
 AIVehicle.SetName_ <- AIVehicle.SetName
 AIVehicle.SetName <- function (vehicle_id, string)
 {
-if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle " + vehicle_id);
-local i = 1;
-for(;!AIVehicle.SetName_(vehicle_id, string + " #" + i); i++)
-	{
-	if(AIError.GetLastError() == AIError.ERR_PRECONDITION_STRING_TOO_LONG){
-		if(AIAI.GetSetting("crash_AI_in_strange_situations") == 1) abort("ops?")
-		else AIVehicle.SetName_(vehicle_id, "PRECONDITION_FAILED");
-		
+	if(!AIVehicle.IsValidVehicle(vehicle_id)) {
+		abort("Invalid vehicle " + vehicle_id);
+	}
+	if(AIEngine.IsWagon(AIVehicle.GetEngineType(vehicle_id))) {
+		abort("naming wagon is impossible " + vehicle_id);
+	}
+	local i = 1;
+	if(AIVehicle.SetName_(vehicle_id, string + " [" + vehicle_id + "]")) {
+		return
+	}
+	for(;!AIVehicle.SetName_(vehicle_id, string + " #" + i + " [" + vehicle_id + "]"); i++){
+		if(AIError.GetLastError() == AIError.ERR_PRECONDITION_STRING_TOO_LONG){
+			if(AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
+				abort("ops?")
+			} else {
+				AIVehicle.SetName_(vehicle_id, "PRECONDITION_FAILED");
+			}
+		}
 	}
 }
+
+AIVehicle.CloneVehicle_ <- AIVehicle.CloneVehicle
+AIVehicle.CloneVehicle <- function (depot_tile, vehicle_id, share_orders)
+{
+	local new_vehicle_id = AIVehicle.CloneVehicle_(depot_tile, vehicle_id, share_orders)
+	if(AIVehicle.IsValidVehicle(new_vehicle_id)) {
+		if(!AIEngine.IsWagon(AIVehicle.GetEngineType(vehicle_id))) {
+			AIVehicle.SetName(new_vehicle_id, "copied")
+		}
+	}
+	return new_vehicle_id
+}
+
+AIVehicle.BuildVehicle_ <- AIVehicle.BuildVehicle
+AIVehicle.BuildVehicle <- function (depot_tile, engine_id)
+{		
+	if (!AIEngine.IsBuildable(engine_id)) {
+		abort("not buildable!")
+	}
+	if (AITile.GetOwner(depot_tile) != AICompany.ResolveCompanyID(AICompany.COMPANY_SELF)) {
+		Error(AITile.GetOwner(depot_tile) + " != " + AICompany.ResolveCompanyID(AICompany.COMPANY_SELF))
+		AISign.BuildSign(depot_tile, "depot_tile")
+		abort("depot tile not owned by company")
+	}
+	type = AIEngine.GetVehicleType(engine_id)
+	if (type == AIVehicle.VT_RAIL) {
+		if(!AIRail.IsRailDepotTile(depot_tile)) {
+			AISign.BuildSign(depot_tile, "depot_tile")
+			abort ("no rail depot")
+		}
+	} else if (type == AIVehicle.VT_ROAD) {
+		if(!AIRoad.IsRoadDepotTile(depot_tile)) {
+			AISign.BuildSign(depot_tile, "depot_tile")
+			abort ("no RV depot")
+		}
+	} else if (type == AIVehicle.VT_WATER) {
+		if(!AIMarine.IsWaterDepotTile(depot_tile)) {
+			AISign.BuildSign(depot_tile, "depot_tile")
+			abort ("no water depot")
+		}
+	} else if (type == AIVehicle.VT_AIR) {
+		if(!AIAirport.IsHangarTile(depot_tile)) {
+			AISign.BuildSign(depot_tile, "depot_tile")
+			abort ("no hangar")
+		}
+	} else {
+		AISign.BuildSign(depot_tile, "depot_tile")
+		abort ("incorrect vehicle type (" + type + ")")
+	}
+
+	local vehicle_id = AIVehicle.BuildVehicle_(depot_tile, engine_id);
+	if(AIError.GetLastError() != AIError.ERR_NONE) {
+		Warning("Vehicle ("+AIEngine.GetName(engine_id)+") construction failed with "+AIError.GetLastErrorString() + "(message from modified AIVehicle::BuildVehicle)")
+		if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH) {
+			do {
+				rodzic.SafeMaintenance();
+				ProvideMoney();
+				AIController.Sleep(400);
+				Info("retry: BuildVehicle");
+				vehicle_id = AIVehicle.BuildVehicle_(depot_tile, engine_id);
+			} while(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH)
+		}
+		Warning(AIError.GetLastErrorString());
+		if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_BUILD_DISABLED || AIError.GetLastError()==AIVehicle.ERR_VEHICLE_TOO_MANY ){
+			return AIVehicle.VEHICLE_INVALID;
+		}
+		if(AIError.GetLastError()==AIVehicle.ERR_VEHICLE_WRONG_DEPOT) {
+			abort("depot nuked");
+		}
+		if(AIError.GetLastError()==AIError.ERR_PRECONDITION_FAILED) {
+			AISign.BuildSign(depot_tile, "ERR_PRECONDITION_FAILED");
+			abort("ERR_PRECONDITION_FAILED (before sign construction), engine: "+AIEngine.GetName(engine_id));
+		}
+		if(AIError.GetLastError()!=AIError.ERR_NONE) {
+			abort("wtf");
+		}
+	}
+	if(AIError.GetLastError() != AIError.ERR_NONE) {
+		Info(AIError.GetLastErrorString());
+	}
+	Info(AIEngine.GetName(engine_id) + " constructed! ("+vehicle_id+")")
+	if(!AIVehicle.IsValidVehicle(vehicle_id)) {
+		abort("!!!!!!!!!!!!!!!");
+	}
+	if(!AIEngine.IsWagon(AIVehicle.GetEngineType(vehicle_id))) {
+		AIVehicle.SetName(vehicle_id, "new")
+	}
+	return vehicle_id;
 }
 
 AIVehicle.IsOKVehicle <- function(vehicle_id)

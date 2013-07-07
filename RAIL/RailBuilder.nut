@@ -90,22 +90,24 @@ return ile;
 
 function RailBuilder::copyVehicle(main_vehicle_id, cargo)
 {
-Info("Copying "+AIVehicle.GetName(main_vehicle_id))
-if(!AIVehicle.IsValidVehicle(main_vehicle_id)) return false;
+	Info("Copying "+AIVehicle.GetName(main_vehicle_id))
+	if(!AIVehicle.IsValidVehicle(main_vehicle_id)) {
+		return false
+	}
 
-local depot_tile = GetDepotLocation(main_vehicle_id);
-if(depot_tile == null) {
-	return false
-}
-if(AIVehicleList_SharedOrders(main_vehicle_id).Count()<LoadDataFromStationNameFoundByStationId( GetLoadStationId(main_vehicle_id), "{}"))
-   {
-   local vehicle_id = AIVehicle.CloneVehicle(depot_tile, main_vehicle_id, true);
-   if(AIVehicle.IsValidVehicle(vehicle_id))
-      {
- 	  if(AIVehicle.StartStopVehicle (vehicle_id)) return true;
-	  }
-   }   
-return false;
+	local depot_tile = GetDepotLocation(main_vehicle_id);
+	if(depot_tile == null) {
+		return false
+	}
+	if(AIVehicleList_SharedOrders(main_vehicle_id).Count()<LoadDataFromStationNameFoundByStationId( GetLoadStationId(main_vehicle_id), "{}")) {
+		local vehicle_id = AIVehicle.CloneVehicle(depot_tile, main_vehicle_id, true)
+		if(AIVehicle.IsValidVehicle(vehicle_id)) {
+			if(AIVehicle.StartStopVehicle (vehicle_id)) {
+				return true;
+			}
+		}
+	}   
+	return false;
 }
 
 function RailBuilder::TrainReplaceOnThisStation(station_id)
@@ -447,7 +449,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 		return null;
 	}
 
-	local engineId = AIAI.BuildVehicle(depotTile, bestEngine)
+	local engineId = AIVehicle.BuildVehicle(depotTile, bestEngine)
 	if (!AIVehicle.IsValidVehicle(engineId)) {
 		return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
 	}
@@ -487,7 +489,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 				Error("WTF, it was supposed to be wagonless train!")
 			}
 		}
-		local newWagon = AIAI.BuildVehicle(depotTile, bestWagon);
+		local newWagon = AIVehicle.BuildVehicle(depotTile, bestWagon);
 		if(!AIVehicle.IsValidVehicle(newWagon)) {
 			Info("Failed to build wagon '" + AIEngine.GetName(bestWagon) +"':" + AIError.GetLastErrorString());
 		}
@@ -510,7 +512,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
    	local multiplier = min(GetAvailableMoney()/costs.GetCosts(), route.station_size*16/AIVehicle.GetLength(engineId))
 	multiplier--; //one part of train is already constructed
 	for(local x=0; x<multiplier; x++) {
-		local newengineId = AIAI.BuildVehicle(route.depot_tile, bestEngine)
+		local newengineId = AIVehicle.BuildVehicle(route.depot_tile, bestEngine)
 		AIVehicle.RefitVehicle(newengineId, route.cargo)
 		AIVehicle.MoveWagon(newengineId, 0, engineId, 0)
 		for(local i = 0; i<max_number_of_wagons; i++) {
@@ -518,7 +520,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 				AIVehicle.SellWagon(engineId, AIVehicle.GetNumWagons(engineId)-1)
 				break
 			}
-			local newWagon = AIAI.BuildVehicle(route.depot_tile, bestWagon);        
+			local newWagon = AIVehicle.BuildVehicle(route.depot_tile, bestWagon);        
 			AIVehicle.RefitVehicle(newWagon, cargoIndex)
 			if(!AIVehicle.MoveWagon(newWagon, 0, engineId, AIVehicle.GetNumWagons(engineId)-1)) {
 				Error("Couldn't join wagon to train: " + AIError.GetLastErrorString())
@@ -543,7 +545,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 	AIVehicle.SellWagon(engineId, AIVehicle.GetNumWagons(engineId)-1)
 	Info("Last wagon sold")
 	
-	local newWagon = AIAI.BuildVehicle(route.depot_tile, GetBrakeVan())
+	local newWagon = AIVehicle.BuildVehicle(route.depot_tile, GetBrakeVan())
 	if(!AIVehicle.MoveWagon(newWagon, 0, engineId, AIVehicle.GetNumWagons(engineId)-1)) {
 		Error("Couldn't join brake van to train: " + AIError.GetLastErrorString())
 	}
