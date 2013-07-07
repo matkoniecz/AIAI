@@ -388,12 +388,12 @@ if(AICargo.IsFreight(cargo)) weight += capacity * AIGameSettings.GetValue("vehic
 return weight;
 }
 
-function RailBuilder::BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
+function RailBuilder::BuildTrainButNotWithThisVehicle(route, name_of_train, bad_vehicle, recover_from_failed_engine)
 {
 	DeleteVehiclesInDepots()
-	Info("Failed to build '" + AIEngine.GetName(bestEngine) +"':" + AIError.GetLastErrorString() +" **@@*");
-	blacklisted_vehicles.AddItem(bestEngine, 0);
-	Warning("blacklisted "+AIEngine.GetName(bestEngine))
+	Info("Failed to build '" + AIEngine.GetName(bad_vehicle) +"':" + AIError.GetLastErrorString() +" **@@*");
+	blacklisted_vehicles.AddItem(bad_vehicle, 0);
+	Warning("blacklisted "+AIEngine.GetName(bad_vehicle))
 	if (!recover_from_failed_engine) {
 		return null;
 	}
@@ -438,11 +438,11 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 	Info("BuildTrain (" + AIEngine.GetName(bestEngine) + " + " + AIEngine.GetName(bestWagon) + ")")
 
 	if(!AIEngine.IsBuildable(bestEngine)) {
-		return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
+		return this.BuildTrainButNotWithThisVehicle(route, name_of_train, bestEngine, recover_from_failed_engine)
 	}
 
 	if(!AIEngine.IsBuildable(bestWagon)) {
-		return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestWagon, recover_from_failed_engine)
+		return this.BuildTrainButNotWithThisVehicle(route, name_of_train, bestWagon, recover_from_failed_engine)
 	}
 
 	if(AIEngine.GetPrice(bestEngine) + AIEngine.GetPrice(bestWagon) > AICompany.GetBankBalance(AICompany.COMPANY_SELF)) {
@@ -451,7 +451,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 
 	local engineId = AIVehicle.BuildVehicle(depotTile, bestEngine)
 	if (!AIVehicle.IsValidVehicle(engineId)) {
-		return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
+		return this.BuildTrainButNotWithThisVehicle(route, name_of_train, bestEngine, recover_from_failed_engine)
 	}
 
 	AIVehicle.SetName(engineId, "in construction");
@@ -498,7 +498,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 		if(!RailBuilder.AttachWagonToTheTrain(newWagon, engineId)) {
 			if(i==0) {
 				Error("And it was the first one!");
-				return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
+				return this.BuildTrainButNotWithThisVehicle(route, name_of_train, bestEngine, recover_from_failed_engine)
 			}
 		}
 	}
@@ -555,7 +555,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 		return engineId;
 	}
 	Error("Train refuses to start, please report this problem.");
-	return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
+	return this.BuildTrainButNotWithThisVehicle(route, name_of_train, bestEngine, recover_from_failed_engine)
 }
 
 function RailBuilder::GetBrakeVan()
