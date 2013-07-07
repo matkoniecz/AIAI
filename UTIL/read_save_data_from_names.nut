@@ -59,7 +59,7 @@ if(!AIVehicle.IsOKVehicle) {
 	return null
 }
 for(local i=0; i<AIOrder.GetOrderCount(vehicle_id); i++) if(AIOrder.IsGotoStationOrder(vehicle_id, i)) return AIOrder.GetOrderDestination(vehicle_id, i);
-abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle_id));
+abort("Explosion caused by vehicle " + vehicle_id + " named "+ AIVehicle.GetName(vehicle_id));
 }
 
 function GetUnloadStationId(vehicle_id)
