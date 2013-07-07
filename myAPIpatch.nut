@@ -120,4 +120,15 @@ for(;!AIVehicle.SetName_(vehicle_id, string + " #" + i); i++)
 }
 }
 
+AIVehicle.IsOKVehicle <- function(vehicle_id)
+{
+	if (!AIVehicle.IsValidVehicle(vehicle_id)) {
+		return false
+	}
+	if (AIVehicle.GetState(vehicle_id) & AIVehicle.VS_CRASHED) {
+		return false
+	}
+	return true
+}
+
 Info("changing API finished");

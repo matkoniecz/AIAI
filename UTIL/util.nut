@@ -201,7 +201,7 @@ function IsCargoLoadedOnThisStation(station_id, cargo_id)
 	{
 	local vehicle_list=AIVehicleList_Station(station_id);
 	if(vehicle_list.Count()!=0)
-		if(AIStation.GetStationID(GetLoadStationLocation(vehicle_list.Begin()))==station_id)
+		if(GetLoadStationId(vehicle_list.Begin())==station_id)
 			if(AIVehicle.GetCapacity(vehicle_list.Begin(), cargo_id)!=0)
 				return true;
 	return false;
@@ -252,7 +252,12 @@ function DeleteUnprofitable()
 	
 	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()) 
 	   {
-	   if(AIVehicle.GetVehicleType(vehicle_id)!=AIVehicle.VT_RAIL || (AIVehicleList_Station(AIStation.GetStationID(GetLoadStationLocation(vehicle_id)))).Count()>2)
+	   local load_station_id = GetLoadStationId(vehicle_id)
+	   if(load_station_id == null) {
+		continue
+	   }
+	   local load_station_vehicle_list = AIVehicleList_Station(load_station_id)
+	   if(AIVehicle.GetVehicleType(vehicle_id)!=AIVehicle.VT_RAIL || load_station_vehicle_list.Count()>2)
 	      {
 		  if(AIVehicle.IsValidVehicle(vehicle_id)) if(AIAI.sellVehicle(vehicle_id, "unprofitable")) counter++;
 		  }

@@ -941,7 +941,9 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
 					continue;
 					}
 				local end = GetUnloadStationLocation(original);
-
+				if (end == null) {
+					continue
+				}
 				if(AITile.GetCargoAcceptance (end, cargo, 1, 1, 4)==0)
 					{
 					if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles"))AISign.BuildSign(end, "ACCEPTATION STOPPED");
@@ -996,8 +998,12 @@ TODO DUAL END
 			continue;
 			}
 */
-		local another_station = AIStation.GetStationID(GetUnloadStationLocation(original));
-		if(station_id == another_station ) another_station = AIStation.GetStationID(GetLoadStationLocation(original));
+		local another_station = GetUnloadStationId(original);
+		local load_station_id = GetLoadStationId(original);
+		if(load_station_id == null || another_station == null) {
+			continue
+		}
+		if(station_id == another_station ) another_station = load_station_id;
 		if(IsItNeededToImproveThatStation(another_station, cargo))
 		   {
 		   if(this.copyVehicle(original, cargo )) ile++;
@@ -1019,7 +1025,11 @@ function RoadBuilder::DynamicFullLoadManagement(full_station, empty_station, RV)
 {
 if(AIBase.RandRange(3)!=0) return true; //To wait for effects of action and avoid RV flood
 
-local first_station_is_full = (AIStation.GetStationID(GetLoadStationLocation(RV)) == full_station);
+local load_station_tile_id = GetLoadStationId(RV);
+if(load_station_tile_id == null) {
+	return false
+}
+local first_station_is_full = (load_station_tile_id == full_station);
 
 if(first_station_is_full)
    {
@@ -1076,7 +1086,15 @@ ProvideMoney();
 if(AIVehicle.IsValidVehicle(main_vehicle_id)==false) return false;
 local depot_tile = GetDepotLocation(main_vehicle_id);
 local speed = AIEngine.GetMaxSpeed(this.FindRV(cargo));
-local distance = AIMap.DistanceManhattan(GetLoadStationLocation(main_vehicle_id), GetUnloadStationLocation(main_vehicle_id));
+local load_station_tile = GetLoadStationLocation(main_vehicle_id);
+if(load_station_tile == null) {
+	return false
+}
+local unload_station_tile = GetUnloadStationLocation(main_vehicle_id);
+if(unload_station_tile == null) {
+	return false
+}
+local distance = AIMap.DistanceManhattan(load_station_tile, unload_station_tile);
 
 //OPTION TODO
 //1 na tile przy 25 km/h
@@ -1089,9 +1107,11 @@ local distance = AIMap.DistanceManhattan(GetLoadStationLocation(main_vehicle_id)
 local maksymalnie = 24*distance*48/51/speed*2;
 //local maksymalnie=distance*50/(speed+10); - old
 
-local load_station_tile = GetLoadStationLocation(main_vehicle_id);
-local load_station_id = AIStation.GetStationID(load_station_tile);
-local list = AIVehicleList_Station(load_station_id);   	
+local load_station_id = GetLoadStationId(main_vehicle_id)
+if(load_station_id == null) {
+	return false
+}
+local list = AIVehicleList_Station(load_station_id);
 local ile = list.Count();
 
 
@@ -1158,12 +1178,15 @@ for (local station = station_list.Begin(); station_list.HasNext(); station = sta
 			break;
 	
 	local front_vehicle = vehicle_list.Begin();
-	local station_id = AIStation.GetStationID(GetLoadStationLocation(front_vehicle)); 
+	local station_id = GetLoadStationId(front_vehicle)
+	if(station_id == null) {
+		continue
+	}
 	if(station==station_id){
 		//Info("Station with " + AIStation.GetCargoWaiting(station, cargo) + " of " + AICargo.GetCargoLabel(cargo));
 		if(!IsItNeededToImproveThatStation(station, cargo)){
 			for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()){
-				if(IsForSell(vehicle_id) || AIVehicle.GetAge(vehicle_id)<60){
+				if(IsForSell(vehicle_id) != false || AIVehicle.GetAge(vehicle_id)<60){
 					waiting_counter=0;
 					break;
 					}

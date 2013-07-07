@@ -223,11 +223,14 @@ function AIAI::gentleSellVehicle(vehicle_id, why)
 {
 if(AIVehicle.GetName(vehicle_id) == "stupid #1"){Error("detected"); AIController.Sleep(50);}
 
-if(IsForSell(vehicle_id)) return false;
+if(IsForSell(vehicle_id) != false) return false;
 
 local tile_1 = GetLoadStationLocation(vehicle_id);
 local tile_2 = GetUnloadStationLocation(vehicle_id);
 local depot_location = GetDepotLocation(vehicle_id);
+if (tile_1 == null || tile_2 == null || depot_location == null) {
+	return false
+}
 
 if(!AIOrder.UnshareOrders(vehicle_id))
 	{
@@ -265,7 +268,7 @@ local state_crashed = AIVehicle.VS_CRASHED
 local state_crashed_and_broken = AIVehicle.VS_CRASHED | AIVehicle.VS_BROKEN 
 
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck1 " + vehicle_id);
-if(IsForSell(vehicle_id) == true) return false;
+if(IsForSell(vehicle_id) != false) return false;
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck2 " + vehicle_id);
 AIVehicle.SetName(vehicle_id, "sell!" + why);
 if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle, aftercheck3 " + vehicle_id);

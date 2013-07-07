@@ -65,7 +65,9 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
 			vehicle_list.Valuate(AIBase.RandItem);
 			vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
 			local original=vehicle_list.Begin();
-			if(AIStation.GetLocation(station)!=GetLoadStationLocation(original))abort("wtf");
+			if (AIStation.GetLocation(station) != GetLoadStationLocation(original)) {
+				continue
+			}
 		 
 			if(AIVehicle.GetProfitLastYear(original)<0){
 				Warning("Unprofitable leader");
@@ -92,7 +94,10 @@ Info("Copying "+AIVehicle.GetName(main_vehicle_id))
 if(!AIVehicle.IsValidVehicle(main_vehicle_id)) return false;
 
 local depot_tile = GetDepotLocation(main_vehicle_id);
-if(AIVehicleList_SharedOrders(main_vehicle_id).Count()<LoadDataFromStationNameFoundByStationId( AIStation.GetStationID(GetLoadStationLocation(main_vehicle_id)), "{}"))
+if(depot_tile == null) {
+	return false
+}
+if(AIVehicleList_SharedOrders(main_vehicle_id).Count()<LoadDataFromStationNameFoundByStationId( GetLoadStationId(main_vehicle_id), "{}"))
    {
    local vehicle_id = AIVehicle.CloneVehicle(depot_tile, main_vehicle_id, true);
    if(AIVehicle.IsValidVehicle(vehicle_id))
@@ -113,7 +118,7 @@ function RailBuilder::TrainReplaceOnThisStation(station_id)
 	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()){
 		if(empty)abort("IN LOOP");
 		local vehicle_name = AIVehicle.GetName(vehicle_id); //attempt to debug ridiculous crash, vehicle suddenly gets invalid
-		if(IsForSell(vehicle_id))continue;
+		if(IsForSell(vehicle_id) != false)continue;
 
 		local cargo_list = AICargoList();
 		local max = 0;
@@ -165,7 +170,7 @@ function RailBuilder::TrainReplace()
 		local vehicle_list=AIVehicleList_Station(station_id);
 		if(vehicle_list.Count()==0)continue;
 		local front_vehicle = vehicle_list.Begin();
-		if( station_id != AIStation.GetStationID(GetLoadStationLocation(front_vehicle)))
+		if( station_id != GetLoadStationId(front_vehicle))
 			{
 			continue;
 			}

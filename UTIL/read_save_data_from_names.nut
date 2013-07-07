@@ -22,7 +22,9 @@ function IntToStrFill(int_val, num_digits)
 
 function IsForSell(vehicle_id)
 {
-if(!AIVehicle.IsValidVehicle(vehicle_id)) abort("Invalid vehicle " + vehicle_id);
+if(!AIVehicle.IsOKVehicle) {
+	return null
+}
 local name=AIVehicle.GetName(vehicle_id)+"            ";
 local forsell="for sell";
 
@@ -33,23 +35,47 @@ return true;
 
 function GetDepotLocation(vehicle_id)
 {
-assert(AIVehicle.IsValidVehicle(vehicle_id))
-local depot_location = LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(GetLoadStationLocation(vehicle_id)), "[]");
+if(!AIVehicle.IsOKVehicle) {
+	return null
+}
+local depot_location = LoadDataFromStationNameFoundByStationId(GetLoadStationId(vehicle_id), "[]");
 if(AIMap.IsValidTile(depot_location)) return depot_location;
 //for(local i=0; i<AIOrder.GetOrderCount(vehicle_id); i++) if(AIOrder.IsGotoDepotOrder(vehicle_id, i)) return AIOrder.GetOrderDestination(vehicle_id, i);
 abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle_id)+ " depot_location from station name is "+depot_location);
 }
 
+function GetLoadStationId(vehicle_id)
+{
+	local location = GetLoadStationLocation(vehicle_id)
+	if(location == null) {
+		return null
+	}
+	return AIStation.GetStationID(location)
+}
+
 function GetLoadStationLocation(vehicle_id)
 {
-assert(AIVehicle.IsValidVehicle(vehicle_id))
+if(!AIVehicle.IsOKVehicle) {
+	return null
+}
 for(local i=0; i<AIOrder.GetOrderCount(vehicle_id); i++) if(AIOrder.IsGotoStationOrder(vehicle_id, i)) return AIOrder.GetOrderDestination(vehicle_id, i);
 abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle_id));
 }
 
+function GetUnloadStationId(vehicle_id)
+{
+	local location = GetUnloadStationLocation(vehicle_id)
+	if(location == null) {
+		return null
+	}
+	return AIStation.GetStationID(location)
+}
+
 function GetUnloadStationLocation(vehicle_id)
 {
-assert(AIVehicle.IsValidVehicle(vehicle_id))
+if(!AIVehicle.IsOKVehicle) {
+	return null
+}
 local onoff = false;
 for(local i=0; i<AIOrder.GetOrderCount(vehicle_id); i++) {
    if(AIOrder.IsGotoStationOrder(vehicle_id, i)) {
