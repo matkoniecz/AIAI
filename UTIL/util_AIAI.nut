@@ -41,7 +41,7 @@ function IsItNeededToImproveThatNoRawStation(station, cargo)
 	}
 }
 
-function Name()
+function NameCompany()
 {
 	if((AICompany.GetName(AICompany.COMPANY_SELF)!="AIAI") && (AIVehicleList().Count()>0)) {
 		while(true) {
@@ -78,7 +78,7 @@ function AIAI::ShowContactInfoOnTheMap()
 	}
 }
 
-function AIAI::HQ() //from Rondje
+function AIAI::BuildHQ() //from Rondje
 {
 	if(AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) {
 		return

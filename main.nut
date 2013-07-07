@@ -17,8 +17,8 @@ function AIAI::Starter()
 	Info("");
 	Info("Hi!");
 	
-	Name();
-	HQ();
+	NameCompany();
+	BuildHQ();
 	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")!= 0) AICompany.SetAutoRenewStatus(true);
 	else AICompany.SetAutoRenewStatus(false);
 	AICompany.SetAutoRenewMonths(0);
