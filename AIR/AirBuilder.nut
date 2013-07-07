@@ -308,7 +308,7 @@ engine_list.Valuate(AIEngine.CanRefitCargo, cargo);
 engine_list.KeepValue(1);
 
 engine_list.Valuate(AIEngine.GetMaximumOrderDistance); //note, function is modified and return INFINITE_DISTANCE instead of 0
-engine_list.RemoveBelowValue(distance);
+engine_list.RemoveBelowValue(INFINITE_DISTANCE); //TODO: Allow planes with suitable range
 
 engine_list.Valuate(FindAircraftValuator);
 engine_list.KeepTop(1);
