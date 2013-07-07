@@ -428,7 +428,7 @@ function RailBuilder::AttachWagonToTheTrain(newWagon, engineId)
 		abort("AIVehicle.GetVehicleType(engineId) != AIVehicle.VT_RAIL (" + AIVehicle.GetVehicleType(engineId) +")")
 	}
 	if(!AIVehicle.MoveWagon(newWagon, 0, engineId, 0)) {
-		Warning("Couldn't join wagon to train: " + AIError.GetLastErrorString());
+		Info("Couldn't join wagon to train: " + AIError.GetLastErrorString());
 		if(AIError.GetLastError() == AIError.ERR_PRECONDITION_FAILED) {
 			abort("ERR_PRECONDITION_FAILED in MoveWagon")
 		}
@@ -510,7 +510,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 
 		if(!RailBuilder.AttachWagonToTheTrain(newWagon, engineId)) {
 			if(i==0) {
-				Error("And it was the first one!");
+				Warning("And it was the first one!");
 				return this.BuildTrainButNotWithThisEngineWagonCombination(route, name_of_train, bestEngine, bestWagon, recover_from_failed_engine)
 			}
 		}
