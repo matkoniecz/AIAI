@@ -33,7 +33,7 @@ function IsItNeededToImproveThatStation(station, cargo)
 }
 function IsItNeededToImproveThatNoRawStation(station, cargo)
 {
-	if (AIStation.GetCargoWaiting(station, cargo)>150) {
+	if (AIStation.GetCargoRating(station, cargo)<70 && AIStation.GetCargoWaiting(station, cargo)>150) {
 		return true
 	}
 	if (AIStation.GetCargoRating(station, cargo)<40 && AIStation.GetCargoWaiting(station, cargo)>0) {
