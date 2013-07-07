@@ -1265,7 +1265,7 @@ function RailBuilder::FindCityProducerStation(town, cargo, length, platform_coun
 local radius = AIStation.GetCoverageRadius(AIStation.STATION_TRAIN);
 local tile = AITown.GetLocation(town);
 local list = AITileList();
-local range = Sqrt(AITown.GetPopulation(town)/100) + 15;
+local range = Helper.Sqrt(AITown.GetPopulation(town)/100) + 15;
 SafeAddRectangle(list, tile, range);
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, radius);
 list.KeepAboveValue(10);

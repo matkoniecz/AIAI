@@ -5,6 +5,8 @@ const INFINITE_DISTANCE = 4000000;
 import("pathfinder.road", "RoadPathFinder", 4);      //################################################## <- external
 import("util.superlib", "SuperLib", 27);      //################################################## <- external
 
+require("mySuperLibpatch.nut");
+
 Helper <- SuperLib.Helper
 Tile <- SuperLib.Tile
 Direction <- SuperLib.Direction
@@ -14,21 +16,6 @@ DataStore <- SuperLib.DataStore
 Town <- SuperLib.Town
 
 require("UTIL/debug.nut")
-
-//from Rondje, computes square root of i using Babylonian method
-function Sqrt(i) 
-{ 
-	assert(i>=0);
-	if (i == 0)
-		return 0;   // Avoid divide by zero
-	local n = (i / 2) + 1;       // Initial estimate, never low
-	local n1 = (n + (i / n)) / 2;
-	while (n1 < n) {
-		n = n1;
-		n1 = (n + (i / n)) / 2;
-	}
-	return n;
-}
 
 require("myAPIpatch.nut");
 require("path.nut");

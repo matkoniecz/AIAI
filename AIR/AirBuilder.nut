@@ -154,7 +154,7 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile=nul
 	for (local town = town_list.Begin(); town_list.HasNext(); town = town_list.Next()) {
     	local tile = AITown.GetLocation(town);
 		local list = AITileList();
-		local range = Sqrt(AITown.GetPopulation(town)/100) + 15;
+		local range = Helper.Sqrt(AITown.GetPopulation(town)/100) + 15;
 		SafeAddRectangle(list, tile, range);
 		list.Valuate(AITile.IsBuildableRectangle, airport_x, airport_y);
 		list.KeepValue(1);
@@ -203,7 +203,7 @@ function AirBuilder::FindSuitableAirportSpotInTownThatAcceptsThisWeirdCargo(town
 {
  	local tile = AITown.GetLocation(town);
 	local list = AITileList();
-	local range = Sqrt(AITown.GetPopulation(town)/100) + 15;
+	local range = Helper.Sqrt(AITown.GetPopulation(town)/100) + 15;
 	SafeAddRectangle(list, tile, range);
 
 	list.Valuate(AITile.IsBuildableRectangle, airport_x, airport_y);
@@ -270,7 +270,7 @@ function AirBuilder::CostEstimation()
 function AirBuilder::FindEngine(route)
 {
 route.engine_count = 3;
-route.engine = AirBuilder.FindAircraft(route.station_size, route.cargo, route.engine_count = 3, route.budget, Sqrt(AIOrder.GetOrderDistance(AIVehicle.VT_AIR, route.start_tile, route.end_tile)));
+route.engine = AirBuilder.FindAircraft(route.station_size, route.cargo, route.engine_count = 3, route.budget, Helper.Sqrt(AIOrder.GetOrderDistance(AIVehicle.VT_AIR, route.start_tile, route.end_tile)));
 route.demand = AirBuilder.CostEstimation();
 return route;
 }

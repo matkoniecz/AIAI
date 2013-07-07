@@ -664,7 +664,7 @@ function RoadBuilder::FindStationMiejska(town, cargo)
 {
 local tile = AITown.GetLocation(town);
 local list = AITileList();
-local range = Sqrt(AITown.GetPopulation(town)/100) + 15;
+local range = Helper.Sqrt(AITown.GetPopulation(town)/100) + 15;
 SafeAddRectangle(list, tile, range);
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
 list.KeepAboveValue(10);
@@ -690,7 +690,7 @@ function RoadBuilder::FindBusStation(town, start, cargo)
 {
 local tile = AITown.GetLocation(town);
 local list = AITileList();
-local range = Sqrt(AITown.GetPopulation(town)/100) + 15;
+local range = Helper.Sqrt(AITown.GetPopulation(town)/100) + 15;
 SafeAddRectangle(list, tile, range);
 list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
 list.KeepAboveValue(max(25, 50-desperation));

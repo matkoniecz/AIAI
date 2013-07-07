@@ -91,7 +91,7 @@ function AIAI::HQ() //from Rondje
 	local town = towns.Begin()
 	
 	// Find empty 2x2 square as close to town centre as possible
-	local maxRange = Sqrt(AITown.GetPopulation(town)/100) + 5
+	local maxRange = Helper.Sqrt(AITown.GetPopulation(town)/100) + 5
 	local HQArea = AITileList()
 	HQArea.AddRectangle(AITown.GetLocation(town) - AIMap.GetTileIndex(maxRange, maxRange), AITown.GetLocation(town) + AIMap.GetTileIndex(maxRange, maxRange))
 	HQArea.Valuate(AITile.IsBuildableRectangle, 2, 2)
