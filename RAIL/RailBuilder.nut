@@ -442,7 +442,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 	}
 
 	if(!AIEngine.IsBuildable(bestWagon)) {
-		return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestEngine, recover_from_failed_engine)
+		return this.BuildTrainButNotWithThisEngine(route, name_of_train, bestWagon, recover_from_failed_engine)
 	}
 
 	if(AIEngine.GetPrice(bestEngine) + AIEngine.GetPrice(bestWagon) > AICompany.GetBankBalance(AICompany.COMPANY_SELF)) {
