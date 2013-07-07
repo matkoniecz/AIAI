@@ -1082,82 +1082,84 @@ static AIOrderFlags AIOrder::GetOrderFlags  	(  	VehicleID   	 vehicle_id,
 
 function RoadBuilder::copyVehicle(main_vehicle_id, cargo)
 {
-ProvideMoney();
-if(AIVehicle.IsValidVehicle(main_vehicle_id)==false) return false;
-local depot_tile = GetDepotLocation(main_vehicle_id);
-local speed = AIEngine.GetMaxSpeed(this.FindRV(cargo));
-local load_station_tile = GetLoadStationLocation(main_vehicle_id);
-if(load_station_tile == null) {
-	return false
-}
-local unload_station_tile = GetUnloadStationLocation(main_vehicle_id);
-if(unload_station_tile == null) {
-	return false
-}
-local distance = AIMap.DistanceManhattan(load_station_tile, unload_station_tile);
+	ProvideMoney()
+	if(AIVehicle.IsValidVehicle(main_vehicle_id)==false) {
+		return false
+	}
+	local depot_tile = GetDepotLocation(main_vehicle_id)
+	local speed = AIEngine.GetMaxSpeed(this.FindRV(cargo))
+	local load_station_tile = GetLoadStationLocation(main_vehicle_id)
+	local unload_station_tile = GetUnloadStationLocation(main_vehicle_id)
+	if(unload_station_tile == null || load_station_tile == null) {
+		return false
+	}
+	local distance = AIMap.DistanceManhattan(load_station_tile, unload_station_tile);
 
-//OPTION TODO
-//1 na tile przy 25 km/h
-//mo¿na obs³u¿yæ 22 miesiêcznie //24?
-//30 dni
-//52 tiles
-//48 km/h
-// w dwie strony
-//maksymalnie = 24*(distance/51)/(speed/48)*2
-local maksymalnie = 24*distance*48/51/speed*2;
-//local maksymalnie=distance*50/(speed+10); - old
+	//RV station may process 24 RV in a month (24*)
+	//in one month vehicle moves 52 tiles at 48 km/h - so it is OK to simply use (distance/speed)
+	//go and return - two directions (*2)
 
-local load_station_id = GetLoadStationId(main_vehicle_id)
-if(load_station_id == null) {
-	return false
-}
-local list = AIVehicleList_Station(load_station_id);
-local ile = list.Count();
-
-
-if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")){
-	Helper.SetSign(load_station_tile+AIMap.GetTileIndex(-1, 0), "Ile: "+ile+" na " + maksymalnie);
-	Helper.SetSign(load_station_tile+AIMap.GetTileIndex(-2, 0), "distance " + distance);
+	local max_count = 24*distance/speed*2;
+	if(max_count < 3) {
+		max_count = 3
+	}
+	if(max_count > 100) {
+		max_count = 100
 	}
 
-	if(ile>maksymalnie){
-		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles"))AISign.BuildSign(load_station_tile, "maxed!");
-		Warning("Too many vehicles on this route!");
+	local load_station_id = GetLoadStationId(main_vehicle_id)
+	if(load_station_id == null) {
+		return false
+	}
+	local list = AIVehicleList_Station(load_station_id)
+	local how_many = list.Count()
+
+	if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+		Helper.SetSign(load_station_tile+AIMap.GetTileIndex(-1, 0), ""+how_many+" of " + max_count)
+		Helper.SetSign(load_station_tile+AIMap.GetTileIndex(-2, 0), "distance " + distance)
+	}
+
+	if(how_many>max_count) {
+		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles"))AISign.BuildSign(load_station_tile, "maxed!")
+		Warning("Too many vehicles on this route!")
 		return false;
 	}
 
-	local vehicle_id = AIVehicle.CloneVehicle(depot_tile, main_vehicle_id, true);
-	if(!AIVehicle.IsValidVehicle(vehicle_id)){
+	local vehicle_id = AIVehicle.CloneVehicle(depot_tile, main_vehicle_id, true)
+	if(!AIVehicle.IsValidVehicle(vehicle_id)) {
 		Warning("RoadBuilder::copyVehicle failed due to " + AIError.GetLastErrorString())
 		return false;
-		}
-	if(!AIVehicle.StartStopVehicle (vehicle_id)){
-		sellVehicleStoppedInDepotDueToFoo(vehicle_id, "starting (from copyVehicle)");
-		return false;
+	}
+	if(!AIVehicle.StartStopVehicle (vehicle_id)) {
+		sellVehicleStoppedInDepotDueToFoo(vehicle_id, "starting (from copyVehicle)")
+		return false
 	}
 
-	local string;
-	local raw = this.RawVehicle(main_vehicle_id);
-	local processed = this.ProcessedCargoVehicle(main_vehicle_id);
-	local passengers = this.PassengerCargoVehicle(main_vehicle_id);
+	local string
+	local raw = this.RawVehicle(main_vehicle_id)
+	local processed = this.ProcessedCargoVehicle(main_vehicle_id)
+	local passengers = this.PassengerCargoVehicle(main_vehicle_id)
 
-	if(raw && raw != null) string = "Raw cargo "; 
-	else if(processed && processed != null) string = "Processed cargo"; 
-	else if(passengers && passengers != null) string = "Bus line";
-	else {
+	if(raw && raw != null) {
+		string = "Raw cargo "; 
+	} else if(processed && processed != null) {
+		string = "Processed cargo"; 
+	} else if(passengers && passengers != null) {
+		string = "Bus line";
+	} else {
 		return false; //TODO - cancel sell order
 	}
 	AIVehicle.SetName(vehicle_id, string);
-    return true;
+	return true;
 }
 
 function RoadBuilder::RemoveRedundantRV()
 {
-local station_list = AIStationList(AIStation.STATION_TRUCK_STOP);
-local ile = RoadBuilder.RemoveRedundantRVFromStation(station_list);
-local station_list = AIStationList(AIStation.STATION_BUS_STOP);
-ile+=RoadBuilder.RemoveRedundantRVFromStation(station_list);
-return ile;
+	local station_list = AIStationList(AIStation.STATION_TRUCK_STOP);
+	local how_many = RoadBuilder.RemoveRedundantRVFromStation(station_list);
+	local station_list = AIStationList(AIStation.STATION_BUS_STOP);
+	how_many += RoadBuilder.RemoveRedundantRVFromStation(station_list);
+	return how_many;
 }
 
 function RoadBuilder::RemoveRedundantRVFromStation(station_list)
