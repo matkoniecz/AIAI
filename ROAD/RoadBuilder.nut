@@ -1067,17 +1067,7 @@ else
 	  }
 	  }
    }
-return false;   
-/*
-static boolean AIOrder::SetOrderFlags  	(  	VehicleID   	 vehicle_id,
-		OrderPosition  	order_position,
-		AIOrderFlags  	order_flags	 
-	)
-	
-static AIOrderFlags AIOrder::GetOrderFlags  	(  	VehicleID   	 vehicle_id,
-		OrderPosition  	order_position	 
-	) 	
-*/
+return false
 }
 
 function RoadBuilder::copyVehicle(main_vehicle_id, cargo)
