@@ -3,7 +3,7 @@ const INFINITE_DISTANCE = 4000000;
 //import("queue.binary_heap", "", 1);//################################################## <- external
 
 import("pathfinder.road", "RoadPathFinder", 4);      //################################################## <- external
-import("util.superlib", "SuperLib", 27);      //################################################## <- external
+import("util.superlib", "SuperLib", 28);      //################################################## <- external
 
 require("mySuperLibpatch.nut");
 
