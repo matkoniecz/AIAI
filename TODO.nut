@@ -1,4 +1,4 @@
-
+TODO: Self feader
 TODO: Use ProuctionCanIncrease in valuate producer
 TODO: cargo planes are disabled
 TODO: explain aystar mess (caused by passing lane generator)
