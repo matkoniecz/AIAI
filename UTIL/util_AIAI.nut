@@ -45,7 +45,7 @@ function NameCompany()
 {
 	if((AICompany.GetName(AICompany.COMPANY_SELF)!="AIAI") && (AIVehicleList().Count()>0)) {
 		while(true) {
-			Info("Company created by other ai. As such it is not possible for AIAI to menage that company.")
+			Error("Company created by other ai. As such it is not possible for AIAI to menage that company.")
 			Info("Zzzzz...")
 			Sleep(1000)
 		}
@@ -59,8 +59,11 @@ function NameCompany()
 				i++
 			}
 		}
+		Info("BUUUUUUURN!")
 		Money.BurnMoney()
 		while(true) {
+			Error("Multiple instances of AIAI would cause problems. As there is already other company named AIAI this company will do nothing")
+			Info("Zzzzz...")
 			Sleep(1000)
 		}
 	}
