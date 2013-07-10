@@ -102,8 +102,8 @@ class AIAI extends AIInfo {
 		flags = CONFIG_BOOLEAN + CONFIG_INGAME
 	});
 	AddSetting( {
-		name = "use_busses",
-		description = "Busses allowed",
+		name = "use_buses",
+		description = "Buses allowed",
 		easy_value = 1,
 		medium_value = 1,
 		hard_value = 1,
@@ -257,7 +257,7 @@ class AIAI extends AIInfo {
 	});
 	AddSetting( {
 		name = "show_pathfinding",
-		description = "show pathfinding (using 737474828920202 signs)",
+		description = "show pathfinding (using many signs)",
 		easy_value = 0,
 		medium_value = 0,
 		hard_value = 0,
@@ -266,7 +266,7 @@ class AIAI extends AIInfo {
 	});
 	AddSetting( {
 		name = "show_full_pathfinding",
-		description = "show full pathfinding (using 737474828273874374374747920202 signs)",
+		description = "show full pathfinding (using crazy amount of signs)",
 		easy_value = 0,
 		medium_value = 0,
 		hard_value = 0,

@@ -61,7 +61,7 @@ function Builder::GetCost()
 return cost;
 }
 
-function Builder::HowManyVehiclesFromThisStationAreStopped(station)
+function Builder::HowManyVehiclesFromThisStationAreNotMoving(station)
 {
 local count = 0;
 			local vehicle_list=AIVehicleList_Station(station);

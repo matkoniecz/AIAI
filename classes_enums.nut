@@ -60,13 +60,18 @@ function RemoveRailwayTracks(first, last)
 	}
 }
 
+enum RouteType
+{
+rawCargo,
+processedCargo,
+townCargo,
+}
+
 class Route
 {
 start = null;
 end = null;
 forbidden_industries = null;
-start_otoczka = null;
-koniec_otoczka = null;
 depot_tile = null;
 start_tile = null;
 end_tile = null;
@@ -79,11 +84,6 @@ first_station = null;
 second_station = null;
 
 track_type = null;
-
-//trasa.type
-//0 proceed trasa.cargo
-//1 raw
-//2 passenger
 engine = null;
 engine_count = null;
 budget = null;
@@ -97,8 +97,6 @@ second_station = Station();
 start=null;
 end=null;
 forbidden_industries = AIList();
-start_otoczka=null; //obsolete TODO //move to Station()
-koniec_otoczka=null; //obsolete TODO //move to Station()
 depot_tile = null;
 start_tile = null;
 end_tile = null;

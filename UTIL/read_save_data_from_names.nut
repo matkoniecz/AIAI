@@ -60,9 +60,37 @@ function GetLoadStationLocation(vehicle_id)
 		return null
 	}
 	for(local i=0; i<AIOrder.GetOrderCount(vehicle_id); i++) if(AIOrder.IsGotoStationOrder(vehicle_id, i)) {
-		return AIOrder.GetOrderDestination(vehicle_id, i);
+		if((AIOrder.GetOrderFlags(vehicle_id, i) & AIOrder.OF_NO_LOAD) !=AIOrder.OF_NO_LOAD) {
+			return AIOrder.GetOrderDestination(vehicle_id, i);
+		}
 	}
 	abort("Explosion caused by vehicle " + vehicle_id + " named "+ AIVehicle.GetName(vehicle_id));
+}
+
+function GetSecondLoadStationId(vehicle_id)
+{
+	local location = GetSecondLoadStationLocation(vehicle_id)
+	if(location == null) {
+		return null
+	}
+	return AIStation.GetStationID(location)
+}
+
+function GetSecondLoadStationLocation(vehicle_id)
+{
+	if(!AIVehicle.IsOKVehicle) {
+		return null
+	}
+	local first_was_found = false;
+	for(local i=0; i<AIOrder.GetOrderCount(vehicle_id); i++) if(AIOrder.IsGotoStationOrder(vehicle_id, i)) {
+		if((AIOrder.GetOrderFlags(vehicle_id, i) & AIOrder.OF_NO_LOAD) !=AIOrder.OF_NO_LOAD) {
+			if(first_was_found) {
+				return AIOrder.GetOrderDestination(vehicle_id, i);
+			}
+			first_was_found = true;
+		}
+	}
+	return null;
 }
 
 function GetUnloadStationId(vehicle_id)

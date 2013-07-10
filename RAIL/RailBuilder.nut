@@ -73,7 +73,7 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
 				Warning("Unprofitable leader");
 				continue;
 				}
-			if(HowManyVehiclesFromThisStationAreStopped(station) != 0) continue;
+			if(HowManyVehiclesFromThisStationAreNotMoving(station) != 0) continue;
 			local end = AIOrder.GetOrderDestination(original, AIOrder.GetOrderCount(original)-2);
 			//if(AITile.GetCargoAcceptance (end, cargo, 1, 7, 5)==0) //TODO: improve it to have real data
 			//   {
@@ -667,17 +667,17 @@ return i;
 
 function RailBuilder::TrainOrders(engineId)
 {
-if(trasa.type==1) //1 raw
+if(trasa.type == RouteType.rawCargo)
    {
 	AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE );
 	AIOrder.AppendOrder (engineId, trasa.second_station.location, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_NO_LOAD );
 	}
-else if(trasa.type==0) //0 proceed trasa.cargo
+else if(trasa.type == RouteType.processedCargo)
    {
 	AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE );
 	AIOrder.AppendOrder (engineId, trasa.second_station.location, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_NO_LOAD );
 	}
-else if(trasa.type == 2) //2 passenger
+else if(trasa.type == RouteType.townCargo)
    {
 	AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE );
 	AIOrder.AppendOrder (engineId, trasa.second_station.location, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE );

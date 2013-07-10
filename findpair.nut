@@ -129,7 +129,7 @@ if(best==0){
    return traska;
    }
 choise.OK=true;
-if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(choise.start))) choise.type=1;
-else choise.type=0;
+if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(choise.start))) choise.type = RouteType.rawCargo;
+else choise.type = RouteType.processedCargo;
 return choise;
 }
