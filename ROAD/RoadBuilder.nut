@@ -353,6 +353,7 @@ function RoadBuilder::PrepareRoute()
 
 function RoadBuilder::ConstructionOfRVRoute(type)
 {
+	trasa.depot_tile = null;
 	ProvideMoney();
 	if(!this.BuildRVStation(type)){
 		return false;
@@ -365,8 +366,19 @@ function RoadBuilder::ConstructionOfRVRoute(type)
 		return false;
 	}
 
-	trasa.depot_tile = Road.BuildDepotNextToRoad(trasa.first_station.location, 0, 200);
-	if(trasa.depot_tile==null) {
+	Info("   working on circle around loading bay");
+	this.BuildLoopAroundStation(trasa.first_station.road_loop[0], trasa.first_station.road_loop[1], trasa.first_station.location);
+	if(AIRoad.BuildRoadDepot(trasa.first_station.road_loop[0], trasa.first_station.location)) { //to make more likely that RV have place to reverse
+		trasa.depot_tile = trasa.first_station.road_loop[0];
+	}
+	if(AIRoad.BuildRoadDepot(trasa.first_station.road_loop[1], trasa.first_station.location)) { //to make more likely that RV have place to reverse
+		trasa.depot_tile = trasa.first_station.road_loop[1];
+	}
+
+	if(trasa.depot_tile == null) {
+		trasa.depot_tile = Road.BuildDepotNextToRoad(trasa.first_station.location, 0, 200);
+	}
+	if(trasa.depot_tile == null) {
 		Info("   Depot placement error");
 		return false;
 	}
@@ -376,10 +388,6 @@ function RoadBuilder::ConstructionOfRVRoute(type)
 
 	Info("   Route constructed!");
 
-	Info("   working on circle around loading bay");
-	this.BuildLoopAroundStation(trasa.first_station.road_loop[0], trasa.first_station.road_loop[1], trasa.first_station.location);
-	AIRoad.BuildRoadDepot(trasa.first_station.road_loop[0], trasa.first_station.location); //to make more likely that RV have place to reverse
-	AIRoad.BuildRoadDepot(trasa.first_station.road_loop[1], trasa.first_station.location); //to make more likely that RV have place to reverse
 
 	local how_many_new_vehicles = this.BuildVehicles();
 
