@@ -1116,7 +1116,7 @@ function RoadBuilder::RemoveRedundantRVFromStation(station, cargo, vehicle_list)
 function RoadBuilder::deleteVehicles(vehicle_list, delete_goal, cargo)
 {
 	local delete_count=0;
-	vehicle_list.Valuate(IsForSell);
+	vehicle_list.Valuate(IsForSellUseTrueForInvalidVehicles);
 	vehicle_list.KeepValue(0);
 	vehicle_list.Valuate(AIVehicle.GetAge);
 	vehicle_list.KeepAboveValue(60);

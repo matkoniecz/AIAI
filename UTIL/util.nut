@@ -235,7 +235,7 @@ function DeleteUnprofitable()
 {
 	local vehicle_list = AIVehicleList();
 
-   	vehicle_list.Valuate(IsForSell);
+   	vehicle_list.Valuate(IsForSellUseTrueForInvalidVehicles);
 	vehicle_list.KeepValue(0);
 
    	vehicle_list.Valuate(AIVehicle.GetAge);

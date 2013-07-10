@@ -19,9 +19,18 @@ function IntToStrFill(int_val, num_digits)
 	return str;
 }
 
+function IsForSellUseTrueForInvalidVehicles(vehicle_id)
+{
+	local value = IsForSell(vehicle_id);
+	if(value == null) {
+		return true;
+	}
+	return value;
+}
+
 function IsForSell(vehicle_id)
 {
-	if(!AIVehicle.IsOKVehicle) {
+	if(!AIVehicle.IsOKVehicle(vehicle_id)) {
 		return null
 	}
 	local name=AIVehicle.GetName(vehicle_id)+"            ";
@@ -35,7 +44,7 @@ function IsForSell(vehicle_id)
 
 function GetDepotLocation(vehicle_id)
 {
-	if(!AIVehicle.IsOKVehicle) {
+	if(!AIVehicle.IsOKVehicle(vehicle_id)) {
 		return null
 	}
 	local depot_location = LoadDataFromStationNameFoundByStationId(GetLoadStationId(vehicle_id), "[]");
@@ -56,7 +65,7 @@ function GetLoadStationId(vehicle_id)
 
 function GetLoadStationLocation(vehicle_id)
 {
-	if(!AIVehicle.IsOKVehicle) {
+	if(!AIVehicle.IsOKVehicle(vehicle_id)) {
 		return null
 	}
 	for(local i=0; i<AIOrder.GetOrderCount(vehicle_id); i++) if(AIOrder.IsGotoStationOrder(vehicle_id, i)) {
@@ -78,7 +87,7 @@ function GetSecondLoadStationId(vehicle_id)
 
 function GetSecondLoadStationLocation(vehicle_id)
 {
-	if(!AIVehicle.IsOKVehicle) {
+	if(!AIVehicle.IsOKVehicle(vehicle_id)) {
 		return null
 	}
 	local first_was_found = false;
@@ -104,7 +113,7 @@ function GetUnloadStationId(vehicle_id)
 
 function GetUnloadStationLocation(vehicle_id)
 {
-	if(!AIVehicle.IsOKVehicle) {
+	if(!AIVehicle.IsOKVehicle(vehicle_id)) {
 		return null
 	}
 	local onoff = false;

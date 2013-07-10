@@ -45,7 +45,7 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
 			Info("IsItNeededToImproveThatNoRawStation (" +AIBaseStation.GetName(station) + ")? YES!");
 			local vehicle_list=AIVehicleList_Station(station);
 			local how_many = vehicle_list.Count();
-			vehicle_list.Valuate(IsForSell);
+			vehicle_list.Valuate(IsForSellUseTrueForInvalidVehicles);
 			vehicle_list.KeepValue(0);
 			if(how_many != vehicle_list.Count()) {
 				Info("wait for sell");
