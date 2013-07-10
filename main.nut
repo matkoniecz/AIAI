@@ -399,7 +399,7 @@ function AIAI::HandleEvents() //from CluelessPlus and simpleai
 			   this.BankruptProtector();
 			   }
 			else {
-				Warning("Competitor is in trouble!");
+				Info("Competitor is in trouble!");
 				}
 			}
 		else if(ev_type == AIEvent.ET_ROAD_RECONSTRUCTION ){
