@@ -1147,7 +1147,7 @@ function RoadBuilder::deleteVehicles(vehicle_list, delete_goal, cargo)
 function RoadBuilder::BuildRoadSegment(path, par, depth)
 {
 	if(depth>=6) {
-		Info("Construction terminated! "+AIError.GetLastErrorString()); 
+		Warning("Construction terminated: "+AIError.GetLastErrorString()); 
 		if(AIAI.GetSetting("other_debug_signs"))AISign.BuildSign(path, "stad" + depth+AIError.GetLastErrorString());
 		return false;
 	}
@@ -1178,7 +1178,7 @@ function RoadBuilder::BuildRoadSegment(path, par, depth)
 			AIController.Sleep(20);
 			return this.BuildRoadSegment(path, par, depth+1);
 		}
-		Info("Construction terminated! "+AIError.GetLastErrorString()); 
+		Warning("Construction terminated: "+AIError.GetLastErrorString()); 
 		if(AIAI.GetSetting("other_debug_signs")){
 			AISign.BuildSign(path, "stad" + depth+AIError.GetLastErrorString());
 		}
