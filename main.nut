@@ -56,7 +56,7 @@ function AIAI::Start()
 		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>Money.Inflate(500000) && this.BuildStatues()) Info("I Am Rich! Statues!");
 		this.InformationCenter(builders);
 		if(this.TryEverything(builders)){
-			desperation = 0;
+			desperation /= 10;
 			}
 		else{
 			Info("Nothing to do!");
