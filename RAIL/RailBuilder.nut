@@ -69,7 +69,7 @@ for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.
 				continue
 			}
 		 
-			if(AIVehicle.GetProfitLastYear(original)<0){
+			if(AIVehicle.GetProfitLastYear(original) + AIVehicle.GetProfitThisYear(original) <0){
 				Warning("Unprofitable leader");
 				continue;
 				}
