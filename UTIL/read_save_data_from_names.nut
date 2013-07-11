@@ -130,6 +130,7 @@ function GetUnloadStationLocation(vehicle_id)
 
 function LoadDataFromStationNameFoundByStationId(station_id, delimiters)
 {
+	assert(station_id != null);
 	assert(AIStation.IsValidStation(station_id))
 	local start_code = delimiters[0]
 	local end_code = delimiters[1]

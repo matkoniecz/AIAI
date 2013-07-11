@@ -99,7 +99,9 @@ function RailBuilder::copyVehicle(main_vehicle_id, cargo)
 	if(depot_tile == null) {
 		return false
 	}
-	if(AIVehicleList_SharedOrders(main_vehicle_id).Count()<LoadDataFromStationNameFoundByStationId( GetLoadStationId(main_vehicle_id), "{}")) {
+	local loadStationId = GetLoadStationId(main_vehicle_id);
+	local limit = LoadDataFromStationNameFoundByStationId(loadStationId, "{}");
+	if(AIVehicleList_SharedOrders(main_vehicle_id).Count() < limit) {
 		local vehicle_id = AIVehicle.CloneVehicle(depot_tile, main_vehicle_id, true)
 		if(AIVehicle.IsValidVehicle(vehicle_id)) {
 			if(AIVehicle.StartStopVehicle (vehicle_id)) {
