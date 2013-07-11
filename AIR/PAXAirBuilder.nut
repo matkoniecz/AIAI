@@ -41,19 +41,19 @@ function PAXAirBuilder::BuildAirportRouteBetweenCitiesWithAirportTypeSet(airport
 	if(!AIAirport.IsValidAirportType(airport_type)) return false;
 	local engine=this.FindAircraft(airport_type, Helper.GetPAXCargo(), 3, GetAvailableMoney(), min_distance);
 	if(engine==null){
-		Info("Unfortunatelly no suitable aircraft found");
+		Info("Unfortunately no suitable aircraft found");
 		return false;
 	}
 	
 	ProvideMoney();
 	local tile_1 = this.FindSuitableAirportSpotInTown(airport_type);
 	if (tile_1 < 0){
-		Info("Unfortunatelly no suitable airport location");
+		Info("Unfortunately no suitable airport location");
 		return false;
 	}
 	local tile_2 = this.FindSuitableAirportSpotInTown(airport_type, tile_1, AIEngine.GetMaximumOrderDistance(engine));
 	if (tile_2 < 0){		{
-		Info("Unfortunatelly no suitable pair of airport locations");
+		Info("Unfortunatell no suitable pair of airport locations");
 		return false;
 		}
 	}

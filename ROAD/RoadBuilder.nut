@@ -345,7 +345,7 @@ function RoadBuilder::PrepareRoute()
 	cost = estimated_cost;
 
 	if(GetAvailableMoney()<estimated_cost) {
-		Info("too expensivee, we have only " + GetAvailableMoney() + " And we need " + estimated_cost);
+		Warning("too expensivee, we have only " + GetAvailableMoney() + " And we need " + estimated_cost);
 		return false;
 	}
 	return true;   

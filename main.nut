@@ -40,7 +40,7 @@ function AIAI::Start()
 {
 	this.Starter();
 	local builders = strategyGenerator();
-	while(true){
+	for(local i = 1; true; i++){
 		Warning("Desperation: " + desperation);
 		root_tile = Tile.GetRandomTile();
 		if(AIVehicleList().Count()!=0){
@@ -64,12 +64,17 @@ function AIAI::Start()
 			desperation++;
 			continue;
 			}
-		Info(GetDate()-GeneralInspection+" month from general check")
-		if((GetDate()-GeneralInspection)>=6){ //6 months
+		local time = GetDate()-GeneralInspection;
+		if(time == 1) {
+			Info("1 month from general check");
+		} else {
+			Info(time + " months from general check");
+		}
+		if(time >= 6){ //6 months
 			this.RunGeneralInspection();
 			this.GeneralInspection = GetDate();
-			}
-		Info("===================================");
+		}
+		Info("==================iteration number " + i + " of the main loop is now finished=================");
 		}
 	abort("Escaped Start function, it was not supposed to happen");
 }
@@ -135,20 +140,17 @@ return false;
 function AIAI::GetMinimalCost(builders)
 {
 local cost = 10000000000;
-			Info(cost);
 for(local i = 0; i<builders.len(); i++)
 	{
 	if(builders[i] != null){
 		if(builders[i].IsAllowed()){
 			if(builders[i].GetCost() < cost){
 				cost = builders[i].GetCost();
-				Info(cost);
 				}
 			}
 		}
 	}
 if(cost < Money.Inflate(100000)) cost = Money.Inflate(100000);
-			Info(cost);
 return cost;
 }
 

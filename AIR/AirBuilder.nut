@@ -373,13 +373,13 @@ return vehicle;
 function AirBuilder::HowManyAirplanes(distance, speed, production, engine)
 {
 local ile = (3*distance)/(2*speed);
-Info(ile + "aircrafts needed; based on distance");
+Info(ile + " aircrafts needed; based on distance");
 
 ile *= 10 * production;
 //Info(ile + "&^%***********");
 
 ile /= AIEngine.GetCapacity(engine);
-Info(ile + "aircrafts needed after production (" + production + ") and capacity (" +  AIEngine.GetCapacity(engine) +") adjustment");
+Info(ile + " aircrafts needed after production (" + production + ") and capacity (" +  AIEngine.GetCapacity(engine) +") adjustment");
 ile = max(ile, 3);
 return ile;
 }

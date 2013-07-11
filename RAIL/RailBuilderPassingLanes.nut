@@ -530,12 +530,12 @@ function RailBuilder::ConstructionOfPassingLanes(list)
 local count = 0;
 for(local i=0; i<list.len(); i++)
 	{
-	Error("******************************** "+list.len())
+	Info("******************************** " + i+1 + " of " + list.len() + " passing lanes")
 	local copy = list[i].path;
 	local cost;
 
 	cost = GetCostOfRoute(copy);
-	Info("******" + cost)
+	Info("****** cost: " + cost)
 	while(cost != null && cost > GetAvailableMoney()){
 		AIController.Sleep(500);
 		rodzic.Maintenance();
@@ -543,7 +543,7 @@ for(local i=0; i<list.len(); i++)
 		Info("Waiting for more money: " + GetAvailableMoney()/1000 + "k / " + cost/1000 + "k");
 		}
 	
-	Info("******" + GetAvailableMoney())
+	Info("****** available money: " + GetAvailableMoney())
 	
 	if(cost != null){
 		Info("Entered")
