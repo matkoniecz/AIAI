@@ -86,17 +86,6 @@ AIOrder.AppendOrder <- function(vehicle_id, destination, order_flags)
 	local boom  = 0/0;
 }
 
-AIVehicleList_Station_ <- AIVehicleList_Station
-AIVehicleList_Station <- function(station_id)
-{
-	local vehicle_list = AIVehicleList_Station_(station_id)
-	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()){
-		if(AIVehicle.GetState(vehicle_id) == AIVehicle.VS_CRASHED) Error("AIVehicleList_Station contains crashed vehicle: "+AIVehicle.GetName(vehicle_id))
-		}
-	if(vehicle_list.Count()==0) Error("Empty AIVehicleList_Station");
-	return vehicle_list;
-}
-
 AIVehicle.SetName_ <- AIVehicle.SetName
 AIVehicle.SetName <- function (vehicle_id, string)
 {
