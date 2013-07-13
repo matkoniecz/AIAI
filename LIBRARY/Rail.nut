@@ -1,15 +1,41 @@
-function RailBuilder::BuildDepot(path, reverse) //from adimral
+AILog.Info("adding new functions to SuperLib (Rail)");
+
+class Rail{}
+
+	//from AIAI
+	//attempts to locate brake van - wagon appearing in some newgrfs (for example - Japanese Train Set v2.1a), required to start freight train
+	//search is limited to ones usable on specified railtype
+	//returns engine_id of the fastest one or null if none was found
+function Rail::GetBrakeVan(railtype)
 {
-	if (reverse) {
-		local rpath = RPathItem(path.GetTile());
-		while (path.GetParent() != null) {
-			path = path.GetParent();
-			local npath = RPathItem(path.GetTile());
-			npath._parent = rpath;
-			rpath = npath;
-		}
-		path = rpath;
+	local wagons = AIEngineList(AIVehicle.VT_RAIL);
+	wagons.Valuate(AIEngine.IsWagon);
+	wagons.RemoveValue(0);
+	wagons.Valuate(AIEngine.IsBuildable);
+	wagons.RemoveValue(0);
+	wagons.Valuate(AIEngine.CanRunOnRail, railtype);
+	wagons.RemoveValue(0);
+	local cargo_list=AICargoList();
+	for (local cargoIndex = cargo_list.Begin(); !cargo_list.IsEnd(); cargoIndex = cargo_list.Next()){
+		wagons.Valuate(AIEngine.CanRefitCargo, cargoIndex);
+		wagons.RemoveValue(1);
 	}
+	if(wagons.Count() == 0){
+		return null;
+	} else {
+		wagons.Valuate(AIEngine.GetMaxSpeed);
+		return wagons.Begin();
+	}
+}
+
+	//from AdmiralAI by Thijs Marinussen
+	//constructs RailDepot and connects it to railway supplied in path parameter
+	//if parameter reverse is true 
+	//may perform some landscaping
+	//Returns a depot tile if successful, null otherwise 
+	function Rail::BuildDepot(path);
+function Rail::BuildDepot(path)
+{
 	local prev = null;
 	local pp = null;
 	local ppp = null;
@@ -136,3 +162,20 @@ function ConnectDepotDiagonal(tile_a, tile_b, tile_c)
 	return depot_tile;
 }
 
+//from Rondje, computes square root of i using Babylonian method
+_SuperLib_Helper.Sqrt <- function(i) 
+{ 
+	assert(i>=0);
+	if (i == 0) {
+		return 0; // Avoid divide by zero
+	}
+	local n = (i / 2) + 1; // Initial estimate, never low
+	local n1 = (n + (i / n)) / 2;
+	while (n1 < n) {
+		n = n1;
+		n1 = (n + (i / n)) / 2;
+	}
+	return n;
+}
+
+AILog.Info("changing SuperLib (Rail) finished");

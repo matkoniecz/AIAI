@@ -155,8 +155,8 @@ function IsConnectedIndustry(industry_id, cargo_id)
 		}
 	}
 
-	local tile_list = AITileList_IndustryProducing(industry_id, AIStation.GetCoverageRadius(AIStation.STATION_TRUCK_STOP)) //assumes that STATION_BUS_STOP have the same coverage
-
+	assert(AIStation.GetCoverageRadius(AIStation.STATION_TRUCK_STOP) == AIStation.GetCoverageRadius(AIStation.STATION_BUS_STOP));
+	local tile_list = AITileList_IndustryProducing(industry_id, AIStation.GetCoverageRadius(AIStation.STATION_TRUCK_STOP))
 	for(local tile = tile_list.Begin(); tile_list.HasNext(); tile = tile_list.Next()) {
 		local station_id = AIStation.GetStationID(tile)
 		if(AIStation.IsValidStation(station_id)) {

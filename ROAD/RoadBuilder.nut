@@ -305,7 +305,7 @@ function RoadBuilder::UniversalStationAllocator(project)
 
 function RoadBuilder::PrepareRoute()
 {
-	Info("   Company started route on distance: " + AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile));
+	Info("   Road route on distance: " + AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile));
 
 	local forbidden_tiles = array(2);
 	forbidden_tiles[0] = trasa.second_station.location;

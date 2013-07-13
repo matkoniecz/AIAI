@@ -1,11 +1,13 @@
 const INFINITE_DISTANCE = 4000000;
+const INFINITE_SPEED = 4000000;
 //import("graph.aystar", "", 4);  - currently unused
 //import("queue.binary_heap", "", 1);//################################################## <- external
 
 import("pathfinder.road", "RoadPathFinder", 4);      //################################################## <- external
 import("util.superlib", "SuperLib", 28);      //################################################## <- external
 
-require("mySuperLibpatch.nut");
+require("LIBRARY/Rail.nut");
+require("LIBRARY/Helper.nut");
 
 Helper <- SuperLib.Helper
 Tile <- SuperLib.Tile

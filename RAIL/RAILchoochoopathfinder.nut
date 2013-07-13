@@ -1,9 +1,7 @@
-/* $Id: main.nut 15101 2009-01-16 00:05:26Z truebrain $ */
-
 /**
  * A Rail Pathfinder.
  */
-class Rail
+class RailPathfinder
 {
 	estimate_multiplier = 3;
 	
@@ -16,6 +14,7 @@ class Rail
 	_cost_bridge_per_tile = null;  ///< The cost per tile of a new bridge, this is added to _cost_tile.
 	_cost_tunnel_per_tile = null;  ///< The cost per tile of a new tunnel, this is added to _cost_tile.
 	_cost_coast = null;            ///< The extra cost for a coast tile.
+	_cost_level_crossing = null;   ///< The extra cost for a level crossing tile.
 	_pathfinder = null;            ///< A reference to the used AyStar object.
 	_max_bridge_length = null;     ///< The maximum length of a bridge that will be build.
 	_max_tunnel_length = null;     ///< The maximum length of a tunnel that will be build.
@@ -34,6 +33,7 @@ class Rail
 		this._cost_bridge_per_tile = 150;
 		this._cost_tunnel_per_tile = 120;
 		this._cost_coast = 20;
+		this._cost_level_crossing = 100;
 		this._max_bridge_length = 6;
 		this._max_tunnel_length = 6;
 		this._pathfinder = this._aystar_class(this._Cost, this._Estimate, this._Neighbours, this._CheckDirection, this, this, this, this);
@@ -75,7 +75,7 @@ class Rail
 	function FindPath(iterations);
 };
 
-class Rail.Cost
+class RailPathfinder.Cost
 {
 	_main = null;
 
@@ -92,6 +92,7 @@ class Rail.Cost
 			case "bridge_per_tile":   this._main._cost_bridge_per_tile = val; break;
 			case "tunnel_per_tile":   this._main._cost_tunnel_per_tile = val; break;
 			case "coast":             this._main._cost_coast = val; break;
+			case "level_crossing":    this._main._cost_level_crossing = val; break;
 			case "max_bridge_length": this._main._max_bridge_length = val; break;
 			case "max_tunnel_length": this._main._max_tunnel_length = val; break;
 			default: throw("the index '" + idx + "' does not exist");
@@ -111,6 +112,7 @@ class Rail.Cost
 			case "bridge_per_tile":   return this._main._cost_bridge_per_tile;
 			case "tunnel_per_tile":   return this._main._cost_tunnel_per_tile;
 			case "coast":             return this._main._cost_coast;
+			case "level_crossing":    return this._main._cost_level_crossing;
 			case "max_bridge_length": return this._main._max_bridge_length;
 			case "max_tunnel_length": return this._main._max_tunnel_length;
 			default: throw("the index '" + idx + "' does not exist");
@@ -123,7 +125,7 @@ class Rail.Cost
 	}
 };
 
-function Rail::FindPath(iterations)
+function RailPathfinder::FindPath(iterations)
 {
 	local test_mode = AITestMode();
 	local ret = this._pathfinder.FindPath(iterations);
@@ -138,7 +140,7 @@ function Rail::FindPath(iterations)
 	return ret;
 }
 
-function Rail::_GetBridgeNumSlopes(end_a, end_b)
+function RailPathfinder::_GetBridgeNumSlopes(end_a, end_b)
 {
 	local slopes = 0;
 	local direction = (end_b - end_a) / AIMap.DistanceManhattan(end_a, end_b);
@@ -159,12 +161,12 @@ function Rail::_GetBridgeNumSlopes(end_a, end_b)
 	return slopes;
 }
 
-function Rail::_nonzero(a, b)
+function RailPathfinder::_nonzero(a, b)
 {
 	return a != 0 ? a : b;
 }
 
-function Rail::_Cost(path, new_tile, new_direction, self)
+function RailPathfinder::_Cost(path, new_tile, new_direction, self)
 {
 	/* path == null means this is the first node of a path, so the cost is 0. */
 	if (path == null) return 0;
@@ -243,6 +245,16 @@ function Rail::_Cost(path, new_tile, new_direction, self)
 		cost += self._cost_slope;
 	}
 
+	/* Check if the last tile was sloped. */
+	if (path.GetParent() != null && !AIBridge.IsBridgeTile(prev_tile) && !AITunnel.IsTunnelTile(prev_tile) &&
+			self._IsSlopedRail(path.GetParent().GetTile(), prev_tile, new_tile)) {
+		cost += self._cost_slope;
+	}
+
+	if (AITile.HasTransportType(new_tile, AITile.TRANSPORT_ROAD)) {
+		cost += self._cost_level_crossing;
+	}
+
 	/* We don't use already existing rail, so the following code is unused. It
 	 *  assigns if no rail exists along the route. */
 	/*
@@ -254,7 +266,7 @@ function Rail::_Cost(path, new_tile, new_direction, self)
 	return path.GetCost() + cost;
 }
 
-function Rail::_Estimate(cur_tile, cur_direction, goal_tiles, self)
+function RailPathfinder::_Estimate(cur_tile, cur_direction, goal_tiles, self)
 {
 	local min_cost = self._max_cost;
 	/* As estimate we multiply the lowest possible cost for a single tile with
@@ -268,7 +280,7 @@ function Rail::_Estimate(cur_tile, cur_direction, goal_tiles, self)
 	return min_cost*self.estimate_multiplier;
 }
 
-function Rail::_Neighbours(path, cur_node, self)
+function RailPathfinder::_Neighbours(path, cur_node, self)
 {
 	if (AITile.HasTransportType(cur_node, AITile.TRANSPORT_RAIL)) return [];
 	/* self._max_cost is the maximum path cost, if we go over it, the path isn't valid. */
@@ -317,12 +329,12 @@ function Rail::_Neighbours(path, cur_node, self)
 	return tiles;
 }
 
-function Rail::_CheckDirection(tile, existing_direction, new_direction, self)
+function RailPathfinder::_CheckDirection(tile, existing_direction, new_direction, self)
 {
 	return false;
 }
 
-function Rail::_dir(from, to)
+function RailPathfinder::_dir(from, to)
 {
 	if (from - to == 1) return 0;
 	if (from - to == -1) return 1;
@@ -331,7 +343,7 @@ function Rail::_dir(from, to)
 	throw("Shouldn't come here in _dir");
 }
 
-function Rail::_GetDirection(pre_from, from, to, is_bridge)
+function RailPathfinder::_GetDirection(pre_from, from, to, is_bridge)
 {
 	if (is_bridge) {
 		if (from - to == 1) return 1;
@@ -348,7 +360,7 @@ function Rail::_GetDirection(pre_from, from, to, is_bridge)
  *  for performance reasons. Tunnels will only be build if no terraforming
  *  is needed on both ends.
  */
-function Rail::_GetTunnelsBridges(last_node, cur_node, bridge_dir)
+function RailPathfinder::_GetTunnelsBridges(last_node, cur_node, bridge_dir)
 {
 	local slope = AITile.GetSlope(cur_node);
 	if (slope == AITile.SLOPE_FLAT && AITile.IsBuildable(cur_node + (cur_node - last_node))) return [];
@@ -375,7 +387,7 @@ function Rail::_GetTunnelsBridges(last_node, cur_node, bridge_dir)
 	return tiles;
 }
 
-function Rail::_IsTurn(pre, start, middle, end)
+function RailPathfinder::_IsTurn(pre, start, middle, end)
 {
 	//AIMap.DistanceManhattan(new_tile, path.GetParent().GetParent().GetTile()) == 3 &&
 	//path.GetParent().GetParent().GetTile() - path.GetParent().GetTile() != prev_tile - new_tile) {
@@ -383,7 +395,7 @@ function Rail::_IsTurn(pre, start, middle, end)
 }
 
 
-function Rail::_IsSlopedRail(start, middle, end)
+function RailPathfinder::_IsSlopedRail(start, middle, end)
 {
 	local NW = 0; // Set to true if we want to build a rail to / from the north-west
 	local NE = 0; // Set to true if we want to build a rail to / from the north-east

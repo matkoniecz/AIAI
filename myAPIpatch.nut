@@ -204,7 +204,7 @@ AIVehicle.IsOKVehicle <- function(vehicle_id)
 	if (!AIVehicle.IsValidVehicle(vehicle_id)) {
 		return false
 	}
-	if (AIVehicle.GetState(vehicle_id) & AIVehicle.VS_CRASHED) {
+	if ((AIVehicle.GetState(vehicle_id) & AIVehicle.VS_CRASHED) ==  AIVehicle.VS_CRASHED) {
 		return false
 	}
 	return true

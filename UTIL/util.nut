@@ -200,10 +200,13 @@ function IsConnectedDistrict(town_tile)
 function IsCargoLoadedOnThisStation(station_id, cargo_id)
 	{
 	local vehicle_list=AIVehicleList_Station(station_id);
-	if(vehicle_list.Count()!=0)
-		if(GetLoadStationId(vehicle_list.Begin())==station_id)
-			if(AIVehicle.GetCapacity(vehicle_list.Begin(), cargo_id)!=0)
+	if(vehicle_list.Count() != 0) {
+		if(GetLoadStationId(vehicle_list.Begin()) == station_id) {
+			if(AIVehicle.GetCapacity(vehicle_list.Begin(), cargo_id) != 0) {
 				return true;
+			}
+		}
+	}
 	return false;
 	}
 
