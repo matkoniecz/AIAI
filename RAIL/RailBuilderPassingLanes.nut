@@ -553,7 +553,7 @@ function RailBuilder::ConstructionOfPassingLanes(list)
 	local count = 0;
 	for(local i=0; i<list.len(); i++)
 	{
-		Info("******************************** " + i+1 + " of " + list.len() + " passing lanes")
+		Info("******************************** " + (i+1) + " of " + list.len() + " passing lanes")
 		local copy = list[i].path;
 		local cost;
 
