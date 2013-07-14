@@ -14,8 +14,8 @@ class RoadStation extends Station
 	road_loop = null;
 }
 
-require("KRAI_level_crossing_menagement_from_clueless_plus.nut");
-require("KRAIpathfinder.nut");
+require("level_crossing_menagement_from_clueless_plus.nut");
+require("RoadPathfinder.nut");
 
 function RoadBuilder::IsAllowed()
 {
