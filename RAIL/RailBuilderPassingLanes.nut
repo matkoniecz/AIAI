@@ -286,32 +286,54 @@ function RailBuilder::IsItPossibleToEndPathWIthIt(path, prevtile, tile, aftertil
 {
 	local old_copy = path;
 
-	if (!AIMap.IsValidTile(prevtile)) return false;
-	if (!AIMap.IsValidTile(tile)) return false;
-	if (!AIMap.IsValidTile(aftertile)) return false;
+	if (!AIMap.IsValidTile(prevtile)) {
+		return false;
+	}
+	if (!AIMap.IsValidTile(tile)) {
+		return false;
+	}
+	if (!AIMap.IsValidTile(aftertile)) {
+		return false;
+	}
 	local tileSide = GetTileOnTheSideOftrack(tile, prevtile, side)
-	if (!AIMap.IsValidTile(tileSide)) return false;
-	path=addTileToPath(path, tileSide, stay_behind_path);
-	if(path.OK)path=path.path;
-	else{
+	if (!AIMap.IsValidTile(tileSide)) {
+		return false;
+	}
+	path = addTileToPath(path, tileSide, stay_behind_path);
+	if(path.OK) {
+		path=path.path;
+	} else {
 		return false;
 	}
 	
 	path=addTileToPath(path, tile, stay_behind_path);
-	if(path.OK)path=path.path;
-	else{
+	if(path.OK) {
+		path=path.path;
+	} else {
 		return false;
 	}
 
 	path=addTileToPath(path, aftertile, stay_behind_path);
-	if(path.OK)path=path.path;
-	else{
+	if(path.OK) {
+		path=path.path;
+	} else {
 		return false;
 	}
-	if(after1tile != null) if(after1tile - path.GetTile() == - ( path.GetParent().GetTile() - path.GetParent().GetParent().GetTile() )) return false;
-	if(after2tile != null) if(path.GetTile() - path.GetParent().GetTile() == - ( after2tile - after1tile )) return false;
-	if(after3tile != null) if(after1tile - path.GetTile() == - ( after3tile - after2tile )) return false;
-
+	if(after1tile != null) {
+		if(after1tile - path.GetTile() == - ( path.GetParent().GetTile() - path.GetParent().GetParent().GetTile() )) {
+			return false;
+		}
+	}
+	if(after2tile != null) {
+		if(path.GetTile() - path.GetParent().GetTile() == - ( after2tile - after1tile )) {
+			return false;
+		}
+	}
+	if(after3tile != null) {
+		if(after1tile - path.GetTile() == - ( after3tile - after2tile )) {
+			return false;
+		}
+	}
 	return path;
 }
 
@@ -331,13 +353,17 @@ function RailBuilder::IsItPossibleToStartPathWIthIt(prevprevtile, prevtile, tile
 	}
 	
 	path=addTileToPath(path, tile, stay_behind_path);
-	if(path.OK)path=path.path;
-	else return false;
-
+	if(path.OK) {
+		path=path.path;
+	} else {
+		return false;
+	}
 	path=addTileToPath(path, afterSide, stay_behind_path);
-	if(path.OK)path=path.path;
-	else return false;
-
+	if(path.OK) {
+		path=path.path;
+	} else {
+		return false;
+	}
 	if(prevprevtile!= null) {
 		local change = array(4);
 		change[0] = prevtile - prevprevtile;
@@ -402,7 +428,9 @@ class PassingLaneConstructor extends RailBuilder
 
 	function GetLane()
 	{
-		if(status != PassingLaneFinderStatus.finished)abort("GetLane - incorrect status Error <here insert random number :D>");
+		if(status != PassingLaneFinderStatus.finished) {
+			abort("GetLane - incorrect status Error <here insert random number :D>");
+		}
 		status = PassingLaneFinderStatus.failed
 		local copy_last_finished = last_finished;
 		this.last_finished = null;
@@ -416,13 +444,11 @@ class PassingLaneConstructor extends RailBuilder
 			if(active_construction.OK && path != null) {
 				if(side == debug_side) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, longer");
 				active_construction=active_construction.path;
-			}
-			else {
-				if(last_finished!=null)	{
+			} else {
+				if(last_finished!=null) {
 					if(side == debug_side) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, ended");
 					status = PassingLaneFinderStatus.finished;
-				}
-				else {
+				} else {
 					status = PassingLaneFinderStatus.failed;
 					if(side == debug_side) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, failed");
 				}
@@ -432,18 +458,18 @@ class PassingLaneConstructor extends RailBuilder
 		if(status==PassingLaneFinderStatus.active) {
 			local test = null;
 			test = IsItPossibleToEndPathWIthIt(active_construction, prevtile, tile, nextile_in_end, side, stay_behind_path, after1tile_in_end, after2tile_in_end, after3tile_in_end)
-			if(test != false && test.GetRealLength()>9.0) //HACK, should be 7.0
-			{
+			if(test != false && test.GetRealLength()>9.0) { //HACK, should be 7.0 TODO
 				if(side == debug_side) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, may end here "+test.GetRealLength());
 				last_finished=test;
 				end_tile = path;
-			}
-			else
-			{
+			} else {
 				if(side == debug_side) 
 				{
-					if(test != false) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, may NOT end here: "+test.GetRealLength());
-					else AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, may NOT end here: false active_construction len:"+active_construction.GetRealLength());
+					if(test != false) {
+						AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, may NOT end here: "+test.GetRealLength());
+					} else {
+						AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "active, may NOT end here: false active_construction len:"+active_construction.GetRealLength());
+					}
 				}
 			}
 		}
@@ -453,19 +479,21 @@ class PassingLaneConstructor extends RailBuilder
 				active_construction = test;
 				status = PassingLaneFinderStatus.active;
 				last_finished = null;
-				if( path.GetChildren() != null ) 
-				{
+				if( path.GetChildren() != null ) {
 					start_tile = path.GetChildren();
 					if( path.GetChildren().GetChildren() != null ) 
 					start_tile = path.GetChildren().GetChildren();
+				} else {
+					start_tile = path;
 				}
-				else start_tile = path;
 				number_of_start_tile = number_of_tile;
-				if(side == debug_side) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "failed, started");
-			}
-			else
-			{
-				if(side == debug_side) AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "failed");
+				if(side == debug_side) {
+					AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "failed, started");
+				}
+			} else {
+				if(side == debug_side) {
+					AISign.BuildSign(tile + AIMap.GetTileIndex(0, 0), "failed");
+				}
 			}
 		}
 	}
@@ -490,27 +518,24 @@ function RailBuilder::GeneratePassingLanes(path)
 			nextile = path.GetParent().GetTile();
 		}
 		path = path.GetParent();
-		if(i>10) stay_behind_path = stay_behind_path.GetParent();
+		if(i>10) {
+			stay_behind_path = stay_behind_path.GetParent();
+		}
 		local nextile_in_end = nextile
 		local after1tile_in_end = null;
 		local after2tile_in_end = null;
 		local after3tile_in_end = null;
-		if(!(tile != nextile || path.GetParent() == null || path.GetParent().GetParent() == null))
-		{
+		if(!(tile != nextile || path.GetParent() == null || path.GetParent().GetParent() == null)) {
 			nextile_in_end = path.GetParent().GetParent().GetTile();
 			after1tile_in_end = path.GetParent().GetParent().GetTile();
 			if(path.GetParent().GetParent().GetParent() != null) {
 				after2tile_in_end = path.GetParent().GetParent().GetParent().GetTile();
 				if(path.GetParent().GetParent().GetParent().GetParent() != null) after3tile_in_end = path.GetParent().GetParent().GetParent().GetParent().GetTile();
 			}
-		}
-		else
-		{
-			if(path != null)if(path.GetParent() != null)
-			{
+		} else {
+			if(path != null)if(path.GetParent() != null) {
 				after1tile_in_end = path.GetParent().GetTile();
-				if(path.GetParent().GetParent() != null) 
-				{
+				if(path.GetParent().GetParent() != null) {
 					after2tile_in_end = path.GetParent().GetParent().GetTile();
 					if(path.GetParent().GetParent().GetParent() != null) after3tile_in_end = path.GetParent().GetParent().GetParent().GetTile();
 				}
@@ -528,8 +553,7 @@ function RailBuilder::GeneratePassingLanes(path)
 			list.append(right.GetLane());
 			right = PassingLaneConstructor(true);
 			left = PassingLaneConstructor(false);
-		}
-		else if(left.Finished() && (left.GetPositionOfStart() < right.GetPositionOfStart() || right.Failed())) {
+		} else if(left.Finished() && (left.GetPositionOfStart() < right.GetPositionOfStart() || right.Failed())) {
 			list.append(left.GetLane());
 			right = PassingLaneConstructor(true);
 			left = PassingLaneConstructor(false);
@@ -551,8 +575,7 @@ function RailBuilder::GeneratePassingLanes(path)
 function RailBuilder::ConstructionOfPassingLanes(list)
 {
 	local count = 0;
-	for(local i=0; i<list.len(); i++)
-	{
+	for(local i=0; i<list.len(); i++) {
 		Info("******************************** " + (i+1) + " of " + list.len() + " passing lanes")
 		local copy = list[i].path;
 		local cost;
