@@ -1,6 +1,35 @@
 AILog.Info("adding new functions to SuperLib (Helper)");
 
-//from Rondje, computes square root of i using Babylonian method
+//from Rondje - attempt to contruct HQ in the biggest city, returns true if HQ contruction succeded, false otherwise
+_SuperLib_Helper.BuildCompanyHQ <- function()
+{
+	if(AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) {
+		return;
+	}
+
+	// Find biggest town for HQ
+	local towns = AITownList();
+	towns.Valuate(AITown.GetPopulation);
+	towns.Sort(AIList.SORT_BY_VALUE, false);
+	local town = towns.Begin();
+	
+	// Find empty 2x2 square as close to town centre as possible
+	local maxRange = Helper.Sqrt(AITown.GetPopulation(town)/100) + 5;
+	local HQArea = AITileList();
+	HQArea.AddRectangle(AITown.GetLocation(town) - AIMap.GetTileIndex(maxRange, maxRange), AITown.GetLocation(town) + AIMap.GetTileIndex(maxRange, maxRange));
+	HQArea.Valuate(AITile.IsBuildableRectangle, 2, 2);
+	HQArea.KeepValue(1);
+	HQArea.Valuate(AIMap.DistanceManhattan, AITown.GetLocation(town));
+	HQArea.Sort(AIList.SORT_BY_VALUE, true);
+	
+	for (local tile = HQArea.Begin(); HQArea.HasNext(); tile = HQArea.Next()) {
+		if(AICompany.BuildCompanyHQ(tile)) {
+			return true;
+		} 
+	}
+	return false;
+}
+//from Rondje, computes and returns square root of parameter using Babylonian method 
 _SuperLib_Helper.Sqrt <- function(i) 
 { 
 	assert(i>=0);

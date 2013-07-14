@@ -82,8 +82,7 @@ AIOrder._AppendOrder <- AIOrder.AppendOrder;
 AIOrder.AppendOrder <- function(vehicle_id, destination, order_flags)
 {
 	if(AIOrder._AppendOrder(vehicle_id, destination, order_flags)) return true;
-	Error(AIError.GetLastErrorString() + " in AppendOrder") //assertion
-	local boom  = 0/0;
+	abort(AIError.GetLastErrorString() + " in AppendOrder");
 }
 
 AIVehicle.SetName_ <- AIVehicle.SetName
