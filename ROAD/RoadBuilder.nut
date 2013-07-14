@@ -1064,11 +1064,11 @@ function RoadBuilder::RemoveRedundantRVFromStations(station_list)
 
 	for (local station = station_list.Begin(); station_list.HasNext(); station = station_list.Next()) {
 		local cargo;
-		if(AgeOfTheYoungestVehicle(station) < 150) {
-			continue;
-		}
 		local vehicle_list = AIVehicleList_Station(station);
 		if(vehicle_list.Count()==0) {
+			continue;
+		}
+		if(AgeOfTheYoungestVehicle(station) < 150) {
 			continue;
 		}
 		for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) {
@@ -1092,32 +1092,37 @@ function RoadBuilder::RemoveRedundantRVFromStation(station, cargo, vehicle_list)
 {
 	local waiting_counter = 0;
 	local active_counter = 0;
-	if(!IsItNeededToImproveThatStation(station, cargo)) {
-		for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()){
-			if(IsForSell(vehicle_id) != false || AIVehicle.GetAge(vehicle_id) < 60){
-				waiting_counter=0;
-				break;
-			}
-			if(AIVehicle.GetCargoLoad (vehicle_id, cargo)==0 && AIStation.GetDistanceManhattanToTile(station, AIVehicle.GetLocation(vehicle_id))<=4) {
+	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()){
+		if(IsForSell(vehicle_id) != false || AIVehicle.GetAge(vehicle_id) < 60){
+			return 0;
+		}
+		if(AIVehicle.GetCapacity (vehicle_id, cargo) == 0) {
+			if(AIStation.GetDistanceManhattanToTile(station, AIVehicle.GetLocation(vehicle_id))*16 > 4*AIVehicle.GetLength(vehicle_id)*2) {
 				if(AIVehicle.GetState(vehicle_id) == AIVehicle.VS_AT_STATION) {
-					waiting_counter++;
-				}
-				if(AIVehicle.GetCurrentSpeed(vehicle_id)==0) {
+					waiting_counter+=2;
+					//AISign.BuildSign(AIVehicle.GetLocation(vehicle_id), "w1");
+				} else if(AIVehicle.GetCurrentSpeed(vehicle_id)==0) {
+					//AISign.BuildSign(AIVehicle.GetLocation(vehicle_id), "w2");
 					waiting_counter++;
 				} else {
+					//AISign.BuildSign(AIVehicle.GetLocation(vehicle_id), "a1");
 					waiting_counter--;
 				}
 			} else {
+				//AISign.BuildSign(AIVehicle.GetLocation(vehicle_id), "a2");
 				active_counter++;
 			}
+		} else {
+			//AISign.BuildSign(AIVehicle.GetLocation(vehicle_id), "a3");
+			active_counter++;
 		}
-		local delete_goal = waiting_counter-5; //TODO OPTION
-		local alternate_delete_goal = waiting_counter-active_counter-1;
-		if(delete_goal < alternate_delete_goal) {
-			delete_goal = alternate_delete_goal;
-		}
-		return this.deleteVehicles(vehicle_list, delete_goal, cargo);
 	}
+	local delete_goal = waiting_counter-5; //TODO OPTION
+	local alternate_delete_goal = waiting_counter-active_counter-1;
+	if(delete_goal < alternate_delete_goal) {
+		delete_goal = alternate_delete_goal;
+	}
+	return this.deleteVehicles(vehicle_list, delete_goal, cargo);
 	return 0;
 }
 
