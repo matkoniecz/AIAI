@@ -8,8 +8,8 @@ const INFINITE_SPEED = 4000000;
 import("pathfinder.road", "RoadPathFinder", 4);      //################################################## <- external
 import("util.superlib", "SuperLib", 28);      //################################################## <- external
 
-require("LIBRARY/Rail.nut");
-require("LIBRARY/Helper.nut");
+require("library/Rail.nut");
+require("library/Helper.nut");
 
 Helper <- SuperLib.Helper
 Tile <- SuperLib.Tile
@@ -19,25 +19,25 @@ Money <- SuperLib.Money
 DataStore <- SuperLib.DataStore
 Town <- SuperLib.Town
 
-require("UTIL/debug.nut")
+require("util/debug.nut")
 
 require("myAPIpatch.nut");
 require("path.nut");
 
-require("UTIL/read_save_data_from_names.nut")
-require("UTIL/util.nut");
-require("UTIL/util_AIAI.nut")
-require("UTIL/money.nut")
+require("util/read_save_data_from_names.nut")
+require("util/util.nut");
+require("util/util_AIAI.nut")
+require("util/money.nut")
 require("aystar.nut");   //modified to use in passing lanes, it should be done in a other way TODO
 require("strategy.nut");
 require("autoreplace.nut");
 require("classes_enums.nut");
 require("findpair.nut");
 require("Builder.nut");
-require("RAIL/RailBuilder.nut");
-require("ROAD/RoadBuilder.nut");
-require("ROAD/BusRoadBuilder.nut");
-require("ROAD/TruckRoadBuilder.nut");
-require("AIR/AirBuilder.nut");
-require("AIR/PAXAirBuilder.nut");
-require("AIR/CargoAirBuilder.nut");
+require("rail/RailBuilder.nut");
+require("road/RoadBuilder.nut");
+require("road/BusRoadBuilder.nut");
+require("road/TruckRoadBuilder.nut");
+require("air/AirBuilder.nut");
+require("air/PAXAirBuilder.nut");
+require("air/CargoAirBuilder.nut");
