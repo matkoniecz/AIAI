@@ -246,8 +246,10 @@ function AIAI::gentleSellVehicle(vehicle_id, why)
 	AIOrder.AppendOrder(vehicle_id, tile_1, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_FULL_LOAD_ANY);
 	AIOrder.AppendOrder(vehicle_id, tile_2, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_NO_LOAD);
 	AIOrder.AppendOrder(vehicle_id, depot_location, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_STOP_IN_DEPOT);
-	if(!AIOrder.SkipToOrder(vehicle_id, 1)) {
-		abort("SkipToOrder failed");
+	if(AIOrder.ResolveOrderPosition (vehicle_id, AIOrder.ORDER_CURRENT) != 1) {
+		if(!AIOrder.SkipToOrder(vehicle_id, 1)) {
+			abort("SkipToOrder failed");
+		}
 	}
 	AIVehicle.SetName(vehicle_id, "for sell!" + why);
 }
