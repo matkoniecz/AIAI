@@ -1064,7 +1064,7 @@ function RoadBuilder::RemoveRedundantRVFromStations(station_list)
 
 	for (local station = station_list.Begin(); station_list.HasNext(); station = station_list.Next()) {
 		local cargo;
-		if(AgeOfTheYoungestVehicle(station)<150) {
+		if(AgeOfTheYoungestVehicle(station) < 150) {
 			continue;
 		}
 		local vehicle_list = AIVehicleList_Station(station);
@@ -1072,7 +1072,7 @@ function RoadBuilder::RemoveRedundantRVFromStations(station_list)
 			continue;
 		}
 		for (cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) {
-			if(AIVehicle.GetCapacity (vehicle_list.Begin(), cargo)>0) {
+			if(AIVehicle.GetCapacity (vehicle_list.Begin(), cargo) > 0) {
 				break;
 			}
 		}
@@ -1082,7 +1082,7 @@ function RoadBuilder::RemoveRedundantRVFromStations(station_list)
 			continue;
 		}
 		if(station == station_id) {
-			full_delete_count += this.RemoveRedundantRVFromStation(station, cargo, vehicle_list)
+			full_delete_count += this.RemoveRedundantRVFromStation(station, cargo, vehicle_list);
 		}
 	}
 	return full_delete_count;
@@ -1090,11 +1090,11 @@ function RoadBuilder::RemoveRedundantRVFromStations(station_list)
 
 function RoadBuilder::RemoveRedundantRVFromStation(station, cargo, vehicle_list)
 {
-	local waiting_counter=0;
-	local active_counter=0;
+	local waiting_counter = 0;
+	local active_counter = 0;
 	if(!IsItNeededToImproveThatStation(station, cargo)) {
 		for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()){
-			if(IsForSell(vehicle_id) != false || AIVehicle.GetAge(vehicle_id)<60){
+			if(IsForSell(vehicle_id) != false || AIVehicle.GetAge(vehicle_id) < 60){
 				waiting_counter=0;
 				break;
 			}
