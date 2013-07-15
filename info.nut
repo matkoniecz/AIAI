@@ -8,7 +8,7 @@ class AIAI extends AIInfo {
   function GetShortName()   { return "AIAI"; }
   function MinVersionToLoad() { return 87; } 
   function GetDate()        { return "2012-10-1"; }
-  function GetURL() {return "http://tinyurl.com/ottdaiai (redirects to http://www.tt-forums.net/viewtopic.php?f=65&t=47298) or bulwersator@gmail.com. Thanks! [iota (" + GetVersion() +")]";}
+  function GetURL() {return "https://github.com/Bulwersator/AIAI/issues (preferred), other possibilities include http://tinyurl.com/ottdaiai (redirects to http://www.tt-forums.net/viewtopic.php?f=65&t=47298) and bulwersator@gmail.com. Thanks! [iota (" + GetVersion() +")]";}
 
     function GetParameters() {
 	////////////////////////////////////////////////////////////////////

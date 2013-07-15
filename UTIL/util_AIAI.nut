@@ -86,8 +86,9 @@ function AIAI::ShowContactInfoOnTheMap()
 		AISign.BuildSign(tile, "In case of strange or stupid");
 		AISign.BuildSign(tile+AIMap.GetTileIndex(1, 1), "AIAI behaviour, please");
 		AISign.BuildSign(tile+AIMap.GetTileIndex(2, 2), "report it on");
-		AISign.BuildSign(tile+AIMap.GetTileIndex(3, 3), "http://tinyurl.com/ottdaiai");
-		AISign.BuildSign(tile+AIMap.GetTileIndex(4, 4), "or bulwersator@gmail.com");
+		AISign.BuildSign(tile+AIMap.GetTileIndex(3, 3), "https://github.com/Bulwersator/AIAI/issues (preferred)");
+		AISign.BuildSign(tile+AIMap.GetTileIndex(3, 4), "or on http://tinyurl.com/ottdaiai (ttforums)");
+		AISign.BuildSign(tile+AIMap.GetTileIndex(4, 5), "or bulwersator@gmail.com");
 		return true;
 	}
 	return false;
