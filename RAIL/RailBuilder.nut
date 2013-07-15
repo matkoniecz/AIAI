@@ -1522,6 +1522,7 @@ function RailBuilder::TryToPlaceRailStationHere(station_tile, direction, length,
 	tile_b_neighbour = tile_b - antimover
 	local tile_a_real_neighbour = tile_a - antimover
 	local tile_b_real_neighbour = tile_b + antimover
+	//returned.connection is array of arrays in form [path, path_anchor]
 	returned.connection = [[tile_a_real_neighbour, tile_a], [tile_b_real_neighbour, tile_b]]
 
 	if(AIRail.IsRailStationTile(tile_a_neighbour)) {
@@ -1553,6 +1554,12 @@ function RailBuilder::TryToPlaceRailStationHere(station_tile, direction, length,
 			if(!IsTileFlatAndBuildable(tile_b_neighbour + mover * x)) {
 				b_connection_status = false;
 			}
+		}
+		if(!IsTileFlatAndBuildable(tile_a)) {
+			a_connection_status = false;
+		}
+		if(!IsTileFlatAndBuildable(tile_b)) {
+			b_connection_status = false;
 		}
 		if(!station_status || (!a_connection_status && !b_connection_status) || i > max_platform_count){
 			returned.platform_count = i-1;
