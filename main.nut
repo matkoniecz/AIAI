@@ -288,17 +288,17 @@ function DoomsdayMachine()
 {
 	Info("DoomsdayMachine!");
 	Info("Scrap useless vehicles!");
-	DeleteVehiclesInDepots();
+	SellVehiclesInDepots();
 	Info("BuilderMaintenance!");
 	this.BuilderMaintenance();
 	Info("Scrap useless vehicles!");
-	DeleteVehiclesInDepots();
+	SellVehiclesInDepots();
 	Sleep(500);
 	Info("Scrap useless vehicles!");
-	DeleteVehiclesInDepots();
+	SellVehiclesInDepots();
 	Sleep(500);
 	Info("Scrap useless vehicles!");
-	DeleteVehiclesInDepots();
+	SellVehiclesInDepots();
 }
 
 
@@ -307,7 +307,7 @@ function AIAI::Maintenance()
 	this.SafeMaintenance();
 	this.HandleEvents();
 	this.BankruptProtector();
-	DeleteVehiclesInDepots(); //must not be run during creating vehicles
+	SellVehiclesInDepots(); //must not be run during creating vehicles
 }
 
 function AIAI::SafeMaintenance()
@@ -423,7 +423,7 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 				/* Handling is useless. TODO? */
 			}
 		} else if (ev_type == AIEvent.ET_VEHICLE_WAITING_IN_DEPOT) {
-			DeleteVehiclesInDepots();
+			SellVehiclesInDepots();
 		} else if (ev_type == AIEvent.ET_DISASTER_ZEPPELINER_CRASHED) {
 			//TODO
 		} else if (ev_type == AIEvent.ET_DISASTER_ZEPPELINER_CLEARED) {

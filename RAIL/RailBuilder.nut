@@ -460,7 +460,7 @@ function RailBuilder::BuildTrainButNotWithThisVehicle(route, name_of_train, bad_
 
 function RailBuilder::BuildTrainRecoverAfterBlacklisting(route, name_of_train, recover_from_failed_engine)
 {
-	DeleteVehiclesInDepots()
+	SellVehiclesInDepots()
 	if (!recover_from_failed_engine) {
 		return null;
 	}

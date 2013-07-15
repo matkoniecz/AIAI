@@ -105,9 +105,9 @@ function IsTileWithAuthorityRefuse(tile)
 	}
 }
 
-function DeleteVehiclesInDepots()
+function SellVehiclesInDepots()
 {
-	//Info("DeleteVehiclesInDepots");
+	//Info("SellVehiclesInDepots");
 	local counter=0;
 	local list=AIVehicleList();
 	for (local q = list.Begin(); list.HasNext(); q = list.Next()){ //from Chopper 
