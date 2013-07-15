@@ -257,7 +257,21 @@ function DeleteEmptyStations()
 	station_id_list.Valuate(VehicleCounter);
 	station_id_list.KeepValue(0);
 	for (local spam = station_id_list.Begin(); station_id_list.HasNext(); spam = station_id_list.Next()) {
-		AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
+		local depot_tile = LoadDataFromStationNameFoundByStationId(spam, "[]");
+		if(AIRoad.IsRoadDepotTile(depot_tile)) {
+			if(AIRoad.RemoveRoadDepot(depot_tile)) {
+				AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
+			} else {
+				if (AIError.GetLastError() != AIError.ERR_VEHICLE_IN_THE_WAY && AIError.GetLastError() != AIError.AIError.ERR_NOT_ENOUGH_CASH) {
+					Error("Abandoned road depot removal failed with " + AIError.GetLastErrorString());
+					if(AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
+						abort("unexpected error");
+					}
+				}
+			}
+		} else {
+			AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
+		}
 	}
 
 	station_id_list = AIStationList(AIStation.STATION_TRAIN); //TODO: remove also tracks
