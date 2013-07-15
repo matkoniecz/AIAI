@@ -1111,7 +1111,11 @@ function RailBuilder::IsAllowed()
 function RailBuilder::Possible()
 {
 	if(!this.IsAllowed()) return false;
-	Info("estimated cost of a railway connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
+	if(this.cost <= 1) {
+		Info("no cost estimation for a railway connection is available.");
+	} else {
+		Info("estimated cost of a railway connection: " + this.cost + " /  available funds: " + GetAvailableMoney() + " (" + (GetAvailableMoney()*100/this.cost) + "%)");
+	}
 	return this.cost<GetAvailableMoney();
 }
 
@@ -1241,7 +1245,7 @@ function RailBuilder::PrepareStupidRailRoute()
 	if(GetAvailableMoney()<estimated_cost) {
 		ProvideMoney();
 		if(GetAvailableMoney()<estimated_cost) {
-			Warning("too expensivee, we have only " + GetAvailableMoney() + " And we need " + estimated_cost + " ( " + (GetAvailableMoney()*100/estimated_cost) + "% )");
+			Warning("too expensivee, we have only " + GetAvailableMoney() + ". And we need " + estimated_cost + " ( " + (GetAvailableMoney()*100/estimated_cost) + "% )");
 			return false;
 		}
 	}

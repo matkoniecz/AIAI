@@ -3,7 +3,7 @@ AILog.Info("adding new functions to SuperLib (Town)");
 //Based on function from AdmiralAI by <>, modifications and bugs by Kogut
 //Plant trees around town town_id to improve rating till it is at least min_rating, stop if amount of available money drops below money_threshold
 //return true on success (rating is at least as high as min_rating), false otherwise 
-function _SuperLib_Town.PlantTreesToImproveRating <- function(town_id, min_rating, money_threshold)
+_SuperLib_Town.PlantTreesToImproveRating <- function(town_id, min_rating, money_threshold)
 {
 	/* Build trees to improve the rating. We build this tree in an expanding
 	 * circle starting around the town center. */

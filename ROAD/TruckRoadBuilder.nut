@@ -15,7 +15,11 @@ function TruckRoadBuilder::Possible()
 	if(!this.IsAllowed()) {
 		return false;
 	}
-	Warning("estimated cost of a truck connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
+	if(this.cost <= 1) {
+		Info("no cost estimation for a truck connection is available.");
+	} else {
+		Info("estimated cost of a truck connection: " + this.cost + " /  available funds: " + GetAvailableMoney() + " (" + (GetAvailableMoney()*100/this.cost) + "%)");
+	}
 	return this.cost < GetAvailableMoney();
 }
 

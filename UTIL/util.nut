@@ -108,9 +108,12 @@ function ImproveTownRating(town_id, desperation)
 	if (rating == AITown.TOWN_RATING_NONE || rating >= min_rating) {
 		return true;
 	}
-	local costs = AIAccounting();
-	Town.PlantTreesToImproveRating(town_id, min_rating, GetSafeBankBalance());
-	Info("Tree planting at cost of " + costs.GetCosts());
+
+	if(GetAvailableMoney() > GetSafeBankBalance()) {
+		local costs = AIAccounting();
+		Town.PlantTreesToImproveRating(town_id, min_rating, GetSafeBankBalance());
+		Info("Tree planting at cost of " + costs.GetCosts() + " near " + AITown.GetName(town_id));
+	}
 
 	if (rating == AITown.TOWN_RATING_NONE || rating >= min_rating) {
 		return true;

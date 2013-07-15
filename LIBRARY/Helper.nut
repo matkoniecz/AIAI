@@ -2,7 +2,7 @@ AILog.Info("adding new functions to SuperLib (Helper)");
 
 //estimates how weight of vehicle will change after loading one piece of cargo_id cargo
 //it is a guess, but there is no better method for predicting this value
-function _SuperLib_Helper.GetWeightOfOneCargoPiece <- function(cargo_id)
+_SuperLib_Helper.GetWeightOfOneCargoPiece <- function(cargo_id)
 {
 	if(AICargo.IsFreight(cargo_id)) {
 		return AIGameSettings.GetValue("vehicle.freight_trains");
@@ -14,7 +14,7 @@ function _SuperLib_Helper.GetWeightOfOneCargoPiece <- function(cargo_id)
 }
 
 //iterates over vehicles, all stopped in depots are sold
-function _SuperLib_Helper.SellAllVehiclesStoppedInDepots <- function()
+_SuperLib_Helper.SellAllVehiclesStoppedInDepots <- function()
 {
 	local counter = 0;
 	local list = AIVehicleList();

@@ -15,7 +15,11 @@ function BusRoadBuilder::Possible()
 	if(!this.IsAllowed()) {
 		return false;
 	}
-	Info("estimated cost of a bus connection: " + this.cost + " /  available funds: " + GetAvailableMoney());
+	if(this.cost <= 1) {
+		Info("no cost estimation for a bus route connection is available.");
+	} else {
+		Info("estimated cost of a bus connection: " + this.cost + " /  available funds: " + GetAvailableMoney() + " (" + (GetAvailableMoney()*100/this.cost) + "%)");
+	}
 	return this.cost<GetAvailableMoney();
 }
 
