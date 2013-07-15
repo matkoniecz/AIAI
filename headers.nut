@@ -6,7 +6,7 @@ const INFINITE_SPEED = 4000000;
 //import("queue.binary_heap", "", 1);//################################################## <- external
 
 import("pathfinder.road", "RoadPathFinder", 4);      //################################################## <- external
-import("util.superlib", "SuperLib", 28);      //################################################## <- external
+import("util.superlib", "SuperLib", 32);      //################################################## <- external
 
 require("library/Rail.nut");
 require("library/Helper.nut");
