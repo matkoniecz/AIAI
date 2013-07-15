@@ -105,14 +105,14 @@ function IsTileWithAuthorityRefuse(tile)
 	}
 }
 
+//TODO - librarize
 function SellVehiclesInDepots()
 {
-	//Info("SellVehiclesInDepots");
-	local counter=0;
-	local list=AIVehicleList();
-	for (local q = list.Begin(); list.HasNext(); q = list.Next()){ //from Chopper 
-		if(AIVehicle.IsStoppedInDepot(q)){
-			AIVehicle.SellVehicle(q);
+	local counter = 0;
+	local list = AIVehicleList();
+	for (local vehicle = list.Begin(); list.HasNext(); vehicle = list.Next()) {
+		if(AIVehicle.IsStoppedInDepot(vehicle)){
+			AIVehicle.SellVehicle(vehicle);
 			counter++;
 		}
 	}
