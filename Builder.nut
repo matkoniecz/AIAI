@@ -32,19 +32,21 @@ function Builder::ValuateProducer(ID, cargo)
 	return base;
 }
  
-function Builder::ValuateConsumer(ID, cargo, score)
+function Builder::ValuateConsumer(industry_id, cargo, score)
 {
-	if(!AIIndustry.IsValidIndustry(ID)) {
+	if(!AIIndustry.IsValidIndustry(industry_id)) {
 		return -1;
 	}
-	if(AIIndustry.GetStockpiledCargo(ID, cargo)==0) {
+	local industry_name = AIIndustry.GetName(industry_id);
+	if(AIIndustry.GetStockpiledCargo(industry_id, cargo)==0) {
 		score *= 2;
 	}
-	if(IsConnectedIndustry(ID, cargo)) {
+	if(IsConnectedIndustry(industry_id, cargo)) {
 		score *= 7;
 	}
-	local type = AIIndustry.GetIndustryType(ID);
-	local list = AIIndustryType.GetProducedCargo(type);
+	local industry_type_id = AIIndustry.GetIndustryType(industry_id);
+	local industry_type_name = AIIndustryType.GetName(industry_type_id);
+	local list = AIIndustryType.GetProducedCargo(industry_type_id);
 	if(list.Count() == 0) {
 		score /= 2;
 	}
