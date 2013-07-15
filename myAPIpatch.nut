@@ -54,11 +54,16 @@ AISign.BuildSign <- function(tile, text)
 	local test = AIExecMode(); //allow sign construction in test mode
 	text+=""; //allow AISign.BuildSign(tile, 42)
 	local returned = AISign._BuildSign(tile, text);
-	if(AIError.GetLastError()!=AIError.ERR_NONE)
-		{
-		Error(AIError.GetLastErrorString() + " - SIGN FAILED" );
-		if(!AIMap.IsValidTile(tile))Error("Tile invalid");
+	if(AIError.GetLastError() != AIError.ERR_NONE) {
+		Error(AIError.GetLastErrorString() + " - SIGN FAILED.");
+		Error("Requested text: <" + text + "> on tile " + tile + ".");
+		if(AIError.GetLastError() == AIError.ERR_PRECONDITION_STRING_TOO_LONG) {
+			Error("Text " + text.len() + " characters long, maximum is 31");
 		}
+		if(!AIMap.IsValidTile(tile)) {
+			Error("Tile invalid");
+		}
+	}
 	return returned;
 } 
 
