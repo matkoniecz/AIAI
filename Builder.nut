@@ -33,9 +33,17 @@ function Builder::ValuateConsumer(ID, cargo, score)
 	if(!AIIndustry.IsValidIndustry(ID)) {
 		return -1;
 	}
-	if(AIIndustry.GetStockpiledCargo(ID, cargo)==0) score*=2;
-	if(IsConnectedIndustry(ID, cargo)) score*=7;
-	if(AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(ID)).Count()==0) score/=2;
+	if(AIIndustry.GetStockpiledCargo(ID, cargo)==0) {
+		score *= 2;
+	}
+	if(IsConnectedIndustry(ID, cargo)) {
+		score *= 7;
+	}
+	local type = AIIndustry.GetIndustryType(ID);
+	local list = AIIndustryType.GetProducedCargo(type);
+	if(list.Count() == 0) {
+		score /= 2;
+	}
 	return score;
 }
 
