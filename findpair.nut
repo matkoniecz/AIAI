@@ -32,20 +32,33 @@ function FindPairWrapped (route, GetIndustryList, IsProducerOK, IsConnectedIndus
 	return FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForMe, CityStationAllocator, FindEngine);
 }
 
+function LogInFindPair(string)
+{
+	if(AIAI.GetSetting("log_in_find_pair") == 1) {
+		Info(string);
+	}
+}
+
 function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForMe, ToCityStationAllocator, FindEngine)
 {
 	local industry_list = GetIndustryList();
 	local choise = Route();
-	Info("Finding the best route started! Industry list count: " + industry_list.Count());
+	local count = industry_list.Count();
+	Info("Finding the best route started! Industry list count: " + count);
 	local best = 0;
 	local new;
-	//local counter = 1;
+	local counter = 1;
+	if(count == 0) {
+		LogInFindPair("no industries");
+	}
 	for (route.start = industry_list.Begin(); industry_list.HasNext(); route.start = industry_list.Next()) {
-		//Info(counter++ + " of " + industry_list.Count());
-		if(IsProducerOK(route.start)==false) {
+		LogInFindPair(counter++ + " of " + industry_list.Count());
+		if(IsProducerOK(route.start) == false) {
+			LogInFindPair("bad producer " + AIIndustry.GetName(route.start));
 			continue;
 		}
 		if(route.forbidden_industries.HasItem(route.start)) {
+			LogInFindPair("banned producer");
 			continue;
 		}
 		local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(route.start));
@@ -53,6 +66,7 @@ function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedI
 			//Info(AICargo.GetCargoLabel(route.cargo));
 			route.production = AIIndustry.GetLastMonthProduction(route.start, route.cargo)*(100-AIIndustry.GetLastMonthTransportedPercentage (route.start, route.cargo))/100;
 			if(IsConnectedIndustry(route.start, route.cargo)) {
+				LogInFindPair("connected producer");
 				continue;
 			}
 			local industry_list_accepting_current_cargo = rodzic.GetLimitedIndustryList_CargoAccepting(route.cargo);
@@ -60,16 +74,19 @@ function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedI
 			if(industry_list_accepting_current_cargo.Count()>0) {
 				for(route.end = industry_list_accepting_current_cargo.Begin(); industry_list_accepting_current_cargo.HasNext(); route.end = industry_list_accepting_current_cargo.Next()) {
 					if(route.forbidden_industries.HasItem(route.end)) {
+						LogInFindPair("banned consumer");
 						continue;
 					}
 					if(!IsConsumerOK(route.end)) {
+						LogInFindPair("bad consumer");
 						continue; 
 					}
 					new = ValuateConsumer(route.end, route.cargo, base);
 					local distance = AITile.GetDistanceManhattanToTile(AIIndustry.GetLocation(route.end), AIIndustry.GetLocation(route.start)); 
 					new *= distanceBetweenIndustriesValuator(distance); 
-					if(AITile.GetCargoAcceptance (AIIndustry.GetLocation(route.end), route.cargo, 1, 1, 4)==0) {
-						new=0;
+					if(AITile.GetCargoAcceptance (AIIndustry.GetLocation(route.end), route.cargo, 1, 1, 4) == 0) {
+						LogInFindPair("cargo is not accepted");
+						continue;
 					}
 					if(new>best) {
 						route.start_tile = AIIndustry.GetLocation(route.start);
@@ -87,7 +104,11 @@ function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedI
 								choise.first_station.is_city = false;
 								choise.second_station.is_city = false;
 								choise.track_type = route.track_type;
+							} else {
+								LogInFindPair("no viable engine");
 							}
+						} else {
+							LogInFindPair("unallocated stations");
 						}
 					}
 				}
@@ -95,6 +116,7 @@ function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedI
 				route.end = GetNiceTownForMe(AIIndustry.GetLocation(route.start));
 				if(route.end == null) {
 					continue;
+					LogInFindPair("no available town");
 				}
 				local distance = AITile.GetDistanceManhattanToTile(AITown.GetLocation(route.end), AIIndustry.GetLocation(route.start));
 				new = ValuateConsumerTown(route.end, route.cargo, base);
@@ -104,7 +126,7 @@ function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedI
 					route.start_tile = AIIndustry.GetLocation(route.start);
 					route.end_tile = AITown.GetLocation(route.end);
 					route = ToCityStationAllocator(route)
-					if(route.StationsAllocated()){
+					if(route.StationsAllocated()) {
 						route = FindEngine(route);
 						if(route.engine != null) {
 							best = new;
@@ -117,16 +139,22 @@ function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedI
 							choise.end_tile = AITown.GetLocation(route.end);
 							choise.first_station.is_city = false;
 							choise.second_station.is_city = true;
+						} else {
+							LogInFindPair("no viable engine");
 						}
+					} else {
+						LogInFindPair("unallocated stations");
 					}
 				}
 			}
 		}
 	}
-	Info(best/1000 + "k points");
 	if(best == 0) {
-		route.OK=false;
+		Warning("Fail!");
+		route.OK = false;
 		return route;
+	} else {
+		Info(best/1000 + "k points");
 	}
 	choise.OK = true;
 	if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(choise.start))) {

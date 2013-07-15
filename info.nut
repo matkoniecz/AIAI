@@ -256,6 +256,15 @@ class AIAI extends AIInfo {
 		flags = CONFIG_BOOLEAN + CONFIG_INGAME + CONFIG_DEVELOPER
 	});
 	AddSetting( {
+		name = "log_in_find_pair",
+		description = "log_in_find_pair",
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
+		flags = CONFIG_BOOLEAN + CONFIG_INGAME + CONFIG_DEVELOPER
+	});
+	AddSetting( {
 		name = "show_pathfinding",
 		description = "show pathfinding (using many signs)",
 		easy_value = 0,
