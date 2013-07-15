@@ -868,13 +868,13 @@ function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
 	
 	if(AIVehicle.GetProfitLastYear(original)<0) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			AISign.BuildSign(AIStation.GetLocation(station_id), "unprofitable")
+			AISign.BuildSign(AIStation.GetLocation(station_id), "unprofitable - " + GetReadableDate())
 		}
 		return 0;
 	}
 	if(HowManyVehiclesFromThisStationAreNotMoving(station_id) != 0) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			AISign.BuildSign(AIStation.GetLocation(station_id), "not moving vehicles")
+			AISign.BuildSign(AIStation.GetLocation(station_id), "not moving - " + GetReadableDate())
 		}
 		return 0;
 	}
@@ -884,7 +884,7 @@ function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
 	}
 	if(AITile.GetCargoAcceptance (end, cargo, 1, 1, 4)==0) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			AISign.BuildSign(end, "ACCEPTATION STOPPED");
+			AISign.BuildSign(end, "ACCEPTATION STOPPED - " + GetReadableDate());
 		}
 		return 0;
 	}
