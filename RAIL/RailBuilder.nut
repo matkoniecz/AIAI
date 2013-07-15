@@ -127,7 +127,7 @@ function RailBuilder::AddTrainsToThisStation(station, cargo)
 		}
 		if(!AICargoList_StationAccepting(GetUnloadStationId(original)).HasItem(cargo)) {
 			if(AIAI.GetSetting("other_debug_signs")) {
-				AISign.BuildSign(GetUnloadStationLocation(original), "ACCEPTATION STOPPED"); //TODO - TEST
+				AISign.BuildSign(GetUnloadStationLocation(original), "ACCEPTATION STOPPED");
 			}
 			return 0;
 		}
