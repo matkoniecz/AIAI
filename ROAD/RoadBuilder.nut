@@ -385,6 +385,8 @@ function RoadBuilder::ConstructionOfRVRoute(type)
 
 	rodzic.SetStationName(trasa.first_station.location, "["+trasa.depot_tile+"]");
 	rodzic.SetStationName(trasa.second_station.location, "["+trasa.depot_tile+"]");
+	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.first_station.location), "[]") == trasa.depot_tile);
+	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.second_station.location), "[]") == trasa.depot_tile);
 
 	Info("   Route constructed!");
 
