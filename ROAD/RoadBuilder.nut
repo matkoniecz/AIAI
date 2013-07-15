@@ -246,7 +246,7 @@ function RoadBuilder::TownCargoStationAllocator(project)
 		}
 		return project;
 	}
-	Info("   Stations planned.");
+	//Info("   Stations planned.");
 	project = RoadBuilder.InitRoadLoop(project);
 	return project;
 }
@@ -298,7 +298,7 @@ function RoadBuilder::UniversalStationAllocator(project)
 		}
 		return project;
 	}
-	Info("   Stations planned.");
+	//Info("   Stations planned.");
 	project = RoadBuilder.InitRoadLoop(project);
 	return project;
 }

@@ -123,7 +123,7 @@ function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedI
 			}
 		}
 	}
-	Info("(" + best/1000 + "k points)");
+	Info(best/1000 + "k points");
 	if(best == 0) {
 		route.OK=false;
 		return route;
