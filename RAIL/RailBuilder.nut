@@ -1231,7 +1231,7 @@ function RailBuilder::PrepareStupidRailRoute()
 	if(GetAvailableMoney()<estimated_cost) {
 		ProvideMoney();
 		if(GetAvailableMoney()<estimated_cost) {
-			Warning("too expensivee, we have only " + GetAvailableMoney() + " And we need " + estimated_cost);
+			Warning("too expensivee, we have only " + GetAvailableMoney() + " And we need " + estimated_cost + " ( " + (GetAvailableMoney()*100/estimated_cost) + "% )");
 			return false;
 		}
 	}
