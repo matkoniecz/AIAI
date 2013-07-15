@@ -1,5 +1,33 @@
 AILog.Info("adding new functions to SuperLib (Helper)");
 
+//estimates how weight of vehicle will change after loading one piece of cargo_id cargo
+//it is a guess, but there is no better method for predicting this value
+function _SuperLib_Helper.GetWeightOfOneCargoPiece <- function(cargo_id)
+{
+	if(AICargo.IsFreight(cargo_id)) {
+		return AIGameSettings.GetValue("vehicle.freight_trains");
+	}
+	if(AICargo.HasCargoClass(cargo_id, AICargo.CC_MAIL) || AICargo.HasCargoClass(cargo_id, AICargo.CC_PASSENGERS))  {
+		return 0;
+	}
+	return 1;
+}
+
+//iterates over vehicles, all stopped in depots are sold
+function _SuperLib_Helper.SellAllVehiclesStoppedInDepots <- function()
+{
+	local counter = 0;
+	local list = AIVehicleList();
+	for (local vehicle = list.Begin(); list.HasNext(); vehicle = list.Next()) {
+		if(AIVehicle.IsStoppedInDepot(vehicle)){
+			AIVehicle.SellVehicle(vehicle);
+			counter++;
+		}
+	}
+	return counter;
+}
+
+
 //from Rondje - attempt to contruct HQ in the biggest city, returns true if HQ contruction succeded, false otherwise
 _SuperLib_Helper.BuildCompanyHQ <- function()
 {
@@ -29,6 +57,7 @@ _SuperLib_Helper.BuildCompanyHQ <- function()
 	}
 	return false;
 }
+
 //from Rondje, computes and returns square root of parameter using Babylonian method 
 _SuperLib_Helper.Sqrt <- function(i) 
 { 

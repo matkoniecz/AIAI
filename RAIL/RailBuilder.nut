@@ -462,7 +462,7 @@ function RailBuilder::BuildTrainButNotWithThisVehicle(route, name_of_train, bad_
 
 function RailBuilder::BuildTrainRecoverAfterBlacklisting(route, name_of_train, recover_from_failed_engine)
 {
-	SellVehiclesInDepots()
+	Helper.SellAllVehiclesStoppedInDepots()
 	if (!recover_from_failed_engine) {
 		return null;
 	}
@@ -527,7 +527,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 	local max_number_of_wagons = 1000;
 	local maximal_weight = AIEngine.GetMaxTractiveEffort(bestEngine) * 3;
 	local capacity_of_engine = AIVehicle.GetCapacity(engineId, cargoIndex);
-	local weight_of_engine = AIEngine.GetWeight(bestEngine) + (capacity_of_engine * GetWeightOfCargo(cargoIndex));
+	local weight_of_engine = AIEngine.GetWeight(bestEngine) + (capacity_of_engine * Helper.GetWeightOfOneCargoPiece(cargoIndex));
 	local length_of_engine = AIVehicle.GetLength(engineId);
 	local weight_of_wagon;
 	local length_of_wagon = null;
@@ -535,7 +535,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 	for(local i = 0; i<max_number_of_wagons; i++) {
 		if(i==1) {
 			weight_of_wagon = AIEngine.GetWeight(bestWagon);
-			weight_of_wagon += (AIVehicle.GetCapacity(engineId, cargoIndex) - capacity_of_engine) * GetWeightOfCargo(cargoIndex);
+			weight_of_wagon += (AIVehicle.GetCapacity(engineId, cargoIndex) - capacity_of_engine) * Helper.GetWeightOfOneCargoPiece(cargoIndex);
 			if(AIGameSettings.GetValue("vehicle.train_acceleration_model")==1) {
 				max_number_of_wagons = (maximal_weight-weight_of_engine)/weight_of_wagon;
 			}

@@ -10,6 +10,7 @@ import("util.superlib", "SuperLib", 28);      //################################
 
 require("library/Rail.nut");
 require("library/Helper.nut");
+require("library/Town.nut");
 
 Helper <- SuperLib.Helper
 Tile <- SuperLib.Tile

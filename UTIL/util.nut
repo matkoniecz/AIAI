@@ -30,16 +30,6 @@ function AIAI::BuildStatues()
 	return false;
 }
 
-function GetWeightOfCargo(cargo_id) {
-	if(AICargo.IsFreight(cargo_id)) {
-		return AIGameSettings.GetValue("vehicle.freight_trains");
-	}
-	if(AICargo.HasCargoClass(cargo_id, AICargo.CC_MAIL) || AICargo.HasCargoClass(cargo_id, AICargo.CC_PASSENGERS))  {
-		return 0;
-	}
-	return 1;
-}
-
 /////////////////////////////////////////////////
 /// Age of the youngest vehicle (in days)
 /// @pre AIStation.IsValidStation(station_id)
@@ -105,56 +95,6 @@ function IsTileWithAuthorityRefuse(tile)
 	}
 }
 
-//TODO - librarize
-function SellVehiclesInDepots()
-{
-	local counter = 0;
-	local list = AIVehicleList();
-	for (local vehicle = list.Begin(); list.HasNext(); vehicle = list.Next()) {
-		if(AIVehicle.IsStoppedInDepot(vehicle)){
-			AIVehicle.SellVehicle(vehicle);
-			counter++;
-		}
-	}
-	return counter;
-}
-
-//TODO - librarize
-function PlantTreesToImproveRating(town_id, min_rating) //from AdmiralAI
-{
-	/* Build trees to improve the rating. We build this tree in an expanding
-	 * circle starting around the town center. */
-	local location = AITown.GetLocation(town_id);
-	local list = Tile.GetTownTiles(town_id)
-	list.Valuate(AITile.IsBuildable);
-	list.KeepValue(1);
-	/* Don't build trees on tiles that already have trees, as this doesn't
-	 * give any town rating improvement. */
-	list.Valuate(AITile.HasTreeOnTile);
-	list.KeepValue(0);
-	foreach (tile, dummy in list) {
-		if(AITown.IsWithinTownInfluence(town_id, tile)) {
-			if(!AITile.PlantTree(tile)) {
-				if(AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH) {
-					return (AITown.GetRating(town_id, AICompany.COMPANY_SELF) >= min_rating);
-				}
-			}
-		}
-		/* Check whether the current rating is good enough. */
-		if (AITown.GetRating(town_id, AICompany.COMPANY_SELF) >= min_rating) {
-			return true;
-		}
-		if(GetAvailableMoney() < 0) {
-			return false;
-		}
-	}
-	if (AITown.GetRating(town_id, AICompany.COMPANY_SELF) >= min_rating) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
 function ImproveTownRating(town_id, desperation)
 {
 	local mode = AIExecMode();
@@ -169,7 +109,7 @@ function ImproveTownRating(town_id, desperation)
 		return true;
 	}
 	local costs = AIAccounting();
-	PlantTreesToImproveRating(town_id, min_rating);
+	Town.PlantTreesToImproveRating(town_id, min_rating, GetSafeBankBalance());
 	Info("Tree planting at cost of " + costs.GetCosts());
 
 	if (rating == AITown.TOWN_RATING_NONE || rating >= min_rating) {
