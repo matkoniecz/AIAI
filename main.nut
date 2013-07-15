@@ -51,15 +51,17 @@ function AIAI::Start()
 	this.Starter();
 	local builders = strategyGenerator();
 	for(local i = 1; true; i++) {
+		local waiting_for_money = false;
 		Warning("Desperation: " + desperation);
 		root_tile = Tile.GetRandomTile();
-		if(AIVehicleList().Count()!=0) {
+		if(AIVehicleList().Count() != 0) {
 			local need = this.GetMinimalCost(builders);
-			if(GetAvailableMoney()<need) {
+			if(GetAvailableMoney() < need) {
 				Info("Waiting for more money: " + GetAvailableMoney()/1000 + "k / " + need/1000 + "k");
 				this.Maintenance();
 				BankruptProtector();
 				Sleep(500);
+				waiting_for_money = true;
 			}
 		}
 		this.Maintenance();
@@ -69,7 +71,7 @@ function AIAI::Start()
 		this.InformationCenter(builders);
 		if(this.TryEverything(builders)) {
 			desperation /= 10;
-		} else {
+		} else if (!waiting_for_money) {
 			Info("Nothing to do!");
 			Sleep(100);
 			desperation++;
