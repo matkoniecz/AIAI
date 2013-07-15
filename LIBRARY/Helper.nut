@@ -28,11 +28,12 @@ _SuperLib_Helper.SellAllVehiclesStoppedInDepots <- function()
 }
 
 
-//from Rondje - attempt to contruct HQ in the biggest city, returns true if HQ contruction succeded, false otherwise
+//from Rondje - attempt to contruct HQ in the biggest city, returns true if HQ exists on exiting function, false otherwise
+//if HQ exists on calling function it will not be moved and function will return true
 _SuperLib_Helper.BuildCompanyHQ <- function()
 {
 	if(AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) {
-		return;
+		return true;
 	}
 
 	// Find biggest town for HQ

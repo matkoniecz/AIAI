@@ -18,9 +18,11 @@ function AIAI::Starter()
 	Info("Hi!");
 	
 	NameCompany();
-	Info("Building company HQ...")
-	if(!Helper.BuildCompanyHQ()) {
-		Info("No possible HQ location found");
+	if(!AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) {
+		Info("Building company HQ...")
+		if(!Helper.BuildCompanyHQ()) {
+			Info("No possible HQ location found");
+		}
 	}
 	this.ShowContactInfoOnTheMap();
 	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")!= 0) {
