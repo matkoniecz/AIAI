@@ -43,6 +43,7 @@ class RailwayStation extends Station
 							AISign.BuildSign(railway_tracks[x][1][i][0], "a");
 							AISign.BuildSign(railway_tracks[x][1][i][1], "b");
 							AISign.BuildSign(railway_tracks[x][1][i][2], "c");
+							AIController.Break("failed railway construction"); 
 						}
 						Error(i + "BuildRailwayTracks failure");
 						return false;
@@ -67,6 +68,7 @@ class RailwayStation extends Station
 							AISign.BuildSign(railway_tracks[x][1][i][0], "a");
 							AISign.BuildSign(railway_tracks[x][1][i][1], "b");
 							AISign.BuildSign(railway_tracks[x][1][i][2], "c");
+							AIController.Break("failed railway destruction"); 
 						}
 						Error(i + "RemoveRailwayTracks failure");
 						return false;
