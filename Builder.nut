@@ -75,21 +75,6 @@ function Builder::GetCost()
 	return cost;
 }
 
-function Builder::HowManyVehiclesFromThisStationAreNotMoving(station)
-{
-	local count = 0;
-	local vehicle_list=AIVehicleList_Station(station);
-	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()) {
-		if(AIVehicle.GetCurrentSpeed(vehicle_id) == 0) {
-			if(AIVehicle.GetState(vehicle_id)!=AIVehicle.VS_AT_STATION) {
-				//Warning(AIVehicle.GetName(vehicle_id) + " is waiting");
-				count++;
-			}
-		}
-	}
-	return count;
-}
-
 function Builder::GetPathfindingLimit()
 {
 	return pathfinding_time_limit + desperation * 2;
