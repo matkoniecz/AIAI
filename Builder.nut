@@ -26,7 +26,7 @@ function Builder::ValuateProducer(ID, cargo)
 			}
 		}
 	return base;
-}	
+}
  
 function Builder::ValuateConsumer(ID, cargo, score)
 {
