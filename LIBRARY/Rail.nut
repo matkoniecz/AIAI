@@ -2,10 +2,17 @@ AILog.Info("adding new functions to SuperLib (Rail)");
 
 class Rail{}
 
-	//from AIAI
+	//from AIAI by Kogut
 	//attempts to locate brake van - wagon appearing in some newgrfs (for example - Japanese Train Set v2.1a), required to start freight train
 	//search is limited to ones usable on specified railtype
 	//returns engine_id of the fastest one or null if none was found
+	//GetBrakeVan(railtype)
+
+	//from AdmiralAI by Thijs Marinussen
+	//constructs RailDepot and connects it to railway supplied in path parameter, may perform some landscaping to allow construction of the depot
+	//Returns a depot tile if successful, null otherwise 
+	//BuildDepot(path);
+
 function Rail::GetBrakeVan(railtype)
 {
 	local wagons = AIEngineList(AIVehicle.VT_RAIL);
@@ -28,12 +35,6 @@ function Rail::GetBrakeVan(railtype)
 	}
 }
 
-	//from AdmiralAI by Thijs Marinussen
-	//constructs RailDepot and connects it to railway supplied in path parameter
-	//if parameter reverse is true 
-	//may perform some landscaping
-	//Returns a depot tile if successful, null otherwise 
-	function Rail::BuildDepot(path);
 function Rail::BuildDepot(path)
 {
 	local prev = null;
@@ -160,22 +161,6 @@ function ConnectDepotDiagonal(tile_a, tile_b, tile_c)
 	}
 	if (!depot_build && !AIRail.BuildRailDepot(depot_tile, tile_c)) return null;
 	return depot_tile;
-}
-
-//from Rondje, computes square root of i using Babylonian method
-_SuperLib_Helper.Sqrt <- function(i) 
-{ 
-	assert(i>=0);
-	if (i == 0) {
-		return 0; // Avoid divide by zero
-	}
-	local n = (i / 2) + 1; // Initial estimate, never low
-	local n1 = (n + (i / n)) / 2;
-	while (n1 < n) {
-		n = n1;
-		n1 = (n + (i / n)) / 2;
-	}
-	return n;
 }
 
 AILog.Info("changing SuperLib (Rail) finished");

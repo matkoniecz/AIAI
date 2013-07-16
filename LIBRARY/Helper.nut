@@ -1,7 +1,25 @@
 AILog.Info("adding new functions to SuperLib (Helper)");
 
-//estimates how weight of vehicle will change after loading one piece of cargo_id cargo
-//it is a guess, but there is no better method for predicting this value
+	//from AIAI by Kogut
+	//estimates how weight of vehicle will change after loading one piece of cargo_id cargo
+	//it is a guess, but there is no better method for predicting this value
+	//returns expected weight of single piece of cargo_id
+	//GetWeightOfOneCargoPiece(cargo_id)
+
+	//from AIAI by Kogut
+	//iterates over vehicles, all stopped in depots are sold
+	//SellAllVehiclesStoppedInDepots()
+
+	//from Rondje om de kerk
+	//computes square root of i using Babylonian method
+	//returns n that is the highest integer that is lower or equal to the square root of integer i
+	//Sqrt(i)
+
+	//from Rondje om the kerk
+	//attempt to contruct HQ in the biggest city, returns true if HQ exists on exiting function, false otherwise
+	//if HQ exists on calling function it will not be moved and function will return true
+	//BuildCompanyHQ()
+
 _SuperLib_Helper.GetWeightOfOneCargoPiece <- function(cargo_id)
 {
 	if(AICargo.IsFreight(cargo_id)) {
@@ -13,7 +31,6 @@ _SuperLib_Helper.GetWeightOfOneCargoPiece <- function(cargo_id)
 	return 1;
 }
 
-//iterates over vehicles, all stopped in depots are sold
 _SuperLib_Helper.SellAllVehiclesStoppedInDepots <- function()
 {
 	local counter = 0;
@@ -27,9 +44,6 @@ _SuperLib_Helper.SellAllVehiclesStoppedInDepots <- function()
 	return counter;
 }
 
-
-//from Rondje - attempt to contruct HQ in the biggest city, returns true if HQ exists on exiting function, false otherwise
-//if HQ exists on calling function it will not be moved and function will return true
 _SuperLib_Helper.BuildCompanyHQ <- function()
 {
 	if(AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) {
@@ -59,8 +73,7 @@ _SuperLib_Helper.BuildCompanyHQ <- function()
 	return false;
 }
 
-//from Rondje, computes and returns square root of parameter using Babylonian method 
-_SuperLib_Helper.Sqrt <- function(i) 
+_SuperLib_Helper.Sqrt <- function(i)
 { 
 	assert(i>=0);
 	if (i == 0) {
