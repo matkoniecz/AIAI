@@ -1090,7 +1090,11 @@ function RoadBuilder::RemoveRedundantRVFromStations(station_list)
 	return full_delete_count;
 }
 
-function RoadBuilder::RemoveRedundantRVFromStation(station, cargo, vehicle_list)
+function RoadBuilder::IsVehicleNearStation(vehicle_id, station_id) {
+	return AIStation.GetDistanceManhattanToTile(station_id, AIVehicle.GetLocation(vehicle_id))*16 > 4*AIVehicle.GetLength(vehicle_id)*2;
+}
+
+function RoadBuilder::RemoveRedundantRVFromStation(station_id, cargo, vehicle_list)
 {
 	local waiting_counter = 0;
 	local active_counter = 0;
@@ -1099,7 +1103,7 @@ function RoadBuilder::RemoveRedundantRVFromStation(station, cargo, vehicle_list)
 			return 0;
 		}
 		if(AIVehicle.GetCapacity (vehicle_id, cargo) == 0) {
-			if(AIStation.GetDistanceManhattanToTile(station, AIVehicle.GetLocation(vehicle_id))*16 > 4*AIVehicle.GetLength(vehicle_id)*2) {
+			if(RoadBuilder.IsVehicleNearStation(vehicle_id, station_id)) {
 				if(AIVehicle.GetState(vehicle_id) == AIVehicle.VS_AT_STATION) {
 					waiting_counter+=2;
 					//AISign.BuildSign(AIVehicle.GetLocation(vehicle_id), "w1");
