@@ -455,7 +455,17 @@ return shorter*99/70 + longer - shorter;
 
 function AirBuilder::GetBurdenOfSingleAircraft(tile_1, tile_2, engine)
 {
-return AIEngine.GetMaxSpeed(engine)*200/(this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2)+50);
+/*
+Info("AIEngine.GetMaxSpeed(engine) = " + AIEngine.GetMaxSpeed(engine))
+Info("this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2) = " + this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2))
+Info(AIEngine.GetMaxSpeed(engine) + "*200/(" + this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2) + "+50)")
+Info(AIEngine.GetMaxSpeed(engine)*200/(this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2)+50))
+*/
+
+//return AIEngine.GetMaxSpeed(engine)*200/(this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2)+50);
+//was too restrictive for Colemena Count at 1/1 speed ratio, at distance 171 for small airport [only one allowed, used 428 of 750]
+
+return AIEngine.GetMaxSpeed(engine)*125/(this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2)+75);
 }
 
 function AirBuilder::GetCurrentBurdenOfAirport(airport)
