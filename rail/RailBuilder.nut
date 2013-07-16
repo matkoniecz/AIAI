@@ -115,8 +115,10 @@ function RailBuilder::AddTrainsToThisStation(station, cargo)
 		}
 		vehicle_list.Valuate(AIBase.RandItem);
 		vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
-		local original=vehicle_list.Begin();
-		assert(AIStation.GetLocation(station) == GetLoadStationLocation(original));
+		local original = vehicle_list.Begin();
+		local location_of_processed_station = AIStation.GetLocation(station);
+		local location_of_load_station = GetLoadStationLocation(original)
+		assert(location_of_processed_station == location_of_load_station);
 		if(AIVehicle.GetProfitLastYear(original) + AIVehicle.GetProfitThisYear(original) <0){
 			Warning("Unprofitable leader");
 			return 0;
