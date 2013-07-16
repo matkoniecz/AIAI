@@ -139,11 +139,11 @@ class AIAI extends AIInfo {
 	});
 	AddSetting( {
 		name = "debug_signs",
-		description = "debug_signs allowed",
-		easy_value = 0,
-		medium_value = 0,
-		hard_value = 0,
-		custom_value = 0,
+		description = "debug_signs allowed [fake setting that should stay at one, necessary to keep SuperLib happy]",
+		easy_value = 1,
+		medium_value = 1,
+		hard_value = 1,
+		custom_value = 1,
 		flags = CONFIG_BOOLEAN + CONFIG_INGAME + CONFIG_DEVELOPER
 	});
 	AddSetting( {
