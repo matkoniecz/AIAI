@@ -857,7 +857,7 @@ function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
 	}
 	if(!IsItNeededToImproveThatStation(station_id, cargo)) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			if(AIStation.HasCargoRating(station_id, cargo)) {
+			if(AIStation.HasCargoRating(station_id, cargo)) { //TODO once it will hit stables remove note about debug_signs_about_adding_road_vehicles in info.nut
 				AISign.BuildSign(AIStation.GetLocation(station_id), "OK status - " + GetReadableDate());
 			}
 		}

@@ -25,9 +25,10 @@ function AIAI::GetLimitedIndustryList_CargoProducing(cargo)
 
 function IsItNeededToImproveThatStation(station, cargo)
 {
-	if(!AIStation.HasCargoRating(station, cargo)) {
-		return false;
-	}
+	//TODO: enable once it will be available in trunk
+	//if(!AIStation.HasCargoRating(station, cargo)) {
+	//	return false;
+	//}
 	if (AIStation.GetCargoWaiting(station, cargo)>50) {
 		return true;
 	}
@@ -38,9 +39,10 @@ function IsItNeededToImproveThatStation(station, cargo)
 }
 function IsItNeededToImproveThatNoRawStation(station, cargo)
 {
-	if(!AIStation.HasCargoRating(station, cargo)) {
-		return false;
-	}
+	//TODO: enable once it will be available in trunk
+	//if(!AIStation.HasCargoRating(station, cargo)) {
+	//	return false;
+	//}
 	if (AIStation.GetCargoRating(station, cargo)<70 && AIStation.GetCargoWaiting(station, cargo)>150) {
 		return true;
 	}
