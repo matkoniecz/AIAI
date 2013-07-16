@@ -201,7 +201,7 @@ function DeleteEmptyStations()
 	station_id_list.KeepValue(0);
 	for (local spam = station_id_list.Begin(); station_id_list.HasNext(); spam = station_id_list.Next()) {
 		local depot_tile = LoadDataFromStationNameFoundByStationId(spam, "[]");
-		if(AIRoad.IsRoadDepotTile(depot_tile)) {
+		if(depot_tile != null && AIRoad.IsRoadDepotTile(depot_tile)) {
 			if(AIRoad.RemoveRoadDepot(depot_tile)) {
 				AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
 			} else {
