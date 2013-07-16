@@ -154,7 +154,7 @@ function LoadDataFromStationNameFoundByStationId(station_id, delimiters)
 function AIAI::TrySetStationName(station_id, data, leading_number)
 {
 	local string;
-	string = IntToStrFill(leading_number, 4)+data;
+	string = IntToStrFill(leading_number, 5) + data + " AD " + AIDate.GetYear(AIDate.GetCurrentDate());
 	if(AIBaseStation.GetName(station_id) == string) {
 		return true;
 	}
@@ -165,7 +165,7 @@ function AIAI::SetStationName(location, data)
 {
 	local station_id = AIStation.GetStationID(location);
 	local current_number = LoadDataFromStationNameFoundByStationId(station_id, "0{");
-	if(current_number != null) {
+	if(current_number != null) { //updating data, station have currently a number
 		if(TrySetStationName(station_id, data, current_number)) {
 			return;
 		}
@@ -179,6 +179,7 @@ function AIAI::SetStationName(location, data)
 		station_number++;
 	}
 	station_number++;
+	assert(station_number < 10000); //note that first 0 is fake, see "local current_number = LoadDataFromStationNameFoundByStationId(station_id, "0{");"
 }
 
 function AIAI::SetWaypointName(network, location)
