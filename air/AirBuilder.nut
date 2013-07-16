@@ -451,19 +451,23 @@ local shorter = min(x_delta, y_delta);
 return shorter*99/70 + longer - shorter;
 }
 
+//return burden measured in centiplanemonths - single plane landing during month is 100, twice a month is 200, once a 3 months is 33
 function AirBuilder::GetBurdenOfSingleAircraft(tile_1, tile_2, engine)
 {
-/*
-Info("AIEngine.GetMaxSpeed(engine) = " + AIEngine.GetMaxSpeed(engine))
-Info("this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2) = " + this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2))
-Info(AIEngine.GetMaxSpeed(engine) + "*200/(" + this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2) + "+50)")
-Info(AIEngine.GetMaxSpeed(engine)*200/(this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2)+50))
-*/
-
-//return AIEngine.GetMaxSpeed(engine)*200/(this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2)+50);
-//was too restrictive for Colemena Count at 1/1 speed ratio, at distance 171 for small airport [only one allowed, used 428 of 750]
-
-return AIEngine.GetMaxSpeed(engine)*125/(this.GetEffectiveDistanceBetweenAirports(tile_1, tile_2)+75);
+	local speed_in_kmh = AIEngine.GetMaxSpeed(engine);
+	local distance_in_tiles = GetEffectiveDistanceBetweenAirports(tile_1, tile_2);
+	
+	//http://wiki.openttd.org/Game_mechanics#Vehicle_speeds
+	//The net result is that 100 km/hour is ~3.6 tiles/day. 
+	local speed_in_tiles_per_day = speed_in_kmh / 100.0 * 3.6;
+	
+	local time_spend_on_taxiing_during_sigle_trip = 11;
+	local time_spend_on_loading_and_unloading = 5;
+	local days_to_complete_route = distance_in_tiles / speed_in_tiles_per_day + time_spend_on_taxiing_during_sigle_trip + time_spend_on_loading_and_unloading;
+	local landing_times_during_single_month = 30 / days_to_complete_route;
+	local landing_times_during_single_month_on_one_of_two_airports = landing_times_during_single_month / 2;
+	local burden = (100 * landing_times_during_single_month_on_one_of_two_airports).tointeger();
+	return burden;
 }
 
 function AirBuilder::GetCurrentBurdenOfAirport(airport)
@@ -480,13 +484,31 @@ return total;
 
 function AirBuilder::IsItPossibleToAddBurden(airport_id, tile=null, engine=null, ile=1)
 {
+/*
+throughtput measured by empty concordes
+small: 5
+commuter: 7
+city: 7
+metropo: 10
+international: 11
+intercontinental: 10
+*/
+/*
+throughtput measured by loading/unloading sampsons
+small: 3
+commuter: 5
+city: 5
+metropo: 6
+international: ?
+intercontinental: ?
+*/
 local maksimum;
 local total = this.GetCurrentBurdenOfAirport(airport_id);
 local airport_type = AIAirport.GetAirportType(AIStation.GetLocation(airport_id));
-if(airport_type==AIAirport.AT_LARGE) maksimum = 1500; //1 l¹dowanie miesiêcznie - 250 //6 na du¿ym
-if(airport_type==AIAirport.AT_METROPOLITAN ) maksimum = 2000; //1 l¹dowaie miesiêcznie - 250 //6 na du¿ym
-if(airport_type==AIAirport.AT_COMMUTER) maksimum = 500; //1 l¹dowanie miesiêcznie - 250 //4 na ma³ym
-if(airport_type==AIAirport.AT_SMALL) maksimum = 750; //1 l¹dowanie miesiêcznie - 250 //4 na ma³ym
+if(airport_type==AIAirport.AT_METROPOLITAN ) maksimum = 600;
+if(airport_type==AIAirport.AT_LARGE) maksimum = 500; // city 
+if(airport_type==AIAirport.AT_COMMUTER) maksimum = 500;
+if(airport_type==AIAirport.AT_SMALL) maksimum = 300;
  
 if(AIAI.GetSetting("debug_signs_for_airports_load")) Helper.BuildSign(AIStation.GetLocation(airport_id), total + " (" + maksimum + ")");
 
