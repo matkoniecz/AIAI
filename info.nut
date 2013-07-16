@@ -157,7 +157,7 @@ class AIAI extends AIInfo {
 	});
 	AddSetting( {
 		name = "debug_signs_about_adding_road_vehicles",
-		description = "debug_signs_about_adding_road_vehicles allowed",
+		description = "debug_signs_about_adding_road_vehicles allowed [requires recent nightly to work properly]",
 		easy_value = 0,
 		medium_value = 0,
 		hard_value = 0,
