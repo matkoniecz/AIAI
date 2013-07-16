@@ -295,7 +295,7 @@ function RailBuilder::RailwayLinkConstruction(path)
 
 function RailBuilder::DumbRemover(path, goal)
 {
-	Warning("DumbRemover " + AIError.GetLastErrorString());
+	Warning("DumbRemover after " + AIError.GetLastErrorString());
 	local prev = null;
 	local prevprev = null;
 	while (path != null) {

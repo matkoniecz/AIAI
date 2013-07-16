@@ -86,8 +86,8 @@ local airport_rad = AIAirport.GetAirportCoverageRadius(airport_type);
 	local production_at_first_airport = AITile.GetCargoAcceptance(tile_1, Helper.GetPAXCargo(), airport_x, airport_y, airport_rad);
 	local production_at_second_airport = AITile.GetCargoAcceptance(tile_2, Helper.GetPAXCargo(), airport_x, airport_y, airport_rad);
 	local production = min(production_at_first_airport, production_at_second_airport);
-	local licznik = this.HowManyAirplanes(distance, speed, production, engine);
-	for(local i=0; i<licznik; i++) 
+	local counter = this.HowManyAirplanes(distance, speed, production, engine);
+	for(local i=1; i<=counter; i++) 
 		{
 		while(!this.BuildPassengerAircraftWithRand(tile_1, tile_2, engine, Helper.GetPAXCargo()))
 			{
@@ -99,12 +99,14 @@ local airport_rad = AIAirport.GetAirportCoverageRadius(airport_type);
 			rodzic.Maintenance();
 			AIController.Sleep(500);
 			}
-		Info("We have " + i + " from " + licznik + " aircrafts.");
-		if(!this.IsItPossibleToAddBurden(AIStation.GetStationID(tile_1), tile_2, engine) || 
-		   !this.IsItPossibleToAddBurden(AIStation.GetStationID(tile_2), tile_1, engine))
+		Info("We have " + i + " from " + counter + " aircrafts.");
+		if(i < counter)
 			{
-			Info("Interupted, too many airplanes");
-			return true;
+			if(!this.IsItPossibleToAddBurden(AIStation.GetStationID(tile_1), tile_2, engine) || !this.IsItPossibleToAddBurden(AIStation.GetStationID(tile_2), tile_1, engine))
+				{
+				Info("Interrupted, too many airplanes");
+				return true;
+				}
 			}
 		}
 
