@@ -34,6 +34,7 @@ function IsItNeededToImproveThatStation(station, cargo)
 	if (AIStation.GetCargoRating(station, cargo)<40 && AIStation.GetCargoWaiting(station, cargo)>0) {
 		return true;
 	}
+	return false;
 }
 function IsItNeededToImproveThatNoRawStation(station, cargo)
 {
@@ -46,6 +47,7 @@ function IsItNeededToImproveThatNoRawStation(station, cargo)
 	if (AIStation.GetCargoRating(station, cargo)<40 && AIStation.GetCargoWaiting(station, cargo)>0) {
 		return true;
 	}
+	return false;
 }
 
 function NameCompany()
