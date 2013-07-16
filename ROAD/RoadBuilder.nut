@@ -850,66 +850,91 @@ function RoadBuilder::BuildLoopAroundStation(tile_start, tile_end, tile_ignored)
 function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
 {
 	if(AgeOfTheYoungestVehicle(station_id) <= 20) {
+		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+			AISign.BuildSign(AIStation.GetLocation(station_id), "young RV - " + GetReadableDate());
+		}
 		return 0; //to protect from bursts of new vehicles
 	}
-	
 	if(!IsItNeededToImproveThatStation(station_id, cargo)) {
+		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+			if(AIStation.HasCargoRating(station_id, cargo)) {
+				AISign.BuildSign(AIStation.GetLocation(station_id), "OK status - " + GetReadableDate());
+			}
+		}
 		return 0;
 	}
 	local vehicle_list=AIVehicleList_Station(station_id);
 	if(vehicle_list.Count()==0) {
 		//TODO - revive empty station (?)
+		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+			AISign.BuildSign(AIStation.GetLocation(station_id), "dead - " + GetReadableDate());
+		}
 		return 0;
 	}
 	
 	vehicle_list.Valuate(AIBase.RandItem);
 	vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
-	local original=vehicle_list.Begin();
+	local original = vehicle_list.Begin();
 	
-	if(AIVehicle.GetProfitLastYear(original)<0) {
+	if(AIVehicle.GetProfitLastYear(original) < 0) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			AISign.BuildSign(AIStation.GetLocation(station_id), "unprofitable - " + GetReadableDate())
+			AISign.BuildSign(AIStation.GetLocation(station_id), "unprofitable - " + GetReadableDate());
 		}
 		return 0;
 	}
-	if(HowManyVehiclesFromThisStationAreNotMoving(station_id) != 0) {
+
+	local another_station_id = GetUnloadStationId(original);
+	local load_station_id = GetLoadStationId(original);
+	if(load_station_id == null || another_station_id == null) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			AISign.BuildSign(AIStation.GetLocation(station_id), "not moving - " + GetReadableDate())
+			AISign.BuildSign(AIStation.GetLocation(station_id), "invalid orders - " + GetReadableDate());
 		}
 		return 0;
 	}
-	local end = GetUnloadStationLocation(original);
-	if (end == null) {
-		return 0;
+	if(station_id == another_station_id ) {
+		another_station_id = load_station_id;
 	}
-	if(AITile.GetCargoAcceptance (end, cargo, 1, 1, 4)==0) {
+
+	local veh_list = NotMovingVehiclesFromThisStation(station_id);
+	veh_list.Valuate(IsVehicleNearStation, another_station_id);
+	veh_list.RemoveValue(1);
+	veh_list.Valuate(IsVehicleNearStation, station_id);
+	veh_list.RemoveValue(1);
+	if(veh_list.Count() != 0) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			AISign.BuildSign(end, "ACCEPTATION STOPPED - " + GetReadableDate());
+			AISign.BuildSign(AIStation.GetLocation(station_id), "not moving - " + GetReadableDate());
 		}
 		return 0;
 	}
-	local raw = this.IsRawVehicle(original);
-	if(!(raw && raw != null)) {
+	if(!AICargoList_StationAccepting(another_station_id).HasItem(cargo)) {
+		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+			AISign.BuildSign(AIStation.GetLocation(another_station_id), AICargo.GetLabel(cargo) + " refused - " + GetReadableDate());
+		}
+		return 0;
+	}
+	local processed = this.IsProcessedCargoVehicle(original);
+	if(processed == null) {
+		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+			AISign.BuildSign(AIStation.GetLocation(station_id), "invalid processed status - " + GetReadableDate());
+		}
+		return 0;
+	}
+	if(processed) {
 		if(!IsItNeededToImproveThatNoRawStation(station_id, cargo)) {
+			if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+				AISign.BuildSign(AIStation.GetLocation(station_id), "OK for processed - " + GetReadableDate());
+			}
 			return 0;
 		}
 	}
-	local another_station = GetUnloadStationId(original);
-	local load_station_id = GetLoadStationId(original);
-	if(load_station_id == null || another_station == null) {
-		return 0;
-	}
-	if(station_id == another_station ) {
-		another_station = load_station_id;
-	}
 	if(GetSecondLoadStationId(original) != null) { //two way transport
-		if(!IsItNeededToImproveThatStation(another_station, cargo)) { //another_station may be on full load, resulting in stale cargo on the current one
-			if(!(raw && raw != null)) {
-				if(!IsItNeededToImproveThatNoRawStation(another_station, cargo)) {
+		if(!IsItNeededToImproveThatStation(another_station_id, cargo)) { //another_station_id may be on full load, resulting in stale cargo on the current one
+			if(processed) {
+				if(!IsItNeededToImproveThatNoRawStation(another_station_id, cargo)) {
 					return 0;
 				}
 			}
-			if(RoadBuilder.DynamicFullLoadManagement(station_id, another_station, original)) { //reordering attempted to fix problem
+			if(RoadBuilder.DynamicFullLoadManagement(station_id, another_station_id, original)) { //reordering attempted to fix problem
 				return 0; //cloning is not necessary
 			}
 		}
@@ -948,24 +973,24 @@ function RoadBuilder::DynamicFullLoadManagement(full_station, empty_station, RV)
 	local first_station_is_full = (load_station_tile_id == full_station);
 
 	if(first_station_is_full) {
-		if(AIOrder.GetOrderFlags(RV, 0)!= (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE)) {
+		if(AIOrder.GetOrderFlags(RV, 0) != (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE)) {
 			Info(AIVehicle.GetName(RV) + " - change, situation 1");
 			AIOrder.SetOrderFlags(RV, 0, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE);
 			return true;
 		} else {
-			if(AIOrder.GetOrderFlags(RV, 1)== (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE)) {
+			if(AIOrder.GetOrderFlags(RV, 1) == (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE)) {
 				Info(AIVehicle.GetName(RV) + " - change, situation 2");
 				AIOrder.SetOrderFlags(RV, 1, AIOrder.OF_NON_STOP_INTERMEDIATE);
 				return true;
 			}
 		}
 	} else {
-		if(AIOrder.GetOrderFlags(RV, 1)!= (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE)) {
+		if(AIOrder.GetOrderFlags(RV, 1) != (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE)) {
 			Info(AIVehicle.GetName(RV) + " - change, situation 3");
 			AIOrder.SetOrderFlags(RV, 1, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE);
 			return true;
 		} else {
-			if(AIOrder.GetOrderFlags(RV, 0)== (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE)) {
+			if(AIOrder.GetOrderFlags(RV, 0) == (AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE)) {
 				Info(AIVehicle.GetName(RV) + " - change, situation 4");
 				AIOrder.SetOrderFlags(RV, 0, AIOrder.OF_NON_STOP_INTERMEDIATE);
 				return true;
