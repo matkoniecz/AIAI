@@ -40,9 +40,9 @@ class RailwayStation extends Station
 					if(!AIRail.BuildRail(railway_tracks[x][1][i][0], railway_tracks[x][1][i][1], railway_tracks[x][1][i][2])) {
 						Error(AIError.GetLastErrorString() + " - RailwayStation::BuildRailwayTracks");
 						if(AIAI.GetSetting("debug_signs_about_failed_railway_contruction")) {
-							AISign.BuildSign(railway_tracks[x][1][i][0], "a");
-							AISign.BuildSign(railway_tracks[x][1][i][1], "b");
-							AISign.BuildSign(railway_tracks[x][1][i][2], "c");
+							AISign.BuildSign(railway_tracks[x][1][i][0], "a+");
+							AISign.BuildSign(railway_tracks[x][1][i][1], "b+");
+							AISign.BuildSign(railway_tracks[x][1][i][2], "c+");
 							AIController.Break("failed railway construction"); 
 						}
 						Error(i + "BuildRailwayTracks failure");
@@ -65,9 +65,9 @@ class RailwayStation extends Station
 					if(!AIRail.RemoveRail(railway_tracks[x][1][i][0], railway_tracks[x][1][i][1], railway_tracks[x][1][i][2])){
 						Error(AIError.GetLastErrorString() + " - RailwayStation::RemoveRailwayTracks");
 						if(AIAI.GetSetting("debug_signs_about_failed_railway_contruction")) {
-							AISign.BuildSign(railway_tracks[x][1][i][0], "a");
-							AISign.BuildSign(railway_tracks[x][1][i][1], "b");
-							AISign.BuildSign(railway_tracks[x][1][i][2], "c");
+							AISign.BuildSign(railway_tracks[x][1][i][0], "a-");
+							AISign.BuildSign(railway_tracks[x][1][i][1], "b-");
+							AISign.BuildSign(railway_tracks[x][1][i][2], "c-");
 							AIController.Break("failed railway destruction"); 
 						}
 						Error(i + "RemoveRailwayTracks failure");
