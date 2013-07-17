@@ -121,6 +121,14 @@ function RailBuilder::AddTrainsToThisStation(station, cargo)
 	vehicle_list.Valuate(AIBase.RandItem);
 	vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
 	local original = vehicle_list.Begin();
+	if(AIVehicle.GetCapacity(original, cargo) == 0) {
+		Error(AIVehicle.GetName(original) + " have no capacity for waiting cargo on station.");
+		Error("It was probably a refit accident.");
+		Error("Train engine was refittable but company in the past was unable to afford it attracting unwanted cargo.");
+		Error("Now it changed and cargo is surprised.");
+		Info("Aborting purchase of new trains to carry delusional cargo.");
+		return 0;
+	}
 	local location_of_processed_station = AIStation.GetLocation(station);
 	local location_of_load_station = GetLoadStationLocation(original)
 	assert(location_of_processed_station == location_of_load_station);
