@@ -179,8 +179,6 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile=nul
 			for (tile = list.Begin(); list.HasNext(); tile = list.Next()) {
 				if(!IsItPossibleToHaveAirport(tile, airport_type, AIStation.STATION_NEW))
 				   {
-				   //Error("BAD " + tile);
-				   //AISign.BuildSign(tile, "X");
 				   continue;
 				   }
 				good_tile = tile;
@@ -634,12 +632,10 @@ for (local plane = list.Begin(); list.HasNext(); plane = list.Next())
 			if(AIOrder.SkipToOrder(plane, (i+1)%AIOrder.GetOrderCount(plane)))
 				{
 				count++;
-				//AISign.BuildSign(AIVehicle.GetLocation(plane), "here+");
 				//Error("OK: "+AIError.GetLastErrorString() +" dump: "+AIOrder.GetOrderCount(plane) +" "+ AIOrder.ORDER_CURRENT);
 				break;
 				}
 			else { 
-				//AISign.BuildSign(AIVehicle.GetLocation(plane), "here-");
 				//Error("fail: "+AIError.GetLastErrorString() +" dump: "+AIOrder.GetOrderCount(plane) +" "+ AIOrder.ORDER_CURRENT);
 				break;
 				} 

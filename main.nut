@@ -112,7 +112,6 @@ function AIAI::UpgradeBridges()
 		if(!AIBridge.IsBridgeTile(tile)) {
 			continue
 		}
-		//AISign.BuildSign(tile, i)
 		local old_bridge_type = AIBridge.GetBridgeID (tile)
 		local new_bridge_type = GetMaxSpeedBridge(tile, AIBridge.GetOtherBridgeEnd(tile))
 		if(AIBridge.GetMaxSpeed(new_bridge_type) > AIBridge.GetMaxSpeed(old_bridge_type)) {
