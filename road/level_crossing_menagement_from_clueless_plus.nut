@@ -27,7 +27,7 @@ function AIAI::HandleOldLevelCrossings()
 	this.detected_rail_crossings.Valuate(Helper.ItemValuator);
 	foreach(crash_tile, _ in this.detected_rail_crossings) {
 		Info("Trying to fix a railway crossing that had an accident before");
-		//Helper.SetSign(crash_tile, "crash_tile");
+		//Helper.BuildSign(crash_tile, "crash_tile");
 		local neighbours = Tile.GetNeighbours4MainDir(crash_tile);
 		neighbours.Valuate(AIRoad.AreRoadTilesConnected, crash_tile);
 		neighbours.KeepValue(1);

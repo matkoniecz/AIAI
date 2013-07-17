@@ -20,6 +20,12 @@ Money <- SuperLib.Money
 DataStore <- SuperLib.DataStore
 Town <- SuperLib.Town
 
+Helper.BuildSign <- function(tile, message)
+{
+	Helper.SetSign(tile, message, true);
+}
+
+
 require("util/debug.nut")
 
 require("myAPIpatch.nut");

@@ -488,7 +488,7 @@ if(airport_type==AIAirport.AT_METROPOLITAN ) maksimum = 2000; //1 l¹dowaie miesi
 if(airport_type==AIAirport.AT_COMMUTER) maksimum = 500; //1 l¹dowanie miesiêcznie - 250 //4 na ma³ym
 if(airport_type==AIAirport.AT_SMALL) maksimum = 750; //1 l¹dowanie miesiêcznie - 250 //4 na ma³ym
  
-if(AIAI.GetSetting("debug_signs_for_airports_load")) Helper.SetSign(AIStation.GetLocation(airport_id), total + " (" + maksimum + ")");
+if(AIAI.GetSetting("debug_signs_for_airports_load")) Helper.BuildSign(AIStation.GetLocation(airport_id), total + " (" + maksimum + ")");
 
 if(tile != null && engine != null) total+=ile*this.GetBurdenOfSingleAircraft(AIStation.GetLocation(airport_id), tile, engine);
 

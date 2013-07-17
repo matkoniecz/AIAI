@@ -851,14 +851,14 @@ function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
 {
 	if(AgeOfTheYoungestVehicle(station_id) <= 20) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.SetSign(AIStation.GetLocation(station_id), "young RV - " + GetReadableDate());
+			Helper.BuildSign(AIStation.GetLocation(station_id), "young RV - " + GetReadableDate());
 		}
 		return 0; //to protect from bursts of new vehicles
 	}
 	if(!IsItNeededToImproveThatStation(station_id, cargo)) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
 			if(AIStation.HasCargoRating(station_id, cargo)) { //TODO once it will hit stables remove note about debug_signs_about_adding_road_vehicles in info.nut
-				Helper.SetSign(AIStation.GetLocation(station_id), "OK status - " + GetReadableDate());
+				Helper.BuildSign(AIStation.GetLocation(station_id), "OK status - " + GetReadableDate());
 			}
 		}
 		return 0;
@@ -867,7 +867,7 @@ function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
 	if(vehicle_list.Count()==0) {
 		//TODO - revive empty station (?)
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.SetSign(AIStation.GetLocation(station_id), "dead - " + GetReadableDate());
+			Helper.BuildSign(AIStation.GetLocation(station_id), "dead - " + GetReadableDate());
 		}
 		return 0;
 	}
@@ -885,7 +885,7 @@ function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
 	}
 	if(AIVehicle.GetProfitLastYear(original) < 0) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.SetSign(AIStation.GetLocation(station_id), "unprofitable - " + GetReadableDate());
+			Helper.BuildSign(AIStation.GetLocation(station_id), "unprofitable - " + GetReadableDate());
 		}
 		return 0;
 	}
@@ -894,7 +894,7 @@ function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
 	local load_station_id = GetLoadStationId(original);
 	if(load_station_id == null || another_station_id == null) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.SetSign(AIStation.GetLocation(station_id), "invalid orders - " + GetReadableDate());
+			Helper.BuildSign(AIStation.GetLocation(station_id), "invalid orders - " + GetReadableDate());
 		}
 		return 0;
 	}
@@ -909,27 +909,27 @@ function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
 	veh_list.RemoveValue(1);
 	if(veh_list.Count() != 0) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.SetSign(AIStation.GetLocation(station_id), "not moving - " + GetReadableDate());
+			Helper.BuildSign(AIStation.GetLocation(station_id), "not moving - " + GetReadableDate());
 		}
 		return 0;
 	}
 	if(!AICargoList_StationAccepting(another_station_id).HasItem(cargo)) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.SetSign(AIStation.GetLocation(another_station_id), AICargo.GetLabel(cargo) + " refused - " + GetReadableDate());
+			Helper.BuildSign(AIStation.GetLocation(another_station_id), AICargo.GetLabel(cargo) + " refused - " + GetReadableDate());
 		}
 		return 0;
 	}
 	local processed = this.IsProcessedCargoVehicle(original);
 	if(processed == null) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.SetSign(AIStation.GetLocation(station_id), "invalid processed status - " + GetReadableDate());
+			Helper.BuildSign(AIStation.GetLocation(station_id), "invalid processed status - " + GetReadableDate());
 		}
 		return 0;
 	}
 	if(processed) {
 		if(!IsItNeededToImproveThatNoRawStation(station_id, cargo)) {
 			if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-				Helper.SetSign(AIStation.GetLocation(station_id), "OK for processed - " + GetReadableDate());
+				Helper.BuildSign(AIStation.GetLocation(station_id), "OK for processed - " + GetReadableDate());
 			}
 			return 0;
 		}
@@ -1042,13 +1042,13 @@ function RoadBuilder::copyVehicle(main_vehicle_id, cargo)
 	local how_many = list.Count();
 
 	if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-		Helper.SetSign(load_station_tile+AIMap.GetTileIndex(-1, 0), ""+how_many+" of " + max_count);
-		Helper.SetSign(load_station_tile+AIMap.GetTileIndex(-2, 0), "distance " + distance);
+		Helper.BuildSign(load_station_tile+AIMap.GetTileIndex(-1, 0), ""+how_many+" of " + max_count);
+		Helper.BuildSign(load_station_tile+AIMap.GetTileIndex(-2, 0), "distance " + distance);
 	}
 
 	if(how_many>max_count) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.SetSign(load_station_tile, "maxed!");
+			Helper.BuildSign(load_station_tile, "maxed!");
 		}
 		Warning("Too many vehicles on this route!");
 		return false;
@@ -1138,20 +1138,20 @@ function RoadBuilder::RemoveRedundantRVFromStation(station_id, cargo, vehicle_li
 			if(RoadBuilder.IsVehicleNearStation(vehicle_id, station_id)) {
 				if(AIVehicle.GetState(vehicle_id) == AIVehicle.VS_AT_STATION) {
 					waiting_counter+=2;
-					//Helper.SetSign(AIVehicle.GetLocation(vehicle_id), "w1");
+					//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "w1");
 				} else if(AIVehicle.GetCurrentSpeed(vehicle_id)==0) {
-					//Helper.SetSign(AIVehicle.GetLocation(vehicle_id), "w2");
+					//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "w2");
 					waiting_counter++;
 				} else {
-					//Helper.SetSign(AIVehicle.GetLocation(vehicle_id), "a1");
+					//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "a1");
 					waiting_counter--;
 				}
 			} else {
-				//Helper.SetSign(AIVehicle.GetLocation(vehicle_id), "a2");
+				//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "a2");
 				active_counter++;
 			}
 		} else {
-			//Helper.SetSign(AIVehicle.GetLocation(vehicle_id), "a3");
+			//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "a3");
 			active_counter++;
 		}
 	}
