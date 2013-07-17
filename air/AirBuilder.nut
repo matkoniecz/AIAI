@@ -668,8 +668,10 @@ return distance + rand;
 
 function AirBuilder::IsItPossibleToHaveAirport(tile, airport_type, c)
 {
-	local test = AITestMode();
-	if(AIAirport.BuildAirport(tile, airport_type, c)) return true;
+	{
+		local test = AITestMode();
+		if(AIAirport.BuildAirport(tile, airport_type, c)) return true;
+	}
 	local error = AIError.GetLastError()
 	HandleFailedStationConstruction(tile, error);
 	return (error == AIError.ERR_NOT_ENOUGH_CASH);
