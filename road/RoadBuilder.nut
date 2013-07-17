@@ -876,6 +876,13 @@ function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
 	vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
 	local original = vehicle_list.Begin();
 	
+	if(AIVehicle.GetCapacity(original, cargo) == 0) {
+		Error(AIVehicle.GetName(original) + " have no capacity for " + AICargo.GetCargoLabel(cargo));
+		if(AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
+			abort("Wild cargo appeared. In case of RV there is no valid explanation.");
+		}
+		return 0;
+	}
 	if(AIVehicle.GetProfitLastYear(original) < 0) {
 		if(AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
 			AISign.BuildSign(AIStation.GetLocation(station_id), "unprofitable - " + GetReadableDate());
