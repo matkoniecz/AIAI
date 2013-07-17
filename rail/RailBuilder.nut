@@ -358,7 +358,10 @@ function RailBuilder::RetryCheck(non_critical_errors)
 				non_critical_errors[i].retry_count--;
 				Info("Waiting " + non_critical_errors[i].retry_time_wait + " due to " + AIError.GetLastErrorString() + "(" + non_critical_errors[i].retry_count + ")");
 				AIController.Sleep(non_critical_errors[i].retry_time_wait);
-				rodzic.Maintenance();
+				//rodzic.Maintenance();
+				//this caused problems:
+				// - with measuring cost of contructed route
+				// - builder may run in TestMode
 				return true;
 			}
 		}
