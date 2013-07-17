@@ -993,10 +993,10 @@ function RailBuilder::StationConstruction(path)
 	} else {
 		goal_industry = AIIndustry.GetIndustryType(trasa.end);
 	}
-	local distance = 50
 
 	local direction = null
 
+	local distance = AIMap.DistanceManhattan(trasa.first_station.location, trasa.second_station.location);
 	local location = trasa.first_station.location
 	local platform_count = trasa.first_station.platform_count
 	if(trasa.first_station.direction != StationDirection.x_is_constant__horizontal){
@@ -1004,8 +1004,8 @@ function RailBuilder::StationConstruction(path)
 	} else {
 		direction = AIRail.RAILTRACK_NW_SE;
 	}
-
-	if(!AIRail.BuildNewGRFRailStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, true)) {
+	local source = true;
+	if(!AIRail.BuildNewGRFRailStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)) {
 		if(!AIRail.BuildRailStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW)) {
 			return false;
 		}
@@ -1018,7 +1018,8 @@ function RailBuilder::StationConstruction(path)
 	} else {
 		direction = AIRail.RAILTRACK_NW_SE;
 	}
-	if(!AIRail.BuildNewGRFRailStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, true)) {
+	local source = false;
+	if(!AIRail.BuildNewGRFRailStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)) {
 		if(!AIRail.BuildRailStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW)) {
 			AITile.DemolishTile(trasa.first_station.location);
 			return false;
