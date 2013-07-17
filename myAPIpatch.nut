@@ -195,7 +195,7 @@ AIVehicle.BuildVehicle <- function (depot_tile, engine_id)
 	}
 	Info(AIEngine.GetName(engine_id) + " constructed! ("+vehicle_id+")")
 	if(!AIVehicle.IsValidVehicle(vehicle_id)) {
-		abort("!!!!!!!!!!!!!!!");
+		abort("Supposedly valid vehicle that was just constructed is invalid.");
 	}
 	if(!AIEngine.IsWagon(AIVehicle.GetEngineType(vehicle_id))) {
 		AIVehicle.SetName(vehicle_id, "new")

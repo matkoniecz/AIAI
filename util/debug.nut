@@ -39,7 +39,9 @@ function abort(message)
 {
 	Error(message + ", last error is " + AIError.GetLastErrorString());
 	Warning("Please, post savegame");
-	local tesmode = IsTestModeEnabled()
+	if(IsTestModeEnabled()) {
+		Error("Note: TestMode was enabled");
+	}
 	if(AIAI.GetSetting("pause_game_on_calling_abort_funtion_and_activated_ai_developer_tools") == 1 ) {
 		AIController.Break("STOP!")
 	}
