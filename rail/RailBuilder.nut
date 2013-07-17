@@ -94,48 +94,52 @@ function RailBuilder::Maintenance()
 
 function RailBuilder::AddTrainsToThisStation(station, cargo)
 {
-	if(IsItNeededToImproveThatNoRawStation(station, cargo) && AgeOfTheYoungestVehicle(station)>110) {
-		Info("IsItNeededToImproveThatNoRawStation (" +AIBaseStation.GetName(station) + ")? Yes!");
-		local vehicle_list=AIVehicleList_Station(station);
-		local how_many = vehicle_list.Count();
-		vehicle_list.Valuate(IsForSellUseTrueForInvalidVehicles);
-		vehicle_list.KeepValue(0);
-		if(how_many != vehicle_list.Count()) {
-			Info("wait for sell");
-			return 0;
+	if(!IsItNeededToImproveThatNoRawStation(station, cargo)) {
+		return 0;
+	}
+	if(AgeOfTheYoungestVehicle(station) <= 110) {
+		return 0;
+	}
+	Info("Train station " +AIBaseStation.GetName(station) + " have underservised " + AICargo.GetCargoLabel(cargo));
+	local vehicle_list=AIVehicleList_Station(station);
+	local how_many = vehicle_list.Count();
+	vehicle_list.Valuate(IsForSellUseTrueForInvalidVehicles);
+	vehicle_list.KeepValue(0);
+	if(how_many != vehicle_list.Count()) {
+		Info("wait for sell");
+		return 0;
+	}
+	if(vehicle_list.Count()==0) {
+		Warning("Dead station");
+		return 0;
+	}
+	local max_train_count=LoadDataFromStationNameFoundByStationId(station, "{}");
+	if(how_many >= max_train_count) {
+		Warning("max_train_count = " + max_train_count + " <= how_many = " + how_many);
+		return 0;
+	}
+	vehicle_list.Valuate(AIBase.RandItem);
+	vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
+	local original = vehicle_list.Begin();
+	local location_of_processed_station = AIStation.GetLocation(station);
+	local location_of_load_station = GetLoadStationLocation(original)
+	assert(location_of_processed_station == location_of_load_station);
+	if(AIVehicle.GetProfitLastYear(original) + AIVehicle.GetProfitThisYear(original) <0) {
+		Warning("Unprofitable leader");
+		return 0;
+	}
+	if(HowManyVehiclesFromThisStationAreNotMoving(station) != 0) {
+		Info("Traffic jam");
+		return 0;
+	}
+	if(!AICargoList_StationAccepting(GetUnloadStationId(original)).HasItem(cargo)) {
+		if(AIAI.GetSetting("other_debug_signs")) {
+			AISign.BuildSign(GetUnloadStationLocation(original), "ACCEPTATION STOPPED");
 		}
-		if(vehicle_list.Count()==0) {
-			Warning("Dead station");
-			return 0;
-		}
-		local max_train_count=LoadDataFromStationNameFoundByStationId(station, "{}");
-		if(how_many >= max_train_count) {
-			Warning("max_train_count = " + max_train_count + " <= how_many = " + how_many);
-			return 0;
-		}
-		vehicle_list.Valuate(AIBase.RandItem);
-		vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
-		local original = vehicle_list.Begin();
-		local location_of_processed_station = AIStation.GetLocation(station);
-		local location_of_load_station = GetLoadStationLocation(original)
-		assert(location_of_processed_station == location_of_load_station);
-		if(AIVehicle.GetProfitLastYear(original) + AIVehicle.GetProfitThisYear(original) <0){
-			Warning("Unprofitable leader");
-			return 0;
-		}
-		if(HowManyVehiclesFromThisStationAreNotMoving(station) != 0) {
-			Info("Traffic jam");
-			return 0;
-		}
-		if(!AICargoList_StationAccepting(GetUnloadStationId(original)).HasItem(cargo)) {
-			if(AIAI.GetSetting("other_debug_signs")) {
-				AISign.BuildSign(GetUnloadStationLocation(original), "ACCEPTATION STOPPED");
-			}
-			return 0;
-		}
-		if(this.copyVehicle(original, cargo )) {
-			return 1;
-		}
+		return 0;
+	}
+	if(this.copyVehicle(original, cargo )) {
+		return 1;
 	}
 	return 0;
 }
