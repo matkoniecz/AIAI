@@ -150,7 +150,7 @@ function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedI
 		}
 	}
 	if(best == 0) {
-		Warning("Fail!");
+		Warning("Findpair found nothing usable.");
 		route.OK = false;
 		return route;
 	} else {
