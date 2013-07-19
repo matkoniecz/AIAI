@@ -45,6 +45,9 @@ function Builder::ValuateConsumer(industry_id, cargo, score)
 		score *= 7;
 	}
 	local industry_type_id = AIIndustry.GetIndustryType(industry_id);
+	if(!AIIndustryType.IsValidIndustryType(industry_id)) {
+		return -1; //industry closed after first check in this function
+	}
 	local industry_type_name = AIIndustryType.GetName(industry_type_id);
 	local list = AIIndustryType.GetProducedCargo(industry_type_id);
 	if(list.Count() == 0) {
