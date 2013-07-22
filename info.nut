@@ -138,6 +138,15 @@ class AIAI extends AIInfo {
 		flags = CONFIG_BOOLEAN + CONFIG_INGAME
 	});
 	AddSetting( {
+		name = "abort_pathfinding",
+		description = "abort_pathfinding",
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
+		flags = CONFIG_BOOLEAN + CONFIG_INGAME + CONFIG_DEVELOPER
+	});
+	AddSetting( {
 		name = "debug_signs_about_failed_railway_contruction",
 		description = "debug_signs_about_failed_railway_contruction allowed",
 		easy_value = 0,

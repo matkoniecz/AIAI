@@ -1062,7 +1062,13 @@ function RailBuilder::PathFinder(limit)
 		rodzic.Maintenance();
 		AIController.Sleep(1);
 		guardian++;
-		if(guardian>limit )break;
+		if(guardian>limit) {
+			break;
+		}
+		if (AIAI.GetSetting("abort_pathfinding") == 1) {
+			Warning("pathfinding stopped on request");
+			break;
+		}
 	}
 
 	if(path == false || path == null){

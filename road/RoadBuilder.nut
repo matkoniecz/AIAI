@@ -327,6 +327,10 @@ function RoadBuilder::PrepareRoute()
 		if(guardian>limit) {
 			break;
 		}
+		if (AIAI.GetSetting("abort_pathfinding") == 1) {
+			Warning("pathfinding stopped on request");
+			break;
+		}
 	}
 
 	if(path == false || path == null){
