@@ -1,0 +1,9 @@
+Kappa (2013-07)
+-----------------------------------------------------------------------------
+Basic support for communicating with NoCarGoal GS (disabled as default)
+
+
+-----------------------------------------------------------------------------
+Note that this changelog lists only major features added later than 2013-06.
+Full list of changes is a list of git commits, available at github:
+https://github.com/Bulwersator/AIAI/commits/master

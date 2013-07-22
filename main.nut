@@ -1,3 +1,5 @@
+g_no_car_goal <- null;
+
 class AIAI extends AIController 
 {
 	desperation = null;
@@ -7,6 +9,7 @@ class AIAI extends AIController
 	detected_rail_crossings = null;
 	loaded_game = false;
 	bridge_list = [];
+	library = null;
 }
 
 require("headers.nut");
@@ -48,6 +51,32 @@ function AIAI::Starter()
 	}
 }
 
+function AIAI::CommunicateWithGS()
+{
+	if(AIController.GetSetting("scp_enabled")) {
+		if (this.library == null) {
+			this.library = SCPLib("fake_data", "fake_data");
+			this.library.SCPLogging_Info(Info);
+			this.library.SCPLogging_Error(true);
+			g_no_car_goal = SCPClient_NoCarGoal(this.library);
+		}
+	}
+	if(g_no_car_goal == null) {
+		g_no_car_goal = SCPClient_NoCarGoal(this.library);
+	}
+	if(this.library != null) {
+		this.library.SCPLogging_Info(Info);
+		for(local j = 0; j < 5 && this.library.Check(); j++){}
+	}
+	if(AIController.GetSetting("scp_enabled")) {
+		if(g_no_car_goal.IsNoCarGoalGame()){
+			Info("It is a NoCarGoal game.");
+		} else {
+			Info("No Game Script detected.");
+		}
+	}
+}
+
 function AIAI::Start()
 {
 	this.Starter();
@@ -55,6 +84,7 @@ function AIAI::Start()
 	for(local i = 1; true; i++) {
 		local waiting_for_money = false;
 		Warning("Desperation: " + desperation);
+		this.CommunicateWithGS();
 		root_tile = Tile.GetRandomTile();
 		if(AIVehicleList().Count() != 0) {
 			local need = this.GetMinimalCost(builders);

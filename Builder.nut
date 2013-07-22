@@ -21,6 +21,26 @@ function Builder::ValuateProducer(ID, cargo)
 		base*=3;
 	}
 	base *= AICargo.GetCargoIncome(cargo, 10, 50);
+	if(g_no_car_goal.IsGoalCargo(cargo, true)) {
+		Info(AICargo.GetCargoLabel(cargo));
+		local bonus_percent = 10;
+		local loan = AICompany.GetLoanAmount();
+		local max_loan = AICompany.GetMaxLoanAmount();
+		local loan_available = max_loan - loan;
+		local part_of_available_loan_in_percents = loan_available / (max_loan / 100);
+		bonus_percent += part_of_available_loan_in_percents / 5;
+		if (loan == 0) {
+			bonus_percent += 200;
+		}
+		local my_company = AICompany.ResolveCompanyID(AICompany.COMPANY_SELF);
+		if (AICompany.CURRENT_QUARTER != AICompany.EARLIEST_QUARTER) {
+			bonus_percent += AICompany.GetQuarterlyIncome(my_company, AICompany.CURRENT_QUARTER+1) / 4000;
+		}
+		//Info(part_of_available_loan_in_percents + " part_of_available_loan_in_percents");
+		//Info(bonus_percent + " bonus_percent");
+		base *= (100+bonus_percent);
+		base /= 100;
+	}
 	if(!AIIndustryType.ProductionCanIncrease(AIIndustry.GetIndustryType(ID))) {
 		base/=2;
 	}

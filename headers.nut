@@ -5,8 +5,13 @@ const INFINITE_SPEED = 4000000;
 //import("graph.aystar", "", 4);  - currently unused
 //import("queue.binary_heap", "", 1);//################################################## <- external
 
+require("util/debug.nut")
+require("myAPIpatch.nut");
+
 import("pathfinder.road", "RoadPathFinder", 4);      //################################################## <- external
 import("util.superlib", "SuperLib", 35);      //################################################## <- external
+import("Library.SCPLib", "SCPLib", 45);      //################################################## <- external
+import("Library.SCPClient_NoCarGoal", "SCPClient_NoCarGoal", 1);      //################################################## <- external
 
 require("library/Rail.nut");
 require("library/Helper.nut");
@@ -26,9 +31,7 @@ Helper.BuildSign <- function(tile, message)
 }
 
 
-require("util/debug.nut")
 
-require("myAPIpatch.nut");
 require("path.nut");
 
 require("util/read_save_data_from_names.nut")

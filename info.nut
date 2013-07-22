@@ -2,13 +2,13 @@ class AIAI extends AIInfo {
   function GetAuthor()      { return "Kogut"; }
   function GetName()        { return "AIAI"; }
   function GetVersion()     { return 96; }
-  function GetDescription() { return "Automatic Idiot AI Version iota (" + GetVersion() + "). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
+  function GetDescription() { return "Automatic Idiot AI Version kappa (" + GetVersion() + "). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
   function GetAPIVersion()  { return "1.3"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
   function MinVersionToLoad() { return 87; } 
   function GetDate()        { return "2012-10-1"; }
-  function GetURL() {return "https://github.com/Bulwersator/AIAI/issues (preferred), other possibilities include http://tinyurl.com/ottdaiai (redirects to http://www.tt-forums.net/viewtopic.php?f=65&t=47298) and bulwersator@gmail.com. Thanks! [iota (" + GetVersion() +")]";}
+  function GetURL() {return "https://github.com/Bulwersator/AIAI/issues (preferred), other possibilities include http://tinyurl.com/ottdaiai (redirects to http://www.tt-forums.net/viewtopic.php?f=65&t=47298) and bulwersator@gmail.com. Thanks! [kappa (" + GetVersion() +")]";}
 
     function GetParameters() {
 	////////////////////////////////////////////////////////////////////
@@ -135,6 +135,14 @@ class AIAI extends AIInfo {
 		medium_value = 1,
 		hard_value = 1,
 		custom_value = 1,
+		flags = CONFIG_BOOLEAN + CONFIG_INGAME
+	});
+	AddSetting( {name = "scp_enabled", 
+		description = "Communicate with NoCarGoal. Note that it will result in construction of weird signs.", 
+		easy_value = 0,
+		medium_value = 0,
+		hard_value = 0,
+		custom_value = 0,
 		flags = CONFIG_BOOLEAN + CONFIG_INGAME
 	});
 	AddSetting( {
