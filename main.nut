@@ -56,7 +56,7 @@ function AIAI::CommunicateWithGS()
 	if(AIController.GetSetting("scp_enabled")) {
 		if (this.library == null) {
 			this.library = SCPLib("fake_data", "fake_data");
-			this.library.SCPLogging_Info(Info);
+			this.library.SCPLogging_Info(true);
 			this.library.SCPLogging_Error(true);
 			g_no_car_goal = SCPClient_NoCarGoal(this.library);
 		}
