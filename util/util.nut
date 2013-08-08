@@ -155,13 +155,15 @@ function GetRatherBigRandomTown()
 	return town_list.Begin();
 }
 
-function IsConnectedDistrict(town_tile)
+function IsConnectedDistrict(town_tile, cargo_id)
 {
 	//TODO - it is a hack rather than function
 	local list = AIStationList(AIStation.STATION_AIRPORT);
 	if(list.Count()!=0){
 		list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
 		list.KeepBelowValue(18);
+		list.Valuate(IsCargoLoadedOnThisStation, cargo_id);
+		list.KeepValue(1);
 		if(!list.IsEmpty()) return true;
 	}
 
@@ -169,6 +171,8 @@ function IsConnectedDistrict(town_tile)
 	if(list.Count()!=0){
 		list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
 		list.KeepBelowValue(8);
+		list.Valuate(IsCargoLoadedOnThisStation, cargo_id);
+		list.KeepValue(1);
 		if(!list.IsEmpty()) return true;
 	}
 	return false;
