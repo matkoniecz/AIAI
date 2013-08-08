@@ -70,11 +70,11 @@ function PAXAirBuilder::BuildAirportRouteBetweenCitiesWithAirportTypeSet(airport
 	if (!AIAirport.BuildAirport(tile_2, airport_type, AIStation.STATION_NEW)) {
 		Error("Although the testing told us we could build 2 airports, it still failed on the second airport at tile " + tile_2 + ".");
 		//AIAirport.RemoveAirport(tile_1);
-		rodzic.SetStationName(tile_2, "");
+		AIAI_instance.SetStationName(tile_2, "");
 		return false;
 	}
-	rodzic.SetStationName(tile_1, "");
-	rodzic.SetStationName(tile_2, "");
+	AIAI_instance.SetStationName(tile_1, "");
+	AIAI_instance.SetStationName(tile_2, "");
 	
 local airport_x = AIAirport.GetAirportWidth(airport_type);
 local airport_y = AIAirport.GetAirportHeight(airport_type);
@@ -96,7 +96,7 @@ local airport_rad = AIAirport.GetAirportCoverageRadius(airport_type);
 				{
 				return true;
 				}
-			rodzic.Maintenance();
+			AIAI_instance.Maintenance();
 			AIController.Sleep(500);
 			}
 		Info("We have " + i + " from " + counter + " aircrafts.");

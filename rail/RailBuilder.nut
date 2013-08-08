@@ -358,7 +358,7 @@ function RailBuilder::RetryCheck(non_critical_errors)
 				non_critical_errors[i].retry_count--;
 				Info("Waiting " + non_critical_errors[i].retry_time_wait + " due to " + AIError.GetLastErrorString() + "(" + non_critical_errors[i].retry_count + ")");
 				AIController.Sleep(non_critical_errors[i].retry_time_wait);
-				//rodzic.Maintenance();
+				//AIAI_instance.Maintenance();
 				//this caused problems:
 				// - with measuring cost of contructed route
 				// - builder may run in TestMode
@@ -394,7 +394,7 @@ function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.
 				} else {
 					local status = false;
 					while(!status) {
-						if(rodzic.BuildBridge(AIVehicle.VT_RAIL, prev, path.GetTile())) {
+						if(AIAI_instance.BuildBridge(AIVehicle.VT_RAIL, prev, path.GetTile())) {
 							status = true;
 						} else {
 							Info("Failed bridge")
@@ -1059,7 +1059,7 @@ function RailBuilder::PathFinder(limit)
 		Info("   Pathfinding ("+guardian+" / " + limit + ") started");
 		path = pathfinder.FindPath(2000);
 		Info("   Pathfinding ("+guardian+" / " + limit + ") ended");
-		rodzic.Maintenance();
+		AIAI_instance.Maintenance();
 		AIController.Sleep(1);
 		guardian++;
 		if(guardian>limit) {
@@ -1216,8 +1216,8 @@ function RailBuilder::ConstructionOfRoute()
 	}
 	this.TrainOrders(new_engine);
 
-	rodzic.SetStationName(trasa.first_station.location, "{1}["+trasa.depot_tile+"]");
-	rodzic.SetStationName(trasa.second_station.location, "{1}["+trasa.depot_tile+"]");
+	AIAI_instance.SetStationName(trasa.first_station.location, "{1}["+trasa.depot_tile+"]");
+	AIAI_instance.SetStationName(trasa.second_station.location, "{1}["+trasa.depot_tile+"]");
 	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.first_station.location), "[]") == trasa.depot_tile);
 	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.second_station.location), "[]") == trasa.depot_tile);
 	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.first_station.location), "{}") == 1);
@@ -1233,8 +1233,8 @@ function RailBuilder::ConstructionOfRoute()
 		max_train_count = 2 + (max_train_count-2)/2;
 	}
 
-	rodzic.SetStationName(trasa.first_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
-	rodzic.SetStationName(trasa.second_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
+	AIAI_instance.SetStationName(trasa.first_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
+	AIAI_instance.SetStationName(trasa.second_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
 	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.first_station.location), "[]") == trasa.depot_tile);
 	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.second_station.location), "[]") == trasa.depot_tile);
 	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.first_station.location), "{}") == max_train_count);

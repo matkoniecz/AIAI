@@ -1,7 +1,7 @@
 class RoadBuilder extends Builder
 {
 	desperation = 0;
-	rodzic = null;
+	AIAI_instance = null;
 	cost = 0;
 	detected_rail_crossings = null;
 	path = null;
@@ -274,7 +274,7 @@ function RoadBuilder::PrepareRoute()
 		Info("   Pathfinding ("+guardian+" / " + limit + ") started");
 		path = pathfinder.FindPath(2000);
 		Info("   Pathfinding ("+guardian+" / " + limit + ") ended");
-		rodzic.Maintenance();
+		AIAI_instance.Maintenance();
 		AIController.Sleep(1);
 		guardian++;
 		if(guardian>limit) {
@@ -340,8 +340,8 @@ function RoadBuilder::ConstructionOfRVRoute(type)
 		return false;
 	}
 
-	rodzic.SetStationName(trasa.first_station.location, "["+trasa.depot_tile+"]");
-	rodzic.SetStationName(trasa.second_station.location, "["+trasa.depot_tile+"]");
+	AIAI_instance.SetStationName(trasa.first_station.location, "["+trasa.depot_tile+"]");
+	AIAI_instance.SetStationName(trasa.second_station.location, "["+trasa.depot_tile+"]");
 	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.first_station.location), "[]") == trasa.depot_tile);
 	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.second_station.location), "[]") == trasa.depot_tile);
 
@@ -798,7 +798,7 @@ function RoadBuilder::BuildLoopAroundStation(tile_start, tile_end, tile_ignored)
 		if(path==null) {
 			return false;
 		}
-		rodzic.Maintenance();
+		AIAI_instance.Maintenance();
 		AIController.Sleep(1);
 	}
 	return this.BuildRoad(path);
@@ -1136,7 +1136,7 @@ function RoadBuilder::deleteVehicles(vehicle_list, delete_goal, cargo)
 		}
 		Info(delete_count+" of "+delete_goal+" deleted.")
 		local result = null;
-		if(rodzic.sellVehicle(vehicle_id, "queuer")) {
+		if(AIAI_instance.sellVehicle(vehicle_id, "queuer")) {
 			result = vehicle_id;
 			delete_count++;
 		}
@@ -1164,7 +1164,7 @@ function RoadBuilder::BuildRoadSegment(path, par, depth)
 			if (AITunnel.GetOtherTunnelEnd(path) == par) {
 				result = AITunnel.BuildTunnel(AIVehicle.VT_ROAD, path);
 			} else {
-				result = rodzic.BuildBridge(AIVehicle.VT_ROAD, path, par);
+				result = AIAI_instance.BuildBridge(AIVehicle.VT_ROAD, path, par);
 			}
 		}
 	}

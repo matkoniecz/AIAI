@@ -39,15 +39,15 @@ function CargoAirBuilder::Go()
 		AIAirport.RemoveAirport(trasa.first_station.location);
 		return false;
 		}
-	rodzic.SetStationName(trasa.first_station.location, "");
-	rodzic.SetStationName(trasa.second_station.location, "");
+	AIAI_instance.SetStationName(trasa.first_station.location, "");
+	AIAI_instance.SetStationName(trasa.second_station.location, "");
 	for(local i=0; i<trasa.engine_count; i++){
 		while(!this.BuildCargoAircraft(trasa.first_station.location, trasa.second_station.location, trasa.engine, trasa.cargo, "null")){
 			Error("Cargo aircraft construction failed due to " + AIError.GetLastErrorString()+".")
 			if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH){
 				return true;
 				}
-			rodzic.Maintenance();
+			AIAI_instance.Maintenance();
 			AIController.Sleep(500);
 			}
 		Info("We have " + i + " from " + trasa.engine_count + " aircrafts.");

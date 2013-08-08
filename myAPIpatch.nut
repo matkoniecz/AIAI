@@ -168,7 +168,7 @@ AIVehicle.BuildVehicle <- function (depot_tile, engine_id)
 		Warning("Vehicle ("+AIEngine.GetName(engine_id)+") construction failed with "+AIError.GetLastErrorString() + "(message from modified AIVehicle::BuildVehicle)")
 		if(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH) {
 			do {
-				rodzic.SafeMaintenance();
+				AIAI_instance.SafeMaintenance();
 				ProvideMoney();
 				AIController.Sleep(400);
 				Info("retry: BuildVehicle");

@@ -584,7 +584,7 @@ function RailBuilder::ConstructionOfPassingLanes(list)
 		Info("****** cost: " + cost)
 		while(cost != null && cost > GetAvailableMoney()){
 			AIController.Sleep(500);
-			rodzic.Maintenance();
+			AIAI_instance.Maintenance();
 			cost = GetCostOfRoute(copy);
 			Info("Waiting for more money: " + GetAvailableMoney()/1000 + "k / " + cost/1000 + "k");
 		}

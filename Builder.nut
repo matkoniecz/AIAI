@@ -1,7 +1,7 @@
 class Builder
 {
 	cost = null;
-	rodzic = null;
+	AIAI_instance = null;
 	desperation = 0;
 	retry_limit = 2;
 	pathfinding_time_limit = 10;
@@ -88,7 +88,7 @@ function Builder::SetDesperation(new_desperation)
 
 function Builder::constructor(parent_init, desperation_init)
 {
-	rodzic = parent_init;
+	AIAI_instance = parent_init;
 	desperation = desperation_init;
 	cost = 1;
 }
@@ -107,7 +107,7 @@ const MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES = 80;
 function Builder::GetLimitedIndustryList()
 {
 	local list = AIIndustryList()
-	list.Valuate(AIIndustry.GetDistanceManhattanToTile, rodzic.root_tile)
+	list.Valuate(AIIndustry.GetDistanceManhattanToTile, AIAI_instance.root_tile)
 	list.KeepBottom(MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES);
 	return list;
 }
@@ -115,7 +115,7 @@ function Builder::GetLimitedIndustryList()
 function Builder::GetLimitedIndustryList_CargoAccepting(cargo)
 {
 	local list = AIIndustryList_CargoAccepting(cargo)
-	list.Valuate(AIIndustry.GetDistanceManhattanToTile, rodzic.root_tile)
+	list.Valuate(AIIndustry.GetDistanceManhattanToTile, AIAI_instance.root_tile)
 	list.KeepBottom(MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES/10);
 	return list;
 }
@@ -123,7 +123,7 @@ function Builder::GetLimitedIndustryList_CargoAccepting(cargo)
 function Builder::GetLimitedIndustryList_CargoProducing(cargo)
 {
 	local list = AIIndustryList_CargoProducing(cargo)
-	list.Valuate(AIIndustry.GetDistanceManhattanToTile, rodzic.root_tile)
+	list.Valuate(AIIndustry.GetDistanceManhattanToTile, AIAI_instance.root_tile)
 	list.KeepBottom(MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES/10);
 	return list;
 }
