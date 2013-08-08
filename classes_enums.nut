@@ -15,56 +15,55 @@ class Station
 
 enum RouteType
 {
-rawCargo,
-processedCargo,
-townCargo,
+	rawCargo,
+	processedCargo,
+	townCargo,
 }
 
 class Route
 {
-start = null;
-end = null;
-forbidden_industries = null;
-depot_tile = null;
-start_tile = null;
-end_tile = null;
-cargo = null;
-production = null;
-type = null;
-station_size = null;
-station_direction = null;
-first_station = null;
-second_station = null;
+	start = null;
+	end = null;
+	forbidden_industries = null;
+	depot_tile = null;
+	start_tile = null;
+	end_tile = null;
+	cargo = null;
+	production = null;
+	type = null;
+	station_size = null;
+	station_direction = null;
+	first_station = null;
+	second_station = null;
 
-track_type = null;
-engine = null;
-engine_count = null;
-budget = null;
-demand = null;
-OK = null;
+	track_type = null;
+	engine = null;
+	engine_count = null;
+	budget = null;
+	demand = null;
+	OK = null;
 
-constructor()
-{
-first_station = Station();
-second_station = Station();
-start=null;
-end=null;
-forbidden_industries = AIList();
-depot_tile = null;
-start_tile = null;
-end_tile = null;
-cargo = null;
-production = null;
-type = null;
-station_size = null;
-engine = null;
-engine_count = null;
-budget = null;
-}
+	constructor()
+	{
+		first_station = Station();
+		second_station = Station();
+		start=null;
+		end=null;
+		forbidden_industries = AIList();
+		depot_tile = null;
+		start_tile = null;
+		end_tile = null;
+		cargo = null;
+		production = null;
+		type = null;
+		station_size = null;
+		engine = null;
+		engine_count = null;
+		budget = null;
+	}
 
-function StationsAllocated()
-{
-return first_station.location != null && second_station.location != null
-}
-
+	function StationsAllocated()
+	{
+		return first_station.location != null && second_station.location != null
+	}
 }
