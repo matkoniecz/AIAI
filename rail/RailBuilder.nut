@@ -1150,7 +1150,7 @@ function RailBuilder::Go()
 	for(local i=0; i<2; i++) {
 		if(!Possible()) return false;
 		Info("Scanning for rail route");
-		trasa = this.FindPairForStupidRailRoute(trasa);  
+		trasa = this.FindPairForRoute(trasa);  
 		if(!trasa.OK) {
 			Info("Nothing found!");
 			cost = 0;
@@ -1166,9 +1166,9 @@ function RailBuilder::Go()
 		} else {
 			assert(false);
 		}
-		if(this.PrepareStupidRailRoute()) {
+		if(this.PrepareRoute()) {
 			Info("   Contruction started on correct route.");
-			if(this.ConstructionOfStupidRailRoute()) {
+			if(this.ConstructionOfRoute()) {
 				return true;
 			} else {
 				trasa.forbidden_industries.AddItem(trasa.start, 0);
@@ -1185,7 +1185,7 @@ function RailBuilder::Go()
 	return false;
 }
 
-function RailBuilder::ConstructionOfStupidRailRoute()
+function RailBuilder::ConstructionOfRoute()
 {
 	AIRail.SetCurrentRailType(trasa.track_type);
 	ProvideMoney();
@@ -1249,7 +1249,7 @@ function RailBuilder::ConstructionOfStupidRailRoute()
 	return true;
 }
 
-function RailBuilder::PrepareStupidRailRoute()
+function RailBuilder::PrepareRoute()
 {
 	Info("   Rail route on distance: " + AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile));
 	this.StationPreparation();   
@@ -1277,7 +1277,7 @@ function RailBuilder::PrepareStupidRailRoute()
 	return true;
 }
 
-function RailBuilder::FindPairForStupidRailRoute(route)
+function RailBuilder::FindPairForRoute(route)
 {
 	return FindPairWrapped(route, this);
 }
@@ -1307,8 +1307,8 @@ function RailBuilder::IndustryToIndustryStationAllocator(project)
 
 	project.first_station.location = null; 
 	for(; project.station_size>=this.GetMinimalStationSize(); project.station_size--) {
-		project.first_station = this.FindStationProducerStupidRail(producer, cargo, project.station_size);
-		project.second_station = this.FindStationConsumerStupidRail(consumer, cargo, project.station_size);
+		project.first_station = this.FindStationProducer(producer, cargo, project.station_size);
+		project.second_station = this.FindStationConsumer(consumer, cargo, project.station_size);
 		if(project.StationsAllocated()) {
 			break;
 		}
@@ -1323,7 +1323,7 @@ function RailBuilder::IndustryToCityStationAllocator(project)
 
 	project.first_station.location = null; 
 	for(; project.station_size>=this.GetMinimalStationSize(); project.station_size--) {
-		project.first_station = this.FindStationProducerStupidRail(project.start, project.cargo, project.station_size);
+		project.first_station = this.FindStationProducer(project.start, project.cargo, project.station_size);
 		project.second_station = this.FindCityConsumerStation(project.end, project.cargo, project.station_size);
 		if(project.StationsAllocated()) {
 			break;
@@ -1356,7 +1356,7 @@ function RailBuilder::FindCityProducerStation(town, cargo, length, platform_coun
 	return this.FindStationRail(list, length, platform_count); 
 }
 
-function RailBuilder::FindStationConsumerStupidRail(consumer, cargo, length)
+function RailBuilder::FindStationConsumer(consumer, cargo, length)
 {
 	local radius = AIStation.GetCoverageRadius(AIStation.STATION_TRAIN);
 	local list=AITileList_IndustryAccepting(consumer, radius);
@@ -1367,7 +1367,7 @@ function RailBuilder::FindStationConsumerStupidRail(consumer, cargo, length)
 	return this.FindStationRail(list, length, AIAI.GetSetting("max_train_station_platform_count_end_industry"));
 }
 
-function RailBuilder::FindStationProducerStupidRail(producer, cargo, length)
+function RailBuilder::FindStationProducer(producer, cargo, length)
 {
 	local radius = AIStation.GetCoverageRadius(AIStation.STATION_TRAIN);
 	local list=AITileList_IndustryProducing(producer, radius);
