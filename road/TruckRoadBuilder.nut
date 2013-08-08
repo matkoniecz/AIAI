@@ -100,7 +100,7 @@ function TruckRoadBuilder::Go()
 		Info("Scanning for truck route completed [ " + desperation + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
 		if(this.PrepareRoute()) {
 			Info("   Contruction started on correct route.");
-			if(this.ConstructionOfRVRoute(AIRoad.ROADVEHTYPE_TRUCK)) {
+			if(this.ConstructionOfRVRoute()) {
 				return true;
 			} else {
 				trasa.forbidden_industries.AddItem(trasa.start, 0);

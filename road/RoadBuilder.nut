@@ -308,11 +308,11 @@ function RoadBuilder::PrepareRoute()
 	return true;   
 }
 
-function RoadBuilder::ConstructionOfRVRoute(type)
+function RoadBuilder::ConstructionOfRVRoute()
 {
 	trasa.depot_tile = null;
 	ProvideMoney();
-	if(!this.BuildRVStation(type)){
+	if(!this.BuildRVStation(AIRoad.GetRoadVehicleTypeForCargo(trasa.cargo))){
 		return false;
 	}
 

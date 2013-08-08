@@ -84,7 +84,7 @@ function BusRoadBuilder::Go()
 		Info("Scanning for bus route completed [ " + desperation + " ] ");
 		if(this.PrepareRoute()) {
 			Info("   Contruction started on correct route.");
-			if(this.ConstructionOfRVRoute(AIRoad.ROADVEHTYPE_BUS)) {
+			if(this.ConstructionOfRVRoute()) {
 				return true;
 			} else {
 				//TODO - industries?
