@@ -42,7 +42,7 @@ function LogInFindPair(string)
 function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForMe, ToCityStationAllocator, FindEngine)
 {
 	local industry_list = GetIndustryList();
-	local choise = Route();
+	local choice = Route();
 	local count = industry_list.Count();
 	Info("Finding the best route started! Industry list count: " + count);
 	local best = 0;
@@ -96,14 +96,14 @@ function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedI
 							route = FindEngine(route);
 							if(route.engine != null) {
 								best = new;
-								choise.start_tile = route.start_tile;
-								choise.end_tile = route.end_tile;
-								choise = clone route;
-								choise.first_station = clone route.first_station;
-								choise.second_station = clone route.second_station;
-								choise.first_station.is_city = false;
-								choise.second_station.is_city = false;
-								choise.track_type = route.track_type;
+								choice.start_tile = route.start_tile;
+								choice.end_tile = route.end_tile;
+								choice = clone route;
+								choice.first_station = clone route.first_station;
+								choice.second_station = clone route.second_station;
+								choice.first_station.is_city = false;
+								choice.second_station.is_city = false;
+								choice.track_type = route.track_type;
 							} else {
 								LogInFindPair("no viable engine");
 							}
@@ -130,15 +130,15 @@ function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedI
 						route = FindEngine(route);
 						if(route.engine != null) {
 							best = new;
-							choise.start_tile = route.start_tile;
-							choise.end_tile = route.end_tile;
-							choise = clone route;
-							choise.first_station = clone route.first_station;
-							choise.second_station = clone route.second_station;
-							choise.start_tile = AIIndustry.GetLocation(route.start);
-							choise.end_tile = AITown.GetLocation(route.end);
-							choise.first_station.is_city = false;
-							choise.second_station.is_city = true;
+							choice.start_tile = route.start_tile;
+							choice.end_tile = route.end_tile;
+							choice = clone route;
+							choice.first_station = clone route.first_station;
+							choice.second_station = clone route.second_station;
+							choice.start_tile = AIIndustry.GetLocation(route.start);
+							choice.end_tile = AITown.GetLocation(route.end);
+							choice.first_station.is_city = false;
+							choice.second_station.is_city = true;
 						} else {
 							LogInFindPair("no viable engine");
 						}
@@ -156,11 +156,11 @@ function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedI
 	} else {
 		Info(best/1000 + "k points");
 	}
-	choise.OK = true;
-	if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(choise.start))) {
-		choise.type = RouteType.rawCargo;
+	choice.OK = true;
+	if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(choice.start))) {
+		choice.type = RouteType.rawCargo;
 	} else {
-		choise.type = RouteType.processedCargo;
+		choice.type = RouteType.processedCargo;
 	}
-	return choise;
+	return choice;
 }
