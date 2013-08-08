@@ -587,11 +587,11 @@ function RoadBuilder::FindTownCargoStation(town, start, cargo)
 	return (this.FindStation(list));
 }
 
-function RoadBuilder::HowManyVehiclesForNewStation(traska)
+function RoadBuilder::HowManyVehiclesForNewStation(route)
 {
-	local speed = AIEngine.GetMaxSpeed(traska.engine);
-	local distance = AIMap.DistanceManhattan(traska.first_station.location, traska.second_station.location);
-	local how_many = trasa.production/AIEngine.GetCapacity(traska.engine);
+	local speed = AIEngine.GetMaxSpeed(route.engine);
+	local distance = AIMap.DistanceManhattan(route.first_station.location, route.second_station.location);
+	local how_many = route.production/AIEngine.GetCapacity(route.engine);
 	local multiplier = ((distance*88)/(50*speed));
 	if(multiplier == 0) {
 		multiplier = 1;
