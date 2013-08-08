@@ -9,7 +9,7 @@ require("util/debug.nut")
 require("myAPIpatch.nut");
 
 import("pathfinder.road", "RoadPathFinder", 4);      //################################################## <- external
-import("util.superlib", "SuperLib", 35);      //################################################## <- external
+import("util.superlib", "SuperLib", 36);      //################################################## <- external
 import("Library.SCPLib", "SCPLib", 45);      //################################################## <- external
 import("Library.SCPClient_NoCarGoal", "SCPClient_NoCarGoal", 1);      //################################################## <- external
 
