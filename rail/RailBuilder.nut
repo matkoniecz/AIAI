@@ -1119,16 +1119,16 @@ function RailBuilder::IsAllowed()
 	if(0 == AIAI.GetSetting("use_freight_trains")) return false; //TODO - should be in separate class
 	if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_RAIL)) return false;
 
-	local ile;
+	local count;
 	local veh_list = AIVehicleList();
 	veh_list.Valuate(AIVehicle.GetVehicleType);
 	veh_list.KeepValue(AIVehicle.VT_RAIL);
-	ile = veh_list.Count();
+	count = veh_list.Count();
 	local allowed = AIGameSettings.GetValue("vehicle.max_trains");
 	if(allowed==0) return false;
-	if(ile==0) return true;
-	if(((ile*100)/(allowed))>90) return false;
-	if((allowed - ile)<5) return false;
+	if(count==0) return true;
+	if(((count*100)/(allowed))>90) return false;
+	if((allowed - count)<5) return false;
 	return true;
 }
 

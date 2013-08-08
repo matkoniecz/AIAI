@@ -7,16 +7,16 @@ function AirBuilder::IsAllowed()
 	if(AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_AIR)) return false;
 	if(AIGameSettings.GetValue("economy.infrastructure_maintenance")) return false; //TODO - replace by estimating profits
 
-	local ile;
+	local count;
 	local veh_list = AIVehicleList();
 	veh_list.Valuate(AIVehicle.GetVehicleType);
 	veh_list.KeepValue(AIVehicle.VT_AIR);
-	ile = veh_list.Count();
+	count = veh_list.Count();
 	local allowed = AIGameSettings.GetValue("vehicle.max_aircraft");
 	if(allowed==0) return false;
-	if(ile==0) return true;
-	if((allowed - ile)<4) return false;
-	if(((ile*100)/(allowed))>90) return false;
+	if(count==0) return true;
+	if((allowed - count)<4) return false;
+	if(((count*100)/(allowed))>90) return false;
 	return true;
 }
 
@@ -370,16 +370,16 @@ return vehicle;
 
 function AirBuilder::HowManyAirplanes(distance, speed, production, engine)
 {
-local ile = (3*distance)/(2*speed);
-Info(ile + " aircrafts needed; based on distance");
+local count = (3*distance)/(2*speed);
+Info(count + " aircrafts needed; based on distance");
 
-ile *= 10 * production;
-//Info(ile + "&^%***********");
+count *= 10 * production;
+//Info(count + "&^%***********");
 
-ile /= AIEngine.GetCapacity(engine);
-Info(ile + " aircrafts needed after production (" + production + ") and capacity (" +  AIEngine.GetCapacity(engine) +") adjustment");
-ile = max(ile, 3);
-return ile;
+count /= AIEngine.GetCapacity(engine);
+Info(count + " aircrafts needed after production (" + production + ") and capacity (" +  AIEngine.GetCapacity(engine) +") adjustment");
+count = max(count, 3);
+return count;
 }
 
 function AirBuilder::ValuateProducer(ID, cargo)
@@ -470,7 +470,7 @@ for (local plane = airlist.Begin(); airlist.HasNext(); plane = airlist.Next())
 return total;
 }
 
-function AirBuilder::IsItPossibleToAddBurden(airport_id, tile=null, engine=null, ile=1)
+function AirBuilder::IsItPossibleToAddBurden(airport_id, tile=null, engine=null, count=1)
 {
 /*
 throughtput measured by empty concordes
@@ -500,7 +500,7 @@ if(airport_type==AIAirport.AT_SMALL) maksimum = 300;
  
 if(AIAI.GetSetting("debug_signs_for_airports_load")) Helper.BuildSign(AIStation.GetLocation(airport_id), total + " (" + maksimum + ")");
 
-if(tile != null && engine != null) total+=ile*this.GetBurdenOfSingleAircraft(AIStation.GetLocation(airport_id), tile, engine);
+if(tile != null && engine != null) total+=count*this.GetBurdenOfSingleAircraft(AIStation.GetLocation(airport_id), tile, engine);
 
 return total <= maksimum;
 }
