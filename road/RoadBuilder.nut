@@ -205,8 +205,8 @@ function RoadBuilder::TownCargoStationAllocator(project)
 	local town = project.end;
 	local cargo = project.cargo;
 
-	local maybe_start_station = this.FindTownCargoStation(start, null, cargo);
-	local maybe_second_station = this.FindTownCargoStation(town, AITown.GetLocation(start), cargo);
+	local maybe_start_station = this.FindTownCargoSupplyStation(start, null, cargo);
+	local maybe_second_station = this.FindTownCargoSupplyStation(town, AITown.GetLocation(start), cargo);
 
 	project.first_station = maybe_start_station;
 	project.second_station = maybe_second_station;
@@ -565,7 +565,7 @@ function RoadBuilder::FindProducentStation(producer, cargo)
 	return this.FindStation(list);
 }
 
-function RoadBuilder::FindTownCargoStation(town, start, cargo)
+function RoadBuilder::FindTownCargoSupplyStation(town, start, cargo)
 {
 	local tile = AITown.GetLocation(town);
 	local list = AITileList();
