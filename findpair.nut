@@ -1,37 +1,3 @@
-function DefaultIsConsumerOK(industry_id)
-{
-	if(AIIndustry.IsValidIndustry(industry_id)==false) {
-		return false; //industry closed during preprocessing
-	}
-	return true;
-}
-
-function DefaultIsProducerOK(industry_id)
-{
-	local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(industry_id));
-	if(cargo_list==null) {
-		return false;
-	}
-	if(cargo_list.Count()==0) {
-		return false;
-	}
-	if(AIIndustry.IsValidIndustry(industry_id)==false) {
-		return false; //industry closed during preprocessing
-	}
-	return true;
-}
-
-function FindPairWrapped (route, GetLimitedIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForMe, CityStationAllocator, FindEngine)
-{
-	if(IsProducerOK == null) {
-		IsProducerOK = DefaultIsProducerOK;
-	}
-	if(IsConsumerOK == null) {
-		IsConsumerOK = DefaultIsConsumerOK;
-	}
-	return FindPairDeepWrapped (route, GetLimitedIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForMe, CityStationAllocator, FindEngine);
-}
-
 function LogInFindPair(string)
 {
 	if(AIAI.GetSetting("log_in_find_pair") == 1) {
@@ -39,9 +5,9 @@ function LogInFindPair(string)
 	}
 }
 
-function FindPairDeepWrapped (route, GetLimitedIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForMe, ToCityStationAllocator, FindEngine)
+function FindPairWrapped (route, builder)
 {
-	local industry_list = GetLimitedIndustryList();
+	local industry_list = builder.GetLimitedIndustryList();
 	local choice = Route();
 	local count = industry_list.Count();
 	Info("Finding the best route started! Industry list count: " + count);
@@ -53,7 +19,7 @@ function FindPairDeepWrapped (route, GetLimitedIndustryList, IsProducerOK, IsCon
 	}
 	for (route.start = industry_list.Begin(); industry_list.HasNext(); route.start = industry_list.Next()) {
 		LogInFindPair(counter++ + " of " + industry_list.Count());
-		if(IsProducerOK(route.start) == false) {
+		if(builder.IsProducerOK(route.start) == false) {
 			LogInFindPair("bad producer " + AIIndustry.GetName(route.start));
 			continue;
 		}
@@ -69,21 +35,21 @@ function FindPairDeepWrapped (route, GetLimitedIndustryList, IsProducerOK, IsCon
 				LogInFindPair("connected producer");
 				continue;
 			}
-			local industry_list_accepting_current_cargo = rodzic.GetLimitedIndustryList_CargoAccepting(route.cargo);
-			local base = ValuateProducer(route.start, route.cargo);
+			local industry_list_accepting_current_cargo = builder.GetLimitedIndustryList_CargoAccepting(route.cargo);
+			local base = builder.ValuateProducer(route.start, route.cargo);
 			if(industry_list_accepting_current_cargo.Count()>0) {
 				for(route.end = industry_list_accepting_current_cargo.Begin(); industry_list_accepting_current_cargo.HasNext(); route.end = industry_list_accepting_current_cargo.Next()) {
 					if(route.forbidden_industries.HasItem(route.end)) {
 						LogInFindPair("banned consumer");
 						continue;
 					}
-					if(!IsConsumerOK(route.end)) {
+					if(!builder.IsConsumerOK(route.end)) {
 						LogInFindPair("bad consumer");
 						continue; 
 					}
-					new = ValuateConsumer(route.end, route.cargo, base);
+					new = builder.ValuateConsumer(route.end, route.cargo, base);
 					local distance = AITile.GetDistanceManhattanToTile(AIIndustry.GetLocation(route.end), AIIndustry.GetLocation(route.start)); 
-					new *= distanceBetweenIndustriesValuator(distance); 
+					new *= builder.distanceBetweenIndustriesValuator(distance); 
 					if(AITile.GetCargoAcceptance (AIIndustry.GetLocation(route.end), route.cargo, 1, 1, 4) == 0) {
 						LogInFindPair("cargo is not accepted");
 						continue;
@@ -91,9 +57,9 @@ function FindPairDeepWrapped (route, GetLimitedIndustryList, IsProducerOK, IsCon
 					if(new>best) {
 						route.start_tile = AIIndustry.GetLocation(route.start);
 						route.end_tile = AIIndustry.GetLocation(route.end);
-						route = DualIndustryStationAllocator(route);
+						route = builder.IndustryToIndustryStationAllocator(route);
 						if(route.StationsAllocated()) {
-							route = FindEngine(route);
+							route = builder.FindEngineForRoute(route);
 							if(route.engine != null) {
 								best = new;
 								choice.start_tile = route.start_tile;
@@ -113,21 +79,21 @@ function FindPairDeepWrapped (route, GetLimitedIndustryList, IsProducerOK, IsCon
 					}
 				}
 			} else {
-				route.end = GetNiceTownForMe(AIIndustry.GetLocation(route.start));
+				route.end = builder.GetNiceRandomTown(AIIndustry.GetLocation(route.start));
 				if(route.end == null) {
 					continue;
 					LogInFindPair("no available town");
 				}
 				local distance = AITile.GetDistanceManhattanToTile(AITown.GetLocation(route.end), AIIndustry.GetLocation(route.start));
 				new = ValuateConsumerTown(route.end, route.cargo, base);
-				new *= distanceBetweenIndustriesValuator(distance);
+				new *= builder.distanceBetweenIndustriesValuator(distance);
 				new*=2; /*if(AIIndustry.GetStockpiledCargo(x, route.cargo)==0)*/
 				if(new>best) {
 					route.start_tile = AIIndustry.GetLocation(route.start);
 					route.end_tile = AITown.GetLocation(route.end);
-					route = ToCityStationAllocator(route)
+					route = builder.IndustryToCityStationAllocator(route)
 					if(route.StationsAllocated()) {
-						route = FindEngine(route);
+						route = builder.FindEngineForRoute(route);
 						if(route.engine != null) {
 							best = new;
 							choice.start_tile = route.start_tile;

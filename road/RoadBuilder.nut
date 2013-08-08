@@ -177,20 +177,6 @@ function RoadBuilder::GetBiggestNiceTown(location)
 	return town_list.Begin();
 }
 
-function RoadBuilder::GetNiceRandomTown(location)
-{
-	local town_list = AITownList();
-	town_list.Valuate(AITown.GetDistanceManhattanToTile, location);
-	town_list.KeepBelowValue(GetMaxDistance());
-	town_list.KeepAboveValue(GetMinDistance());
-	town_list.Valuate(AIBase.RandItem);
-	town_list.KeepTop(1);
-	if(town_list.Count()==0) {
-		return null;
-	}
-	return town_list.Begin();
-}
-
 function RoadBuilder::InitRoadLoop(project)
 {
 	project.first_station.road_loop = array(2);
@@ -249,39 +235,6 @@ function RoadBuilder::TownCargoStationAllocator(project)
 	//Info("   Stations planned.");
 	project = RoadBuilder.InitRoadLoop(project);
 	return project;
-}
-
-function RoadBuilder::IndustryToIndustryTruckStationAllocator(project)
-{
-	local producer = project.start;
-	local consumer = project.end;
-	local cargo = project.cargo;
-	local maybe_start_station = this.FindProducentStation(producer, cargo);
-	local maybe_second_station = this.FindConsumerStation(consumer, cargo);
-
-	project.first_station = maybe_start_station;
-	project.second_station = maybe_second_station;
-
-	project.second_station.location = project.second_station.location;
-
-	return RoadBuilder.UniversalStationAllocator(project);
-}
-
-function RoadBuilder::IndustryToCityTruckStationAllocator(project)
-{
-	local start = project.start;
-	local town = project.end;
-	local cargo = project.cargo;
-
-	local maybe_start_station = this.FindProducentStation(start, cargo);
-	local maybe_second_station = this.FindCityStation(town, cargo);
-
-	project.first_station = maybe_start_station;
-	project.second_station = maybe_second_station;
-
-	project.second_station.location = project.second_station.location;
-
-	return RoadBuilder.UniversalStationAllocator(project);
 }
 
 function RoadBuilder::UniversalStationAllocator(project)
@@ -420,7 +373,7 @@ function RoadBuilder::GetReplace(existing_vehicle, cargo)
 	return this.FindRV(cargo);
 }
 
-function FindRVForFindPair(route)
+function FindEngineForRoute(route)
 {
 	route.engine = FindRV(route.cargo);
 	if(route.engine == null) {

@@ -56,13 +56,20 @@ function CargoAirBuilder::Go()
 }
 function CargoAirBuilder::FindPair(route)
 {
-	local GetLimitedIndustryList = rodzic.GetLimitedIndustryList.bindenv(rodzic);
-	local IsProducerOK = null;
-	local IsConsumerOK = null;
-	local IsConnectedIndustry = IsConnectedIndustry.bindenv(this);
-	local ValuateProducer = this.ValuateProducer.bindenv(this);
-	local ValuateConsumer = this.ValuateConsumer.bindenv(this);
-	local distanceBetweenIndustriesValuator = this.distanceBetweenIndustriesValuator.bindenv(this);
-	return FindPairWrapped(route, GetLimitedIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, 
-	distanceBetweenIndustriesValuator, FindPairDualIndustryAllocator, GetNiceRandomTown, FindPairIndustryToTownAllocator, FindEngine);
+	return FindPairWrapped(route, this);
 }
+
+function CargoAirBuilder::GetNiceRandomTown(location)
+{
+	local town_list = AITownList();
+	town_list.Valuate(AITown.GetDistanceManhattanToTile, location);
+	town_list.KeepBelowValue(GetMaxDistance());
+	town_list.KeepAboveValue(GetMinDistance());
+	town_list.Valuate(AIBase.RandItem);
+	town_list.KeepTop(1);
+	if(town_list.Count()==0) {
+		return null;
+	}
+	return town_list.Begin();
+}
+

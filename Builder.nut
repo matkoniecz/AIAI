@@ -102,3 +102,51 @@ function Builder::GetPathfindingLimit()
 {
 	return pathfinding_time_limit + desperation * 2;
 }
+
+const MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES = 80;
+function Builder::GetLimitedIndustryList()
+{
+	local list = AIIndustryList()
+	list.Valuate(AIIndustry.GetDistanceManhattanToTile, rodzic.root_tile)
+	list.KeepBottom(MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES);
+	return list;
+}
+
+function Builder::GetLimitedIndustryList_CargoAccepting(cargo)
+{
+	local list = AIIndustryList_CargoAccepting(cargo)
+	list.Valuate(AIIndustry.GetDistanceManhattanToTile, rodzic.root_tile)
+	list.KeepBottom(MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES/10);
+	return list;
+}
+
+function Builder::GetLimitedIndustryList_CargoProducing(cargo)
+{
+	local list = AIIndustryList_CargoProducing(cargo)
+	list.Valuate(AIIndustry.GetDistanceManhattanToTile, rodzic.root_tile)
+	list.KeepBottom(MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES/10);
+	return list;
+}
+
+function Builder::IsConsumerOK(industry_id)
+{
+	if(AIIndustry.IsValidIndustry(industry_id)==false) {
+		return false; //industry closed during preprocessing
+	}
+	return true;
+}
+
+function Builder::IsProducerOK(industry_id)
+{
+	local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(industry_id));
+	if(cargo_list==null) {
+		return false;
+	}
+	if(cargo_list.Count()==0) {
+		return false;
+	}
+	if(AIIndustry.IsValidIndustry(industry_id)==false) {
+		return false; //industry closed during preprocessing
+	}
+	return true;
+}

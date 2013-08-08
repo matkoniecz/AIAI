@@ -23,6 +23,20 @@ function TruckRoadBuilder::Possible()
 	return this.cost < GetAvailableMoney();
 }
 
+function TruckRoadBuilder::GetNiceRandomTown(location)
+{
+	local town_list = AITownList();
+	town_list.Valuate(AITown.GetDistanceManhattanToTile, location);
+	town_list.KeepBelowValue(GetMaxDistance());
+	town_list.KeepAboveValue(GetMinDistance());
+	town_list.Valuate(AIBase.RandItem);
+	town_list.KeepTop(1);
+	if(town_list.Count()==0) {
+		return null;
+	}
+	return town_list.Begin();
+}
+
 function TruckRoadBuilder::ValuateProducer(ID, cargo)
 {
 	if(AIRoad.GetRoadVehicleTypeForCargo(cargo) != AIRoad.ROADVEHTYPE_TRUCK) {
@@ -33,15 +47,40 @@ function TruckRoadBuilder::ValuateProducer(ID, cargo)
 
 function TruckRoadBuilder::FindPair(route)
 {
-	local GetLimitedIndustryList = rodzic.GetLimitedIndustryList.bindenv(rodzic);
-	local IsProducerOK = null;
-	local IsConsumerOK = null;
-	local IsConnectedIndustry = IsConnectedIndustry.bindenv(this);
-	local ValuateProducer = this.ValuateProducer.bindenv(this);
-	local ValuateConsumer = this.ValuateConsumer.bindenv(this);
-	local distanceBetweenIndustriesValuator = this.distanceBetweenIndustriesValuator.bindenv(this);
-	return FindPairWrapped(route, GetLimitedIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, 
-	distanceBetweenIndustriesValuator, IndustryToIndustryTruckStationAllocator, GetNiceRandomTown, IndustryToCityTruckStationAllocator, FindRVForFindPair);
+	return FindPairWrapped(route, this);
+}
+
+function TruckRoadBuilder::IndustryToIndustryStationAllocator(project)
+{
+	local producer = project.start;
+	local consumer = project.end;
+	local cargo = project.cargo;
+	local maybe_start_station = this.FindProducentStation(producer, cargo);
+	local maybe_second_station = this.FindConsumerStation(consumer, cargo);
+
+	project.first_station = maybe_start_station;
+	project.second_station = maybe_second_station;
+
+	project.second_station.location = project.second_station.location;
+
+	return RoadBuilder.UniversalStationAllocator(project);
+}
+
+function TruckRoadBuilder::IndustryToCityStationAllocator(project)
+{
+	local start = project.start;
+	local town = project.end;
+	local cargo = project.cargo;
+
+	local maybe_start_station = this.FindProducentStation(start, cargo);
+	local maybe_second_station = this.FindCityStation(town, cargo);
+
+	project.first_station = maybe_start_station;
+	project.second_station = maybe_second_station;
+
+	project.second_station.location = project.second_station.location;
+
+	return RoadBuilder.UniversalStationAllocator(project);
 }
 
 function TruckRoadBuilder::Go()

@@ -20,7 +20,7 @@ function AirBuilder::IsAllowed()
 	return true;
 }
 
-function AirBuilder::FindPairIndustryToTownAllocator(route)
+function AirBuilder::IndustryToCityStationAllocator(route)
 {
 route.first_station.location = null
 route.second_station.location = null
@@ -47,7 +47,7 @@ route.station_size = AIAirport.AT_SMALL
 return route
 }
 
-function AirBuilder::FindPairDualIndustryAllocator(route)
+function AirBuilder::IndustryToIndustryStationAllocator(route)
 {
 
 route.first_station.location = FindSuitableAirportSpotNearIndustryWithAirportTypeProducer(AIAirport.AT_METROPOLITAN, route.start)
@@ -265,7 +265,7 @@ function AirBuilder::CostEstimation()
 		}
 	}
 
-function AirBuilder::FindEngine(route)
+function AirBuilder::FindEngineForRoute(route)
 {
 route.engine_count = 3;
 route.engine = AirBuilder.FindAircraft(route.station_size, route.cargo, route.engine_count = 3, route.budget, Helper.Sqrt(AIOrder.GetOrderDistance(AIVehicle.VT_AIR, route.start_tile, route.end_tile)));
@@ -405,18 +405,6 @@ AIOrder.AppendOrder(vehicle, tile_2, AIOrder.OF_NO_LOAD);
 AIVehicle.StartStopVehicle(vehicle);
 AIVehicle.SetName(vehicle, nazwa);
 return true;
-}
-
-function AirBuilder::GetNiceRandomTown(location)
-{
-local town_list = AITownList();
-town_list.Valuate(AITown.GetDistanceManhattanToTile, location);
-town_list.KeepBelowValue(GetMaxDistance());
-town_list.KeepAboveValue(GetMinDistance());
-town_list.Valuate(AIBase.RandItem);
-town_list.KeepTop(1);
-if(town_list.Count()==0) return null;
-return town_list.Begin();
 }
 
 function AirBuilder::Maintenance()

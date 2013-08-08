@@ -781,7 +781,7 @@ function RailBuilder::FindTrain(trasa)//from DenverAndRioGrande
 	return trasa;
 }
 
-function RailBuilder::GetTrain(trasa)//from DenverAndRioGrande
+function RailBuilder::FindEngineForRoute(trasa)//from DenverAndRioGrande
 {
 	local railTypes = GetRailTypeList();
 
@@ -1083,10 +1083,10 @@ function RailBuilder::PathFinder(limit)
 	return true;
 }
 
-function RailBuilder::distanceBetweenIndustriesValuatorRail(distance)
+function RailBuilder::distanceBetweenIndustriesValuator(distance)
 {
-	if(distance>GetMaxDistanceRail()) return 0;
-	if(distance<GetMinDistanceRail()) return 0;
+	if(distance>GetMaxDistance()) return 0;
+	if(distance<GetMinDistance()) return 0;
 
 	if(desperation>5){
 		if(distance>100+desperation*60) return 1;
@@ -1103,12 +1103,12 @@ function RailBuilder::distanceBetweenIndustriesValuatorRail(distance)
 	return 0;
 }
 
-function RailBuilder::GetMinDistanceRail()
+function RailBuilder::GetMinDistance()
 {
 	return 10;
 }
 
-function RailBuilder::GetMaxDistanceRail()
+function RailBuilder::GetMaxDistance()
 {
 	if(desperation>5) return 100+desperation*75;
 	return 250+desperation*50;
@@ -1279,23 +1279,15 @@ function RailBuilder::PrepareStupidRailRoute()
 
 function RailBuilder::FindPairForStupidRailRoute(route)
 {
-	local GetLimitedIndustryList = rodzic.GetLimitedIndustryList.bindenv(rodzic);
-	local IsProducerOK = null;
-	local IsConsumerOK = null;
-	local IsConnectedIndustry = IsConnectedIndustry.bindenv(this);
-	local ValuateProducer = this.ValuateProducer.bindenv(this); 
-	local ValuateConsumer = this.ValuateConsumer.bindenv(this);
-	local distanceBetweenIndustriesValuatorRail = this.distanceBetweenIndustriesValuatorRail.bindenv(this);
-	return FindPairWrapped(route, GetLimitedIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, 
-	distanceBetweenIndustriesValuatorRail, IndustryToIndustryTrainStupidRailStationAllocator, GetNiceRandomTownStupidRail, IndustryToCityTrainStupidRailStationAllocator, RailBuilder.GetTrain);
+	return FindPairWrapped(route, this);
 }
 
-function RailBuilder::GetNiceRandomTownStupidRail(location)
+function RailBuilder::GetNiceRandomTown(location)
 {
 	local town_list = AITownList();
 	town_list.Valuate(AITown.GetDistanceManhattanToTile, location);
-	town_list.KeepBelowValue(GetMaxDistanceRail());
-	town_list.KeepAboveValue(GetMinDistanceRail());
+	town_list.KeepBelowValue(GetMaxDistance());
+	town_list.KeepAboveValue(GetMinDistance());
 	town_list.Valuate(AIBase.RandItem);
 	town_list.KeepTop(1);
 	if(town_list.Count()==0) {
@@ -1304,7 +1296,8 @@ function RailBuilder::GetNiceRandomTownStupidRail(location)
 	return town_list.Begin();
 }
 
-function RailBuilder::IndustryToIndustryTrainStupidRailStationAllocator(project)
+
+function RailBuilder::IndustryToIndustryStationAllocator(project)
 {
 	project.station_size = AIAI.GetSetting("max_train_station_length");
 
@@ -1324,7 +1317,7 @@ function RailBuilder::IndustryToIndustryTrainStupidRailStationAllocator(project)
 	return project;
 }
 
-function RailBuilder::IndustryToCityTrainStupidRailStationAllocator(project)
+function RailBuilder::IndustryToCityStationAllocator(project)
 {
 	project.station_size = AIAI.GetSetting("max_train_station_length");
 

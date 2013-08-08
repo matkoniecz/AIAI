@@ -23,6 +23,20 @@ function BusRoadBuilder::Possible()
 	return this.cost<GetAvailableMoney();
 }
 
+function BusRoadBuilder::GetNiceRandomTown(location)
+{
+	local town_list = AITownList();
+	town_list.Valuate(AITown.GetDistanceManhattanToTile, location);
+	town_list.KeepBelowValue(GetMaxDistance());
+	town_list.KeepAboveValue(GetMinDistance());
+	town_list.Valuate(AIBase.RandItem);
+	town_list.KeepTop(1);
+	if(town_list.Count()==0) {
+		return null;
+	}
+	return town_list.Begin();
+}
+
 function BusRoadBuilder::FindBusPair()
 {
 	trasa.start = GetRatherBigRandomTown();
@@ -45,7 +59,7 @@ function BusRoadBuilder::FindBusPair()
 		trasa.production = min(cargo_production_at_first_location, cargo_production_at_second_location);
 		trasa.type = RouteType.townCargo;
 		
-		trasa = FindRVForFindPair(trasa);
+		trasa = FindEngineForRoute(trasa);
 		if(trasa.engine == null) {
 			return false;
 		} else {

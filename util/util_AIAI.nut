@@ -1,28 +1,3 @@
-const MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES = 80;
-function AIAI::GetLimitedIndustryList()
-{
-	local list = AIIndustryList()
-	list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile)
-	list.KeepBottom(MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES);
-	return list;
-}
-
-function AIAI::GetLimitedIndustryList_CargoAccepting(cargo)
-{
-	local list = AIIndustryList_CargoAccepting(cargo)
-	list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile)
-	list.KeepBottom(MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES/10);
-	return list;
-}
-
-function AIAI::GetLimitedIndustryList_CargoProducing(cargo)
-{
-	local list = AIIndustryList_CargoProducing(cargo)
-	list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile)
-	list.KeepBottom(MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES/10);
-	return list;
-}
-
 function IsItNeededToImproveThatStation(station, cargo)
 {
 	//TODO: enable once it will be available in trunk
