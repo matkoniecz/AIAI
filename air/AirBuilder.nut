@@ -490,19 +490,19 @@ metropo: 6
 international: ?
 intercontinental: ?
 */
-local maksimum;
+local maximum;
 local total = this.GetCurrentBurdenOfAirport(airport_id);
 local airport_type = AIAirport.GetAirportType(AIStation.GetLocation(airport_id));
-if(airport_type==AIAirport.AT_METROPOLITAN ) maksimum = 600;
-if(airport_type==AIAirport.AT_LARGE) maksimum = 500; // city 
-if(airport_type==AIAirport.AT_COMMUTER) maksimum = 500;
-if(airport_type==AIAirport.AT_SMALL) maksimum = 300;
+if(airport_type==AIAirport.AT_METROPOLITAN ) maximum = 600;
+if(airport_type==AIAirport.AT_LARGE) maximum = 500; // city 
+if(airport_type==AIAirport.AT_COMMUTER) maximum = 500;
+if(airport_type==AIAirport.AT_SMALL) maximum = 300;
  
-if(AIAI.GetSetting("debug_signs_for_airports_load")) Helper.BuildSign(AIStation.GetLocation(airport_id), total + " (" + maksimum + ")");
+if(AIAI.GetSetting("debug_signs_for_airports_load")) Helper.BuildSign(AIStation.GetLocation(airport_id), total + " (" + maximum + ")");
 
 if(tile != null && engine != null) total+=count*this.GetBurdenOfSingleAircraft(AIStation.GetLocation(airport_id), tile, engine);
 
-return total <= maksimum;
+return total <= maximum;
 }
 
 function AirBuilder::addPAXAircrafts()
