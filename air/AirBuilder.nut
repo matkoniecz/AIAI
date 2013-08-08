@@ -607,7 +607,6 @@ local list = AIList();
 
 for (local airport = airport_list.Begin(); airport_list.HasNext(); airport = airport_list.Next())
    {
-   local pozycja=AIStation.GetLocation(airport)
    local airlist=AIVehicleList_Station(airport);
    if(airlist.Count()==0)continue;
 
@@ -616,7 +615,7 @@ for (local airport = airport_list.Begin(); airport_list.HasNext(); airport = air
    local plane_left_on_airport = null;
    for (local plane = airlist.Begin(); airlist.HasNext(); plane = airlist.Next()){
 	  if(AIVehicle.GetState(plane)==AIVehicle.VS_AT_STATION)
-	     if(AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(plane), pozycja)<30)
+	     if(AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(plane), AIStation.GetLocation(airport))<30)
 		    if(AIVehicle.GetCapacity(plane, Helper.GetPAXCargo())>0){
 			local percent = ( 100 * AIVehicle.GetCargoLoad(plane, Helper.GetPAXCargo()))/(AIVehicle.GetCapacity(plane, Helper.GetPAXCargo()));
 		    //Info(percent + " %");
