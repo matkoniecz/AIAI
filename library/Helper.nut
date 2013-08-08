@@ -16,7 +16,7 @@ AILog.Info("adding new functions to SuperLib (Helper)");
 	//Sqrt(i)
 
 	//from Rondje om the kerk
-	//attempt to contruct HQ in the biggest city, returns true if HQ exists on exiting function, false otherwise
+	//attempt to construct HQ in the biggest city, returns true if HQ exists on exiting function, false otherwise
 	//if HQ exists on calling function it will not be moved and function will return true
 	//BuildCompanyHQ()
 

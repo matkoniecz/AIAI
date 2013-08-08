@@ -1,6 +1,6 @@
 AILog.Info("adding new functions to SuperLib (Town)");
 
-	//Based on function from AdmiralAI by Yexo, modifications and bugs by Kogut
+	//from AIAI by Kogut, based on function from AdmiralAI by Yexo 
 	//Plant trees around town town_id to improve rating till it is at least min_rating, stop if amount of available money drops below money_threshold
 	//return true on success (rating is at least as high as min_rating), false otherwise
 	//PlantTreesToImproveRating(town_id, min_rating, money_threshold)
