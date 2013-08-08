@@ -29,7 +29,6 @@ function FindPairWrapped (route, builder)
 		}
 		local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(route.start));
 		for (route.cargo = cargo_list.Begin(); cargo_list.HasNext(); route.cargo = cargo_list.Next()) {
-			//Info(AICargo.GetCargoLabel(route.cargo));
 			route.production = AIIndustry.GetLastMonthProduction(route.start, route.cargo)*(100-AIIndustry.GetLastMonthTransportedPercentage (route.start, route.cargo))/100;
 			if(IsConnectedIndustry(route.start, route.cargo)) {
 				LogInFindPair("connected producer");
