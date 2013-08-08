@@ -3,7 +3,7 @@ const INFINITE_DISTANCE = 4000000;
 const INFINITE_SPEED = 4000000;
 
 //import("graph.aystar", "", 4);  - currently unused
-//import("queue.binary_heap", "", 1);//################################################## <- external
+//import("queue.binary_heap", "", 1);//################################################## <- external (imported in aystar.nut)
 
 require("util/debug.nut")
 require("myAPIpatch.nut");
