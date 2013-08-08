@@ -1,5 +1,5 @@
 const MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES = 80;
-function AIAI::GetIndustryList()
+function AIAI::GetLimitedIndustryList()
 {
 	local list = AIIndustryList()
 	list.Valuate(AIIndustry.GetDistanceManhattanToTile, root_tile)

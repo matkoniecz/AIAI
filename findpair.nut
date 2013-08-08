@@ -21,7 +21,7 @@ function DefaultIsProducerOK(industry_id)
 	return true;
 }
 
-function FindPairWrapped (route, GetIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForMe, CityStationAllocator, FindEngine)
+function FindPairWrapped (route, GetLimitedIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForMe, CityStationAllocator, FindEngine)
 {
 	if(IsProducerOK == null) {
 		IsProducerOK = DefaultIsProducerOK;
@@ -29,7 +29,7 @@ function FindPairWrapped (route, GetIndustryList, IsProducerOK, IsConnectedIndus
 	if(IsConsumerOK == null) {
 		IsConsumerOK = DefaultIsConsumerOK;
 	}
-	return FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForMe, CityStationAllocator, FindEngine);
+	return FindPairDeepWrapped (route, GetLimitedIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForMe, CityStationAllocator, FindEngine);
 }
 
 function LogInFindPair(string)
@@ -39,9 +39,9 @@ function LogInFindPair(string)
 	}
 }
 
-function FindPairDeepWrapped (route, GetIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForMe, ToCityStationAllocator, FindEngine)
+function FindPairDeepWrapped (route, GetLimitedIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, distanceBetweenIndustriesValuator, DualIndustryStationAllocator, GetNiceTownForMe, ToCityStationAllocator, FindEngine)
 {
-	local industry_list = GetIndustryList();
+	local industry_list = GetLimitedIndustryList();
 	local choice = Route();
 	local count = industry_list.Count();
 	Info("Finding the best route started! Industry list count: " + count);

@@ -1279,14 +1279,14 @@ function RailBuilder::PrepareStupidRailRoute()
 
 function RailBuilder::FindPairForStupidRailRoute(route)
 {
-	local GetIndustryList = rodzic.GetIndustryList.bindenv(rodzic);
+	local GetLimitedIndustryList = rodzic.GetLimitedIndustryList.bindenv(rodzic);
 	local IsProducerOK = null;
 	local IsConsumerOK = null;
 	local IsConnectedIndustry = IsConnectedIndustry.bindenv(this);
 	local ValuateProducer = this.ValuateProducer.bindenv(this); 
 	local ValuateConsumer = this.ValuateConsumer.bindenv(this);
 	local distanceBetweenIndustriesValuatorRail = this.distanceBetweenIndustriesValuatorRail.bindenv(this);
-	return FindPairWrapped(route, GetIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, 
+	return FindPairWrapped(route, GetLimitedIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, 
 	distanceBetweenIndustriesValuatorRail, IndustryToIndustryTrainStupidRailStationAllocator, GetNiceRandomTownStupidRail, IndustryToCityTrainStupidRailStationAllocator, RailBuilder.GetTrain);
 }
 

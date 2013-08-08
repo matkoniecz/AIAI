@@ -56,13 +56,13 @@ function CargoAirBuilder::Go()
 }
 function CargoAirBuilder::FindPair(route)
 {
-	local GetIndustryList = rodzic.GetIndustryList.bindenv(rodzic);
+	local GetLimitedIndustryList = rodzic.GetLimitedIndustryList.bindenv(rodzic);
 	local IsProducerOK = null;
 	local IsConsumerOK = null;
 	local IsConnectedIndustry = IsConnectedIndustry.bindenv(this);
 	local ValuateProducer = this.ValuateProducer.bindenv(this);
 	local ValuateConsumer = this.ValuateConsumer.bindenv(this);
 	local distanceBetweenIndustriesValuator = this.distanceBetweenIndustriesValuator.bindenv(this);
-	return FindPairWrapped(route, GetIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, 
+	return FindPairWrapped(route, GetLimitedIndustryList, IsProducerOK, IsConnectedIndustry, ValuateProducer, IsConsumerOK, ValuateConsumer, 
 	distanceBetweenIndustriesValuator, FindPairDualIndustryAllocator, GetNiceRandomTown, FindPairIndustryToTownAllocator, FindEngine);
 }
