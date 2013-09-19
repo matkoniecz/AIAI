@@ -469,8 +469,6 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 			// No idea what is this (undocumented in docs), but there is no planned support.
 		} else if (ev_type == AIEvent.ET_GOAL_QUESTION_ANSWER) {
 			// No idea what is this (undocumented in docs), but there is no planned support.
-		} else if (ev_type == AIEvent.ET_EXCLUSIVE_TRANSPORT_RIGHTS) {
-			//TODO
 		} else if (ev_type == AIEvent.ET_ROAD_RECONSTRUCTION ) {
 			//TODO
 		} else if (ev_type == AIEvent.ET_SUBSIDY_OFFER) {
