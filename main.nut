@@ -357,8 +357,9 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 		if(event == null) {
 			return;
 		}
-		local ev_type = event.GetEventType();
-		if(ev_type == AIEvent.ET_VEHICLE_LOST) {
+		switch(event.GetEventType())
+		{
+		case AIEvent.ET_VEHICLE_LOST:
     		Warning("Vehicle lost event detected!");
 			local lost_event = AIEventVehicleLost.Convert(event);
 			local lost_veh = lost_event.GetVehicleID();
@@ -379,19 +380,21 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 				SellVehicle(lost_veh);
 			}
 			*/
-			
-		} else if(ev_type == AIEvent.ET_VEHICLE_CRASHED){
+			break;
+		case AIEvent.ET_VEHICLE_CRASHED:
 			Warning("Vehicle crash detected!");
 			local crash_event = AIEventVehicleCrashed.Convert(event);
 			local crash_reason = crash_event.GetCrashReason();
 			if(crash_reason == AIEventVehicleCrashed.CRASH_RV_LEVEL_CROSSING){
 				this.HandleNewLevelCrossing(event);
 			}
-		} else if(ev_type == AIEvent.ET_AIRCRAFT_DEST_TOO_FAR) {
+			break;
+		case AIEvent.ET_AIRCRAFT_DEST_TOO_FAR:
 			local order_event = AIEventAircraftDestTooFar.Convert(event);
 			local airplane_id = order_event.GetVehicleID();
 			abort("AIRCRAFT_DEST_TOO_FAR " + airplane_id + " " + airplane_id + " " + AIVehicle.GetName(airplane_id));
-		} else if(ev_type == AIEvent.ET_ENGINE_PREVIEW) {
+			break;
+		case AIEvent.ET_ENGINE_PREVIEW:
 			event = AIEventEnginePreview.Convert(event);
 			if (event.AcceptPreview()){
 				Info("New engine available from preview: " + event.GetName());
@@ -400,7 +403,8 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 					this.BuilderMaintenance();
 				}
 			}
-		} else if(ev_type == AIEvent.ET_ENGINE_AVAILABLE) {
+			break;
+		case AIEvent.ET_ENGINE_AVAILABLE:
 			event = AIEventEngineAvailable.Convert(event);
 			local engine = event.GetEngineID();
 			Info("New engine available: " + AIEngine.GetName(engine));
@@ -408,11 +412,13 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 			if(AIEngine.GetVehicleType(engine) == AIVehicle.VT_RAIL) {
 				this.BuilderMaintenance();
 			}
-		} else if(ev_type == AIEvent.ET_COMPANY_NEW) {
+			break;
+		case AIEvent.ET_COMPANY_NEW:
 			event = AIEventCompanyNew.Convert(event);
 			local company = event.GetCompanyID();
 			Info("Welcome " + AICompany.GetName(company));
-		} else if(ev_type == AIEvent.ET_COMPANY_IN_TROUBLE) {
+			break;
+		case AIEvent.ET_COMPANY_IN_TROUBLE:
 			event = AIEventCompanyInTrouble.Convert(event);
 			local company = event.GetCompanyID();
 			if (AICompany.IsMine(company)) {
@@ -421,7 +427,8 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 			} else {
 				Info("Competitor is in trouble!");
 			}
-		} else if (ev_type == AIEvent.ET_COMPANY_BANKRUPT) {
+			break;
+		case AIEvent.ET_COMPANY_BANKRUPT:
 			event = AIEventCompanyInTrouble.Convert(event);
 			local company = event.GetCompanyID();
 			if (AICompany.IsMine(company)) {
@@ -431,59 +438,74 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 				Info("Competitor failed!");
 				Info("Muhahhahahahahaha");
 			}
-		} else if(ev_type == AIEvent.ET_ROAD_RECONSTRUCTION ) {
+			break;
+		case AIEvent.ET_ROAD_RECONSTRUCTION :
 			event = AIEventRoadReconstruction.Convert(event);
 			local town = event.GetTownID();
 			local company = event.GetCompanyID();
 			Info("Road reconstruction at " + AITown.GetName(town) + " caused by " + AICompany.GetName(company));
 			/* TODO: Handle it. */
-		} else if(ev_type == AIEvent.ET_EXCLUSIVE_TRANSPORT_RIGHTS ) {
+			break;
+		case AIEvent.ET_EXCLUSIVE_TRANSPORT_RIGHTS :
 			event = AIEventExclusiveTransportRights.Convert(event);
 			local town = event.GetTownID();
 			local company = event.GetCompanyID();
 			Info("Exclusive rights at " + AITown.GetName(town) + " bought by " + AICompany.GetName(company));
 			/* TODO: Handle it. */
-		} else if(ev_type == AIEvent.ET_INDUSTRY_OPEN) {
+			break;
+		case AIEvent.ET_INDUSTRY_OPEN:
 			event = AIEventIndustryOpen.Convert(event);
 			local industry = event.GetIndustryID();
 			Info("New industry: " + AIIndustry.GetName(industry));
 			// No need, this should be noticed in normal route finding.
-		} else if(ev_type == AIEvent.ET_INDUSTRY_CLOSE) {
+			break;
+		case AIEvent.ET_INDUSTRY_CLOSE:
 			event = AIEventIndustryClose.Convert(event);
 			local industry = event.GetIndustryID();
 			if (AIIndustry.IsValidIndustry(industry)) {
 				Info("Closing industry " + AIIndustry.GetName(industry) + " at [" + AIMap.GetTileX(AIIndustry.GetLocation(industry)) + ", " + AIMap.GetTileY(AIIndustry.GetLocation(industry)) + "]");
 				// Handling is useless, as it should be caught on checking existing connections. Also, it may be temporary (weird NewGrf) or fixed by another company.
 			}
-		} else if (ev_type == AIEvent.ET_VEHICLE_WAITING_IN_DEPOT) {
+			break;
+		case AIEvent.ET_VEHICLE_WAITING_IN_DEPOT:
 			Helper.SellAllVehiclesStoppedInDepots();
-		} else if (ev_type == AIEvent.ET_DISASTER_ZEPPELINER_CRASHED) {
+			break;
+		case AIEvent.ET_DISASTER_ZEPPELINER_CRASHED:
 			//TODO
-		} else if (ev_type == AIEvent.ET_DISASTER_ZEPPELINER_CLEARED) {
+			break;
+		case AIEvent.ET_DISASTER_ZEPPELINER_CLEARED:
 			//TODO
-		} else if (ev_type == AIEvent.ET_TOWN_FOUNDED) {
+			break;
+		case AIEvent.ET_TOWN_FOUNDED:
 			// No need, this should be noticed in normal route finding.
-		} else if (ev_type == AIEvent.ET_ADMIN_PORT) {
+			break;
+		case AIEvent.ET_ADMIN_PORT:
 			// Currently there is no support for anything related with admin port. Nor there is a any need or plan for this.
-		} else if (ev_type == AIEvent.ET_WINDOW_WIDGET_CLICK) {
+			break;
+		case AIEvent.ET_WINDOW_WIDGET_CLICK:
 			// No idea what is this (undocumented in docs), but there is no planned support.
-		} else if (ev_type == AIEvent.ET_GOAL_QUESTION_ANSWER) {
+			break;
+		case AIEvent.ET_GOAL_QUESTION_ANSWER:
 			// No idea what is this (undocumented in docs), but there is no planned support.
-		} else if (ev_type == AIEvent.ET_ROAD_RECONSTRUCTION ) {
+			break;
+		case AIEvent.ET_ROAD_RECONSTRUCTION :
 			//TODO
-		} else if (ev_type == AIEvent.ET_SUBSIDY_OFFER) {
-		} else if (ev_type == AIEvent.ET_SUBSIDY_OFFER_EXPIRED) {
-		} else if (ev_type == AIEvent.ET_SUBSIDY_AWARDED) {
-		} else if (ev_type == AIEvent.ET_SUBSIDY_EXPIRED) {
-		} else if (ev_type == AIEvent.ET_COMPANY_ASK_MERGER) {
-		} else if (ev_type == AIEvent.ET_COMPANY_MERGER) {
-		} else if (ev_type == AIEvent.ET_VEHICLE_UNPROFITABLE) {
-		} else if (ev_type == AIEvent.ET_STATION_FIRST_VEHICLE) {
-		} else {
-			Error("Unhandled event " + ev_type);
+			break;
+		case AIEvent.ET_SUBSIDY_OFFER:
+		case AIEvent.ET_SUBSIDY_OFFER_EXPIRED:
+		case AIEvent.ET_SUBSIDY_AWARDED:
+		case AIEvent.ET_SUBSIDY_EXPIRED:
+		case AIEvent.ET_COMPANY_ASK_MERGER:
+		case AIEvent.ET_COMPANY_MERGER:
+		case AIEvent.ET_VEHICLE_UNPROFITABLE:
+		case AIEvent.ET_STATION_FIRST_VEHICLE:
+			break;
+		default:
+			Error("Unhandled event " + event.GetEventType());
 			if(AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
 				abort("unhandled event");
 			}
+			break;
 		}
 	}
 }
