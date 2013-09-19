@@ -447,13 +447,13 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 			event = AIEventIndustryOpen.Convert(event);
 			local industry = event.GetIndustryID();
 			Info("New industry: " + AIIndustry.GetName(industry));
-			/* TODO: Handle it. */
+			// No need, this should be noticed in normal route finding.
 		} else if(ev_type == AIEvent.ET_INDUSTRY_CLOSE) {
 			event = AIEventIndustryClose.Convert(event);
 			local industry = event.GetIndustryID();
 			if (AIIndustry.IsValidIndustry(industry)) {
 				Info("Closing industry " + AIIndustry.GetName(industry) + " at [" + AIMap.GetTileX(AIIndustry.GetLocation(industry)) + ", " + AIMap.GetTileY(AIIndustry.GetLocation(industry)) + "]");
-				/* Handling is useless. TODO? */
+				// Handling is useless, as it should be caught on checking existing connections. Also, it may be temporary (weird NewGrf) or fixed by another company.
 			}
 		} else if (ev_type == AIEvent.ET_VEHICLE_WAITING_IN_DEPOT) {
 			Helper.SellAllVehiclesStoppedInDepots();
@@ -462,13 +462,13 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 		} else if (ev_type == AIEvent.ET_DISASTER_ZEPPELINER_CLEARED) {
 			//TODO
 		} else if (ev_type == AIEvent.ET_TOWN_FOUNDED) {
-			//TODO
+			// No need, this should be noticed in normal route finding.
 		} else if (ev_type == AIEvent.ET_ADMIN_PORT) {
-			//TODO
+			// Currently there is no support for anything related with admin port. Nor there is a any need or plan for this.
 		} else if (ev_type == AIEvent.ET_WINDOW_WIDGET_CLICK) {
-			//TODO
+			// No idea what is this (undocumented in docs), but there is no planned support.
 		} else if (ev_type == AIEvent.ET_GOAL_QUESTION_ANSWER) {
-			//TODO
+			// No idea what is this (undocumented in docs), but there is no planned support.
 		} else if (ev_type == AIEvent.ET_EXCLUSIVE_TRANSPORT_RIGHTS) {
 			//TODO
 		} else if (ev_type == AIEvent.ET_ROAD_RECONSTRUCTION ) {
