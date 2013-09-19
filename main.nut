@@ -452,7 +452,7 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 			event = AIEventIndustryClose.Convert(event);
 			local industry = event.GetIndustryID();
 			if (AIIndustry.IsValidIndustry(industry)) {
-				Info("Closing industry: " + AIIndustry.GetName(industry));
+				Info("Closing industry " + AIIndustry.GetName(industry) + " at [" + AIMap.GetTileX(AIIndustry.GetLocation(industry)) + ", " + AIMap.GetTileY(AIIndustry.GetLocation(industry)) + "]");
 				/* Handling is useless. TODO? */
 			}
 		} else if (ev_type == AIEvent.ET_VEHICLE_WAITING_IN_DEPOT) {
