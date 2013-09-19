@@ -787,25 +787,28 @@ function RailBuilder::FindTrain(trasa)//from DenverAndRioGrande
 function RailBuilder::FindEngineForRoute(trasa)//from DenverAndRioGrande
 {
 	local railTypes = GetRailTypeList();
+	if (railTypes != null) {
+		/*
+		for(local rail_type = railTypes.Begin(); railTypes.HasNext(); rail_type = railTypes.Next()) {
+			local max_speed = AIRail.GetMaxSpeed(rail_type);
+			local cost = AIRail.GetBuildCost(rail_type, AIRail.BT_TRACK);
+			Info("Railtype " + AIRail.GetName(rail_type) + "("+rail_type+") with " + max_speed + " max speed and cost of " + cost + " has " + (max_speed*5-cost) + " points.");
+			}
+		*/
 
-	/*
-	for(local rail_type = railTypes.Begin(); railTypes.HasNext(); rail_type = railTypes.Next()){
-		local max_speed = AIRail.GetMaxSpeed(rail_type);
-		local cost = AIRail.GetBuildCost(rail_type, AIRail.BT_TRACK);
-		Info("Railtype " + AIRail.GetName(rail_type) + "("+rail_type+") with " + max_speed + " max speed and cost of " + cost + " has " + (max_speed*5-cost) + " points.");
+		for(local rail_type = railTypes.Begin(); railTypes.HasNext(); rail_type = railTypes.Next()) {
+			local max_speed = AIRail.GetMaxSpeed(rail_type);
+			local cost = AIRail.GetBuildCost(rail_type, AIRail.BT_TRACK);
+			Info("Railtype "+ AIRail.GetName(rail_type) + " ( " +rail_type+" ) with " + max_speed + " max speed and cost of " + cost)// + " has " + (max_speed*5-cost) + " points.");
+
+			trasa.track_type = rail_type;
+			trasa = RailBuilder.FindTrain(trasa);
+			if(trasa.engine[0] != null && trasa.engine[1] != null ) {
+				return trasa;
+			}
 		}
-	*/
-
-	for(local rail_type = railTypes.Begin(); railTypes.HasNext(); rail_type = railTypes.Next()){		
-		local max_speed = AIRail.GetMaxSpeed(rail_type);
-		local cost = AIRail.GetBuildCost(rail_type, AIRail.BT_TRACK);
-		Info("Railtype "+ AIRail.GetName(rail_type) + " ( " +rail_type+" ) with " + max_speed + " max speed and cost of " + cost)// + " has " + (max_speed*5-cost) + " points.");
-
-		trasa.track_type = rail_type;
-		trasa = RailBuilder.FindTrain(trasa);
-		if(trasa.engine[0] != null && trasa.engine[1] != null ) {
-			return trasa;
-		}
+	} else {
+		Error("No tracks!")
 	}
 	Error("No engine!")
 	trasa.engine = null;
@@ -1148,8 +1151,12 @@ function RailBuilder::Possible()
 
 function RailBuilder::Go()
 {
-	local types = AIRailTypeList();
-	AIRail.SetCurrentRailType(types.Begin()); //TODO FIXME - needed in IsGreatPlaceForRailStationRail etc
+	local list_of_rail_types = GetRailTypeList();
+	if (list_of_rail_types == null) {
+		Error("No suitable railtype!")
+		return false;
+	}
+	AIRail.SetCurrentRailType(list_of_rail_types.Begin()); //TODO FIXME - needed in IsGreatPlaceForRailStationRail etc
 	for(local i=0; i<2; i++) {
 		if(!Possible()) return false;
 		Info("Scanning for rail route");
