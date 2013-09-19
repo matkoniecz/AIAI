@@ -1156,7 +1156,14 @@ function RailBuilder::Go()
 		Error("No suitable railtype!")
 		return false;
 	}
-	AIRail.SetCurrentRailType(list_of_rail_types.Begin()); //TODO FIXME - needed in IsGreatPlaceForRailStationRail etc
+	//TODO FIXME railtype mess
+	//IsGreatPlaceForRailStationRail etc should know which railtype will be used
+	//engine selection depends on length of station and is deciding which railtype will be used
+	//at least pathfinding happens after this and it is the only affected thing, for now there is now difference in station construction
+	//so this bug (for now) is not noticeable in any way, form or shape
+	//solution - select railtype and keep it would be worse (aborted constructions) for no gain
+	//maybe futureproofing may be done with looking for a new station location if their construction failed?
+	AIRail.SetCurrentRailType(list_of_rail_types.Begin());
 	for(local i=0; i<2; i++) {
 		if(!Possible()) {
 			return false;
