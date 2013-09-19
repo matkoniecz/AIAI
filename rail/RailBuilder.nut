@@ -1158,7 +1158,9 @@ function RailBuilder::Go()
 	}
 	AIRail.SetCurrentRailType(list_of_rail_types.Begin()); //TODO FIXME - needed in IsGreatPlaceForRailStationRail etc
 	for(local i=0; i<2; i++) {
-		if(!Possible()) return false;
+		if(!Possible()) {
+			return false;
+		}
 		Info("Scanning for rail route");
 		trasa = this.FindPairForRoute(trasa);  
 		if(!trasa.OK) {
