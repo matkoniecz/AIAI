@@ -730,20 +730,23 @@ function RailBuilder::TrainOrders(engineId)
 
 function RailBuilder::ValuatorRailType(rail_type_id)
 {
-	local max_speed = AIRail.GetMaxSpeed(rail_type_id);
-	if(max_speed==0) {
-		local engines = AIEngineList(AIVehicle.VT_RAIL);
-		engines.Valuate(AIEngine.IsWagon);
-		engines.RemoveValue(1);  
-		engines.Valuate(AIEngine.IsBuildable);
-		engines.RemoveValue(0);
-		engines.Valuate(AIEngine.HasPowerOnRail, rail_type_id);
-		engines.RemoveValue(0);
-		engines.Valuate(AIEngine.CanRunOnRail, rail_type_id);
-		engines.RemoveValue(0);
-		engines.Valuate(AIEngine.GetMaxSpeed);
-		engines.Sort(AIList.SORT_BY_VALUE, false); //descending
-		max_speed=engines.GetValue(engines.Begin());
+	local engines = AIEngineList(AIVehicle.VT_RAIL);
+	engines.Valuate(AIEngine.IsWagon);
+	engines.RemoveValue(1);  
+	engines.Valuate(AIEngine.IsBuildable);
+	engines.RemoveValue(0);
+	engines.Valuate(AIEngine.HasPowerOnRail, rail_type_id);
+	engines.RemoveValue(0);
+	engines.Valuate(AIEngine.CanRunOnRail, rail_type_id);
+	engines.RemoveValue(0);
+	engines.Valuate(AIEngine.GetMaxSpeed);
+	engines.Sort(AIList.SORT_BY_VALUE, false); //descending
+
+	local max_speed=engines.GetValue(engines.Begin());
+	local rail_max_speed = AIRail.GetMaxSpeed(rail_type_id);
+
+	if(rail_max_speed != 0 && max_speed > rail_max_speed) {
+		max_speed = rail_max_speed;
 	}
 	return max_speed*5-AIRail.GetBuildCost(rail_type_id, AIRail.BT_TRACK);
 }
