@@ -14,9 +14,6 @@ function FindPairWrapped (route, builder)
 	local best = 0;
 	local new;
 	local counter = 1;
-	if (count == 0) {
-		LogInFindPair("no industries");
-	}
 	for (route.start = industry_list.Begin(); industry_list.HasNext(); route.start = industry_list.Next()) {
 		LogInFindPair(counter++ + " of " + industry_list.Count());
 		if (builder.IsProducerOK(route.start) == false) {
