@@ -5,7 +5,7 @@ function LogInFindPair(string)
 	}
 }
 
-function FindPairWrapped(route, builder)
+function FindPairWrapped(idea, builder)
 {
 	local industry_list = builder.GetLimitedIndustryList();
 	local choice = Route();
@@ -14,58 +14,58 @@ function FindPairWrapped(route, builder)
 	local best = 0;
 	local new;
 	local counter = 1;
-	for (route.start = industry_list.Begin(); industry_list.HasNext(); route.start = industry_list.Next()) {
+	for (idea.start = industry_list.Begin(); industry_list.HasNext(); idea.start = industry_list.Next()) {
 		LogInFindPair(counter++ + " of " + industry_list.Count());
-		if (builder.IsProducerOK(route.start) == false) {
-			LogInFindPair("bad producer " + AIIndustry.GetName(route.start));
+		if (builder.IsProducerOK(idea.start) == false) {
+			LogInFindPair("bad producer " + AIIndustry.GetName(idea.start));
 			continue;
 		}
-		if (route.forbidden_industries.HasItem(route.start)) {
+		if (idea.forbidden_industries.HasItem(idea.start)) {
 			LogInFindPair("banned producer");
 			continue;
 		}
-		local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(route.start));
-		for (route.cargo = cargo_list.Begin(); cargo_list.HasNext(); route.cargo = cargo_list.Next()) {
-			if (IsConnectedIndustry(route.start, route.cargo)) {
+		local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(idea.start));
+		for (idea.cargo = cargo_list.Begin(); cargo_list.HasNext(); idea.cargo = cargo_list.Next()) {
+			if (IsConnectedIndustry(idea.start, idea.cargo)) {
 				LogInFindPair("connected producer");
 				continue;
 			}
-			route.production = AIIndustry.GetLastMonthProduction(route.start, route.cargo)*(100-AIIndustry.GetLastMonthTransportedPercentage (route.start, route.cargo))/100;
-			local base = builder.ValuateProducer(route.start, route.cargo);
-			local industry_list_accepting_current_cargo = builder.GetLimitedIndustryList_CargoAccepting(route.cargo);
+			idea.production = AIIndustry.GetLastMonthProduction(idea.start, idea.cargo)*(100-AIIndustry.GetLastMonthTransportedPercentage (idea.start, idea.cargo))/100;
+			local base = builder.ValuateProducer(idea.start, idea.cargo);
+			local industry_list_accepting_current_cargo = builder.GetLimitedIndustryList_CargoAccepting(idea.cargo);
 			if (industry_list_accepting_current_cargo.Count() > 0) {
-				for(route.end = industry_list_accepting_current_cargo.Begin(); industry_list_accepting_current_cargo.HasNext(); route.end = industry_list_accepting_current_cargo.Next()) {
-					if (route.forbidden_industries.HasItem(route.end)) {
+				for(idea.end = industry_list_accepting_current_cargo.Begin(); industry_list_accepting_current_cargo.HasNext(); idea.end = industry_list_accepting_current_cargo.Next()) {
+					if (idea.forbidden_industries.HasItem(idea.end)) {
 						LogInFindPair("banned consumer");
 						continue;
 					}
-					if (!builder.IsConsumerOK(route.end)) {
+					if (!builder.IsConsumerOK(idea.end)) {
 						LogInFindPair("bad consumer");
 						continue; 
 					}
-					new = builder.ValuateConsumer(route.end, route.cargo, base);
-					local distance = AITile.GetDistanceManhattanToTile(AIIndustry.GetLocation(route.end), AIIndustry.GetLocation(route.start)); 
+					new = builder.ValuateConsumer(idea.end, idea.cargo, base);
+					local distance = AITile.GetDistanceManhattanToTile(AIIndustry.GetLocation(idea.end), AIIndustry.GetLocation(idea.start)); 
 					new *= builder.distanceBetweenIndustriesValuator(distance); 
-					if (AITile.GetCargoAcceptance(AIIndustry.GetLocation(route.end), route.cargo, 1, 1, 4) == 0) {
+					if (AITile.GetCargoAcceptance(AIIndustry.GetLocation(idea.end), idea.cargo, 1, 1, 4) == 0) {
 						LogInFindPair("cargo is not accepted");
 						continue;
 					}
 					if (new>best) {
-						route.start_tile = AIIndustry.GetLocation(route.start);
-						route.end_tile = AIIndustry.GetLocation(route.end);
-						route = builder.IndustryToIndustryStationAllocator(route);
-						if (route.StationsAllocated()) {
-							route = builder.FindEngineForRoute(route);
-							if (route.engine != null) {
+						idea.start_tile = AIIndustry.GetLocation(idea.start);
+						idea.end_tile = AIIndustry.GetLocation(idea.end);
+						idea = builder.IndustryToIndustryStationAllocator(idea);
+						if (idea.StationsAllocated()) {
+							idea = builder.FindEngineForRoute(idea);
+							if (idea.engine != null) {
 								best = new;
-								choice.start_tile = route.start_tile;
-								choice.end_tile = route.end_tile;
-								choice = clone route;
-								choice.first_station = clone route.first_station;
-								choice.second_station = clone route.second_station;
+								choice.start_tile = idea.start_tile;
+								choice.end_tile = idea.end_tile;
+								choice = clone idea;
+								choice.first_station = clone idea.first_station;
+								choice.second_station = clone idea.second_station;
 								choice.first_station.is_city = false;
 								choice.second_station.is_city = false;
-								choice.track_type = route.track_type;
+								choice.track_type = idea.track_type;
 							} else {
 								LogInFindPair("no viable engine");
 							}
@@ -75,30 +75,30 @@ function FindPairWrapped(route, builder)
 					}
 				}
 			} else {
-				route.end = builder.GetNiceRandomTown(AIIndustry.GetLocation(route.start));
-				if (route.end == null) {
+				idea.end = builder.GetNiceRandomTown(AIIndustry.GetLocation(idea.start));
+				if (idea.end == null) {
 					continue;
 					LogInFindPair("no available town");
 				}
-				local distance = AITile.GetDistanceManhattanToTile(AITown.GetLocation(route.end), AIIndustry.GetLocation(route.start));
-				new = ValuateConsumerTown(route.end, route.cargo, base);
+				local distance = AITile.GetDistanceManhattanToTile(AITown.GetLocation(idea.end), AIIndustry.GetLocation(idea.start));
+				new = ValuateConsumerTown(idea.end, idea.cargo, base);
 				new *= builder.distanceBetweenIndustriesValuator(distance);
-				new*=2; /*if (AIIndustry.GetStockpiledCargo(x, route.cargo)==0)*/
+				new*=2; /*if (AIIndustry.GetStockpiledCargo(x, idea.cargo)==0)*/
 				if (new>best) {
-					route.start_tile = AIIndustry.GetLocation(route.start);
-					route.end_tile = AITown.GetLocation(route.end);
-					route = builder.IndustryToCityStationAllocator(route)
-					if (route.StationsAllocated()) {
-						route = builder.FindEngineForRoute(route);
-						if (route.engine != null) {
+					idea.start_tile = AIIndustry.GetLocation(idea.start);
+					idea.end_tile = AITown.GetLocation(idea.end);
+					idea = builder.IndustryToCityStationAllocator(idea)
+					if (idea.StationsAllocated()) {
+						idea = builder.FindEngineForRoute(idea);
+						if (idea.engine != null) {
 							best = new;
-							choice.start_tile = route.start_tile;
-							choice.end_tile = route.end_tile;
-							choice = clone route;
-							choice.first_station = clone route.first_station;
-							choice.second_station = clone route.second_station;
-							choice.start_tile = AIIndustry.GetLocation(route.start);
-							choice.end_tile = AITown.GetLocation(route.end);
+							choice.start_tile = idea.start_tile;
+							choice.end_tile = idea.end_tile;
+							choice = clone idea;
+							choice.first_station = clone idea.first_station;
+							choice.second_station = clone idea.second_station;
+							choice.start_tile = AIIndustry.GetLocation(idea.start);
+							choice.end_tile = AITown.GetLocation(idea.end);
 							choice.first_station.is_city = false;
 							choice.second_station.is_city = true;
 						} else {
@@ -113,8 +113,8 @@ function FindPairWrapped(route, builder)
 	}
 	if (best == 0) {
 		Warning("Findpair found nothing usable.");
-		route.OK = false;
-		return route;
+		idea.OK = false;
+		return idea;
 	} else {
 		Info(best/1000 + "k points");
 	}
