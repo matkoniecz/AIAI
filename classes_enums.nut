@@ -42,7 +42,7 @@ class Route
 	budget = null;
 	demand = null;
 	OK = null;
-
+	
 	constructor()
 	{
 		first_station = Station();
@@ -65,5 +65,31 @@ class Route
 	function StationsAllocated()
 	{
 		return first_station.location != null && second_station.location != null
+	}
+
+	function proper_clone()
+	{
+		local returned = Route();
+		returned.start = start;
+		returned.end = end;
+		returned.forbidden_industries = forbidden_industries; //note that this is NOT cloned and everything links to the same list
+		returned.depot_tile = depot_tile;
+		returned.start_tile = start_tile;
+		returned.end_tile = end_tile;
+		returned.cargo = cargo;
+		returned.production = production;
+		returned.type = type;
+		returned.station_size = station_size;
+		returned.station_direction = station_direction;
+		returned.first_station = clone first_station;
+		returned.second_station = clone second_station;
+	
+		returned.track_type = track_type;
+		returned.engine = engine;
+		returned.engine_count = engine_count;
+		returned.budget = budget;
+		returned.demand = demand;
+		returned.OK = OK;	
+		return returned;
 	}
 }

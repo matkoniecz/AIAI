@@ -58,14 +58,9 @@ function FindPairWrapped(idea, builder)
 							idea = builder.FindEngineForRoute(idea);
 							if (idea.engine != null) {
 								best = new;
-								choice.start_tile = idea.start_tile;
-								choice.end_tile = idea.end_tile;
-								choice = clone idea;
-								choice.first_station = clone idea.first_station;
-								choice.second_station = clone idea.second_station;
+								choice = idea.proper_clone();
 								choice.first_station.is_city = false;
 								choice.second_station.is_city = false;
-								choice.track_type = idea.track_type;
 							} else {
 								LogInFindPair("no viable engine");
 							}
@@ -92,13 +87,7 @@ function FindPairWrapped(idea, builder)
 						idea = builder.FindEngineForRoute(idea);
 						if (idea.engine != null) {
 							best = new;
-							choice.start_tile = idea.start_tile;
-							choice.end_tile = idea.end_tile;
-							choice = clone idea;
-							choice.first_station = clone idea.first_station;
-							choice.second_station = clone idea.second_station;
-							choice.start_tile = AIIndustry.GetLocation(idea.start);
-							choice.end_tile = AITown.GetLocation(idea.end);
+							choice = idea.proper_clone();
 							choice.first_station.is_city = false;
 							choice.second_station.is_city = true;
 						} else {
