@@ -77,8 +77,8 @@ function FindPairWrapped(idea, builder)
 			} else {
 				idea.end = builder.GetNiceRandomTown(AIIndustry.GetLocation(idea.start));
 				if (idea.end == null) {
-					continue;
 					LogInFindPair("no available town");
+					continue;
 				}
 				local distance = AITile.GetDistanceManhattanToTile(AITown.GetLocation(idea.end), AIIndustry.GetLocation(idea.start));
 				new = ValuateConsumerTown(idea.end, idea.cargo, base);
