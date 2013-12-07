@@ -7,7 +7,7 @@ class AIAI extends AIController
 	root_tile = null;
 	station_number = null;
 	detected_rail_crossings = null;
-	loaded_game = false;
+	is_this_a_loaded_game = false;
 	bridge_list = [];
 	library_to_communicate_with_GS = null;
 }
@@ -37,7 +37,7 @@ function AIAI::Starter()
 	AICompany.SetAutoRenewMoney(100000);
 	detected_rail_crossings = AIList()
 
-	if(!loaded_game) {
+	if(!is_this_a_loaded_game) {
 		desperation = 0;
 		GeneralInspection = GetDate() - 12;
 		station_number = 1
@@ -232,7 +232,7 @@ function AIAI::Save()
 function AIAI::Load(version, data)
 {
 	if (data.rawin("desperation") && data.rawin("GeneralInspection") && data.rawin("BridgeList") && data.rawin("station_number")) {
-		this.loaded_game = true;
+		this.is_this_a_loaded_game = true;
 		this.desperation = data.rawget("desperation");
 		this.GeneralInspection = data.rawget("GeneralInspection");
 		this.bridge_list =  data.rawget("BridgeList");
