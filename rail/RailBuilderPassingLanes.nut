@@ -26,7 +26,7 @@ function RailBuilder::GetTileOnTheSideOftrack(tile, prevtile, on_the_left)
 		if (on_the_left) {
 			side = !side;
 		}
-		if (side){
+		if (side) {
 			return tile + AIMap.GetTileIndex(-1, 0);
 		} else {
 			return tile + AIMap.GetTileIndex(1, 0);
@@ -48,7 +48,7 @@ function RailBuilder::GetTileOnTheSideOftrack(tile, prevtile, on_the_left)
 		if (on_the_left) {
 			side = !side;
 		}
-		if (side){
+		if (side) {
 			return tile + AIMap.GetTileIndex(0, 0);
 		} else {
 			return tile + AIMap.GetTileIndex(1, 1);
@@ -166,7 +166,7 @@ function RailBuilder::CheckTileForEvilTracks(tile, path)
 
 	table[0]=0;
 	for(local i=1; i<=6; i++)
-	if (table[i]){
+	if (table[i]) {
 		//AISign.BuildSign(tile, ".");
 		//Info(i+"is here! *");
 		table[0]++;
@@ -206,7 +206,7 @@ function RailBuilder::testPath(path, stay_behind_path)
 		return false;
 	}
 	local test = AITestMode();
-	if (path != null && path.GetParent() != null && path.GetParent().GetParent() != null){
+	if (path != null && path.GetParent() != null && path.GetParent().GetParent() != null) {
 		local final_answer = false
 		local returned
 		while(!final_answer) {
@@ -218,7 +218,7 @@ function RailBuilder::testPath(path, stay_behind_path)
 			if (AIError.GetLastError() == AIError.ERR_VEHICLE_IN_THE_WAY) {
 				final_answer = false //this error may hide other real ones (bad terrain etc)
 			}
-			if (!final_answer){
+			if (!final_answer) {
 				AIController.Sleep(20);
 				Warning("This answer is not final! (RailBuilder::testPath)");
 			}
@@ -558,7 +558,7 @@ function RailBuilder::GeneratePassingLanes(path)
 			right = PassingLaneConstructor(true);
 			left = PassingLaneConstructor(false);
 		}
-		if (left.Finished() && right.Finished()){
+		if (left.Finished() && right.Finished()) {
 			list.append(right.GetLane());
 			right = PassingLaneConstructor(true);
 			left = PassingLaneConstructor(false);
@@ -582,7 +582,7 @@ function RailBuilder::ConstructionOfPassingLanes(list)
 
 		cost = GetCostOfRoute(copy);
 		Info("****** cost: " + cost)
-		while(cost != null && cost > GetAvailableMoney()){
+		while(cost != null && cost > GetAvailableMoney()) {
 			AIController.Sleep(500);
 			AIAI_instance.Maintenance();
 			cost = GetCostOfRoute(copy);
@@ -591,7 +591,7 @@ function RailBuilder::ConstructionOfPassingLanes(list)
 		
 		Info("****** available money: " + GetAvailableMoney())
 		
-		if (cost != null){
+		if (cost != null) {
 			Info("Entered")
 			ProvideMoney(cost)
 			Info("Provided")

@@ -36,7 +36,7 @@ _SuperLib_Helper.SellAllVehiclesStoppedInDepots <- function()
 	local counter = 0;
 	local list = AIVehicleList();
 	for (local vehicle = list.Begin(); list.HasNext(); vehicle = list.Next()) {
-		if (AIVehicle.IsStoppedInDepot(vehicle)){
+		if (AIVehicle.IsStoppedInDepot(vehicle)) {
 			AIVehicle.SellVehicle(vehicle);
 			counter++;
 		}

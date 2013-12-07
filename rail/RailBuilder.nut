@@ -62,7 +62,7 @@ class RailwayStation extends Station
 		for(local x = 0; x < railway_tracks.len(); x++) {
 			if (first == railway_tracks[x][0] || last == railway_tracks[x][0]) {
 				for(local i = 0; i < railway_tracks[x][1].len(); i++) {
-					if (!AIRail.RemoveRail(railway_tracks[x][1][i][0], railway_tracks[x][1][i][1], railway_tracks[x][1][i][2])){
+					if (!AIRail.RemoveRail(railway_tracks[x][1][i][0], railway_tracks[x][1][i][1], railway_tracks[x][1][i][2])) {
 						Error(AIError.GetLastErrorString() + " - RailwayStation::RemoveRailwayTracks");
 						if (AIAI.GetSetting("debug_signs_about_failed_railway_contruction")) {
 							AISign.BuildSign(railway_tracks[x][1][i][0], "a-");
@@ -411,7 +411,7 @@ function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.
 				path = path.GetParent();
 			} else { //AIMap.DistanceManhattan(prev, path.GetTile()) <= 1
 				local status = false;
-				while(!status){
+				while(!status) {
 					if (AIRail.BuildRail(prevprev, prev, path.GetTile())) {
 						status = true;
 					} else {
@@ -586,7 +586,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 		}
 	}
 
-	if (AIVehicle.GetNumWagons(engineId) == 0){
+	if (AIVehicle.GetNumWagons(engineId) == 0) {
 		abort("it was not supposed to happen - wagonless train");
 	}
 
@@ -1005,7 +1005,7 @@ function RailBuilder::StationConstruction(path)
 	local distance = AIMap.DistanceManhattan(trasa.first_station.location, trasa.second_station.location);
 	local location = trasa.first_station.location
 	local platform_count = trasa.first_station.platform_count
-	if (trasa.first_station.direction != StationDirection.x_is_constant__horizontal){
+	if (trasa.first_station.direction != StationDirection.x_is_constant__horizontal) {
 		direction = AIRail.RAILTRACK_NE_SW;
 	} else {
 		direction = AIRail.RAILTRACK_NW_SE;
@@ -1077,7 +1077,7 @@ function RailBuilder::PathFinder(limit)
 		}
 	}
 
-	if (path == false || path == null){
+	if (path == false || path == null) {
 		Info("   Pathfinder failed to find route. ");
 		if (AIAI.GetSetting("log_rail_pathfinding_time"))
 		AISign.BuildSign(AIMap.GetTileIndex(1, 1), "- "+GetReadableDate() + "[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]")
@@ -1094,7 +1094,7 @@ function RailBuilder::distanceBetweenIndustriesValuator(distance)
 	if (distance>GetMaxDistance()) return 0;
 	if (distance<GetMinDistance()) return 0;
 
-	if (desperation>5){
+	if (desperation>5) {
 		if (distance>100+desperation*60) return 1;
 		return 4;
 	}
@@ -1601,15 +1601,15 @@ function RailBuilder::TryToPlaceRailStationHere(station_tile, direction, length,
 		if (!IsTileFlatAndBuildable(tile_b)) {
 			b_connection_status = false;
 		}
-		if (!station_status || (!a_connection_status && !b_connection_status) || i > max_platform_count){
+		if (!station_status || (!a_connection_status && !b_connection_status) || i > max_platform_count) {
 			returned.platform_count = i-1;
-			if (returned.platform_count == 1){
+			if (returned.platform_count == 1) {
 				return achieved;
 			} else {
-				if (returned.connection.len() == 2){
+				if (returned.connection.len() == 2) {
 					returned.area_blocked_by_station = this.ForbiddenArea(returned.platform_count, length, station_tile, mover, antimover, tile_a_neighbour, tile_b_neighbour, tile_a, tile_b);
 				} else {
-					if (a_connection_status){
+					if (a_connection_status) {
 						returned.area_blocked_by_station = this.ForbiddenArea(returned.platform_count, length, station_tile, mover, antimover, tile_a_neighbour, null, tile_a, null);
 					} else {
 						returned.area_blocked_by_station = this.ForbiddenArea(returned.platform_count, length, station_tile, mover, antimover, tile_b_neighbour, null, tile_b, null);

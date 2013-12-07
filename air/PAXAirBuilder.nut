@@ -23,16 +23,16 @@ function PAXAirBuilder::Go()
 {
 	cost = this.CostEstimation();
 	Info("Trying to build an airport route (city version)");
-	if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_METROPOLITAN)){
+	if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_METROPOLITAN)) {
 		return true;
 		}
-	else if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_LARGE)){
+	else if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_LARGE)) {
 		return true;
 		}
-	else if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_COMMUTER)){
+	else if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_COMMUTER)) {
 		return true;
 		}
-	else if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_SMALL)){
+	else if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_SMALL)) {
 		return true;
 		}
 	cost=0;
@@ -44,19 +44,19 @@ function PAXAirBuilder::BuildAirportRouteBetweenCitiesWithAirportTypeSet(airport
 	local min_distance = 250 - 4*desperation;
 	if (!AIAirport.IsValidAirportType(airport_type)) return false;
 	local engine=this.FindAircraft(airport_type, Helper.GetPAXCargo(), 3, GetAvailableMoney(), min_distance);
-	if (engine==null){
+	if (engine==null) {
 		Info("Unfortunately no suitable aircraft found");
 		return false;
 	}
 	
 	ProvideMoney();
 	local tile_1 = this.FindSuitableAirportSpotInTown(airport_type);
-	if (tile_1 < 0){
+	if (tile_1 < 0) {
 		Info("Unfortunately no suitable airport location");
 		return false;
 	}
 	local tile_2 = this.FindSuitableAirportSpotInTown(airport_type, tile_1, AIEngine.GetMaximumOrderDistance(engine));
-	if (tile_2 < 0){		{
+	if (tile_2 < 0) {		{
 		Info("Unfortunatell no suitable pair of airport locations");
 		return false;
 		}

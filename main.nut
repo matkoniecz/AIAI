@@ -66,10 +66,10 @@ function AIAI::CommunicateWithGS()
 	}
 	if (this.library_to_communicate_with_GS != null) {
 		this.library_to_communicate_with_GS.SCPLogging_Info(Info);
-		for(local j = 0; j < 5 && this.library_to_communicate_with_GS.Check(); j++){}
+		for(local j = 0; j < 5 && this.library_to_communicate_with_GS.Check(); j++) {}
 	}
 	if (AIController.GetSetting("scp_enabled")) {
-		if (g_no_car_goal.IsNoCarGoalGame()){
+		if (g_no_car_goal.IsNoCarGoalGame()) {
 			Info("It is a NoCarGoal game.");
 		} else {
 			Info("No Game Script detected.");
@@ -115,7 +115,7 @@ function AIAI::Start()
 		} else {
 			Info(time + " months from general check");
 		}
-		if (time >= 6){ //6 months
+		if (time >= 6) { //6 months
 			this.Rungeneral_inspection();
 			this.general_inspection = GetDate();
 		}
@@ -385,7 +385,7 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 			Warning("Vehicle crash detected!");
 			local crash_event = AIEventVehicleCrashed.Convert(event);
 			local crash_reason = crash_event.GetCrashReason();
-			if (crash_reason == AIEventVehicleCrashed.CRASH_RV_LEVEL_CROSSING){
+			if (crash_reason == AIEventVehicleCrashed.CRASH_RV_LEVEL_CROSSING) {
 				this.HandleNewLevelCrossing(event);
 			}
 			break;
@@ -396,7 +396,7 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 			break;
 		case AIEvent.ET_ENGINE_PREVIEW:
 			event = AIEventEnginePreview.Convert(event);
-			if (event.AcceptPreview()){
+			if (event.AcceptPreview()) {
 				Info("New engine available from preview: " + event.GetName());
 				Autoreplace();
 				if (event.GetVehicleType() == AIVehicle.VT_RAIL) {

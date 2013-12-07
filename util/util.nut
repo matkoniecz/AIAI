@@ -119,7 +119,7 @@ function ImproveTownRating(town_id, desperation)
 		return true;
 	}
 	while(GetAvailableMoney()> Money.Inflate(3000000 || desperation > 5)) {
-		if (AITown.PerformTownAction(town_id, AITown.TOWN_ACTION_BRIBE)){
+		if (AITown.PerformTownAction(town_id, AITown.TOWN_ACTION_BRIBE)) {
 			Info("Bribed "+AITown.GetName(town_id)+"!" + AIError.GetLastErrorString());
 		} else {
 			Info("Bribe in "+AITown.GetName(town_id)+" failed!" + AIError.GetLastErrorString());
@@ -159,7 +159,7 @@ function IsConnectedDistrict(town_tile, cargo_id)
 {
 	//TODO - it is a hack rather than function
 	local list = AIStationList(AIStation.STATION_AIRPORT);
-	if (list.Count()!=0){
+	if (list.Count()!=0) {
 		list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
 		list.KeepBelowValue(18);
 		list.Valuate(IsCargoLoadedOnThisStation, cargo_id);
@@ -168,7 +168,7 @@ function IsConnectedDistrict(town_tile, cargo_id)
 	}
 
 	list = AIStationList(AIStation.STATION_BUS_STOP);
-	if (list.Count()!=0){
+	if (list.Count()!=0) {
 		list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
 		list.KeepBelowValue(8);
 		list.Valuate(IsCargoLoadedOnThisStation, cargo_id);

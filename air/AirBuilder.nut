@@ -167,7 +167,7 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile=nul
 		list.RemoveBelowValue(10);
 		
 		// Handle order distance
-		if (center_tile != null){
+		if (center_tile != null) {
 			town_list.Valuate(AirBuilder.GetOrderDistance, center_tile);
 			town_list.KeepBelowValue(max_distance);
 		}
@@ -257,8 +257,8 @@ function AirBuilder::CostEstimation()
 	for(local i=1; i<100; i++)
 		{
 		local engine = AirBuilder.FindAircraft(AIAirport.AT_LARGE, Helper.GetPAXCargo(), 3, Money.Inflate(30000)*i, 120-4*desperation);
-		if (engine!=null){
-			if (AIEngine.IsBuildable(engine)){
+		if (engine!=null) {
+			if (AIEngine.IsBuildable(engine)) {
 				return i*Money.Inflate(30000);
 				}
 			}
@@ -566,23 +566,23 @@ function AirBuilder::AddCargoAircrafts()
 local list = AIStationList(AIStation.STATION_AIRPORT);
 if (list.Count()==0) return;
 
-for (local airport = list.Begin(); list.HasNext(); airport = list.Next()){
+for (local airport = list.Begin(); list.HasNext(); airport = list.Next()) {
 	local cargo_list = AICargoList();
 	for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next())
-		if (AIStation.GetCargoWaiting(airport, cargo)>1){
+		if (AIStation.GetCargoWaiting(airport, cargo)>1) {
 		if (cargo != Helper.GetPAXCargo())
 			if (cargo != Helper.GetMailCargo())
 				if (IsItNeededToImproveThatStation(airport, cargo))
 				{
 				local airport_type = AIAirport.GetAirportType(AIStation.GetLocation(airport));
-				if (airport_type==AIAirport.AT_SMALL || airport_type==AIAirport.AT_COMMUTER){
+				if (airport_type==AIAirport.AT_SMALL || airport_type==AIAirport.AT_COMMUTER) {
 					airport_type=AIAirport.AT_SMALL;
 					}
 				local vehicle = AIVehicleList_Station(airport).Begin();
 				local another_station = AIOrder.GetOrderDestination(vehicle, 0);
 				if (AIStation.GetLocation(airport) == another_station) another_station = AIOrder.GetOrderDestination(vehicle, 1);
 				local engine=this.FindAircraft(airport_type, cargo, 1, GetAvailableMoney(), AIOrder.GetOrderDistance(AIVehicle.VT_AIR, another_station, AIBaseStation.GetLocation(airport)));
-				if (engine != null){
+				if (engine != null) {
 					ProvideMoney();
 					if (IsItPossibleToAddBurden(airport, another_station, engine)) {
 						if (IsItPossibleToAddBurden(AIStation.GetStationID(another_station), AIBaseStation.GetLocation(airport), engine)) {
@@ -613,10 +613,10 @@ for (local airport = airport_list.Begin(); airport_list.HasNext(); airport = air
    local counter=0;
    local minimum = 101;
    local plane_left_on_airport = null;
-   for (local plane = airlist.Begin(); airlist.HasNext(); plane = airlist.Next()){
+   for (local plane = airlist.Begin(); airlist.HasNext(); plane = airlist.Next()) {
 	  if (AIVehicle.GetState(plane)==AIVehicle.VS_AT_STATION)
 	     if (AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(plane), AIStation.GetLocation(airport))<30)
-		    if (AIVehicle.GetCapacity(plane, Helper.GetPAXCargo())>0){
+		    if (AIVehicle.GetCapacity(plane, Helper.GetPAXCargo())>0) {
 			local percent = ( 100 * AIVehicle.GetCargoLoad(plane, Helper.GetPAXCargo()))/(AIVehicle.GetCapacity(plane, Helper.GetPAXCargo()));
 		    //Info(percent + " %");
 			if (percent < minimum)

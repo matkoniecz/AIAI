@@ -103,8 +103,8 @@ AIVehicle.SetName <- function (vehicle_id, string)
 	if (AIVehicle.SetName_(vehicle_id, string + " [" + vehicle_id + "]")) {
 		return
 	}
-	for(;!AIVehicle.SetName_(vehicle_id, string + " #" + i + " [" + vehicle_id + "]"); i++){
-		if (AIError.GetLastError() == AIError.ERR_PRECONDITION_STRING_TOO_LONG){
+	for(;!AIVehicle.SetName_(vehicle_id, string + " #" + i + " [" + vehicle_id + "]"); i++) {
+		if (AIError.GetLastError() == AIError.ERR_PRECONDITION_STRING_TOO_LONG) {
 			if (AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
 				abort("ops?")
 			} else {
@@ -176,7 +176,7 @@ AIVehicle.BuildVehicle <- function (depot_tile, engine_id)
 			} while(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH)
 		}
 		Warning(AIError.GetLastErrorString());
-		if (AIError.GetLastError()==AIVehicle.ERR_VEHICLE_BUILD_DISABLED || AIError.GetLastError()==AIVehicle.ERR_VEHICLE_TOO_MANY ){
+		if (AIError.GetLastError()==AIVehicle.ERR_VEHICLE_BUILD_DISABLED || AIError.GetLastError()==AIVehicle.ERR_VEHICLE_TOO_MANY ) {
 			return AIVehicle.VEHICLE_INVALID;
 		}
 		if (AIError.GetLastError()==AIVehicle.ERR_VEHICLE_WRONG_DEPOT) {

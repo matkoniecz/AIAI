@@ -48,8 +48,8 @@ function BankruptProtector()
 		}
 		Info("End of financial problems!");
 	}
-	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)< needed_pocket_money){
-		if (!BorrowOnePieceOfLoan()){
+	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)< needed_pocket_money) {
+		if (!BorrowOnePieceOfLoan()) {
 			Error("We need money! ("+AICompany.GetBankBalance(AICompany.COMPANY_SELF)+"/"+needed_pocket_money+")");
 			Helper.SellAllVehiclesStoppedInDepots();
 			Sleep(1000);

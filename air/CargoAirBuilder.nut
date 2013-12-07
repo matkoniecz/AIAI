@@ -26,7 +26,7 @@ function CargoAirBuilder::Go()
 
 	Info("Trying to build an airport route from industry - scanning completed");
 
-	if (!trasa.OK){
+	if (!trasa.OK) {
 		Info("Airport cargo route failed");
 		return false;
 		}
@@ -35,16 +35,16 @@ function CargoAirBuilder::Go()
 		}
 
 	if (!AIAirport.BuildAirport(trasa.first_station.location, trasa.station_size, AIStation.STATION_NEW)) return false;
-	if (!AIAirport.BuildAirport(trasa.second_station.location, trasa.station_size, AIStation.STATION_NEW)){
+	if (!AIAirport.BuildAirport(trasa.second_station.location, trasa.station_size, AIStation.STATION_NEW)) {
 		AIAirport.RemoveAirport(trasa.first_station.location);
 		return false;
 		}
 	AIAI_instance.SetStationName(trasa.first_station.location, "");
 	AIAI_instance.SetStationName(trasa.second_station.location, "");
-	for(local i=0; i<trasa.engine_count; i++){
-		while(!this.BuildCargoAircraft(trasa.first_station.location, trasa.second_station.location, trasa.engine, trasa.cargo, "null")){
+	for(local i=0; i<trasa.engine_count; i++) {
+		while(!this.BuildCargoAircraft(trasa.first_station.location, trasa.second_station.location, trasa.engine, trasa.cargo, "null")) {
 			Error("Cargo aircraft construction failed due to " + AIError.GetLastErrorString()+".")
-			if (AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH){
+			if (AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH) {
 				return true;
 				}
 			AIAI_instance.Maintenance();
