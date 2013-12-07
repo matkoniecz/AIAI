@@ -15,7 +15,7 @@ function AIAI::HandleNewLevelCrossing(event)
 	
 	local road_tile_next_to_crossing = neighbours.Begin();
 	
-	if(!neighbours.IsEmpty() && Road.ConvertRailCrossingToBridge(crash_tile, road_tile_next_to_crossing) == null) {
+	if (!neighbours.IsEmpty() && Road.ConvertRailCrossingToBridge(crash_tile, road_tile_next_to_crossing) == null) {
 		// couldn't fix it right now, so put in in a wait list
 		this.list_of_detected_rail_crossings.AddItem(crash_tile, 0);
 	}
@@ -34,7 +34,7 @@ function AIAI::HandleOldLevelCrossings()
 		
 		local road_tile_next_to_crossing = neighbours.Begin();
 
-		if(neighbours.IsEmpty() ||
+		if (neighbours.IsEmpty() ||
 				!AIMap.IsValidTile(road_tile_next_to_crossing) ||
 				!AITile.HasTransportType(crash_tile, AITile.TRANSPORT_ROAD) ||
 				!AITile.HasTransportType(road_tile_next_to_crossing, AITile.TRANSPORT_ROAD)) {
@@ -42,7 +42,7 @@ function AIAI::HandleOldLevelCrossings()
 		}
 
 		local bridge_result = Road.ConvertRailCrossingToBridge(crash_tile, road_tile_next_to_crossing); 
-		if(bridge_result.succeeded == true || bridge_result.permanently == true) {
+		if (bridge_result.succeeded == true || bridge_result.permanently == true) {
 			// Succeded to build rail crossing or failed permanently -> don't try again
 			this.list_of_detected_rail_crossings.RemoveValue(crash_tile);
 		}

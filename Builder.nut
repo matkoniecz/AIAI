@@ -12,16 +12,16 @@ class Builder
 
 function Builder::ValuateProducer(ID, cargo)
 {
-	if(!AIIndustry.IsValidIndustry(ID)) {
+	if (!AIIndustry.IsValidIndustry(ID)) {
 		return -1;
 	}
 	local base = AIIndustry.GetLastMonthProduction(ID, cargo);
 	base *= (100-AIIndustry.GetLastMonthTransportedPercentage (ID, cargo));
-	if(AIIndustry.GetLastMonthTransportedPercentage (ID, cargo)==0) {
+	if (AIIndustry.GetLastMonthTransportedPercentage (ID, cargo)==0) {
 		base*=3;
 	}
 	base *= AICargo.GetCargoIncome(cargo, 10, 50);
-	if(g_no_car_goal.IsGoalCargo(cargo, true)) {
+	if (g_no_car_goal.IsGoalCargo(cargo, true)) {
 		Info(AICargo.GetCargoLabel(cargo));
 		local bonus_percent = 10;
 		local loan = AICompany.GetLoanAmount();
@@ -41,11 +41,11 @@ function Builder::ValuateProducer(ID, cargo)
 		base *= (100+bonus_percent);
 		base /= 100;
 	}
-	if(!AIIndustryType.ProductionCanIncrease(AIIndustry.GetIndustryType(ID))) {
+	if (!AIIndustryType.ProductionCanIncrease(AIIndustry.GetIndustryType(ID))) {
 		base/=2;
 	}
-	if(base!=0) {
-		if(AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(ID))) {
+	if (base!=0) {
+		if (AIIndustryType.IsRawIndustry(AIIndustry.GetIndustryType(ID))) {
 			base += 10000;
 		}
 	}
@@ -54,23 +54,23 @@ function Builder::ValuateProducer(ID, cargo)
  
 function Builder::ValuateConsumer(industry_id, cargo, score)
 {
-	if(!AIIndustry.IsValidIndustry(industry_id)) {
+	if (!AIIndustry.IsValidIndustry(industry_id)) {
 		return -1;
 	}
 	local industry_name = AIIndustry.GetName(industry_id);
-	if(AIIndustry.GetStockpiledCargo(industry_id, cargo)==0) {
+	if (AIIndustry.GetStockpiledCargo(industry_id, cargo)==0) {
 		score *= 2;
 	}
-	if(IsConnectedIndustry(industry_id, cargo)) {
+	if (IsConnectedIndustry(industry_id, cargo)) {
 		score *= 7;
 	}
 	local industry_type_id = AIIndustry.GetIndustryType(industry_id);
-	if(!AIIndustryType.IsValidIndustryType(industry_id)) {
+	if (!AIIndustryType.IsValidIndustryType(industry_id)) {
 		return -1; //industry closed after first check in this function
 	}
 	local industry_type_name = AIIndustryType.GetName(industry_type_id);
 	local list = AIIndustryType.GetProducedCargo(industry_type_id);
-	if(list.Count() == 0) {
+	if (list.Count() == 0) {
 		score /= 2;
 	}
 	return score;
@@ -130,7 +130,7 @@ function Builder::GetLimitedIndustryList_CargoProducing(cargo)
 
 function Builder::IsConsumerOK(industry_id)
 {
-	if(AIIndustry.IsValidIndustry(industry_id)==false) {
+	if (AIIndustry.IsValidIndustry(industry_id)==false) {
 		return false; //industry closed during preprocessing
 	}
 	return true;
@@ -139,13 +139,13 @@ function Builder::IsConsumerOK(industry_id)
 function Builder::IsProducerOK(industry_id)
 {
 	local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(industry_id));
-	if(cargo_list==null) {
+	if (cargo_list==null) {
 		return false;
 	}
-	if(cargo_list.Count()==0) {
+	if (cargo_list.Count()==0) {
 		return false;
 	}
-	if(AIIndustry.IsValidIndustry(industry_id)==false) {
+	if (AIIndustry.IsValidIndustry(industry_id)==false) {
 		return false; //industry closed during preprocessing
 	}
 	return true;

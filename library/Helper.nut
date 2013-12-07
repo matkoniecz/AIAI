@@ -22,10 +22,10 @@ AILog.Info("adding new functions to SuperLib (Helper)");
 
 _SuperLib_Helper.GetWeightOfOneCargoPiece <- function(cargo_id)
 {
-	if(AICargo.IsFreight(cargo_id)) {
+	if (AICargo.IsFreight(cargo_id)) {
 		return AIGameSettings.GetValue("vehicle.freight_trains");
 	}
-	if(AICargo.HasCargoClass(cargo_id, AICargo.CC_MAIL) || AICargo.HasCargoClass(cargo_id, AICargo.CC_PASSENGERS))  {
+	if (AICargo.HasCargoClass(cargo_id, AICargo.CC_MAIL) || AICargo.HasCargoClass(cargo_id, AICargo.CC_PASSENGERS))  {
 		return 0;
 	}
 	return 1;
@@ -36,7 +36,7 @@ _SuperLib_Helper.SellAllVehiclesStoppedInDepots <- function()
 	local counter = 0;
 	local list = AIVehicleList();
 	for (local vehicle = list.Begin(); list.HasNext(); vehicle = list.Next()) {
-		if(AIVehicle.IsStoppedInDepot(vehicle)){
+		if (AIVehicle.IsStoppedInDepot(vehicle)){
 			AIVehicle.SellVehicle(vehicle);
 			counter++;
 		}
@@ -46,7 +46,7 @@ _SuperLib_Helper.SellAllVehiclesStoppedInDepots <- function()
 
 _SuperLib_Helper.BuildCompanyHQ <- function()
 {
-	if(AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) {
+	if (AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) {
 		return true;
 	}
 
@@ -66,7 +66,7 @@ _SuperLib_Helper.BuildCompanyHQ <- function()
 	HQArea.Sort(AIList.SORT_BY_VALUE, true);
 	
 	for (local tile = HQArea.Begin(); HQArea.HasNext(); tile = HQArea.Next()) {
-		if(AICompany.BuildCompanyHQ(tile)) {
+		if (AICompany.BuildCompanyHQ(tile)) {
 			return true;
 		} 
 	}

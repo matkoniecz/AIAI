@@ -226,11 +226,11 @@ class AyStar.Path
 		} else {
 			old_path._next = this;
 			this._length = old_path.GetLength() + AIMap.DistanceManhattan(old_path.GetTile(), new_tile);
-			if(old_path.GetParent() != null)
+			if (old_path.GetParent() != null)
 				{
 				local old_tile = old_path.GetTile();
 				local very_old_tile = old_path.GetParent().GetTile();
-				if(new_tile - old_tile != old_tile - very_old_tile) {
+				if (new_tile - old_tile != old_tile - very_old_tile) {
 					this._real_length = old_path._real_length + 0.5;
 					}
 				else{
@@ -243,7 +243,7 @@ class AyStar.Path
 				}
 		}
 		this._cost = cost_callback(old_path, new_tile, new_direction, cost_callback_param);
-		if((AIAI.GetSetting("show_pathfinding") == 1 && AIBase.RandRange(4) == 0) || AIAI.GetSetting("show_full_pathfinding") == 1)
+		if ((AIAI.GetSetting("show_pathfinding") == 1 && AIBase.RandRange(4) == 0) || AIAI.GetSetting("show_full_pathfinding") == 1)
 			{
 			local mode = AIExecMode();
 			AISign.BuildSign(new_tile, this._real_length);
@@ -280,7 +280,7 @@ class AyStar.Path
 	 */
 	function GetRealLength() 
 	{ 
-	if(this.GetParent() == null) return 0;
+	if (this.GetParent() == null) return 0;
 	return this.GetParent()._real_length; 
 	}
 

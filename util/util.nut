@@ -1,23 +1,23 @@
 function AIAI::BuildStatues()
 {
 	local veh_list = AIVehicleList();
-	if(veh_list.Count()==0) return false;
+	if (veh_list.Count()==0) return false;
 
 	veh_list.Valuate(AIBase.RandItem);
 	veh_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
 	for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next()) {
 		for(local i = 0; i < AIOrder.GetOrderCount(veh); i++) {
 			local location = AIOrder.GetOrderDestination(veh, i);
-			if(AITile.IsStationTile(location)) {
-				if((AIOrder.GetOrderFlags(veh, i) & AIOrder.OF_NO_LOAD) != AIOrder.OF_NO_LOAD) {
+			if (AITile.IsStationTile(location)) {
+				if ((AIOrder.GetOrderFlags(veh, i) & AIOrder.OF_NO_LOAD) != AIOrder.OF_NO_LOAD) {
 					local station = AIStation.GetStationID(location);
 					local suma = 0;
-					if(AIVehicle.GetVehicleType(veh) == AIVehicle.VT_RAIL || AICompany.GetBankBalance(AICompany.COMPANY_SELF) > AICompany.GetMaxLoanAmount() || desperation>30) {
-						if(AITown.PerformTownAction(AITile.GetClosestTown(location), AITown.TOWN_ACTION_BUILD_STATUE)) {
+					if (AIVehicle.GetVehicleType(veh) == AIVehicle.VT_RAIL || AICompany.GetBankBalance(AICompany.COMPANY_SELF) > AICompany.GetMaxLoanAmount() || desperation>30) {
+						if (AITown.PerformTownAction(AITile.GetClosestTown(location), AITown.TOWN_ACTION_BUILD_STATUE)) {
 							Info("Statue for " + AIVehicle.GetName(veh));
 							return true;
 						} else {
-							if(AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH) {
+							if (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH) {
 								return false;
 							}
 						}
@@ -36,14 +36,14 @@ function AIAI::BuildStatues()
 /////////////////////////////////////////////////
 function AgeOfTheYoungestVehicle(station_id)
 {
-	if(!AIStation.IsValidStation(station_id)) {
+	if (!AIStation.IsValidStation(station_id)) {
 		abort("Invalid station_id");
 	}
 	local list = AIVehicleList_Station(station_id);
 	local minimum = 10000;
 	for (local q = list.Begin(); list.HasNext(); q = list.Next()) {
 		local age=AIVehicle.GetAge(q);
-		if(minimum > age) {
+		if (minimum > age) {
 			minimum = age;
 		}
 	}
@@ -57,12 +57,12 @@ function GetAverageCapacityOfVehiclesFromStation(station, cargo)
 	local count = 0;
 	for (local q = list.Begin(); list.HasNext(); q = list.Next()) {
 		local plus = AIVehicle.GetCapacity(q, cargo);
-		if(plus>0) {
+		if (plus>0) {
 			total+=plus;
 			count++;
 		}
 	}
-	if(count == 0) {
+	if (count == 0) {
 		return 0;
 	} else {
 		return total/count;
@@ -88,7 +88,7 @@ function IsTileFlatAndBuildable(tile)
 function IsTileWithAuthorityRefuse(tile)
 {
 	local town_id=AITile.GetClosestTown (tile);
-	if(!Town.TownRatingAllowStationBuilding(town_id)) {
+	if (!Town.TownRatingAllowStationBuilding(town_id)) {
 		return true;
 	} else {
 		return false;
@@ -98,7 +98,7 @@ function IsTileWithAuthorityRefuse(tile)
 function ImproveTownRating(town_id, desperation)
 {
 	local mode = AIExecMode();
-	if(GetAvailableMoney() < Money.Inflate(200000) && desperation == 0) {
+	if (GetAvailableMoney() < Money.Inflate(200000) && desperation == 0) {
 		return false;
 	}
 	ProvideMoney();
@@ -109,7 +109,7 @@ function ImproveTownRating(town_id, desperation)
 		return true;
 	}
 
-	if(GetAvailableMoney() > GetSafeBankBalance()) {
+	if (GetAvailableMoney() > GetSafeBankBalance()) {
 		local costs = AIAccounting();
 		Town.PlantTreesToImproveRating(town_id, min_rating, GetSafeBankBalance());
 		Info("Tree planting at cost of " + costs.GetCosts() + " near " + AITown.GetName(town_id));
@@ -119,7 +119,7 @@ function ImproveTownRating(town_id, desperation)
 		return true;
 	}
 	while(GetAvailableMoney()> Money.Inflate(3000000 || desperation > 5)) {
-		if(AITown.PerformTownAction(town_id, AITown.TOWN_ACTION_BRIBE)){
+		if (AITown.PerformTownAction(town_id, AITown.TOWN_ACTION_BRIBE)){
 			Info("Bribed "+AITown.GetName(town_id)+"!" + AIError.GetLastErrorString());
 		} else {
 			Info("Bribe in "+AITown.GetName(town_id)+" failed!" + AIError.GetLastErrorString());
@@ -137,7 +137,7 @@ function ImproveTownRating(town_id, desperation)
 
 function HandleFailedStationConstruction(location, error)
 {
-	if(error == AIError.ERR_LOCAL_AUTHORITY_REFUSES) {
+	if (error == AIError.ERR_LOCAL_AUTHORITY_REFUSES) {
 		ImproveTownRating(AITile.GetClosestTown(location), this.desperation);
 	}
 }
@@ -159,21 +159,21 @@ function IsConnectedDistrict(town_tile, cargo_id)
 {
 	//TODO - it is a hack rather than function
 	local list = AIStationList(AIStation.STATION_AIRPORT);
-	if(list.Count()!=0){
+	if (list.Count()!=0){
 		list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
 		list.KeepBelowValue(18);
 		list.Valuate(IsCargoLoadedOnThisStation, cargo_id);
 		list.KeepValue(1);
-		if(!list.IsEmpty()) return true;
+		if (!list.IsEmpty()) return true;
 	}
 
 	list = AIStationList(AIStation.STATION_BUS_STOP);
-	if(list.Count()!=0){
+	if (list.Count()!=0){
 		list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
 		list.KeepBelowValue(8);
 		list.Valuate(IsCargoLoadedOnThisStation, cargo_id);
 		list.KeepValue(1);
-		if(!list.IsEmpty()) return true;
+		if (!list.IsEmpty()) return true;
 	}
 	return false;
 }
@@ -181,9 +181,9 @@ function IsConnectedDistrict(town_tile, cargo_id)
 function IsCargoLoadedOnThisStation(station_id, cargo_id)
 {
 	local vehicle_list=AIVehicleList_Station(station_id);
-	if(vehicle_list.Count() != 0) {
-		if(GetLoadStationId(vehicle_list.Begin()) == station_id) {
-			if(AIVehicle.GetCapacity(vehicle_list.Begin(), cargo_id) != 0) {
+	if (vehicle_list.Count() != 0) {
+		if (GetLoadStationId(vehicle_list.Begin()) == station_id) {
+			if (AIVehicle.GetCapacity(vehicle_list.Begin(), cargo_id) != 0) {
 				return true;
 			}
 		}
@@ -205,13 +205,13 @@ function DeleteEmptyStations()
 	station_id_list.KeepValue(0);
 	for (local spam = station_id_list.Begin(); station_id_list.HasNext(); spam = station_id_list.Next()) {
 		local depot_tile = LoadDataFromStationNameFoundByStationId(spam, "[]");
-		if(depot_tile != null && AIRoad.IsRoadDepotTile(depot_tile)) {
-			if(AIRoad.RemoveRoadDepot(depot_tile)) {
+		if (depot_tile != null && AIRoad.IsRoadDepotTile(depot_tile)) {
+			if (AIRoad.RemoveRoadDepot(depot_tile)) {
 				AIRoad.RemoveRoadStation(AIBaseStation.GetLocation(spam));
 			} else {
 				if (AIError.GetLastError() != AIError.ERR_VEHICLE_IN_THE_WAY && AIError.GetLastError() != AIError.AIError.ERR_NOT_ENOUGH_CASH) {
 					Error("Abandoned road depot removal failed with " + AIError.GetLastErrorString());
-					if(AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
+					if (AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
 						abort("unexpected error");
 					}
 				}
@@ -250,12 +250,12 @@ function DeleteUnprofitable()
 	
 	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()) {
 		local load_station_id = GetLoadStationId(vehicle_id)
-		if(load_station_id == null) {
+		if (load_station_id == null) {
 			continue
 		}
 		local load_station_vehicle_list = AIVehicleList_Station(load_station_id)
-		if(AIVehicle.GetVehicleType(vehicle_id)!=AIVehicle.VT_RAIL || load_station_vehicle_list.Count()>2) {
-			if(AIVehicle.IsValidVehicle(vehicle_id)) if(AIAI.sellVehicle(vehicle_id, "unprofitable")) counter++;
+		if (AIVehicle.GetVehicleType(vehicle_id)!=AIVehicle.VT_RAIL || load_station_vehicle_list.Count()>2) {
+			if (AIVehicle.IsValidVehicle(vehicle_id)) if (AIAI.sellVehicle(vehicle_id, "unprofitable")) counter++;
 		}
 	}
 	Info(counter + " vehicle(s) sold.");

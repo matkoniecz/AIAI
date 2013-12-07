@@ -27,7 +27,7 @@ function Rail::GetBrakeVan(railtype)
 		wagons.Valuate(AIEngine.CanRefitCargo, cargoIndex);
 		wagons.RemoveValue(1);
 	}
-	if(wagons.Count() == 0){
+	if (wagons.Count() == 0){
 		return null;
 	} else {
 		wagons.Valuate(AIEngine.GetMaxSpeed);

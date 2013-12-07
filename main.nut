@@ -21,14 +21,14 @@ function AIAI::Starter()
 	Info("Hi!");
 	
 	NameCompany();
-	if(!AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) {
+	if (!AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) {
 		Info("Building company HQ...")
-		if(!Helper.BuildCompanyHQ()) {
+		if (!Helper.BuildCompanyHQ()) {
 			Info("No possible HQ location found");
 		}
 	}
 	this.ShowContactInfoOnTheMap();
-	if(AIGameSettings.GetValue("difficulty.vehicle_breakdowns")!= 0) {
+	if (AIGameSettings.GetValue("difficulty.vehicle_breakdowns")!= 0) {
 		AICompany.SetAutoRenewStatus(true);
 	} else {
 		AICompany.SetAutoRenewStatus(false);
@@ -37,23 +37,23 @@ function AIAI::Starter()
 	AICompany.SetAutoRenewMoney(100000);
 	list_of_detected_rail_crossings = AIList()
 
-	if(!is_this_a_loaded_game) {
+	if (!is_this_a_loaded_game) {
 		desperation = 0;
 		general_inspection = GetDate() - 12;
 		station_number = 1
 	} else {
 	}
-	if(Helper.GetMailCargo==-1) {
+	if (Helper.GetMailCargo==-1) {
 		abort("mail cargo does not exist");
 	}
-	if(Helper.GetPAXCargo==-1) {
+	if (Helper.GetPAXCargo==-1) {
 		abort("PAX cargo does not exist");
 	}
 }
 
 function AIAI::CommunicateWithGS()
 {
-	if(AIController.GetSetting("scp_enabled")) {
+	if (AIController.GetSetting("scp_enabled")) {
 		if (this.library_to_communicate_with_GS == null) {
 			this.library_to_communicate_with_GS = SCPLib("fake_data", "fake_data");
 			this.library_to_communicate_with_GS.SCPLogging_Info(true);
@@ -61,15 +61,15 @@ function AIAI::CommunicateWithGS()
 			g_no_car_goal = SCPClient_NoCarGoal(this.library_to_communicate_with_GS);
 		}
 	}
-	if(g_no_car_goal == null) {
+	if (g_no_car_goal == null) {
 		g_no_car_goal = SCPClient_NoCarGoal(this.library_to_communicate_with_GS);
 	}
-	if(this.library_to_communicate_with_GS != null) {
+	if (this.library_to_communicate_with_GS != null) {
 		this.library_to_communicate_with_GS.SCPLogging_Info(Info);
 		for(local j = 0; j < 5 && this.library_to_communicate_with_GS.Check(); j++){}
 	}
-	if(AIController.GetSetting("scp_enabled")) {
-		if(g_no_car_goal.IsNoCarGoalGame()){
+	if (AIController.GetSetting("scp_enabled")) {
+		if (g_no_car_goal.IsNoCarGoalGame()){
 			Info("It is a NoCarGoal game.");
 		} else {
 			Info("No Game Script detected.");
@@ -86,9 +86,9 @@ function AIAI::Start()
 		Warning("Desperation: " + desperation);
 		this.CommunicateWithGS();
 		root_tile = Tile.GetRandomTile();
-		if(AIVehicleList().Count() != 0) {
+		if (AIVehicleList().Count() != 0) {
 			local need = this.GetMinimalCost(builders);
-			if(GetAvailableMoney() < need) {
+			if (GetAvailableMoney() < need) {
 				Info("Waiting for more money: " + GetAvailableMoney()/1000 + "k / " + need/1000 + "k");
 				this.Maintenance();
 				BankruptProtector();
@@ -101,7 +101,7 @@ function AIAI::Start()
 			Info("I Am Rich! Statues!");
 		}
 		this.InformationCenter(builders);
-		if(this.TryEverything(builders)) {
+		if (this.TryEverything(builders)) {
 			desperation /= 10;
 		} else if (!waiting_for_money) {
 			Info("Nothing to do!");
@@ -110,12 +110,12 @@ function AIAI::Start()
 			continue;
 		}
 		local time = GetDate()-general_inspection;
-		if(time == 1) {
+		if (time == 1) {
 			Info("1 month from general check");
 		} else {
 			Info(time + " months from general check");
 		}
-		if(time >= 6){ //6 months
+		if (time >= 6){ //6 months
 			this.Rungeneral_inspection();
 			this.general_inspection = GetDate();
 		}
@@ -134,23 +134,23 @@ function AIAI::Rungeneral_inspection()
 
 function AIAI::UpgradeBridges()
 {
-	if(bridge_list==null) {
+	if (bridge_list==null) {
 		return
 	}
 	for(local i = 0; i<bridge_list.len() && AICompany.GetBankBalance(AICompany.COMPANY_SELF)>Money.Inflate(500000); i++) {
 		local tile = bridge_list[i]
-		if(!AIBridge.IsBridgeTile(tile)) {
+		if (!AIBridge.IsBridgeTile(tile)) {
 			continue
 		}
 		local old_bridge_type = AIBridge.GetBridgeID (tile)
 		local new_bridge_type = GetMaxSpeedBridge(tile, AIBridge.GetOtherBridgeEnd(tile))
-		if(AIBridge.GetMaxSpeed(new_bridge_type) > AIBridge.GetMaxSpeed(old_bridge_type)) {
+		if (AIBridge.GetMaxSpeed(new_bridge_type) > AIBridge.GetMaxSpeed(old_bridge_type)) {
 			local vehicle_type = AIVehicle.VT_ROAD;
-			if(AITile.HasTransportType(tile, AITile.TRANSPORT_RAIL)) {
+			if (AITile.HasTransportType(tile, AITile.TRANSPORT_RAIL)) {
 				vehicle_type = AIVehicle.VT_RAIL;
 				AIRail.SetCurrentRailType(AIRail.GetRailType(tile))
 			}
-			if(!AIBridge.BuildBridge ( vehicle_type, new_bridge_type, tile, AIBridge.GetOtherBridgeEnd(tile))) {
+			if (!AIBridge.BuildBridge ( vehicle_type, new_bridge_type, tile, AIBridge.GetOtherBridgeEnd(tile))) {
 				Error(AIError.GetLastErrorString() + " - unable to upgrade bridge")
 			}
 		}
@@ -160,7 +160,7 @@ function AIAI::UpgradeBridges()
 function AIAI::InformationCenter(builders)
 {
 	for(local i = 0; i<builders.len(); i++) {
-		if(builders[i] != null) {
+		if (builders[i] != null) {
 			builders[i].SetDesperation(desperation);
 		}
 	}
@@ -169,9 +169,9 @@ function AIAI::InformationCenter(builders)
 function AIAI::TryEverything(builders)
 {
 	for(local i = 0; i<builders.len(); i++) {
-		if(builders[i] != null) {
-			if(builders[i].Possible()) {
-				if(builders[i].Go()) {
+		if (builders[i] != null) {
+			if (builders[i].Possible()) {
+				if (builders[i].Go()) {
 					return true;
 				}
 			}
@@ -184,15 +184,15 @@ function AIAI::GetMinimalCost(builders)
 {
 	local cost = 1000000000; //TODO INFINITE fails
 	for(local i = 0; i<builders.len(); i++) {
-		if(builders[i] != null) {
-			if(builders[i].IsAllowed()) {
-				if(builders[i].GetCost() < cost) {
+		if (builders[i] != null) {
+			if (builders[i].IsAllowed()) {
+				if (builders[i].GetCost() < cost) {
 					cost = builders[i].GetCost();
 				}
 			}
 		}
 	}
-	if(cost < Money.Inflate(100000)) {
+	if (cost < Money.Inflate(100000)) {
 		cost = Money.Inflate(100000);
 	}
 	return cost;
@@ -200,10 +200,10 @@ function AIAI::GetMinimalCost(builders)
 
 function AIAI::SignMenagement()
 {
-	if(AIAI.GetSetting("clear_signs")) {
+	if (AIAI.GetSetting("clear_signs")) {
 		Helper.ClearAllSigns();
 	}
-	if(AIAI.GetSetting("debug_signs_for_airports_load")) {
+	if (AIAI.GetSetting("debug_signs_for_airports_load")) {
 		local list = AIStationList(AIStation.STATION_AIRPORT);
 		for (local x = list.Begin(); list.HasNext(); x = list.Next()) {
 			AirBuilder(0, this).IsItPossibleToAddBurden(x);
@@ -238,21 +238,21 @@ function AIAI::Load(version, data)
 		this.bridge_list =  data.rawget("BridgeList");
 		this.station_number = data.rawget("station_number");
 		//fix broken savegames
-		if(this.desperation == null) {
+		if (this.desperation == null) {
 			this.desperation = 0;
 			Error("Broken savegame, used default data for desperation");
 		}
-		if(this.general_inspection == null) {
+		if (this.general_inspection == null) {
 			this.general_inspection = GetDate()-12;
 			Error("Broken savegame, used default data for general_inspection");
 		}
-		if(this.station_number == null) {
+		if (this.station_number == null) {
 			this.station_number = 1;
 			Error("Broken savegame, used default data for station_number");
 		}
 		return;
 	}
-	if(AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
+	if (AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
 		abort("unable to load");
 	} else {
 		Error("unable to load properly, discrding all provided data");
@@ -261,7 +261,7 @@ function AIAI::Load(version, data)
 
 function AIAI::gentleSellVehicle(vehicle_id, why)
 {
-	if(IsForSell(vehicle_id) != false) {
+	if (IsForSell(vehicle_id) != false) {
 		return false;
 	}
 	local tile_1 = GetLoadStationLocation(vehicle_id);
@@ -271,7 +271,7 @@ function AIAI::gentleSellVehicle(vehicle_id, why)
 		return false
 	}
 
-	if(!AIOrder.UnshareOrders(vehicle_id)) {
+	if (!AIOrder.UnshareOrders(vehicle_id)) {
 		abort("WTF? Unshare impossible? "+AIVehicle.GetName(vehicle_id));
 	}
 
@@ -279,8 +279,8 @@ function AIAI::gentleSellVehicle(vehicle_id, why)
 	AIOrder.AppendOrder(vehicle_id, tile_1, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_FULL_LOAD_ANY);
 	AIOrder.AppendOrder(vehicle_id, tile_2, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_NO_LOAD);
 	AIOrder.AppendOrder(vehicle_id, depot_location, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_STOP_IN_DEPOT);
-	if(AIOrder.ResolveOrderPosition (vehicle_id, AIOrder.ORDER_CURRENT) != 1) {
-		if(!AIOrder.SkipToOrder(vehicle_id, 1)) {
+	if (AIOrder.ResolveOrderPosition (vehicle_id, AIOrder.ORDER_CURRENT) != 1) {
+		if (!AIOrder.SkipToOrder(vehicle_id, 1)) {
 			abort("SkipToOrder failed");
 		}
 	}
@@ -289,15 +289,15 @@ function AIAI::gentleSellVehicle(vehicle_id, why)
 
 function AIAI::sellVehicle(vehicle_id, why)
 {
-	if(!AIVehicle.IsOKVehicle(vehicle_id)) {
+	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
 		Error("Invalid or crashed vehicle " + vehicle_id);
 		return true;
 	}
-	if(IsForSell(vehicle_id) != false) {
+	if (IsForSell(vehicle_id) != false) {
 		return false;
 	}
 	AIVehicle.SetName(vehicle_id, "sell!" + why);
-	if(!AIVehicle.SendVehicleToDepot(vehicle_id)) {
+	if (!AIVehicle.SendVehicleToDepot(vehicle_id)) {
 		Info("failed to sell vehicle! "+AIError.GetLastErrorString());
 		return false;
 	}
@@ -354,7 +354,7 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 	{
 	while(AIEventController.IsEventWaiting()) {
 		local event = AIEventController.GetNextEvent();
-		if(event == null) {
+		if (event == null) {
 			return;
 		}
 		switch(event.GetEventType())
@@ -368,11 +368,11 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 			TODO - do sth with that code
 			local connection = ReadConnectionFromVehicle(lost_veh);
 			
-			if(connection.station.len() >= 2 && connection.connection_failed != true)
+			if (connection.station.len() >= 2 && connection.connection_failed != true)
 			{
 				Info("Try to connect the stations again");
 
-				if(!connection.RepairRoadConnection())
+				if (!connection.RepairRoadConnection())
 					SellVehicle(lost_veh);
 			}
 			else
@@ -385,7 +385,7 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 			Warning("Vehicle crash detected!");
 			local crash_event = AIEventVehicleCrashed.Convert(event);
 			local crash_reason = crash_event.GetCrashReason();
-			if(crash_reason == AIEventVehicleCrashed.CRASH_RV_LEVEL_CROSSING){
+			if (crash_reason == AIEventVehicleCrashed.CRASH_RV_LEVEL_CROSSING){
 				this.HandleNewLevelCrossing(event);
 			}
 			break;
@@ -399,7 +399,7 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 			if (event.AcceptPreview()){
 				Info("New engine available from preview: " + event.GetName());
 				Autoreplace();
-				if(event.GetVehicleType() == AIVehicle.VT_RAIL) {
+				if (event.GetVehicleType() == AIVehicle.VT_RAIL) {
 					this.BuilderMaintenance();
 				}
 			}
@@ -409,7 +409,7 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 			local engine = event.GetEngineID();
 			Info("New engine available: " + AIEngine.GetName(engine));
 			Autoreplace();
-			if(AIEngine.GetVehicleType(engine) == AIVehicle.VT_RAIL) {
+			if (AIEngine.GetVehicleType(engine) == AIVehicle.VT_RAIL) {
 				this.BuilderMaintenance();
 			}
 			break;
@@ -502,7 +502,7 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 			break;
 		default:
 			Error("Unhandled event " + event.GetEventType());
-			if(AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
+			if (AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
 				abort("unhandled event");
 			}
 			break;
@@ -522,7 +522,7 @@ function AIAI::BuildBridge(vehicle_type, start, end)
 {
 	local bridge_type_id = GetMaxSpeedBridge(start, end);
 	local result = AIBridge.BuildBridge(vehicle_type, bridge_type_id, start, end);
-	if(result) {
+	if (result) {
 		bridge_list.append(start);
 	}
 	return result;

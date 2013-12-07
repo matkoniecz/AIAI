@@ -18,9 +18,9 @@ _SuperLib_Town.PlantTreesToImproveRating <- function(town_id, min_rating, money_
 	list.Valuate(AITile.HasTreeOnTile);
 	list.KeepValue(0);
 	foreach (tile, dummy in list) {
-		if(AITown.IsWithinTownInfluence(town_id, tile)) {
-			if(!AITile.PlantTree(tile)) {
-				if(AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH) {
+		if (AITown.IsWithinTownInfluence(town_id, tile)) {
+			if (!AITile.PlantTree(tile)) {
+				if (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH) {
 					return (AITown.GetRating(town_id, AICompany.COMPANY_SELF) >= min_rating);
 				}
 			}
@@ -29,7 +29,7 @@ _SuperLib_Town.PlantTreesToImproveRating <- function(town_id, min_rating, money_
 		if (AITown.GetRating(town_id, AICompany.COMPANY_SELF) >= min_rating) {
 			return true;
 		}
-		if(AICompany.GetBankBalance(AICompany.COMPANY_SELF) < money_threshold) {
+		if (AICompany.GetBankBalance(AICompany.COMPANY_SELF) < money_threshold) {
 			return false;
 		}
 	}

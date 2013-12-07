@@ -23,11 +23,11 @@ class Path
 		} else {
 			old_path._next = this;
 			this._length = old_path.GetLength() + AIMap.DistanceManhattan(old_path.GetTile(), new_tile);
-			if(old_path.GetParent() != null)
+			if (old_path.GetParent() != null)
 				{
 				local old_tile = old_path.GetTile();
 				local very_old_tile = old_path.GetParent().GetTile();
-				if(new_tile - old_tile != old_tile - very_old_tile) {
+				if (new_tile - old_tile != old_tile - very_old_tile) {
 					this._real_length = old_path._real_length + 0.5;
 					}
 				else{
@@ -73,7 +73,7 @@ class Path
 	 */
 	function GetRealLength() 
 	{ 
-	if(this.GetParent() == null) return 0;
+	if (this.GetParent() == null) return 0;
 	return this.GetParent()._real_length; 
 	}
 };

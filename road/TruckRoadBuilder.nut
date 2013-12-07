@@ -4,7 +4,7 @@ class TruckRoadBuilder extends RoadBuilder
 
 function TruckRoadBuilder::IsAllowed()
 {
-	if(0 == AIAI.GetSetting("use_trucks")) {
+	if (0 == AIAI.GetSetting("use_trucks")) {
 		return false;
 	}
 	return RoadBuilder.IsAllowed();
@@ -12,10 +12,10 @@ function TruckRoadBuilder::IsAllowed()
 
 function TruckRoadBuilder::Possible()
 {
-	if(!this.IsAllowed()) {
+	if (!this.IsAllowed()) {
 		return false;
 	}
-	if(this.cost <= 1) {
+	if (this.cost <= 1) {
 		Info("no cost estimation for a truck connection is available.");
 	} else {
 		Info("estimated cost of a truck connection: " + this.cost + " /  available funds: " + GetAvailableMoney() + " (" + (GetAvailableMoney()*100/this.cost) + "%)");
@@ -31,7 +31,7 @@ function TruckRoadBuilder::GetNiceRandomTown(location)
 	town_list.KeepAboveValue(GetMinDistance());
 	town_list.Valuate(AIBase.RandItem);
 	town_list.KeepTop(1);
-	if(town_list.Count()==0) {
+	if (town_list.Count()==0) {
 		return null;
 	}
 	return town_list.Begin();
@@ -39,7 +39,7 @@ function TruckRoadBuilder::GetNiceRandomTown(location)
 
 function TruckRoadBuilder::ValuateProducer(ID, cargo)
 {
-	if(AIRoad.GetRoadVehicleTypeForCargo(cargo) != AIRoad.ROADVEHTYPE_TRUCK) {
+	if (AIRoad.GetRoadVehicleTypeForCargo(cargo) != AIRoad.ROADVEHTYPE_TRUCK) {
 		return 0;
 	}
 	return RoadBuilder.ValuateProducer(ID, cargo);
@@ -91,23 +91,23 @@ function TruckRoadBuilder::Go()
 	for(local i=0; i<retry_limit; i++) {
 		Info("Scanning for truck route");
 		trasa = this.FindPair(trasa); 
-		if(!trasa.OK) {
+		if (!trasa.OK) {
 			Info("Nothing found!");
 			cost = 0;
 			return false;
 		}
 
 		Info("Scanning for truck route completed [ " + desperation + " ] cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start));
-		if(this.PrepareRoute()) {
+		if (this.PrepareRoute()) {
 			Info("   Contruction started on correct route.");
-			if(this.ConstructionOfRVRoute()) {
+			if (this.ConstructionOfRVRoute()) {
 				return true;
 			} else {
 				trasa.forbidden_industries.AddItem(trasa.start, 0);
 			}
 		} else {
 			Info("   Route preaparings failed.");
-			if(trasa.start==null) {
+			if (trasa.start==null) {
 				return false;
 			} else {
 				trasa.forbidden_industries.AddItem(trasa.start, 0);

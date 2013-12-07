@@ -5,13 +5,13 @@ class CargoAirBuilder extends AirBuilder
 
 function CargoAirBuilder::IsAllowed()
 {
-	if(0 == AIAI.GetSetting("cargo_plane")) return false;
+	if (0 == AIAI.GetSetting("cargo_plane")) return false;
 	return AirBuilder.IsAllowed();
 }
 
 function CargoAirBuilder::Possible()
 {
-	if(!this.IsAllowed()) return false;
+	if (!this.IsAllowed()) return false;
 	return this.cost<GetAvailableMoney();
 }
 
@@ -26,7 +26,7 @@ function CargoAirBuilder::Go()
 
 	Info("Trying to build an airport route from industry - scanning completed");
 
-	if(!trasa.OK){
+	if (!trasa.OK){
 		Info("Airport cargo route failed");
 		return false;
 		}
@@ -44,7 +44,7 @@ function CargoAirBuilder::Go()
 	for(local i=0; i<trasa.engine_count; i++){
 		while(!this.BuildCargoAircraft(trasa.first_station.location, trasa.second_station.location, trasa.engine, trasa.cargo, "null")){
 			Error("Cargo aircraft construction failed due to " + AIError.GetLastErrorString()+".")
-			if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH){
+			if (AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH){
 				return true;
 				}
 			AIAI_instance.Maintenance();
@@ -67,7 +67,7 @@ function CargoAirBuilder::GetNiceRandomTown(location)
 	town_list.KeepAboveValue(GetMinDistance());
 	town_list.Valuate(AIBase.RandItem);
 	town_list.KeepTop(1);
-	if(town_list.Count()==0) {
+	if (town_list.Count()==0) {
 		return null;
 	}
 	return town_list.Begin();

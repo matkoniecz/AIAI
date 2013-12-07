@@ -4,14 +4,14 @@ class PAXAirBuilder extends AirBuilder
 
 function PAXAirBuilder::IsAllowed()
 {
-	if(0 == AIAI.GetSetting("PAX_plane")) return false;
+	if (0 == AIAI.GetSetting("PAX_plane")) return false;
 	return AirBuilder.IsAllowed();
 }
 
 function PAXAirBuilder::Possible()
 {
-	if(!this.IsAllowed()) return false;
-	if(this.cost <= 1) {
+	if (!this.IsAllowed()) return false;
+	if (this.cost <= 1) {
 		Info("no cost estimation for a PAX airplane connection is available.");
 	} else {
 		Info("estimated cost of a PAX airplane connection: " + this.cost + " / available funds: " + GetAvailableMoney() + " (" + (GetAvailableMoney()*100/this.cost) + "%)");
@@ -23,16 +23,16 @@ function PAXAirBuilder::Go()
 {
 	cost = this.CostEstimation();
 	Info("Trying to build an airport route (city version)");
-	if(BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_METROPOLITAN)){
+	if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_METROPOLITAN)){
 		return true;
 		}
-	else if(BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_LARGE)){
+	else if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_LARGE)){
 		return true;
 		}
-	else if(BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_COMMUTER)){
+	else if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_COMMUTER)){
 		return true;
 		}
-	else if(BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_SMALL)){
+	else if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_SMALL)){
 		return true;
 		}
 	cost=0;
@@ -42,9 +42,9 @@ function PAXAirBuilder::Go()
 function PAXAirBuilder::BuildAirportRouteBetweenCitiesWithAirportTypeSet(airport_type)
 {
 	local min_distance = 250 - 4*desperation;
-	if(!AIAirport.IsValidAirportType(airport_type)) return false;
+	if (!AIAirport.IsValidAirportType(airport_type)) return false;
 	local engine=this.FindAircraft(airport_type, Helper.GetPAXCargo(), 3, GetAvailableMoney(), min_distance);
-	if(engine==null){
+	if (engine==null){
 		Info("Unfortunately no suitable aircraft found");
 		return false;
 	}
@@ -92,7 +92,7 @@ local airport_rad = AIAirport.GetAirportCoverageRadius(airport_type);
 		while(!this.BuildPassengerAircraftWithRand(tile_1, tile_2, engine, Helper.GetPAXCargo()))
 			{
 			Error("PAX aircraft construction failed due to " + AIError.GetLastErrorString()+".")
-			if(AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH) 
+			if (AIError.GetLastError()!=AIError.ERR_NOT_ENOUGH_CASH) 
 				{
 				return true;
 				}
@@ -100,9 +100,9 @@ local airport_rad = AIAirport.GetAirportCoverageRadius(airport_type);
 			AIController.Sleep(500);
 			}
 		Info("We have " + i + " from " + counter + " aircrafts.");
-		if(i < counter)
+		if (i < counter)
 			{
-			if(!this.IsItPossibleToAddBurden(AIStation.GetStationID(tile_1), tile_2, engine) || !this.IsItPossibleToAddBurden(AIStation.GetStationID(tile_2), tile_1, engine))
+			if (!this.IsItPossibleToAddBurden(AIStation.GetStationID(tile_1), tile_2, engine) || !this.IsItPossibleToAddBurden(AIStation.GetStationID(tile_2), tile_1, engine))
 				{
 				Info("Interrupted, too many airplanes");
 				return true;
