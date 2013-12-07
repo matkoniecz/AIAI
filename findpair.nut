@@ -5,7 +5,7 @@ function LogInFindPair(string)
 	}
 }
 
-function FindPairWrapped (route, builder)
+function FindPairWrapped(route, builder)
 {
 	local industry_list = builder.GetLimitedIndustryList();
 	local choice = Route();
