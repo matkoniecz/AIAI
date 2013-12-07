@@ -9,7 +9,7 @@ class AIAI extends AIController
 	detected_rail_crossings = null;
 	loaded_game = false;
 	bridge_list = [];
-	library = null;
+	library_to_communicate_with_GS = null;
 }
 
 require("headers.nut");
@@ -54,19 +54,19 @@ function AIAI::Starter()
 function AIAI::CommunicateWithGS()
 {
 	if(AIController.GetSetting("scp_enabled")) {
-		if (this.library == null) {
-			this.library = SCPLib("fake_data", "fake_data");
-			this.library.SCPLogging_Info(true);
-			this.library.SCPLogging_Error(true);
-			g_no_car_goal = SCPClient_NoCarGoal(this.library);
+		if (this.library_to_communicate_with_GS == null) {
+			this.library_to_communicate_with_GS = SCPLib("fake_data", "fake_data");
+			this.library_to_communicate_with_GS.SCPLogging_Info(true);
+			this.library_to_communicate_with_GS.SCPLogging_Error(true);
+			g_no_car_goal = SCPClient_NoCarGoal(this.library_to_communicate_with_GS);
 		}
 	}
 	if(g_no_car_goal == null) {
-		g_no_car_goal = SCPClient_NoCarGoal(this.library);
+		g_no_car_goal = SCPClient_NoCarGoal(this.library_to_communicate_with_GS);
 	}
-	if(this.library != null) {
-		this.library.SCPLogging_Info(Info);
-		for(local j = 0; j < 5 && this.library.Check(); j++){}
+	if(this.library_to_communicate_with_GS != null) {
+		this.library_to_communicate_with_GS.SCPLogging_Info(Info);
+		for(local j = 0; j < 5 && this.library_to_communicate_with_GS.Check(); j++){}
 	}
 	if(AIController.GetSetting("scp_enabled")) {
 		if(g_no_car_goal.IsNoCarGoalGame()){
