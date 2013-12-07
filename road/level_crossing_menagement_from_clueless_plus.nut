@@ -17,15 +17,15 @@ function AIAI::HandleNewLevelCrossing(event)
 	
 	if(!neighbours.IsEmpty() && Road.ConvertRailCrossingToBridge(crash_tile, road_tile_next_to_crossing) == null) {
 		// couldn't fix it right now, so put in in a wait list
-		this.detected_rail_crossings.AddItem(crash_tile, 0);
+		this.list_of_detected_rail_crossings.AddItem(crash_tile, 0);
 	}
 }
 
 function AIAI::HandleOldLevelCrossings()
 {
 	// Check for rail crossings that couldn't be fixed just after a crash event
-	this.detected_rail_crossings.Valuate(Helper.ItemValuator);
-	foreach(crash_tile, _ in this.detected_rail_crossings) {
+	this.list_of_detected_rail_crossings.Valuate(Helper.ItemValuator);
+	foreach(crash_tile, _ in this.list_of_detected_rail_crossings) {
 		Info("Trying to fix a railway crossing that had an accident before");
 		//Helper.BuildSign(crash_tile, "crash_tile");
 		local neighbours = Tile.GetNeighbours4MainDir(crash_tile);
@@ -38,13 +38,13 @@ function AIAI::HandleOldLevelCrossings()
 				!AIMap.IsValidTile(road_tile_next_to_crossing) ||
 				!AITile.HasTransportType(crash_tile, AITile.TRANSPORT_ROAD) ||
 				!AITile.HasTransportType(road_tile_next_to_crossing, AITile.TRANSPORT_ROAD)) {
-			this.detected_rail_crossings.RemoveValue(crash_tile);
+			this.list_of_detected_rail_crossings.RemoveValue(crash_tile);
 		}
 
 		local bridge_result = Road.ConvertRailCrossingToBridge(crash_tile, road_tile_next_to_crossing); 
 		if(bridge_result.succeeded == true || bridge_result.permanently == true) {
 			// Succeded to build rail crossing or failed permanently -> don't try again
-			this.detected_rail_crossings.RemoveValue(crash_tile);
+			this.list_of_detected_rail_crossings.RemoveValue(crash_tile);
 		}
 	}
 }

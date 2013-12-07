@@ -3,7 +3,7 @@ class RoadBuilder extends Builder
 	desperation = 0;
 	AIAI_instance = null;
 	cost = 0;
-	detected_rail_crossings = null;
+	list_of_detected_rail_crossings = null;
 	path = null;
 
 	trasa = null;

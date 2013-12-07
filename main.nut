@@ -6,7 +6,7 @@ class AIAI extends AIController
 	general_inspection = null;
 	root_tile = null;
 	station_number = null;
-	detected_rail_crossings = null;
+	list_of_detected_rail_crossings = null;
 	is_this_a_loaded_game = false;
 	bridge_list = [];
 	library_to_communicate_with_GS = null;
@@ -35,7 +35,7 @@ function AIAI::Starter()
 	}
 	AICompany.SetAutoRenewMonths(0);
 	AICompany.SetAutoRenewMoney(100000);
-	detected_rail_crossings = AIList()
+	list_of_detected_rail_crossings = AIList()
 
 	if(!is_this_a_loaded_game) {
 		desperation = 0;
