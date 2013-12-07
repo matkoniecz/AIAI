@@ -26,14 +26,14 @@ function FindPairWrapped (route, builder)
 		}
 		local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(route.start));
 		for (route.cargo = cargo_list.Begin(); cargo_list.HasNext(); route.cargo = cargo_list.Next()) {
-			route.production = AIIndustry.GetLastMonthProduction(route.start, route.cargo)*(100-AIIndustry.GetLastMonthTransportedPercentage (route.start, route.cargo))/100;
 			if (IsConnectedIndustry(route.start, route.cargo)) {
 				LogInFindPair("connected producer");
 				continue;
 			}
-			local industry_list_accepting_current_cargo = builder.GetLimitedIndustryList_CargoAccepting(route.cargo);
+			route.production = AIIndustry.GetLastMonthProduction(route.start, route.cargo)*(100-AIIndustry.GetLastMonthTransportedPercentage (route.start, route.cargo))/100;
 			local base = builder.ValuateProducer(route.start, route.cargo);
-			if (industry_list_accepting_current_cargo.Count()>0) {
+			local industry_list_accepting_current_cargo = builder.GetLimitedIndustryList_CargoAccepting(route.cargo);
+			if (industry_list_accepting_current_cargo.Count() > 0) {
 				for(route.end = industry_list_accepting_current_cargo.Begin(); industry_list_accepting_current_cargo.HasNext(); route.end = industry_list_accepting_current_cargo.Next()) {
 					if (route.forbidden_industries.HasItem(route.end)) {
 						LogInFindPair("banned consumer");
@@ -46,7 +46,7 @@ function FindPairWrapped (route, builder)
 					new = builder.ValuateConsumer(route.end, route.cargo, base);
 					local distance = AITile.GetDistanceManhattanToTile(AIIndustry.GetLocation(route.end), AIIndustry.GetLocation(route.start)); 
 					new *= builder.distanceBetweenIndustriesValuator(distance); 
-					if (AITile.GetCargoAcceptance (AIIndustry.GetLocation(route.end), route.cargo, 1, 1, 4) == 0) {
+					if (AITile.GetCargoAcceptance(AIIndustry.GetLocation(route.end), route.cargo, 1, 1, 4) == 0) {
 						LogInFindPair("cargo is not accepted");
 						continue;
 					}
