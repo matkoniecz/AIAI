@@ -3,7 +3,7 @@ g_no_car_goal <- null;
 class AIAI extends AIController 
 {
 	desperation = null;
-	GeneralInspection = null;
+	general_inspection = null;
 	root_tile = null;
 	station_number = null;
 	detected_rail_crossings = null;
@@ -39,7 +39,7 @@ function AIAI::Starter()
 
 	if(!is_this_a_loaded_game) {
 		desperation = 0;
-		GeneralInspection = GetDate() - 12;
+		general_inspection = GetDate() - 12;
 		station_number = 1
 	} else {
 	}
@@ -109,22 +109,22 @@ function AIAI::Start()
 			desperation++;
 			continue;
 		}
-		local time = GetDate()-GeneralInspection;
+		local time = GetDate()-general_inspection;
 		if(time == 1) {
 			Info("1 month from general check");
 		} else {
 			Info(time + " months from general check");
 		}
 		if(time >= 6){ //6 months
-			this.RunGeneralInspection();
-			this.GeneralInspection = GetDate();
+			this.Rungeneral_inspection();
+			this.general_inspection = GetDate();
 		}
 		Info("==================iteration number " + i + " of the main loop is now finished=================");
 		}
 	abort("Escaped Start function, it was not supposed to happen");
 }
 
-function AIAI::RunGeneralInspection()
+function AIAI::Rungeneral_inspection()
 {
 	DeleteUnprofitable();
 	DeleteEmptyStations();
@@ -222,7 +222,7 @@ function AIAI::Save()
 {
 	local table = {
 		desperation = this.desperation
-		GeneralInspection = this.GeneralInspection
+		general_inspection = this.general_inspection
 		BridgeList = this.bridge_list
 		station_number = this.station_number
 	};
@@ -231,10 +231,10 @@ function AIAI::Save()
 
 function AIAI::Load(version, data)
 {
-	if (data.rawin("desperation") && data.rawin("GeneralInspection") && data.rawin("BridgeList") && data.rawin("station_number")) {
+	if (data.rawin("desperation") && data.rawin("general_inspection") && data.rawin("BridgeList") && data.rawin("station_number")) {
 		this.is_this_a_loaded_game = true;
 		this.desperation = data.rawget("desperation");
-		this.GeneralInspection = data.rawget("GeneralInspection");
+		this.general_inspection = data.rawget("general_inspection");
 		this.bridge_list =  data.rawget("BridgeList");
 		this.station_number = data.rawget("station_number");
 		//fix broken savegames
@@ -242,9 +242,9 @@ function AIAI::Load(version, data)
 			this.desperation = 0;
 			Error("Broken savegame, used default data for desperation");
 		}
-		if(this.GeneralInspection == null) {
-			this.GeneralInspection = GetDate()-12;
-			Error("Broken savegame, used default data for GeneralInspection");
+		if(this.general_inspection == null) {
+			this.general_inspection = GetDate()-12;
+			Error("Broken savegame, used default data for general_inspection");
 		}
 		if(this.station_number == null) {
 			this.station_number = 1;
