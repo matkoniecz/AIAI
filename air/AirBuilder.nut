@@ -4,8 +4,14 @@ class AirBuilder extends Builder
 
 function AirBuilder::IsAllowed()
 {
-	if (AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_AIR)) return false;
-	if (AIGameSettings.GetValue("economy.infrastructure_maintenance")) return false; //TODO - replace by estimating profits
+	if (AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_AIR)) {
+		Warning("AIs are not allowed to build aircrafts in this game (see advanced settings, section 'Competitors', subsection 'Computer players')!");
+		return false;
+	}
+	if (AIGameSettings.GetValue("economy.infrastructure_maintenance")) {
+		Warning("Infrastructure maintenance costs are enabled what makes aircrafts unprofitable (see advanced settings, section 'economy').");
+		return false; //TODO - replace by estimating profits
+	}
 
 	local count;
 	local veh_list = AIVehicleList();
@@ -13,10 +19,21 @@ function AirBuilder::IsAllowed()
 	veh_list.KeepValue(AIVehicle.VT_AIR);
 	count = veh_list.Count();
 	local allowed = AIGameSettings.GetValue("vehicle.max_aircraft");
-	if (allowed==0) return false;
-	if (count==0) return true;
-	if ((allowed - count)<4) return false;
-	if (((count*100)/(allowed))>90) return false;
+	if (allowed==0) {
+		Warning("Max aircraft is set to 0 (see advanced settings, section 'vehicles'). ");
+		return false;
+	}
+	if (count==0) {
+		return true;
+	}
+	if ((allowed - count)<4) {
+		Warning("Max aircraft count is too low to consider more aircrafts (see advanced settings, section 'vehicles'). ");
+		return false;
+	}
+	if (((count*100)/(allowed))>90) {
+		Warning("Max aircraft count is too low to consider more aircrafts (see advanced settings, section 'vehicles'). ");
+		return false;
+	}
 	return true;
 }
 

@@ -20,26 +20,32 @@ require("RoadPathfinder.nut");
 function RoadBuilder::IsAllowed()
 {
 	if (AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_ROAD)) {
+		Warning("AIs are not allowed to build road vehicles in this game (see advanced settings, section 'Competitors', subsection 'Computer players')!");
 		return false;
 	}
 
-	local how_many;
 	local veh_list = AIVehicleList();
 	veh_list.Valuate(AIVehicle.GetVehicleType);
 	veh_list.KeepValue(AIVehicle.VT_ROAD);
-	how_many = veh_list.Count();
+	local count = veh_list.Count();
 	local allowed = AIGameSettings.GetValue("vehicle.max_roadveh");
 
 	if (allowed == 0) {
 		return false;
 	}
-	if (how_many == 0) {
-		return true;
-	}
-	if (((how_many*100)/(allowed)) > 90) {
+	if (allowed==0) {
+		Warning("Max road vehicle count is set to 0 (see advanced settings, section 'vehicles'). ");
 		return false;
 	}
-	if ((allowed - how_many) < 5) {
+	if (count==0) {
+		return true;
+	}
+	if (((count*100)/(allowed))>90) {
+		Warning("Max road vehicle count is too low to consider more road vehicles (see advanced settings, section 'vehicles'). ");
+		return false;
+	}
+	if ((allowed - count)<5) {
+		Warning("Max road vehicle count is too low to consider more road vehicles (see advanced settings, section 'vehicles'). ");
 		return false;
 	}
 	return true;

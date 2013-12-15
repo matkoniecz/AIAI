@@ -1122,8 +1122,14 @@ function RailBuilder::GetMaxDistance()
 
 function RailBuilder::IsAllowed()
 {
-	if (0 == AIAI.GetSetting("use_freight_trains")) return false; //TODO - should be in separate class
-	if (AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_RAIL)) return false;
+	if (0 == AIAI.GetSetting("use_freight_trains")) {
+		Warning("Freight trains are disabled in AIAI settings.")
+		return false;
+	}
+	if (AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_RAIL)) {
+		Warning("AIs are not allowed to build trains in this game (see advanced settings, section 'Competitors', subsection 'Computer players')!");
+		return false;
+	}
 
 	local count;
 	local veh_list = AIVehicleList();
@@ -1131,10 +1137,21 @@ function RailBuilder::IsAllowed()
 	veh_list.KeepValue(AIVehicle.VT_RAIL);
 	count = veh_list.Count();
 	local allowed = AIGameSettings.GetValue("vehicle.max_trains");
-	if (allowed==0) return false;
-	if (count==0) return true;
-	if (((count*100)/(allowed))>90) return false;
-	if ((allowed - count)<5) return false;
+	if (allowed==0) {
+		Warning("Max train count is set to 0 (see advanced settings, section 'vehicles'). ");
+		return false;
+	}
+	if (count==0) {
+		return true;
+	}
+	if (((count*100)/(allowed))>90) {
+		Warning("Max train count is too low to consider more trains (see advanced settings, section 'vehicles'). ");
+		return false;
+	}
+	if ((allowed - count)<5) {
+		Warning("Max train count is too low to consider more trains (see advanced settings, section 'vehicles'). ");
+		return false;
+	}
 	return true;
 }
 

@@ -5,6 +5,7 @@ class TruckRoadBuilder extends RoadBuilder
 function TruckRoadBuilder::IsAllowed()
 {
 	if (0 == AIAI.GetSetting("use_trucks")) {
+		Warning("Trucks are disabled in AIAI settings.")
 		return false;
 	}
 	return RoadBuilder.IsAllowed();
