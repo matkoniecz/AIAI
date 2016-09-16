@@ -328,30 +328,20 @@ function RoadBuilder::ConstructionOfRVRoute()
 		return false;
 	}
 
-	Info("   working on circle around loading bay");
-	this.BuildLoopAroundStation(trasa.first_station.road_loop[0], trasa.first_station.road_loop[1], trasa.first_station.location);
-	if (AIRoad.BuildRoadDepot(trasa.first_station.road_loop[0], trasa.first_station.location)) { //to make more likely that RV have place to reverse
-		trasa.depot_tile = trasa.first_station.road_loop[0];
-	}
-	if (AIRoad.BuildRoadDepot(trasa.first_station.road_loop[1], trasa.first_station.location)) { //to make more likely that RV have place to reverse
-		trasa.depot_tile = trasa.first_station.road_loop[1];
-	}
+	trasa.depot_tile = MakePlaceForReversingVehicles(trasa.first_station, "loading bay");
 
 	if (trasa.depot_tile == null) {
 		trasa.depot_tile = Road.BuildDepotNextToRoad(trasa.first_station.location, 0, 200);
 	}
 	if (trasa.depot_tile == null) {
+		HandleFailedConstructionOfRoute(trasa);
 		Info("   Depot placement error");
 		return false;
 	}
-
-	AIAI_instance.SetStationName(trasa.first_station.location, "["+trasa.depot_tile+"]");
-	AIAI_instance.SetStationName(trasa.second_station.location, "["+trasa.depot_tile+"]");
-	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.first_station.location), "[]") == trasa.depot_tile);
-	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.second_station.location), "[]") == trasa.depot_tile);
+	
+	NameStations(trasa);
 
 	Info("   Route constructed!");
-
 
 	local how_many_new_vehicles = this.BuildVehicles();
 
@@ -364,18 +354,40 @@ function RoadBuilder::ConstructionOfRVRoute()
 
 	Info("   Vehicles construction, " + how_many_new_vehicles + " vehicles constructed.");
 
-	Info("   working on circle around unloading bay");
-	this.BuildLoopAroundStation(trasa.second_station.road_loop[0], trasa.second_station.road_loop[1], trasa.second_station.location);
-	AIRoad.BuildRoadDepot (trasa.second_station.road_loop[0], trasa.second_station.location); //to make more likely that RV have place to reverse
-	AIRoad.BuildRoadDepot (trasa.second_station.road_loop[1], trasa.second_station.location); //to make more likely that RV have place to reverse
-
+	MakePlaceForReversingVehicles(trasa.second_station, "unloading bay");
 	return true;
+}
+
+function RoadBuilder::NameStations(route) {
+	AIAI_instance.SetStationName(route.first_station.location, "["+route.depot_tile+"]");
+	AIAI_instance.SetStationName(route.second_station.location, "["+route.depot_tile+"]");
+	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(route.first_station.location), "[]") == route.depot_tile);
+	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(route.second_station.location), "[]") == route.depot_tile);
 }
 
 function RoadBuilder::HandleFailedConstructionOfRoute(route) {
 	AIRoad.RemoveRoadStation(route.first_station.location);
 	AIRoad.RemoveRoadStation(route.second_station.location);
 	//TODO: remove also road in case of infrastructure costs/small maps - but remove only just newly constructed to avoid destruction of an old route
+}
+
+// additional road/depot has minor costs and makes RV more efficient as turning place is close.
+// without that in some situations vehicles must travel far away before turning is possible - in extreme cases across the maps
+// in case of road failing to be constructed station is capped by depot
+// 
+// this function assumes that road is already constructed and depots may be placed without causing deadlock
+//
+// @returns location of constructed depot, null if no depot was placed
+function RoadBuilder::MakePlaceForReversingVehicles(station, name){
+	Info("   working on circle around " + name);
+	this.BuildLoopAroundStation(station.road_loop[0], station.road_loop[1], station.location);
+	if(AIRoad.BuildRoadDepot (station.road_loop[0], station.location)) { 
+		return station.road_loop[0]
+	}
+	if(AIRoad.BuildRoadDepot (station.road_loop[1], station.location)) { //to make more likely that RV have place to reverse
+		return station.road_loop[1]
+	}
+	return null;
 }
 
 function RoadBuilder::GetReplace(existing_vehicle, cargo)
