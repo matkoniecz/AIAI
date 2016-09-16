@@ -675,8 +675,8 @@ function RoadBuilder::SetOrdersForVehicle(vehicle_id)
 
 function RoadBuilder::BuildVehicles()
 {
-	local constructed=0;
-	if (trasa.engine==null) {
+	local constructed = 0;
+	if (trasa.engine == null) {
 		return null;
 	}
 	local how_many = trasa.engine_count;
