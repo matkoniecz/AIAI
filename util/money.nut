@@ -72,3 +72,11 @@ function ProvideMoney(amount = null)
 		}
 	}
 }
+
+function PortionOfAvailableLoanInPercents(){
+	local loan = AICompany.GetLoanAmount();
+	local max_loan = AICompany.GetMaxLoanAmount();
+	local loan_available = max_loan - loan;
+	local portion_of_available_loan_in_percents = loan_available / (max_loan / 100);
+	return portion_of_available_loan_in_percents;
+}
