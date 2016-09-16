@@ -3,7 +3,7 @@ class AIAI extends AIInfo {
   function GetName()        { return "AIAI"; }
   function GetVersion()     { return 96; }
   function GetDescription() { return "Automatic Idiot AI Version kappa (" + GetVersion() + "). AIAI reuses code from following AIs: WrightAI, CluelessPlus, Chopper, SimpleAI, Rondje, AdmiralAI, ChooChoo and Denver & Rio Grande."; }
-  function GetAPIVersion()  { return "1.3"; }
+  function GetAPIVersion()  { return "1.6"; }
   function CreateInstance() { return "AIAI"; }
   function GetShortName()   { return "AIAI"; }
   function MinVersionToLoad() { return 87; } 
