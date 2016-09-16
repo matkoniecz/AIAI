@@ -325,6 +325,7 @@ function RoadBuilder::ConstructionOfRVRoute()
 	if (!this.BuildRoad(path)) {
 		AIRoad.RemoveRoadStation(trasa.first_station.location);
 		AIRoad.RemoveRoadStation(trasa.second_station.location);
+		//TODO: remove also road in case of infrastructure costs/small maps - but remove only just newly constructed to avoid destruction of an old route
 		Info("   But stopped by error");
 		return false;
 	}
