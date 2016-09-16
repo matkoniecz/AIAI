@@ -323,9 +323,7 @@ function RoadBuilder::ConstructionOfRVRoute()
 	}
 
 	if (!this.BuildRoad(path)) {
-		AIRoad.RemoveRoadStation(trasa.first_station.location);
-		AIRoad.RemoveRoadStation(trasa.second_station.location);
-		//TODO: remove also road in case of infrastructure costs/small maps - but remove only just newly constructed to avoid destruction of an old route
+		HandleFailedConstructionOfRoute(trasa);
 		Info("   But stopped by error");
 		return false;
 	}
@@ -359,8 +357,7 @@ function RoadBuilder::ConstructionOfRVRoute()
 
 	if (how_many_new_vehicles==null) {
 		Error("Vehicles construction failed");
-		AIRoad.RemoveRoadStation(trasa.first_station.location);
-		AIRoad.RemoveRoadStation(trasa.second_station.location);
+		HandleFailedConstructionOfRoute(trasa);
 		cost = 0;
 		return false;
 	}
@@ -373,6 +370,12 @@ function RoadBuilder::ConstructionOfRVRoute()
 	AIRoad.BuildRoadDepot (trasa.second_station.road_loop[1], trasa.second_station.location); //to make more likely that RV have place to reverse
 
 	return true;
+}
+
+function RoadBuilder::HandleFailedConstructionOfRoute(route) {
+	AIRoad.RemoveRoadStation(route.first_station.location);
+	AIRoad.RemoveRoadStation(route.second_station.location);
+	//TODO: remove also road in case of infrastructure costs/small maps - but remove only just newly constructed to avoid destruction of an old route
 }
 
 function RoadBuilder::GetReplace(existing_vehicle, cargo)
