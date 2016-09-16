@@ -39,10 +39,10 @@ function Builder::AdjustForScenarios(ID, cargo, base){
 
 function Builder::AdjustForNoCarGoal(ID, cargo, base){
 	if (g_no_car_goal.IsGoalCargo(cargo, true) == false) {
-		Info(AICargo.GetCargoLabel(cargo) + " is not goal cargo");
+		//Info(AICargo.GetCargoLabel(cargo) + " is not a goal cargo");
 		return base;
 	}
-	Info(AICargo.GetCargoLabel(cargo));
+	Info(AICargo.GetCargoLabel(cargo) + " is a goal cargo");
 	local bonus_percent = 10;
 	bonus_percent += PortionOfAvailableLoanInPercents() / 5;
 	if (AICompany.GetLoanAmount() == 0) {
