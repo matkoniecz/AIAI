@@ -16,9 +16,9 @@ function Builder::ValuateProducer(ID, cargo)
 		return -1;
 	}
 	local base = AIIndustry.GetLastMonthProduction(ID, cargo);
-	base *= (100-AIIndustry.GetLastMonthTransportedPercentage (ID, cargo));
-	if (AIIndustry.GetLastMonthTransportedPercentage (ID, cargo)==0) {
-		base*=3;
+	base *= (100-AIIndustry.GetLastMonthTransportedPercentage(ID, cargo));
+	if (AIIndustry.GetLastMonthTransportedPercentage(ID, cargo) == 0) {
+		base *= 3;
 	}
 	base *= AICargo.GetCargoIncome(cargo, 10, 50);
 	if (g_no_car_goal.IsGoalCargo(cargo, true)) {
