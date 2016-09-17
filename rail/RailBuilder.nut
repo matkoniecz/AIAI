@@ -530,6 +530,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 		return this.BuildTrainButNotWithThisVehicle(route, name_of_train, bestWagon, recover_from_failed_engine)
 	}
 	if (AIEngine.GetPrice(bestEngine) + AIEngine.GetPrice(bestWagon) > AICompany.GetBankBalance(AICompany.COMPANY_SELF)) {
+		Warning("Not enough money to buy train.");
 		return null;
 	}
 
