@@ -855,21 +855,7 @@ function RailBuilder::FindBestWagon(cargoId, track_type)//from DenverAndRioGrand
 	return wagons.Begin();
 }
 
-function RailBuilder::FindBestEngine(wagonId, trainsize, cargoId, track_type)//from DenverAndRioGrande	
-{
-	local minHP = 175 * trainsize;
-
-	local speed = AIEngine.GetMaxSpeed(wagonId);
-	if (speed == 0) {
-		speed = INFINITE_SPEED;
-	}
-	local engines = AIEngineList(AIVehicle.VT_RAIL);
-	engines.Valuate(AIEngine.IsWagon);
-	engines.RemoveValue(1);
-	
-	engines.Valuate(AIEngine.IsBuildable);
-	engines.RemoveValue(0);
-
+function RailBuilder::RemoveBlacklistedEnginesFromList(list_of_engines, wagonId, cargoId, track_type){
 	local blacklisted_engines = AIList();
 	//Info("===================================")
 	foreach(i, val in blacklisted_engine_wagon_combination) {
@@ -878,11 +864,23 @@ function RailBuilder::FindBestEngine(wagonId, trainsize, cargoId, track_type)//f
 		}
 		//Info(AIEngine.GetName(val[0]) + " " + AIEngine.GetName(val[1]))
 	}
-	engines.Valuate(this.IsThisThingBanned, cargoId, blacklisted_engines);
+	list_of_engines.Valuate(this.IsThisThingBanned, cargoId, blacklisted_engines);
+	list_of_engines.RemoveValue(1);
+
+	list_of_engines.Valuate(this.IsThisThingBanned, cargoId, blacklisted_vehicles);
+	list_of_engines.RemoveValue(1);
+	return list_of_engines;
+}
+
+function RailBuilder::GetEngineListExceptClearlyBad(wagonId, cargoId, track_type){
+	local engines = AIEngineList(AIVehicle.VT_RAIL);
+	engines.Valuate(AIEngine.IsWagon);
 	engines.RemoveValue(1);
 
-	engines.Valuate(this.IsThisThingBanned, cargoId, blacklisted_vehicles);
-	engines.RemoveValue(1);
+	engines.Valuate(AIEngine.IsBuildable);
+	engines.RemoveValue(0);
+
+	engines = RemoveBlacklistedEnginesFromList(engines, wagonId, cargoId, track_type)
 
 	engines.Valuate(AIEngine.CanPullCargo, cargoId);
 	engines.RemoveValue(0);
@@ -890,9 +888,27 @@ function RailBuilder::FindBestEngine(wagonId, trainsize, cargoId, track_type)//f
 	engines.RemoveValue(0);
 	engines.Valuate(AIEngine.CanRunOnRail, track_type);
 	engines.RemoveValue(0);
-	
-	engines.Valuate(AIEngine.GetPower);
-	
+
+	return engines;
+}
+
+function RailBuilder::EngineCostValuator(engineId){
+	return AIEngine.GetPrice(engineId);
+}
+
+
+function RailBuilder::FindBestEngine(wagonId, trainsize, cargoId, track_type)//from DenverAndRioGrande	
+{
+	local minHP = 175 * trainsize;
+
+	local speed = AIEngine.GetMaxSpeed(wagonId);
+	if (speed == 0) {
+		speed = INFINITE_SPEED;
+	}
+
+	local engines = GetEngineListExceptClearlyBad(wagonId, cargoId, track_type);
+
+	engines.Valuate(AIEngine.GetPower);	
 	engines.Sort(AIList.SORT_BY_VALUE, false);
 	
 	/*	if (engines.GetValue(engines.Begin()) < minHP ) //no engine can pull the wagon at it's top speed.
@@ -916,19 +932,19 @@ function RailBuilder::FindBestEngine(wagonId, trainsize, cargoId, track_type)//f
 		if (cash > AIEngine.GetPrice(engines.Begin()) * 2 || AIVehicleList().Count() > 10) { //if there are 10 trains, just return the best one and let it fail.
 			return engines.Begin();
 		} else {
-			//Info("The company is poor. Picking a slower, cheaper engine.");
-			engines.Valuate(AIEngine.GetPrice);
+			Warning("The company is poor. Picking a slower, cheaper engine.");
+			engines.Valuate(EngineCostValuator);
 			engines.Sort(AIList.SORT_BY_VALUE, true);
-			//Info("The Cheapest engine to pull '" + AIEngine.GetName(wagonId) + "'  is '" + AIEngine.GetName(engines.Begin()) +"'" );
+			Info("The Cheapest engine to pull '" + AIEngine.GetName(wagonId) + "'  is '" + AIEngine.GetName(engines.Begin()) +"'" );
 			return engines.Begin();
 		}
 	}
 
 	engines.RemoveBelowValue(speed);
-	engines.Valuate(AIEngine.GetPrice);
+	engines.Valuate(EngineCostValuator);
 	engines.Sort(AIList.SORT_BY_VALUE, true);
 	
-	//Info("The cheapest engine to pull '" + AIEngine.GetName(wagonId) + "'' at full speed ("+ speed +") is '" + AIEngine.GetName(engines.Begin()) +"'" );
+	Info("The cheapest engine to pull '" + AIEngine.GetName(wagonId) + "'' at full speed ("+ speed +") is '" + AIEngine.GetName(engines.Begin()) +"'" );
 	return engines.Begin();
 }
 
