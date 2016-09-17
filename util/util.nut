@@ -164,7 +164,7 @@ function GetRatherBigRandomTown()
 	return town_list.Begin();
 }
 
-function IsConnectedDistrict(town_tile, cargo_id)
+function IsCityTileUsed(town_tile, cargo_id)
 {
 	//TODO - it is a hack rather than function
 	local list = AIStationList(AIStation.STATION_AIRPORT);

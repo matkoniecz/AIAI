@@ -702,7 +702,7 @@ function RoadBuilder::FindTownCargoSupplyStation(town, start, cargo)
 		list.RemoveBelowValue(20-desperation/20);
 	}
 
-	list.Valuate(IsConnectedDistrict, cargo);
+	list.Valuate(IsCityTileUsed, cargo);
 	list.KeepValue(0);
 
 	list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
