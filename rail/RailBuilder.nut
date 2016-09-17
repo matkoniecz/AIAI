@@ -893,7 +893,8 @@ function RailBuilder::GetEngineListExceptClearlyBad(wagonId, cargoId, track_type
 }
 
 function RailBuilder::EngineCostValuator(engineId){
-	return AIEngine.GetPrice(engineId);
+	//AIEngine.GetRunningCost gives the running cost of a vehicle per year. 
+	return AIEngine.GetPrice(engineId) + AIEngine.GetRunningCost(engineId);
 }
 
 
