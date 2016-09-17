@@ -12,7 +12,7 @@ function Warning(string)
 
 function Error(string)
 {
-	AILog.Error( GetReadableDate() + " " + string);
+	AILog.Error(GetReadableDate() + " " + string);
 }
 
 function GetReadableDate()
