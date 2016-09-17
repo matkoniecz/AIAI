@@ -163,7 +163,7 @@ function AirBuilder::FindSuitableAirportSpotInTown(airport_type, center_tile=nul
 		town_list.KeepBelowValue(max_distance);    
 
 		town_list.Valuate(this.DistanceWithRandValuator, center_tile);
-		//TODO - wed³ug dystansu optimum to 500
+		//TODO - what is the optimal distance? Old test indicates 500
 		town_list.KeepBottom(50);
 	}
 	
