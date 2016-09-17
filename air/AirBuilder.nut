@@ -635,10 +635,8 @@ for (local airport = airport_list.Begin(); airport_list.HasNext(); airport = air
 	     if (AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(plane), AIStation.GetLocation(airport))<30)
 		    if (AIVehicle.GetCapacity(plane, Helper.GetPAXCargo())>0) {
 			local percent = ( 100 * AIVehicle.GetCargoLoad(plane, Helper.GetPAXCargo()))/(AIVehicle.GetCapacity(plane, Helper.GetPAXCargo()));
-		    //Info(percent + " %");
 			if (percent < minimum)
 			   {
-			   //Info(percent + " %%%")
 			   minimum=percent;
 			   plane_left_on_airport=plane;
 			   }
@@ -658,11 +656,9 @@ for (local plane = list.Begin(); list.HasNext(); plane = list.Next())
 			if (AIOrder.SkipToOrder(plane, (i+1)%AIOrder.GetOrderCount(plane)))
 				{
 				count++;
-				//Error("OK: "+AIError.GetLastErrorString() +" dump: "+AIOrder.GetOrderCount(plane) +" "+ AIOrder.ORDER_CURRENT);
 				break;
 				}
 			else { 
-				//Error("fail: "+AIError.GetLastErrorString() +" dump: "+AIOrder.GetOrderCount(plane) +" "+ AIOrder.ORDER_CURRENT);
 				break;
 				} 
 			}
