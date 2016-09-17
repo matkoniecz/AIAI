@@ -166,6 +166,32 @@ function GetRatherBigRandomTown()
 
 function IsCityTileUsed(town_tile, cargo_id)
 {
+	if(IsCityTileUsedByAirport(town_tile, cargo_id)){
+		return true;
+	}
+	return IsCityTileUsedByRoadVehicle(town_tile, cargo_id);
+}
+
+function IsCityTileUsedByRoadVehicle(town_tile, cargo_id) {
+	local station_type = AIRoad.GetRoadVehicleTypeForCargo(cargo_id);
+	local station_range = AIStation.GetCoverageRadius(station_type);
+
+	local tiles_to_check = AITileList();
+	SafeAddRectangle(tiles_to_check, town_tile, station_range);
+
+	for(local tile = tiles_to_check.Begin(); tiles_to_check.HasNext(); tile = tiles_to_check.Next()) {
+		local station_id = AIStation.GetStationID(tile);
+		if(!AIStation.IsValidStation(station_id)){
+			continue;
+		}
+		if(IsCargoLoadedOnThisStation(station_id, cargo_id)){
+			return true;
+		}
+	}
+	return false;
+}
+
+function IsCityTileUsedByAirport(town_tile, cargo_id) {
 	//TODO - it is a hack rather than function
 	local list = AIStationList(AIStation.STATION_AIRPORT);
 	if (list.Count()!=0) {
@@ -175,29 +201,39 @@ function IsCityTileUsed(town_tile, cargo_id)
 		list.KeepValue(1);
 		if (!list.IsEmpty()) return true;
 	}
+	return false;
+}
 
-	list = AIStationList(AIStation.STATION_BUS_STOP);
-	if (list.Count()!=0) {
-		list.Valuate(AIStation.GetDistanceManhattanToTile, town_tile);
-		list.KeepBelowValue(8);
-		list.Valuate(IsCargoLoadedOnThisStation, cargo_id);
-		list.KeepValue(1);
-		if (!list.IsEmpty()) return true;
+function IsCargoLoadedOnThisStation(station_id, cargo_id) {
+	local vehicle = ExampleOfVehicleFromStation(station_id);
+
+	if (AIVehicle.GetCapacity(vehicle, cargo_id) == 0) {
+		return false;
+	}
+
+	for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) {
+		if (!AIOrder.IsGotoStationOrder(vehicle, i)) {
+			continue;
+		}
+		if ((AIOrder.GetOrderFlags(vehicle, i) & AIOrder.OF_NO_LOAD) == AIOrder.OF_NO_LOAD) {
+			continue;
+		}
+		local tile_destination = AIOrder.GetOrderDestination(vehicle, i);
+		local target_station_id = AIStation.GetStationID(tile_destination);
+		if(target_station_id == station_id) {
+			return true;
+		}
 	}
 	return false;
 }
 
-function IsCargoLoadedOnThisStation(station_id, cargo_id)
-{
+function ExampleOfVehicleFromStation(station_id){
+	local vehicle = null;
 	local vehicle_list=AIVehicleList_Station(station_id);
 	if (vehicle_list.Count() != 0) {
-		if (GetLoadStationId(vehicle_list.Begin()) == station_id) {
-			if (AIVehicle.GetCapacity(vehicle_list.Begin(), cargo_id) != 0) {
-				return true;
-			}
-		}
+		vehicle = vehicle_list.Begin();
 	}
-	return false;
+	return vehicle;
 }
 
 function VehicleCounter(station)
