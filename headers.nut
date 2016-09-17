@@ -12,6 +12,7 @@ import("pathfinder.road", "RoadPathFinder", 4);      //#########################
 import("util.superlib", "SuperLib", 39);      //################################################## <- external
 import("Library.SCPLib", "SCPLib", 45);      //################################################## <- external
 import("Library.SCPClient_NoCarGoal", "SCPClient_NoCarGoal", 1);      //################################################## <- external
+import("util.MinchinWeb", "MinchinWeb", 9);      //################################################## <- external
 
 require("library/Rail.nut");
 require("library/Helper.nut");

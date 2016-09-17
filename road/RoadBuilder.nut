@@ -352,8 +352,111 @@ function RoadBuilder::ConstructionOfRVRoute()
 
 	Info("   Vehicles construction, " + how_many_new_vehicles + " vehicles constructed.");
 
+	Info("MakeAdditionalStations at unload")
+	MakeAdditionalStations(trasa.second_station.location);
+
+	Info("MakeAdditionalStations at load")
+	MakeAdditionalStations(trasa.first_station.location);
+
 	MakePlaceForReversingVehicles(trasa.second_station, "unloading bay");
 	return true;
+}
+
+function RoadBuilder::MakeAdditionalStations(station_location) {
+	local next_to_road_count = 0;
+	local unlocking_count = 100;
+	Info(" AdditionalStationsIncreasingCapture")
+	AdditionalStationsIncreasingCapture(station_location, unlocking_count);
+	Info(" AdditionalAccessibleStations")
+	AdditionalAccessibleStations(station_location, next_to_road_count);
+}
+
+function RandomValuator(dummy){
+	return AIBase.RandRange(1000);
+}
+function RoadBuilder::AdditionalStationsIncreasingCapture(station_location, unlocking_count) {
+	local max_spread = AIGameSettings.GetValue("station.station_spread");
+	local station_range = 3; //TODO - use here and in other places rather AIStation::GetCoverageRadius  (   AIStation::StationType    station_type   )
+	//TODO - be evil and use rail stations? Airports?
+
+	local tiles_for_serving = TilesForServingInRange(station_location, station_range, max_spread);
+
+	//TODO - smarter checking, rather than walk over list it may be possible 
+	//to get minimum number of stations needed for coverage
+
+	tiles_for_serving.Valuate(RandomValuator);
+	tiles_for_serving.Sort(AIList.SORT_BY_VALUE, true);
+
+	while(unlocking_count > 0) {
+		if(tiles_for_serving.Count() == 0){
+			break;
+		}
+		local tile = tiles_for_serving.Begin();
+		local potential_stop_locations = AITileList();
+		SafeAddRectangle(potential_stop_locations, tile, station_range);
+		local type = AIRoad.GetRoadVehicleTypeForCargo(trasa.cargo);
+		local station_id = AIStation.GetStationID(station_location);
+		for(local new_stop = potential_stop_locations.Begin(); potential_stop_locations.HasNext(); new_stop = potential_stop_locations.Next()) {
+			if(TryBothRVStationDirection(new_stop, type, station_id)){
+				SafeRemoveRectangle(tiles_for_serving, new_stop, station_range); //now served
+				unlocking_count -= 1;
+				break;
+			}
+		}
+		tiles_for_serving.RemoveTile(tile); //impossible to serve this one
+	}
+}
+
+function RoadBuilder::AdditionalAccessibleStations(station_location, next_to_road_count) {
+	local max_spread = AIGameSettings.GetValue("station.station_spread");
+	local station_id = AIStation.GetStationID(station_location);
+	local tile = null;
+	local walker = MinchinWeb.SpiralWalker();
+	walker.Start(station_location)
+
+	do {
+		tile = walker.GetTile();
+		walker.Walk();
+		if(next_to_road_count <= 0) {
+			break;
+		}
+		if(AIRoad.IsRoadTile(tile)){
+			if(TryBothRVStationDirection(tile, type, station_id)) {
+				next_to_road_count -= 1; //TODO - this may make some stations from previous round pointless
+			}
+		}
+	} while(AIMap.DistanceManhattan(station_location, tile) < max_spread)
+}
+
+function RoadBuilder::TilesForServingInRange(station_location, station_range, max_spread){
+	local tiles_for_serving = AITileList();
+
+	local new_tiles_in_range = AITileList();
+	SafeAddRectangle(new_tiles_in_range, station_location, station_range + max_spread);
+	SafeRemoveRectangle(new_tiles_in_range, station_location, station_range); //already served
+
+	while(new_tiles_in_range.Count() > 0) {
+		local tile = new_tiles_in_range.Begin();
+		new_tiles_in_range.RemoveTile(tile);
+		if(AITile.GetCargoAcceptance(tile, trasa.cargo, 1, 1, 0) > 0) {
+			tiles_for_serving.AddTile(tile);
+		} else if(AITile.GetCargoProduction(tile, trasa.cargo, 1, 1, 0) > 0) {
+			tiles_for_serving.AddTile(tile);
+		}
+	}
+	return tiles_for_serving;
+}
+
+function RoadBuilder::TryBothRVStationDirection(tile, type, station_id){
+	local next_a = tile+AIMap.GetTileIndex(0, 1);
+	local next_b = tile+AIMap.GetTileIndex(1, 0);
+	if(AIRoad.BuildDriveThroughRoadStation(tile, next_a, type, station_id)){
+		return true;
+	}
+	if(AIRoad.BuildDriveThroughRoadStation(tile, next_b, type, station_id)){
+		return true;
+	}
+	return false;
 }
 
 function RoadBuilder::NameStations(route) {
