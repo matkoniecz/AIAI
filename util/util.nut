@@ -164,6 +164,10 @@ function GetRatherBigRandomTown()
 	return town_list.Begin();
 }
 
+function RandomValuator(dummy){
+	return AIBase.RandRange(1000);
+}
+
 function IsCityTileUsed(town_tile, cargo_id)
 {
 	if(IsCityTileUsedByAirport(town_tile, cargo_id)){

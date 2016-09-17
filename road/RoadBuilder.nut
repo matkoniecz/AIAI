@@ -371,9 +371,6 @@ function RoadBuilder::MakeAdditionalStations(station_location) {
 	AdditionalAccessibleStations(station_location, next_to_road_count);
 }
 
-function RandomValuator(dummy){
-	return AIBase.RandRange(1000);
-}
 function RoadBuilder::AdditionalStationsIncreasingCapture(station_location, unlocking_count) {
 	local max_spread = AIGameSettings.GetValue("station.station_spread");
 	local station_range = 3; //TODO - use here and in other places rather AIStation::GetCoverageRadius  (   AIStation::StationType    station_type   )
@@ -927,59 +924,110 @@ function RoadBuilder::BuildLoopAroundStation(tile_start, tile_end, tile_ignored)
 	return this.BuildRoad(path);
 }
 
+function RoadBuilder::GetRandomVehicle(station_id){
+	local vehicle_list = AIVehicleList_Station(station_id);
+	vehicle_list.Valuate(RandomValuator);
+	vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
+	return vehicle_list.Begin();
+}
+
+function RoadBuilder::GetLinkedStation(station_id) {
+	local original = GetRandomVehicle(station_id);
+	local load_station_id = GetLoadStationId(original);
+	local another_station_id = GetUnloadStationId(original);
+	if (load_station_id == null || another_station_id == null) {
+		HandleInvalidOrders(station_id);
+		return 0;
+	}
+	if (another_station_id == station_id) {
+		another_station_id = load_station_id;
+	}
+	return another_station_id;
+}
+
 function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
 {
-	if (AgeOfTheYoungestVehicle(station_id) <= 20) {
-		if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.BuildSign(AIStation.GetLocation(station_id), "young RV - " + GetReadableDate());
-		}
-		return 0; //to protect from bursts of new vehicles
-	}
-	if (!IsItNeededToImproveThatStation(station_id, cargo)) {
-		if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			if (AIStation.HasCargoRating(station_id, cargo)) { //TODO once it will hit stables remove note about debug_signs_about_adding_road_vehicles in info.nut
-				Helper.BuildSign(AIStation.GetLocation(station_id), "OK status - " + GetReadableDate());
-			}
-		}
-		return 0;
-	}
-	local vehicle_list=AIVehicleList_Station(station_id);
-	if (vehicle_list.Count()==0) {
-		//TODO - revive empty station (?)
-		if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.BuildSign(AIStation.GetLocation(station_id), "dead - " + GetReadableDate());
-		}
-		return 0;
-	}
-	
-	vehicle_list.Valuate(AIBase.RandItem);
-	vehicle_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
-	local original = vehicle_list.Begin();
-	
-	if (AIVehicle.GetCapacity(original, cargo) == 0) {
-		Error(AIVehicle.GetName(original) + " have no capacity for " + AICargo.GetCargoLabel(cargo));
-		if (AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
-			abort("Wild cargo appeared. In case of RV there is no valid explanation.");
-		}
-		return 0;
-	}
-	if (AIVehicle.GetProfitLastYear(original) < 0) {
-		if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.BuildSign(AIStation.GetLocation(station_id), "unprofitable - " + GetReadableDate());
-		}
+	if (AIVehicleList_Station(station_id).Count()==0) {
+		HandleDeadStation(station_id, cargo);
 		return 0;
 	}
 
-	local another_station_id = GetUnloadStationId(original);
-	local load_station_id = GetLoadStationId(original);
-	if (load_station_id == null || another_station_id == null) {
-		if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.BuildSign(AIStation.GetLocation(station_id), "invalid orders - " + GetReadableDate());
-		}
+	local another_station_id = GetLinkedStation(station_id);
+	//station_id is currently processed station, another_station_id is the other side of the link
+
+	local original = GetRandomVehicle(station_id);
+	if (StationModificationStopped(station_id, another_station_id, cargo, original)) {
 		return 0;
 	}
-	if (station_id == another_station_id ) {
-		another_station_id = load_station_id;
+	
+	local processed = this.IsProcessedCargoVehicle(original);
+	if (processed == null) {
+		AddingStoppedInvalidStatus(station_id)
+		return 0;
+	}
+	if (processed) {
+		if (!IsItNeededToImproveThatNoRawStation(station_id, cargo)) {
+			AddingStoppedHelpNotNeededForProcessingStation(station_id, cargo);
+			return 0;
+		}
+	}
+	if (GetSecondLoadStationId(original) != null) { //two way transport
+	}
+	local returned = HandledSpeciallyAsTwoWayRoute(station_id, another_station_id, cargo, original, processed);
+	if (returned != null) {
+		return returned;
+	}
+	if (this.copyVehicle(original, cargo )) {
+		return 1;
+	}
+	return 0;
+}
+
+//return null to accept adding vehicle, return 0 otherwise
+function RoadBuilder::HandledSpeciallyAsTwoWayRoute(station_id, another_station_id, cargo, original, processed) {
+	local list = AIVehicleList_Station(station_id);
+	for (local rv = list.Begin(); list.HasNext(); rv = list.Next()) {
+		if(AIOrder.GetOrderDestination(rv, AIOrder.ORDER_CURRENT) == another_station_id){
+			if(AIVehicle.GetCargoLoad(rv, cargo) < AIVehicle.GetCargoCapacity(rv, cargo)) {
+				//if vehicle is traveling from that station with less than full fill, then adding more is a bad idea
+				//at least on two-way routes
+				return 0;
+			}
+		}
+	}
+
+	if (processed) {
+		if(IsItNeededToImproveThatNoRawStation(another_station_id, cargo)) {
+			//both ends need an improvement, lets launch new vehicles
+			return null;
+		}
+	} else if (IsItNeededToImproveThatStation(another_station_id, cargo)) {
+		//both ends need an improvement, lets launch new vehicles
+		return null;
+	}
+
+	//another_station_id may be on full load, resulting in stale cargo on the current one
+	if (RoadBuilder.DynamicFullLoadManagement(station_id, another_station_id, original)) { //reordering attempted to fix problem
+		return 0; //cloning is not necessary
+	}
+	return null;
+}
+
+function RoadBuilder::StationModificationStopped(station_id, another_station_id, cargo, example_vehicle){
+	if (AIVehicle.GetProfitLastYear(example_vehicle) < 0) {
+		AddingStoppedUnprofitable(station_id, cargo);
+		return true;
+	}
+	if (AgeOfTheYoungestVehicle(station_id) <= 20) {
+		AddingStoppedNewVehiclesPresent(station_id);
+		return true;
+	}
+	if (!IsItNeededToImproveThatStation(station_id, cargo)) {
+		AddingStoppedHelpNotNeeded(station_id, cargo);
+		return true;
+	}
+	if (AIVehicle.GetCapacity(example_vehicle, cargo) == 0) {
+		return AddingStoppedUnexpectedCargo(station_id, cargo);
 	}
 
 	local veh_list = NotMovingVehiclesFromThisStation(station_id);
@@ -988,48 +1036,80 @@ function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
 	veh_list.Valuate(IsVehicleNearStation, station_id);
 	veh_list.RemoveValue(1);
 	if (veh_list.Count() != 0) {
-		if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.BuildSign(AIStation.GetLocation(station_id), "not moving - " + GetReadableDate());
-		}
-		return 0;
+		AddingStoppedTrafficJam(station_id, cargo);
+		return true;
 	}
+
 	if (!AICargoList_StationAccepting(another_station_id).HasItem(cargo)) {
-		if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.BuildSign(AIStation.GetLocation(another_station_id), AICargo.GetLabel(cargo) + " refused - " + GetReadableDate());
-		}
-		return 0;
+		AddingStoppedRouteDestroyed(station_id, cargo);
+		return true;
 	}
-	local processed = this.IsProcessedCargoVehicle(original);
-	if (processed == null) {
-		if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-			Helper.BuildSign(AIStation.GetLocation(station_id), "invalid processed status - " + GetReadableDate());
-		}
-		return 0;
+
+	return false;
+}
+
+function RoadBuilder::HandleInvalidOrders(station_id){
+	if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+		Helper.BuildSign(AIStation.GetLocation(station_id), "invalid orders - " + GetReadableDate());
 	}
-	if (processed) {
-		if (!IsItNeededToImproveThatNoRawStation(station_id, cargo)) {
-			if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
-				Helper.BuildSign(AIStation.GetLocation(station_id), "OK for processed - " + GetReadableDate());
-			}
-			return 0;
+}
+
+function RoadBuilder::HandleDeadStation(station_id, cargo){
+	//TODO - revive empty station (?)
+	if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+		Helper.BuildSign(AIStation.GetLocation(station_id), "dead - " + GetReadableDate());
+	}
+}
+
+function RoadBuilder::AddingStoppedInvalidStatus(station_id){
+	if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+		Helper.BuildSign(AIStation.GetLocation(station_id), "invalid processed status - " + GetReadableDate());
+	}
+}
+
+function RoadBuilder::AddingStoppedNewVehiclesPresent(station_id){
+	//to protect from bursts of new vehicles
+	if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+		Helper.BuildSign(AIStation.GetLocation(station_id), "young RV - " + GetReadableDate());
+	}
+}
+
+function RoadBuilder::AddingStoppedHelpNotNeeded(station_id, cargo){
+	if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+		if (AIStation.HasCargoRating(station_id, cargo)) { //TODO once it will hit stables remove note about debug_signs_about_adding_road_vehicles in info.nut
+			Helper.BuildSign(AIStation.GetLocation(station_id), "OK status - " + GetReadableDate());
 		}
 	}
-	if (GetSecondLoadStationId(original) != null) { //two way transport
-		if (!IsItNeededToImproveThatStation(another_station_id, cargo)) { //another_station_id may be on full load, resulting in stale cargo on the current one
-			if (processed) {
-				if (!IsItNeededToImproveThatNoRawStation(another_station_id, cargo)) {
-					return 0;
-				}
-			}
-			if (RoadBuilder.DynamicFullLoadManagement(station_id, another_station_id, original)) { //reordering attempted to fix problem
-				return 0; //cloning is not necessary
-			}
-		}
+}
+
+function RoadBuilder::AddingStoppedTrafficJam(station_id, cargo){
+	if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+		Helper.BuildSign(AIStation.GetLocation(station_id), "not moving - " + GetReadableDate());
 	}
-	if (this.copyVehicle(original, cargo )) {
-		return 1;
-	} else {
-		return 0;
+}
+
+function RoadBuilder::AddingStoppedUnprofitable(station_id, cargo){
+	if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+		Helper.BuildSign(AIStation.GetLocation(station_id), "unprofitable - " + GetReadableDate());
+	}
+}
+
+function RoadBuilder::AddingStoppedRouteDestroyed(station_id, cargo){
+	if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+		Helper.BuildSign(AIStation.GetLocation(another_station_id), AICargo.GetLabel(cargo) + " refused - " + GetReadableDate());
+	}
+}
+
+function RoadBuilder::AddingStoppedHelpNotNeededForProcessingStation(station_id, cargo){
+	if (AIAI.GetSetting("debug_signs_about_adding_road_vehicles")) {
+		Helper.BuildSign(AIStation.GetLocation(station_id), "OK for processed - " + GetReadableDate());
+	}
+}
+
+function RoadBuilder::AddingStoppedUnexpectedCargo(station_id, cargo){
+	Error(AIVehicle.GetName(original) + " have no capacity for " + AICargo.GetCargoLabel(cargo));
+	if (AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
+		abort("Wild cargo appeared. In case of RV there is no valid explanation.");
 	}
 }
 
