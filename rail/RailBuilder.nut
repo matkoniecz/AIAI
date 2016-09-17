@@ -590,7 +590,8 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 		abort("it was not supposed to happen - wagonless train");
 	}
 
-	//multiplier: for weak locos it may be possible to merge multiple trains ito one (2*loco + 10*wagon, instead of loco+5 wagons)
+	//multiplier: for weak locos it may be necessary to merge multiple trains ito one (2*loco + 10*wagon, instead of loco+5 wagons)
+	//without that travelling uphill would be ridiculously slow
 	//multiplier = how many trains are merged into one
 	local multiplier = min(GetAvailableMoney()/costs.GetCosts(), route.station_size*16/AIVehicle.GetLength(engineId))
 	multiplier--; //one part of train is already constructed
