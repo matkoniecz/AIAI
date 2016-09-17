@@ -335,6 +335,7 @@ function RoadBuilder::ConstructionOfRVRoute()
 		Info("   Depot placement error");
 		return false;
 	}
+	assert(AIRoad.IsRoadDepotTile(trasa.depot_tile));
 	
 	NameStations(trasa);
 
