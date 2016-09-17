@@ -246,14 +246,11 @@ function RoadBuilder::TownCargoStationAllocator(project)
 function RoadBuilder::UniversalStationAllocator(project)
 {
 	if ((project.first_station.location==null) || (project.second_station.location==null)) {
-		if ((project.first_station.location==null) && (project.second_station.location==null)) {
+		if (project.first_station.location == null) {
 			project.forbidden_industries.AddItem(project.start, 0);
 		}
-		if ((project.first_station.location==null) && (project.second_station.location!=null)) {
-			project.forbidden_industries.AddItem(project.start, 0);
-		}
-		if ((project.first_station.location!=null) && (project.second_station.location==null)) {
-			
+		if (project.second_station.location==null) {
+			//TODO - why no receiving industry is blacklisted?
 		}
 		return project;
 	}
