@@ -8,7 +8,7 @@ class AIAI extends AIInfo {
   function GetShortName()   { return "AIAI"; }
   function MinVersionToLoad() { return 87; } 
   function GetDate()        { return "2012-10-1"; }
-  function GetURL() {return "https://github.com/Bulwersator/AIAI/issues (preferred), other possibilities include http://tinyurl.com/ottdaiai (redirects to http://www.tt-forums.net/viewtopic.php?f=65&t=47298) and bulwersator@gmail.com. Thanks! [kappa (" + GetVersion() +")]";}
+  function GetURL() {return "https://github.com/matkoniecz/AIAI/issues (preferred), other possibilities include http://tinyurl.com/ottdaiai (redirects to http://www.tt-forums.net/viewtopic.php?f=65&t=47298) and matkoniecz@gmail.com. Thanks! [kappa (" + GetVersion() +")]";}
 
     function GetParameters() {
 	////////////////////////////////////////////////////////////////////
@@ -211,7 +211,7 @@ class AIAI extends AIInfo {
 	});
 	AddSetting( {
 		name = "hide_contact_information",
-		description = "hide contact information (http://tinyurl.com/ottdaiai or bulwersator@gmail.com)",
+		description = "hide contact information (http://tinyurl.com/ottdaiai or matkoniecz@gmail.com)",
 		easy_value = 0,
 		medium_value = 0,
 		hard_value = 0,

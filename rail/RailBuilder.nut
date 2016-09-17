@@ -620,11 +620,11 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 	}
 	Warning("StartStopVehicle failed! Evil newgrf?");
 	if (!AIVehicle.IsValidVehicle(engineId)) {
-		Error(depotTile, "Please, post savegame on ttforums - http://tinyurl.com/ottdaiai (or send mail on bulwersator@gmail.com)");
+		Error(depotTile, "Please, post savegame on ttforums - http://tinyurl.com/ottdaiai (or send mail on matkoniecz@gmail.com)");
 		abort("Sth happened with train (invalid id)!");
 	}
 	if (error==AIVehicle.ERR_VEHICLE_NO_POWER) {
-		Error(depotTile, "Please, post savegame on ttforums - http://tinyurl.com/ottdaiai (or send mail on bulwersator@gmail.com)");
+		Error(depotTile, "Please, post savegame on ttforums - http://tinyurl.com/ottdaiai (or send mail on matkoniecz@gmail.com)");
 		abort("Sth happened with train (no power)!");
 	}
 	Info("Brake van?")
