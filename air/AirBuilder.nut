@@ -365,7 +365,7 @@ if (!AIVehicle.RefitVehicle(vehicle, cargo))
 return vehicle;
 }
 
-function AirBuilder::HowManyAirplanes(distance, speed, production, engine) {
+function AirBuilder::HowManyInitialAirplanes(distance, speed, production, engine) {
 local count = (3*distance)/(2*speed);
 Info(count + " aircrafts needed; based on distance");
 

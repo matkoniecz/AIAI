@@ -85,7 +85,7 @@ local airport_rad = AIAirport.GetAirportCoverageRadius(airport_type);
 	local production_at_first_airport = AITile.GetCargoAcceptance(tile_1, Helper.GetPAXCargo(), airport_x, airport_y, airport_rad);
 	local production_at_second_airport = AITile.GetCargoAcceptance(tile_2, Helper.GetPAXCargo(), airport_x, airport_y, airport_rad);
 	local production = min(production_at_first_airport, production_at_second_airport);
-	local counter = this.HowManyAirplanes(distance, speed, production, engine);
+	local counter = this.HowManyInitialAirplanes(distance, speed, production, engine);
 	for(local i=1; i<=counter; i++) 
 		{
 		while(!this.BuildPassengerAircraftWithRand(tile_1, tile_2, engine, Helper.GetPAXCargo()))
