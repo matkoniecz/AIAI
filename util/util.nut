@@ -218,7 +218,9 @@ function IsCityTileUsedByAirport(town_tile, cargo_id) {
 
 function IsCargoLoadedOnThisStation(station_id, cargo_id) {
 	local vehicle = ExampleOfVehicleFromStation(station_id);
-
+	if(vehicle == null){
+		return false;
+	}
 	if (AIVehicle.GetCapacity(vehicle, cargo_id) == 0) {
 		return false;
 	}
