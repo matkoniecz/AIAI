@@ -2,8 +2,7 @@ class BusRoadBuilder extends RoadBuilder
 {
 }
 
-function BusRoadBuilder::IsAllowed()
-{
+function BusRoadBuilder::IsAllowed() {
 	if (0 == AIAI.GetSetting("use_buses")) {
 		Warning("Buses are disabled in AIAI settings.")
 		return false;
@@ -11,8 +10,7 @@ function BusRoadBuilder::IsAllowed()
 	return RoadBuilder.IsAllowed();
 }
 
-function BusRoadBuilder::Possible()
-{
+function BusRoadBuilder::Possible() {
 	if (!this.IsAllowed()) {
 		return false;
 	}
@@ -24,8 +22,7 @@ function BusRoadBuilder::Possible()
 	return this.cost<GetAvailableMoney();
 }
 
-function BusRoadBuilder::GetNiceRandomTown(location)
-{
+function BusRoadBuilder::GetNiceRandomTown(location) {
 	local town_list = AITownList();
 	town_list.Valuate(AITown.GetDistanceManhattanToTile, location);
 	town_list.KeepBelowValue(GetMaxDistance());
@@ -38,8 +35,7 @@ function BusRoadBuilder::GetNiceRandomTown(location)
 	return town_list.Begin();
 }
 
-function BusRoadBuilder::FindBusPair()
-{
+function BusRoadBuilder::FindBusPair() {
 	trasa.start = GetRatherBigRandomTown();
 	trasa.end = GetNiceRandomTown(AITown.GetLocation(trasa.start))
 	trasa.cargo = Helper.GetPAXCargo();
@@ -70,8 +66,7 @@ function BusRoadBuilder::FindBusPair()
 	return false;
 }
 
-function BusRoadBuilder::Go()
-{
+function BusRoadBuilder::Go() {
 	AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
 	trasa = Route();
 

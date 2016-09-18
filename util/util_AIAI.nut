@@ -1,5 +1,4 @@
-function IsItNeededToImproveThatStation(station, cargo)
-{
+function IsItNeededToImproveThatStation(station, cargo) {
 	//TODO: enable once it will be available in trunk
 	//if (!AIStation.HasCargoRating(station, cargo)) {
 	//	return false;
@@ -12,8 +11,7 @@ function IsItNeededToImproveThatStation(station, cargo)
 	}
 	return false;
 }
-function IsItNeededToImproveThatNoRawStation(station, cargo)
-{
+function IsItNeededToImproveThatNoRawStation(station, cargo) {
 	//TODO: enable once it will be available in trunk
 	//if (!AIStation.HasCargoRating(station, cargo)) {
 	//	return false;
@@ -27,8 +25,7 @@ function IsItNeededToImproveThatNoRawStation(station, cargo)
 	return false;
 }
 
-function NameCompany()
-{
+function NameCompany() {
 	if ((AICompany.GetName(AICompany.COMPANY_SELF)!="AIAI") && (AIVehicleList().Count()>0)) {
 		while(true) {
 			Error("Company created by other ai. As such it is not possible for AIAI to menage that company.");
@@ -55,8 +52,7 @@ function NameCompany()
 	}
 }
 
-function AIAI::ShowContactInfoOnTheMap()
-{
+function AIAI::ShowContactInfoOnTheMap() {
 	if (AIAI.GetSetting("hide_contact_information") != 1) {
 		local tile = AICompany.GetCompanyHQ(AICompany.COMPANY_SELF);
 		if (!AIMap.IsValidTile(tile)) {
@@ -72,8 +68,7 @@ function AIAI::ShowContactInfoOnTheMap()
 	return false;
 }
 
-function IsConnectedIndustryUsingThisAirport(industry, cargo_id, airport_type)
-{
+function IsConnectedIndustryUsingThisAirport(industry, cargo_id, airport_type) {
 	local radius = AIAirport.GetAirportCoverageRadius(airport_type)
 
 	local tile_list=AITileList_IndustryProducing(industry, radius)
@@ -89,8 +84,7 @@ function IsConnectedIndustryUsingThisAirport(industry, cargo_id, airport_type)
 	return false;
 }
 
-function IsConnectedIndustry(industry_id, cargo_id)
-{
+function IsConnectedIndustry(industry_id, cargo_id) {
 	if (AIStationList(AIStation.STATION_ANY).IsEmpty()) {
 		return false;
 	}

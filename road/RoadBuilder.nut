@@ -17,8 +17,7 @@ class RoadStation extends Station
 require("level_crossing_menagement_from_clueless_plus.nut");
 require("RoadPathfinder.nut");
 
-function RoadBuilder::IsAllowed()
-{
+function RoadBuilder::IsAllowed() {
 	if (AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_ROAD)) {
 		Warning("AIs are not allowed to build road vehicles in this game (see advanced settings, section 'Competitors', subsection 'Computer players')!");
 		return false;
@@ -51,8 +50,7 @@ function RoadBuilder::IsAllowed()
 	return true;
 }
 
-function RoadBuilder::Maintenance()
-{
+function RoadBuilder::Maintenance() {
 	local new = this.AddNewNecessaryRV();
 	local redundant = this.RemoveRedundantRV();
 	if ((new+redundant) > 0) {
@@ -60,13 +58,11 @@ function RoadBuilder::Maintenance()
 	}
 }
 
-function RoadBuilder::GetMinDistance()
-{
+function RoadBuilder::GetMinDistance() {
 	return 10 - desperation/50;
 }
 
-function RoadBuilder::GetMaxDistance()
-{
+function RoadBuilder::GetMaxDistance() {
 	if (desperation>5) {
 		return desperation*75;
 	} else {
@@ -74,8 +70,7 @@ function RoadBuilder::GetMaxDistance()
 	}
 }
 
-function RoadBuilder::distanceBetweenIndustriesValuator(distance)
-{
+function RoadBuilder::distanceBetweenIndustriesValuator(distance) {
 	if (distance>GetMaxDistance()) {
 		return 0;
 	}
@@ -100,8 +95,7 @@ function RoadBuilder::distanceBetweenIndustriesValuator(distance)
 	return 0;
 }
 
-function RoadBuilder::BuildRVStation(type)
-{
+function RoadBuilder::BuildRVStation(type) {
 	if (!AIRoad.BuildDriveThroughRoadStation(trasa.first_station.location, trasa.first_station.road_loop[0], type, AIStation.STATION_NEW)) {
 		HandleFailedStationConstruction(trasa.first_station.location, AIError.GetLastError());
 		if (!AIRoad.BuildDriveThroughRoadStation(trasa.first_station.location, trasa.first_station.road_loop[0], type, AIStation.STATION_NEW)) {
@@ -126,8 +120,7 @@ function RoadBuilder::BuildRVStation(type)
 	return RoadToStation();
 }
 
-function RoadBuilder::RoadToStation()
-{
+function RoadBuilder::RoadToStation() {
 	//with infrastructure maintemance add road removal (but only new parts!) TODO
 	if (!AIRoad.BuildRoad(trasa.first_station.road_loop[1], trasa.first_station.location)) {
 		if (RoadBuilder.IsLastErrorImplyingRoadConstructionFailure()) {
@@ -164,13 +157,11 @@ function RoadBuilder::RoadToStation()
 	return true;
 }
 
-function RoadBuilder::ValuateProducer(ID, cargo)
-{
+function RoadBuilder::ValuateProducer(ID, cargo) {
 	return Builder.ValuateProducer(ID, cargo);
 }
 
-function RoadBuilder::GetBiggestNiceTown(location)
-{
+function RoadBuilder::GetBiggestNiceTown(location) {
 	local town_list = AITownList();
 	town_list.Valuate(AITown.GetDistanceManhattanToTile, location);
 	town_list.KeepBelowValue(GetMaxDistance());
@@ -183,8 +174,7 @@ function RoadBuilder::GetBiggestNiceTown(location)
 	return town_list.Begin();
 }
 
-function RoadBuilder::InitRoadLoop(project)
-{
+function RoadBuilder::InitRoadLoop(project) {
 	project.first_station.road_loop = array(2);
 	project.second_station.road_loop = array(2);
 
@@ -205,8 +195,7 @@ function RoadBuilder::InitRoadLoop(project)
 	return project;
 }
 
-function RoadBuilder::TownCargoStationAllocator(project)
-{
+function RoadBuilder::TownCargoStationAllocator(project) {
 	local start = project.start;
 	local town = project.end;
 	local cargo = project.cargo;
@@ -243,8 +232,7 @@ function RoadBuilder::TownCargoStationAllocator(project)
 	return project;
 }
 
-function RoadBuilder::UniversalStationAllocator(project)
-{
+function RoadBuilder::UniversalStationAllocator(project) {
 	if ((project.first_station.location==null) || (project.second_station.location==null)) {
 		if (project.first_station.location == null) {
 			project.forbidden_industries.AddItem(project.start, 0);
@@ -259,8 +247,7 @@ function RoadBuilder::UniversalStationAllocator(project)
 	return project;
 }
 
-function RoadBuilder::PrepareRoute()
-{
+function RoadBuilder::PrepareRoute() {
 	Info("   Road route on distance: " + AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile));
 
 	local forbidden_tiles = array(2);
@@ -311,8 +298,7 @@ function RoadBuilder::PrepareRoute()
 	return true;   
 }
 
-function RoadBuilder::ConstructionOfRVRoute()
-{
+function RoadBuilder::ConstructionOfRVRoute() {
 	trasa.depot_tile = null;
 	ProvideMoney();
 	if (!this.BuildRVStation(AIRoad.GetRoadVehicleTypeForCargo(trasa.cargo))) {
@@ -488,13 +474,11 @@ function RoadBuilder::MakePlaceForReversingVehicles(station, name){
 	return null;
 }
 
-function RoadBuilder::GetReplace(existing_vehicle, cargo)
-{
+function RoadBuilder::GetReplace(existing_vehicle, cargo) {
 	return this.FindRV(cargo);
 }
 
-function FindEngineForRoute(route)
-{
+function FindEngineForRoute(route) {
 	route.engine = FindRV(route.cargo);
 	if (route.engine == null) {
 		return route;
@@ -503,16 +487,14 @@ function FindEngineForRoute(route)
 	return route;
 }
 
-function RoadBuilder::FindRVValuator(engine)
-{
+function RoadBuilder::FindRVValuator(engine) {
 	//rating points for station:  (Speed (km/h) - 85) / 4 
 	//max rating points from speed: 17% (255 points - 100%, 17% - 43,35) 
 	//rating points more important than anything (almost)
 	return min(43, max((AIEngine.GetMaxSpeed(engine) - 85) /4, 0)) * 1500 + AIEngine.GetCapacity(engine)*AIEngine.GetMaxSpeed(engine);
 }
 
-function RoadBuilder::FindRV(cargo)
-{
+function RoadBuilder::FindRV(cargo) {
 	local list = AIEngineList(AIVehicle.VT_ROAD);
 
 	list.Valuate(AIEngine.GetRoadType);
@@ -544,8 +526,7 @@ function RoadBuilder::FindRV(cargo)
 	return null;
 }
 
-function RoadBuilder::IsLastErrorImplyingRoadConstructionFailure()
-{
+function RoadBuilder::IsLastErrorImplyingRoadConstructionFailure() {
 	if (AIError.GetLastError() == AIError.ERR_ALREADY_BUILT) {
 		return false;
 	}
@@ -558,8 +539,7 @@ function RoadBuilder::IsLastErrorImplyingRoadConstructionFailure()
 	return false;
 }
 
-function RoadBuilder::IsOKPlaceForRVStation(station_tile, direction)
-{
+function RoadBuilder::IsOKPlaceForRVStation(station_tile, direction) {
 	local t_ts = array(2);
 
 	if (direction == StationDirection.x_is_constant__horizontal) {
@@ -591,8 +571,7 @@ function RoadBuilder::IsOKPlaceForRVStation(station_tile, direction)
 	return true;
 }
 
-function RoadBuilder::IsWrongPlaceForRVStation(station_tile, direction)
-{
+function RoadBuilder::IsWrongPlaceForRVStation(station_tile, direction) {
 	if (IsTileWithAuthorityRefuse(station_tile)) {
 		HandleFailedStationConstruction(station_tile, AIError.ERR_LOCAL_AUTHORITY_REFUSES);
 		if (IsTileWithAuthorityRefuse(station_tile)) {
@@ -620,8 +599,7 @@ function RoadBuilder::IsWrongPlaceForRVStation(station_tile, direction)
 	return false;
 }
 
-function RoadBuilder::FindStation(list)
-{
+function RoadBuilder::FindStation(list) {
 	for(local station = list.Begin(); list.HasNext(); station = list.Next()) {
 		if (!IsWrongPlaceForRVStation(station, StationDirection.x_is_constant__horizontal)) {
 			local returned = RoadStation();
@@ -659,8 +637,7 @@ function RoadBuilder::FindStation(list)
 	return returned;
 }
 
-function RoadBuilder::FindCityStation(town, cargo)
-{
+function RoadBuilder::FindCityStation(town, cargo) {
 	local tile = AITown.GetLocation(town);
 	local list = AITileList();
 	local range = Helper.Sqrt(AITown.GetPopulation(town)/100) + 15;
@@ -671,22 +648,19 @@ function RoadBuilder::FindCityStation(town, cargo)
 	return this.FindStation(list);
 }
 
-function RoadBuilder::FindConsumerStation(consumer, cargo)
-{
+function RoadBuilder::FindConsumerStation(consumer, cargo) {
 	local list=AITileList_IndustryAccepting(consumer, 3);
 	list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
 	list.RemoveValue(0);
 	return this.FindStation(list);
 }
 
-function RoadBuilder::FindProducentStation(producer, cargo)
-{
+function RoadBuilder::FindProducentStation(producer, cargo) {
 	local list=AITileList_IndustryProducing(producer, 3);
 	return this.FindStation(list);
 }
 
-function RoadBuilder::FindTownCargoSupplyStation(town, start, cargo)
-{
+function RoadBuilder::FindTownCargoSupplyStation(town, start, cargo) {
 	local tile = AITown.GetLocation(town);
 	local list = AITileList();
 	local range = Helper.Sqrt(AITown.GetPopulation(town)/100) + 15;
@@ -707,8 +681,7 @@ function RoadBuilder::FindTownCargoSupplyStation(town, start, cargo)
 	return (this.FindStation(list));
 }
 
-function RoadBuilder::HowManyVehiclesForNewStation(route)
-{
+function RoadBuilder::HowManyVehiclesForNewStation(route) {
 	local speed = AIEngine.GetMaxSpeed(route.engine);
 	local distance = AIMap.DistanceManhattan(route.first_station.location, route.second_station.location);
 	local how_many = route.production/AIEngine.GetCapacity(route.engine);
@@ -721,8 +694,7 @@ function RoadBuilder::HowManyVehiclesForNewStation(route)
 	return how_many;
 }
 
-function RoadBuilder::sellVehicleStoppedInDepotDueToFoo(vehicle_id, foo)
-{
+function RoadBuilder::sellVehicleStoppedInDepotDueToFoo(vehicle_id, foo) {
 	Error("RV (" + AIVehicle.GetName(vehicle_id) + ") "+ foo + " failed due to " + AIError.GetLastErrorString()+".");
 	if (AIVehicle.SellVehicle(vehicle_id))  {
 		Info("Vehicle sold");
@@ -732,8 +704,7 @@ function RoadBuilder::sellVehicleStoppedInDepotDueToFoo(vehicle_id, foo)
 	return null;
 }
 
-function RoadBuilder::SetOrdersForVehicle(vehicle_id)
-{
+function RoadBuilder::SetOrdersForVehicle(vehicle_id) {
 	if (trasa.type == RouteType.rawCargo) {
 		if (!(AIOrder.AppendOrder (vehicle_id, trasa.first_station.location, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE )&&
 					AIOrder.AppendOrder (vehicle_id, trasa.second_station.location, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_NO_LOAD ))) {
@@ -771,8 +742,7 @@ function RoadBuilder::SetOrdersForVehicle(vehicle_id)
 	}
 }
 
-function RoadBuilder::BuildVehicles()
-{
+function RoadBuilder::BuildVehicles() {
 	local constructed = 0;
 	if (trasa.engine == null) {
 		return null;
@@ -821,32 +791,28 @@ function RoadBuilder::BuildVehicles()
 	return constructed;
 }
 
-function RoadBuilder::IsRawVehicle(vehicle_id)
-{
+function RoadBuilder::IsRawVehicle(vehicle_id) {
 	if (!AIVehicle.IsValidVehicle(vehicle_id)) {
 		return null;
 	}
 	return AIVehicle.GetName(vehicle_id)[0]=='R';
 }
 
-function RoadBuilder::IsProcessedCargoVehicle(vehicle_id)
-{
+function RoadBuilder::IsProcessedCargoVehicle(vehicle_id) {
 	if (!AIVehicle.IsValidVehicle(vehicle_id)) {
 		return null;
 	}
 	return AIVehicle.GetName(vehicle_id)[0]=='P';
 }
 
-function RoadBuilder::IstownCargoVehicle(vehicle_id)
-{
+function RoadBuilder::IstownCargoVehicle(vehicle_id) {
 	if (!AIVehicle.IsValidVehicle(vehicle_id)) {
 		return null;
 	}
 	return AIVehicle.GetName(vehicle_id)[0]=='B';
 }
 
-function RoadBuilder::CheckRoad(path)
-{
+function RoadBuilder::CheckRoad(path) {
 	local costs = AIAccounting();
 	costs.ResetCosts ();
 
@@ -882,8 +848,7 @@ function RoadBuilder::CheckRoad(path)
 	return costs.GetCosts();
 }
 
-function RoadBuilder::BuildRoad(path)
-{
+function RoadBuilder::BuildRoad(path) {
 	if (path == null) {
 		return false;
 	}
@@ -900,8 +865,7 @@ function RoadBuilder::BuildRoad(path)
 	return true;
 }
 
-function RoadBuilder::BuildLoopAroundStation(tile_start, tile_end, tile_ignored)
-{
+function RoadBuilder::BuildLoopAroundStation(tile_start, tile_end, tile_ignored) {
 	local pathfinder = CustomPathfinder();
 	pathfinder.LoopAroundStation();
 	local t1=array(1);
@@ -945,8 +909,7 @@ function RoadBuilder::GetLinkedStation(station_id) {
 	return another_station_id;
 }
 
-function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo)
-{
+function RoadBuilder::AddNewNecessaryRVToThisPlace(station_id, cargo) {
 	if (AIVehicleList_Station(station_id).Count()==0) {
 		HandleDeadStation(station_id, cargo);
 		return 0;
@@ -1113,8 +1076,7 @@ function RoadBuilder::AddingStoppedUnexpectedCargo(station_id, cargo){
 	}
 }
 
-function RoadBuilder::AddNewNecessaryRV()
-{
+function RoadBuilder::AddNewNecessaryRV() {
 	local how_many = 0;
 	local cargo_list = AICargoList();
 	for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) {
@@ -1127,8 +1089,7 @@ function RoadBuilder::AddNewNecessaryRV()
 	return how_many;
 }
 
-function RoadBuilder::DynamicFullLoadManagement(full_station, empty_station, RV)
-{
+function RoadBuilder::DynamicFullLoadManagement(full_station, empty_station, RV) {
 	if (AIBase.RandRange(3) != 0) {
 		return true; //To wait for effects of action and avoid RV flood
 	}
@@ -1167,8 +1128,7 @@ function RoadBuilder::DynamicFullLoadManagement(full_station, empty_station, RV)
 	return false;
 }
 
-function RoadBuilder::copyVehicle(main_vehicle_id, cargo)
-{
+function RoadBuilder::copyVehicle(main_vehicle_id, cargo) {
 	ProvideMoney();
 	if (AIVehicle.IsValidVehicle(main_vehicle_id)==false) {
 		return false;
@@ -1242,8 +1202,7 @@ function RoadBuilder::copyVehicle(main_vehicle_id, cargo)
 	return true;
 }
 
-function RoadBuilder::RemoveRedundantRV()
-{
+function RoadBuilder::RemoveRedundantRV() {
 	local station_list = AIStationList(AIStation.STATION_TRUCK_STOP);
 	local how_many = RoadBuilder.RemoveRedundantRVFromStations(station_list);
 	local station_list = AIStationList(AIStation.STATION_BUS_STOP);
@@ -1251,8 +1210,7 @@ function RoadBuilder::RemoveRedundantRV()
 	return how_many;
 }
 
-function RoadBuilder::RemoveRedundantRVFromStations(station_list)
-{
+function RoadBuilder::RemoveRedundantRVFromStations(station_list) {
 	local full_delete_count = 0;
 	local cargo_list = AICargoList();
 
@@ -1286,8 +1244,7 @@ function RoadBuilder::IsVehicleNearStation(vehicle_id, station_id) {
 	return AIStation.GetDistanceManhattanToTile(station_id, AIVehicle.GetLocation(vehicle_id)) < 4;
 }
 
-function RoadBuilder::RemoveRedundantRVFromStation(station_id, cargo, vehicle_list)
-{
+function RoadBuilder::RemoveRedundantRVFromStation(station_id, cargo, vehicle_list) {
 	local waiting_counter = 0;
 	local active_counter = 0;
 	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()) {
@@ -1324,8 +1281,7 @@ function RoadBuilder::RemoveRedundantRVFromStation(station_id, cargo, vehicle_li
 	return 0;
 }
 
-function RoadBuilder::deleteVehicles(vehicle_list, delete_goal, cargo)
-{
+function RoadBuilder::deleteVehicles(vehicle_list, delete_goal, cargo) {
 	local delete_count=0;
 	vehicle_list.Valuate(IsForSellUseTrueForInvalidVehicles);
 	vehicle_list.KeepValue(0);
@@ -1347,8 +1303,7 @@ function RoadBuilder::deleteVehicles(vehicle_list, delete_goal, cargo)
 	return delete_count;
 }
 
-function RoadBuilder::BuildRoadSegment(path, par, depth)
-{
+function RoadBuilder::BuildRoadSegment(path, par, depth) {
 	if (depth>=6) {
 		Warning("Construction terminated: "+AIError.GetLastErrorString()); 
 		if (AIAI.GetSetting("other_debug_signs"))AISign.BuildSign(path, "stad" + depth+AIError.GetLastErrorString());

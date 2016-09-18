@@ -10,8 +10,7 @@ class Builder
 };
 
 
-function Builder::ValuateProducer(ID, cargo)
-{
+function Builder::ValuateProducer(ID, cargo) {
 	if (!AIIndustry.IsValidIndustry(ID)) {
 		return -1;
 	}
@@ -58,8 +57,7 @@ function Builder::AdjustForNoCarGoal(ID, cargo, base){
 	return base;
 }
 
-function Builder::ValuateConsumer(industry_id, cargo, score)
-{
+function Builder::ValuateConsumer(industry_id, cargo, score) {
 	if (!AIIndustry.IsValidIndustry(industry_id)) {
 		return -1;
 	}
@@ -82,68 +80,58 @@ function Builder::ValuateConsumer(industry_id, cargo, score)
 	return score;
 }
 
-function Builder::ValuateConsumerTown(ID, cargo, score)
-{
+function Builder::ValuateConsumerTown(ID, cargo, score) {
 	return score;
 }
 
-function Builder::SetDesperation(new_desperation)
-{
+function Builder::SetDesperation(new_desperation) {
 	desperation = new_desperation;
 }
 
-function Builder::constructor(parent_init, desperation_init)
-{
+function Builder::constructor(parent_init, desperation_init) {
 	AIAI_instance = parent_init;
 	desperation = desperation_init;
 	cost = 1;
 }
 
-function Builder::GetCost()
-{
+function Builder::GetCost() {
 	return cost;
 }
 
-function Builder::GetPathfindingLimit()
-{
+function Builder::GetPathfindingLimit() {
 	return pathfinding_time_limit + desperation * 2;
 }
 
 const MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES = 80;
-function Builder::GetLimitedIndustryList()
-{
+function Builder::GetLimitedIndustryList() {
 	local list = AIIndustryList()
 	list.Valuate(AIIndustry.GetDistanceManhattanToTile, AIAI_instance.root_tile)
 	list.KeepBottom(MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES);
 	return list;
 }
 
-function Builder::GetLimitedIndustryList_CargoAccepting(cargo)
-{
+function Builder::GetLimitedIndustryList_CargoAccepting(cargo) {
 	local list = AIIndustryList_CargoAccepting(cargo)
 	list.Valuate(AIIndustry.GetDistanceManhattanToTile, AIAI_instance.root_tile)
 	list.KeepBottom(MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES/10);
 	return list;
 }
 
-function Builder::GetLimitedIndustryList_CargoProducing(cargo)
-{
+function Builder::GetLimitedIndustryList_CargoProducing(cargo) {
 	local list = AIIndustryList_CargoProducing(cargo)
 	list.Valuate(AIIndustry.GetDistanceManhattanToTile, AIAI_instance.root_tile)
 	list.KeepBottom(MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES/10);
 	return list;
 }
 
-function Builder::IsConsumerOK(industry_id)
-{
+function Builder::IsConsumerOK(industry_id) {
 	if (AIIndustry.IsValidIndustry(industry_id)==false) {
 		return false; //industry closed during preprocessing
 	}
 	return true;
 }
 
-function Builder::IsProducerOK(industry_id)
-{
+function Builder::IsProducerOK(industry_id) {
 	local cargo_list = AIIndustryType.GetProducedCargo(AIIndustry.GetIndustryType(industry_id));
 	if (cargo_list==null) {
 		return false;

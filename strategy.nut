@@ -1,5 +1,4 @@
-function strategyGenerator()
-{
+function strategyGenerator() {
 	local builders = array(6);
 	local new;
 

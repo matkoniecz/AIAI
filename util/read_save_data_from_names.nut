@@ -1,5 +1,4 @@
-function StringToInteger(string)
-{
+function StringToInteger(string) {
 	Info(string+"<-len")
 	local result = 0;
 	local i=0;
@@ -10,8 +9,7 @@ function StringToInteger(string)
 	return result;
 }
 
-function IntToStrFill(int_val, num_digits)
-{
+function IntToStrFill(int_val, num_digits) {
 	local str = int_val.tostring();
 	while(str.len() < num_digits) {
 		str = "0" + str;
@@ -19,8 +17,7 @@ function IntToStrFill(int_val, num_digits)
 	return str;
 }
 
-function IsForSellUseTrueForInvalidVehicles(vehicle_id)
-{
+function IsForSellUseTrueForInvalidVehicles(vehicle_id) {
 	local value = IsForSell(vehicle_id);
 	if (value == null) {
 		return true;
@@ -28,8 +25,7 @@ function IsForSellUseTrueForInvalidVehicles(vehicle_id)
 	return value;
 }
 
-function IsForSell(vehicle_id)
-{
+function IsForSell(vehicle_id) {
 	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
 		return null
 	}
@@ -42,8 +38,7 @@ function IsForSell(vehicle_id)
 	return true;
 }
 
-function GetDepotLocation(vehicle_id)
-{
+function GetDepotLocation(vehicle_id) {
 	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
 		return null
 	}
@@ -54,8 +49,7 @@ function GetDepotLocation(vehicle_id)
 	abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle_id)+ " depot_location from station name is "+depot_location);
 }
 
-function GetLoadStationId(vehicle_id)
-{
+function GetLoadStationId(vehicle_id) {
 	local location = GetLoadStationLocation(vehicle_id)
 	if (location == null) {
 		return null
@@ -63,8 +57,7 @@ function GetLoadStationId(vehicle_id)
 	return AIStation.GetStationID(location)
 }
 
-function GetLoadStationLocation(vehicle_id)
-{
+function GetLoadStationLocation(vehicle_id) {
 	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
 		return null
 	}
@@ -76,8 +69,7 @@ function GetLoadStationLocation(vehicle_id)
 	abort("Explosion caused by vehicle " + vehicle_id + " named "+ AIVehicle.GetName(vehicle_id));
 }
 
-function GetSecondLoadStationId(vehicle_id)
-{
+function GetSecondLoadStationId(vehicle_id) {
 	local location = GetSecondLoadStationLocation(vehicle_id)
 	if (location == null) {
 		return null
@@ -85,8 +77,7 @@ function GetSecondLoadStationId(vehicle_id)
 	return AIStation.GetStationID(location)
 }
 
-function GetSecondLoadStationLocation(vehicle_id)
-{
+function GetSecondLoadStationLocation(vehicle_id) {
 	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
 		return null
 	}
@@ -102,8 +93,7 @@ function GetSecondLoadStationLocation(vehicle_id)
 	return null;
 }
 
-function GetUnloadStationId(vehicle_id)
-{
+function GetUnloadStationId(vehicle_id) {
 	local location = GetUnloadStationLocation(vehicle_id)
 	if (location == null) {
 		return null
@@ -111,8 +101,7 @@ function GetUnloadStationId(vehicle_id)
 	return AIStation.GetStationID(location)
 }
 
-function GetUnloadStationLocation(vehicle_id)
-{
+function GetUnloadStationLocation(vehicle_id) {
 	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
 		return null
 	}
@@ -128,8 +117,7 @@ function GetUnloadStationLocation(vehicle_id)
 	abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle_id));
 }
 
-function LoadDataFromStationNameFoundByStationId(station_id, delimiters)
-{
+function LoadDataFromStationNameFoundByStationId(station_id, delimiters) {
 	assert(station_id != null);
 	assert(AIStation.IsValidStation(station_id))
 	local start_code = delimiters[0]
@@ -151,8 +139,7 @@ function LoadDataFromStationNameFoundByStationId(station_id, delimiters)
 	return null;
 }
 
-function AIAI::TrySetStationName(station_id, data, leading_number)
-{
+function AIAI::TrySetStationName(station_id, data, leading_number) {
 	local string;
 	string = IntToStrFill(leading_number, 5) + data + " AD " + AIDate.GetYear(AIDate.GetCurrentDate());
 	if (AIBaseStation.GetName(station_id) == string) {
@@ -161,8 +148,7 @@ function AIAI::TrySetStationName(station_id, data, leading_number)
 	return AIBaseStation.SetName(station_id, string)
 }
 
-function AIAI::SetStationName(location, data)
-{
+function AIAI::SetStationName(location, data) {
 	local station_id = AIStation.GetStationID(location);
 	local current_number = LoadDataFromStationNameFoundByStationId(station_id, "0{");
 	if (current_number != null) { //updating data, station have currently a number
@@ -182,8 +168,7 @@ function AIAI::SetStationName(location, data)
 	assert(station_number < 10000); //note that first 0 is fake, see "local current_number = LoadDataFromStationNameFoundByStationId(station_id, "0{");"
 }
 
-function AIAI::SetWaypointName(network, location)
-{
+function AIAI::SetWaypointName(network, location) {
 	local waypoint = AIWaypoint.GetWaypointID(location);
 	if (!AIBaseStation.IsValidBaseStation(waypoint)) {
 		return;

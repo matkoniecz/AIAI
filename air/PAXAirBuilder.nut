@@ -2,8 +2,7 @@ class PAXAirBuilder extends AirBuilder
 {
 }
 
-function PAXAirBuilder::IsAllowed()
-{
+function PAXAirBuilder::IsAllowed() {
 	if (0 == AIAI.GetSetting("PAX_plane")) {
 		Warning("PAX planes are disabled in AIAI settings.")
 		return false;
@@ -11,8 +10,7 @@ function PAXAirBuilder::IsAllowed()
 	return AirBuilder.IsAllowed();
 }
 
-function PAXAirBuilder::Possible()
-{
+function PAXAirBuilder::Possible() {
 	if (!this.IsAllowed()) return false;
 	if (this.cost <= 1) {
 		Info("no cost estimation for a PAX airplane connection is available.");
@@ -22,8 +20,7 @@ function PAXAirBuilder::Possible()
 	return this.cost<GetAvailableMoney();
 }
 
-function PAXAirBuilder::Go()
-{
+function PAXAirBuilder::Go() {
 	cost = this.CostEstimation();
 	Info("Trying to build an airport route (city version)");
 	if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_METROPOLITAN)) {
@@ -42,8 +39,7 @@ function PAXAirBuilder::Go()
 	return false;
 }
 
-function PAXAirBuilder::BuildAirportRouteBetweenCitiesWithAirportTypeSet(airport_type)
-{
+function PAXAirBuilder::BuildAirportRouteBetweenCitiesWithAirportTypeSet(airport_type) {
 	local min_distance = 250 - 4*desperation;
 	if (!AIAirport.IsValidAirportType(airport_type)) return false;
 	local engine=this.FindAircraft(airport_type, Helper.GetPAXCargo(), 3, GetAvailableMoney(), min_distance);

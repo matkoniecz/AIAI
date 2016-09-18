@@ -91,8 +91,7 @@ class AyStar
 	function FindPath(iterations);
 };
 
-function AyStar::InitializePath(sources, goals, ignored_tiles = [])
-{
+function AyStar::InitializePath(sources, goals, ignored_tiles = []) {
 	if (typeof(sources) != "array" || sources.len() == 0) throw("sources has be a non-empty array.");
 	if (typeof(goals) != "array" || goals.len() == 0) throw("goals has be a non-empty array.");
 
@@ -117,8 +116,7 @@ function AyStar::InitializePath(sources, goals, ignored_tiles = [])
 	}
 }
 
-function AyStar::FindPath(iterations)
-{
+function AyStar::FindPath(iterations) {
 	if (this._open == null) throw("can't execute over an uninitialized path");
 
 	while (this._open.Count() > 0 && (iterations == -1 || iterations-- > 0)) {
@@ -188,8 +186,7 @@ function AyStar::FindPath(iterations)
 	return null;
 }
 
-function AyStar::_CleanPath()
-{
+function AyStar::_CleanPath() {
 	this._closed = null;
 	this._open = null;
 	this._goals = null;

@@ -3,8 +3,7 @@ class CargoAirBuilder extends AirBuilder
 	trasa = null;
 }
 
-function CargoAirBuilder::IsAllowed()
-{
+function CargoAirBuilder::IsAllowed() {
 	if (0 == AIAI.GetSetting("cargo_plane")) {
 		Warning("Cargo planes are disabled in AIAI settings.")
 		return false;
@@ -12,14 +11,12 @@ function CargoAirBuilder::IsAllowed()
 	return AirBuilder.IsAllowed();
 }
 
-function CargoAirBuilder::Possible()
-{
+function CargoAirBuilder::Possible() {
 	if (!this.IsAllowed()) return false;
 	return this.cost<GetAvailableMoney();
 }
 
-function CargoAirBuilder::Go()
-{
+function CargoAirBuilder::Go() {
 	ProvideMoney();
 	Info("Trying to build an airport route from industry");
 	trasa = Route();
@@ -57,13 +54,11 @@ function CargoAirBuilder::Go()
 		}
 	return true;
 }
-function CargoAirBuilder::FindPair(route)
-{
+function CargoAirBuilder::FindPair(route) {
 	return FindPairWrapped(route, this);
 }
 
-function CargoAirBuilder::GetNiceRandomTown(location)
-{
+function CargoAirBuilder::GetNiceRandomTown(location) {
 	local town_list = AITownList();
 	town_list.Valuate(AITown.GetDistanceManhattanToTile, location);
 	town_list.KeepBelowValue(GetMaxDistance());

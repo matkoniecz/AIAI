@@ -14,8 +14,7 @@ class AIAI extends AIController
 
 require("headers.nut");
 
-function AIAI::Starter()
-{
+function AIAI::Starter() {
 	Info("AIAI loaded!");
 	Info("");
 	Info("Hi!");
@@ -51,8 +50,7 @@ function AIAI::Starter()
 	}
 }
 
-function AIAI::CommunicateWithGS()
-{
+function AIAI::CommunicateWithGS() {
 	if (AIController.GetSetting("scp_enabled")) {
 		if (this.library_to_communicate_with_GS == null) {
 			this.library_to_communicate_with_GS = SCPLib("fake_data", "fake_data");
@@ -77,8 +75,7 @@ function AIAI::CommunicateWithGS()
 	}
 }
 
-function AIAI::Start()
-{
+function AIAI::Start() {
 	this.Starter();
 	local builders = strategyGenerator();
 	for(local i = 1; true; i++) {
@@ -124,16 +121,14 @@ function AIAI::Start()
 	abort("Escaped Start function, it was not supposed to happen");
 }
 
-function AIAI::Rungeneral_inspection()
-{
+function AIAI::Rungeneral_inspection() {
 	DeleteUnprofitable();
 	DeleteEmptyStations();
 	Autoreplace();
 	this.UpgradeBridges();
 }
 
-function AIAI::UpgradeBridges()
-{
+function AIAI::UpgradeBridges() {
 	if (bridge_list==null) {
 		return
 	}
@@ -157,8 +152,7 @@ function AIAI::UpgradeBridges()
 	}
 }
 
-function AIAI::InformationCenter(builders)
-{
+function AIAI::InformationCenter(builders) {
 	for(local i = 0; i<builders.len(); i++) {
 		if (builders[i] != null) {
 			builders[i].SetDesperation(desperation);
@@ -166,8 +160,7 @@ function AIAI::InformationCenter(builders)
 	}
 }
 
-function AIAI::TryEverything(builders)
-{
+function AIAI::TryEverything(builders) {
 	for(local i = 0; i<builders.len(); i++) {
 		if (builders[i] != null) {
 			if (builders[i].Possible()) {
@@ -180,8 +173,7 @@ function AIAI::TryEverything(builders)
 	return false;
 }
 
-function AIAI::GetMinimalCost(builders)
-{
+function AIAI::GetMinimalCost(builders) {
 	local cost = 1000000000; //TODO INFINITE fails
 	for(local i = 0; i<builders.len(); i++) {
 		if (builders[i] != null) {
@@ -198,8 +190,7 @@ function AIAI::GetMinimalCost(builders)
 	return cost;
 }
 
-function AIAI::SignMenagement()
-{
+function AIAI::SignMenagement() {
 	if (AIAI.GetSetting("clear_signs")) {
 		Helper.ClearAllSigns();
 	}
@@ -212,14 +203,12 @@ function AIAI::SignMenagement()
 }
 
 
-function AIAI::GetDate()
-{
+function AIAI::GetDate() {
 	local date=AIDate.GetCurrentDate();
 	return AIDate.GetYear(date)*12 + AIDate.GetMonth(date);
 }
 
-function AIAI::Save()
-{
+function AIAI::Save() {
 	local table = {
 		desperation = this.desperation
 		general_inspection = this.general_inspection
@@ -229,8 +218,7 @@ function AIAI::Save()
 	return table;
 }
 
-function AIAI::Load(version, data)
-{
+function AIAI::Load(version, data) {
 	if (data.rawin("desperation") && data.rawin("general_inspection") && data.rawin("BridgeList") && data.rawin("station_number")) {
 		this.is_this_a_loaded_game = true;
 		this.desperation = data.rawget("desperation");
@@ -259,8 +247,7 @@ function AIAI::Load(version, data)
 	}
 }
 
-function AIAI::gentleSellVehicle(vehicle_id, why)
-{
+function AIAI::gentleSellVehicle(vehicle_id, why) {
 	if (IsForSell(vehicle_id) != false) {
 		return false;
 	}
@@ -287,8 +274,7 @@ function AIAI::gentleSellVehicle(vehicle_id, why)
 	AIVehicle.SetName(vehicle_id, "for sell!" + why);
 }
 
-function AIAI::sellVehicle(vehicle_id, why)
-{
+function AIAI::sellVehicle(vehicle_id, why) {
 	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
 		Error("Invalid or crashed vehicle " + vehicle_id);
 		return true;
@@ -305,8 +291,7 @@ function AIAI::sellVehicle(vehicle_id, why)
 	return true;
 }
 
-function AIAI::BuilderMaintenance()
-{
+function AIAI::BuilderMaintenance() {
 	local maintenance = array(3);
 	maintenance[0] = RailBuilder(this, 0);
 	maintenance[1] = RoadBuilder(this, 0);
@@ -317,8 +302,7 @@ function AIAI::BuilderMaintenance()
 	}
 }
 
-function DoomsdayMachine()
-{
+function DoomsdayMachine() {
 	Info("DoomsdayMachine!");
 	Info("Scrap useless vehicles!");
 	Helper.SellAllVehiclesStoppedInDepots();
@@ -335,16 +319,14 @@ function DoomsdayMachine()
 }
 
 
-function AIAI::Maintenance()
-{
+function AIAI::Maintenance() {
 	this.SafeMaintenance();
 	this.HandleEvents();
 	this.BankruptProtector();
 	Helper.SellAllVehiclesStoppedInDepots(); //must not be run during creating vehicles
 }
 
-function AIAI::SafeMaintenance()
-{
+function AIAI::SafeMaintenance() {
 	this.SignMenagement();
 	this.HandleOldLevelCrossings();
 	this.BuilderMaintenance();
@@ -510,16 +492,14 @@ function AIAI::HandleEvents() //from CluelessPlus and SimpleAI
 	}
 }
 
-function GetMaxSpeedBridge(start, end)
-{
+function GetMaxSpeedBridge(start, end) {
 	local bridge_list = AIBridgeList_Length(AIMap.DistanceManhattan(start, end) + 1);
 	bridge_list.Valuate(AIBridge.GetMaxSpeed);
 	bridge_list.Sort(AIList.SORT_BY_VALUE, false);
 	return bridge_list.Begin()
 }
 
-function AIAI::BuildBridge(vehicle_type, start, end)
-{
+function AIAI::BuildBridge(vehicle_type, start, end) {
 	local bridge_type_id = GetMaxSpeedBridge(start, end);
 	local result = AIBridge.BuildBridge(vehicle_type, bridge_type_id, start, end);
 	if (result) {

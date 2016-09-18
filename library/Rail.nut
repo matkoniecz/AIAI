@@ -13,8 +13,7 @@ class Rail{}
 	//Returns a depot tile if successful, null otherwise 
 	//BuildDepot(path);
 
-function Rail::GetBrakeVan(railtype)
-{
+function Rail::GetBrakeVan(railtype) {
 	local wagons = AIEngineList(AIVehicle.VT_RAIL);
 	wagons.Valuate(AIEngine.IsWagon);
 	wagons.RemoveValue(0);
@@ -35,8 +34,7 @@ function Rail::GetBrakeVan(railtype)
 	}
 }
 
-function Rail::BuildDepot(path)
-{
+function Rail::BuildDepot(path) {
 	local prev = null;
 	local pp = null;
 	local ppp = null;
@@ -98,8 +96,7 @@ function Rail::BuildDepot(path)
 	return null;
 }
 
-function ConnectDepotDiagonal(tile_a, tile_b, tile_c)
-{
+function ConnectDepotDiagonal(tile_a, tile_b, tile_c) {
 	if (!AITile.IsBuildable(tile_c) && (!AIRail.IsRailTile(tile_c) || !AICompany.IsMine(AITile.GetOwner(tile_c)))) return null;
 	local offset1 = (tile_c - tile_a) / 2;
 	local offset2 = (tile_c - tile_b) / 2;

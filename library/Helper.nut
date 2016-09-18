@@ -20,8 +20,7 @@ AILog.Info("adding new functions to SuperLib (Helper)");
 	//if HQ exists on calling function it will not be moved and function will return true
 	//BuildCompanyHQ()
 
-_SuperLib_Helper.GetWeightOfOneCargoPiece <- function(cargo_id)
-{
+_SuperLib_Helper.GetWeightOfOneCargoPiece <- function(cargo_id) {
 	if (AICargo.IsFreight(cargo_id)) {
 		return AIGameSettings.GetValue("vehicle.freight_trains");
 	}
@@ -31,8 +30,7 @@ _SuperLib_Helper.GetWeightOfOneCargoPiece <- function(cargo_id)
 	return 1;
 }
 
-_SuperLib_Helper.SellAllVehiclesStoppedInDepots <- function()
-{
+_SuperLib_Helper.SellAllVehiclesStoppedInDepots <- function() {
 	local counter = 0;
 	local list = AIVehicleList();
 	for (local vehicle = list.Begin(); list.HasNext(); vehicle = list.Next()) {
@@ -44,8 +42,7 @@ _SuperLib_Helper.SellAllVehiclesStoppedInDepots <- function()
 	return counter;
 }
 
-_SuperLib_Helper.BuildCompanyHQ <- function()
-{
+_SuperLib_Helper.BuildCompanyHQ <- function() {
 	if (AIMap.IsValidTile(AICompany.GetCompanyHQ(AICompany.COMPANY_SELF))) {
 		return true;
 	}
@@ -88,8 +85,7 @@ _SuperLib_Helper.Sqrt <- function(i)
 	return n;
 }
 
-_SuperLib_Helper.ReversePath <- function(i)
-{
+_SuperLib_Helper.ReversePath <- function(i) {
 class RPathItem
 {
 	_tile = null;

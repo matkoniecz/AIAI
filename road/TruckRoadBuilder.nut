@@ -2,8 +2,7 @@ class TruckRoadBuilder extends RoadBuilder
 {
 }
 
-function TruckRoadBuilder::IsAllowed()
-{
+function TruckRoadBuilder::IsAllowed() {
 	if (0 == AIAI.GetSetting("use_trucks")) {
 		Warning("Trucks are disabled in AIAI settings.")
 		return false;
@@ -11,8 +10,7 @@ function TruckRoadBuilder::IsAllowed()
 	return RoadBuilder.IsAllowed();
 }
 
-function TruckRoadBuilder::Possible()
-{
+function TruckRoadBuilder::Possible() {
 	if (!this.IsAllowed()) {
 		return false;
 	}
@@ -24,8 +22,7 @@ function TruckRoadBuilder::Possible()
 	return this.cost < GetAvailableMoney();
 }
 
-function TruckRoadBuilder::GetNiceRandomTown(location)
-{
+function TruckRoadBuilder::GetNiceRandomTown(location) {
 	local town_list = AITownList();
 	town_list.Valuate(AITown.GetDistanceManhattanToTile, location);
 	town_list.KeepBelowValue(GetMaxDistance());
@@ -38,21 +35,18 @@ function TruckRoadBuilder::GetNiceRandomTown(location)
 	return town_list.Begin();
 }
 
-function TruckRoadBuilder::ValuateProducer(ID, cargo)
-{
+function TruckRoadBuilder::ValuateProducer(ID, cargo) {
 	if (AIRoad.GetRoadVehicleTypeForCargo(cargo) != AIRoad.ROADVEHTYPE_TRUCK) {
 		return 0;
 	}
 	return RoadBuilder.ValuateProducer(ID, cargo);
 }
 
-function TruckRoadBuilder::FindPair(route)
-{
+function TruckRoadBuilder::FindPair(route) {
 	return FindPairWrapped(route, this);
 }
 
-function TruckRoadBuilder::IndustryToIndustryStationAllocator(project)
-{
+function TruckRoadBuilder::IndustryToIndustryStationAllocator(project) {
 	local producer = project.start;
 	local consumer = project.end;
 	local cargo = project.cargo;
@@ -67,8 +61,7 @@ function TruckRoadBuilder::IndustryToIndustryStationAllocator(project)
 	return RoadBuilder.UniversalStationAllocator(project);
 }
 
-function TruckRoadBuilder::IndustryToCityStationAllocator(project)
-{
+function TruckRoadBuilder::IndustryToCityStationAllocator(project) {
 	local start = project.start;
 	local town = project.end;
 	local cargo = project.cargo;
@@ -84,8 +77,7 @@ function TruckRoadBuilder::IndustryToCityStationAllocator(project)
 	return RoadBuilder.UniversalStationAllocator(project);
 }
 
-function TruckRoadBuilder::Go()
-{
+function TruckRoadBuilder::Go() {
 	AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
 	trasa = Route();
 

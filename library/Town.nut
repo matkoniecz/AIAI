@@ -5,8 +5,7 @@ AILog.Info("adding new functions to SuperLib (Town)");
 	//return true on success (rating is at least as high as min_rating), false otherwise
 	//PlantTreesToImproveRating(town_id, min_rating, money_threshold)
 
-_SuperLib_Town.PlantTreesToImproveRating <- function(town_id, min_rating, money_threshold)
-{
+_SuperLib_Town.PlantTreesToImproveRating <- function(town_id, min_rating, money_threshold) {
 	/* Build trees to improve the rating. We build this tree in an expanding
 	 * circle starting around the town center. */
 	local location = AITown.GetLocation(town_id);

@@ -1,5 +1,4 @@
-function AIAI::BuildStatues()
-{
+function AIAI::BuildStatues() {
 	local veh_list = AIVehicleList();
 	if (veh_list.Count()==0) return false;
 
@@ -34,8 +33,7 @@ function AIAI::BuildStatues()
 /// Age of the youngest vehicle (in days)
 /// @pre AIStation.IsValidStation(station_id)
 /////////////////////////////////////////////////
-function AgeOfTheYoungestVehicle(station_id)
-{
+function AgeOfTheYoungestVehicle(station_id) {
 	if (!AIStation.IsValidStation(station_id)) {
 		abort("Invalid station_id");
 	}
@@ -50,8 +48,7 @@ function AgeOfTheYoungestVehicle(station_id)
 	return minimum;
 }
 
-function GetAverageCapacityOfVehiclesFromStation(station, cargo)
-{
+function GetAverageCapacityOfVehiclesFromStation(station, cargo) {
 	local list = AIVehicleList_Station(station);
 	local total = 0;
 	local count = 0;
@@ -89,13 +86,11 @@ function SafeRemoveRectangle(list, tile, radius) { //based on code from Rondje
 	list.RemoveRectangle(AIMap.GetTileIndex(x1, y1), AIMap.GetTileIndex(x2, y2)); 
 }
 
-function IsTileFlatAndBuildable(tile)
-{
+function IsTileFlatAndBuildable(tile) {
 	return (AITile.IsBuildable(tile) && AITile.SLOPE_FLAT == AITile.GetSlope(tile));
 }
 
-function IsTileWithAuthorityRefuse(tile)
-{
+function IsTileWithAuthorityRefuse(tile) {
 	local town_id=AITile.GetClosestTown (tile);
 	if (!Town.TownRatingAllowStationBuilding(town_id)) {
 		return true;
@@ -104,8 +99,7 @@ function IsTileWithAuthorityRefuse(tile)
 	}
 }
 
-function ImproveTownRating(town_id, desperation)
-{
+function ImproveTownRating(town_id, desperation) {
 	local mode = AIExecMode();
 	if (GetAvailableMoney() < Money.Inflate(200000) && desperation == 0) {
 		return false;
@@ -144,20 +138,17 @@ function ImproveTownRating(town_id, desperation)
 	return false;
 }
 
-function HandleFailedStationConstruction(location, error)
-{
+function HandleFailedStationConstruction(location, error) {
 	if (error == AIError.ERR_LOCAL_AUTHORITY_REFUSES) {
 		ImproveTownRating(AITile.GetClosestTown(location), this.desperation);
 	}
 }
 
-function GetRatherBigRandomTownValuator(town_id)
-{
+function GetRatherBigRandomTownValuator(town_id) {
 	return AITown.GetPopulation(town_id)*AIBase.RandRange(5);
 }
 
-function GetRatherBigRandomTown()
-{
+function GetRatherBigRandomTown() {
 	local town_list = AITownList();
 	town_list.Valuate(GetRatherBigRandomTownValuator);
 	town_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
@@ -168,8 +159,7 @@ function RandomValuator(dummy){
 	return AIBase.RandRange(1000);
 }
 
-function IsCityTileUsed(town_tile, cargo_id)
-{
+function IsCityTileUsed(town_tile, cargo_id) {
 	if(IsCityTileUsedByAirport(town_tile, cargo_id)){
 		return true;
 	}
@@ -240,13 +230,11 @@ function ExampleOfVehicleFromStation(station_id){
 	return vehicle;
 }
 
-function VehicleCounter(station)
-{
+function VehicleCounter(station) {
 	return AIVehicleList_Station(station).Count();
 }
 
-function DeleteEmptyStations()
-{
+function DeleteEmptyStations() {
 	local station_id_list;
 	station_id_list = AIStationList(AIStation.STATION_TRUCK_STOP);
 	station_id_list.AddList(AIStationList(AIStation.STATION_BUS_STOP));
@@ -278,8 +266,7 @@ function DeleteEmptyStations()
 	}
 }
 
-function DeleteUnprofitable()
-{
+function DeleteUnprofitable() {
 	local vehicle_list = AIVehicleList();
 
 	vehicle_list.Valuate(IsForSellUseTrueForInvalidVehicles);
@@ -310,8 +297,7 @@ function DeleteUnprofitable()
 	Info(counter + " vehicle(s) sold.");
 }
 
-function NotMovingVehiclesFromThisStation(station)
-{
+function NotMovingVehiclesFromThisStation(station) {
 	local vehicle_list = AIVehicleList_Station(station);
 	vehicle_list.Valuate(AIVehicle.GetCurrentSpeed);
 	vehicle_list.KeepValue(0);
@@ -319,7 +305,6 @@ function NotMovingVehiclesFromThisStation(station)
 	vehicle_list.RemoveValue(AIVehicle.VS_AT_STATION);
 	return vehicle_list;
 }
-function HowManyVehiclesFromThisStationAreNotMoving(station)
-{
+function HowManyVehiclesFromThisStationAreNotMoving(station) {
 	return NotMovingVehiclesFromThisStation(station).Count();
 }

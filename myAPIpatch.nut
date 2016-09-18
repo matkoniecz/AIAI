@@ -31,8 +31,7 @@ AIVehicleList_SharedOrders.HasNext <-
 AIVehicleList_Station.HasNext <-
 AIWaypointList.HasNext <-
 AIWaypointList_Vehicle.HasNext <-
-function()
-{
+function() {
 	return !this.IsEnd(); 
 	//I have better things to do than changing HasNext to IsEnd all over my code because OpenTTD devs 
 	//suddenly decided that former one is somehow better (IMHO it is worse due to more complex contruction - it requires !)
@@ -42,15 +41,13 @@ function()
 AILog.Info("changing API");
 
 AIMap._IsValidTile <- AIMap.IsValidTile;
-AIMap.IsValidTile <- function(tile)
-{
+AIMap.IsValidTile <- function(tile) {
 	if (tile == null) return false; //AIMap.IsValidTile(null) will return false instead of crashing
 	return AIMap._IsValidTile(tile);
 }
 
 AISign._BuildSign <- AISign.BuildSign;
-AISign.BuildSign <- function(tile, text)
-{
+AISign.BuildSign <- function(tile, text) {
 	local test = AIExecMode(); //allow sign construction in test mode
 	text+=""; //allow AISign.BuildSign(tile, 42)
 	local returned = AISign._BuildSign(tile, text);
@@ -68,15 +65,13 @@ AISign.BuildSign <- function(tile, text)
 } 
 
 AISign._RemoveSign <- AISign.RemoveSign;
-AISign.RemoveSign <- function(id)
-{
+AISign.RemoveSign <- function(id) {
 	local test = AIExecMode(); //allow sign destruction in test mode
 	local returned = AISign._RemoveSign(id);
 }
 
 AIEngine._GetMaximumOrderDistance <- AIEngine.GetMaximumOrderDistance;
-AIEngine.GetMaximumOrderDistance <- function(engine_id)
-{
+AIEngine.GetMaximumOrderDistance <- function(engine_id) {
 	local value = AIEngine._GetMaximumOrderDistance(engine_id);
 	if (value == 0) value = INFINITE_DISTANCE; //it is better to get rid of 0 here, to allow KeepBelow etc in valuators
 	return value;
@@ -84,15 +79,13 @@ AIEngine.GetMaximumOrderDistance <- function(engine_id)
 
 
 AIOrder._AppendOrder <- AIOrder.AppendOrder;
-AIOrder.AppendOrder <- function(vehicle_id, destination, order_flags)
-{
+AIOrder.AppendOrder <- function(vehicle_id, destination, order_flags) {
 	if (AIOrder._AppendOrder(vehicle_id, destination, order_flags)) return true;
 	abort(AIError.GetLastErrorString() + " in AppendOrder");
 }
 
 AIVehicle.SetName_ <- AIVehicle.SetName
-AIVehicle.SetName <- function (vehicle_id, string)
-{
+AIVehicle.SetName <- function (vehicle_id, string) {
 	if (!AIVehicle.IsValidVehicle(vehicle_id)) {
 		abort("Invalid vehicle " + vehicle_id);
 	}
@@ -115,8 +108,7 @@ AIVehicle.SetName <- function (vehicle_id, string)
 }
 
 AIVehicle.CloneVehicle_ <- AIVehicle.CloneVehicle
-AIVehicle.CloneVehicle <- function (depot_tile, vehicle_id, share_orders)
-{
+AIVehicle.CloneVehicle <- function (depot_tile, vehicle_id, share_orders) {
 	local new_vehicle_id = AIVehicle.CloneVehicle_(depot_tile, vehicle_id, share_orders)
 	if (AIVehicle.IsValidVehicle(new_vehicle_id)) {
 		if (!AIEngine.IsWagon(AIVehicle.GetEngineType(vehicle_id))) {
@@ -203,8 +195,7 @@ AIVehicle.BuildVehicle <- function (depot_tile, engine_id)
 	return vehicle_id;
 }
 
-AIVehicle.IsOKVehicle <- function(vehicle_id)
-{
+AIVehicle.IsOKVehicle <- function(vehicle_id) {
 	if (!AIVehicle.IsValidVehicle(vehicle_id)) {
 		return false
 	}

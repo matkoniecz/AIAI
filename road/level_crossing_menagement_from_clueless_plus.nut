@@ -1,8 +1,7 @@
 //idea and code stolen from CluelessPlus
 //I claim authorship of all bugs
 
-function AIAI::HandleNewLevelCrossing(event)
-{
+function AIAI::HandleNewLevelCrossing(event) {
 	local crash_event = AIEventVehicleCrashed.Convert(event);
 	local crash_reason = crash_event.GetCrashReason();
 	local vehicle_id = crash_event.GetVehicleID();
@@ -21,8 +20,7 @@ function AIAI::HandleNewLevelCrossing(event)
 	}
 }
 
-function AIAI::HandleOldLevelCrossings()
-{
+function AIAI::HandleOldLevelCrossings() {
 	// Check for rail crossings that couldn't be fixed just after a crash event
 	this.list_of_detected_rail_crossings.Valuate(Helper.ItemValuator);
 	foreach(crash_tile, _ in this.list_of_detected_rail_crossings) {

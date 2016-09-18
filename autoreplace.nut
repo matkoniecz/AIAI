@@ -1,5 +1,4 @@
-function Autoreplace()
-{
+function Autoreplace() {
 	Info("Autoreplace started");
 	AutoreplaceRV();
 	AutoreplaceSmallPlane();
@@ -7,8 +6,7 @@ function Autoreplace()
 	Info("Autoreplace list updated by Autoreplace()");
 }
 
-function AutoreplaceBigPlane()
-{
+function AutoreplaceBigPlane() {
 	local engine_list=AIEngineList(AIVehicle.VT_AIR);
 	engine_list.Valuate(AIEngine.GetPlaneType);
 	engine_list.KeepValue(AIAirport.PT_BIG_PLANE);
@@ -31,8 +29,7 @@ function AutoreplaceBigPlane()
 	}
 }
 
-function AutoreplaceSmallPlane()
-{
+function AutoreplaceSmallPlane() {
 local engine_list=AIEngineList(AIVehicle.VT_AIR);
 engine_list.Valuate(AIEngine.GetPlaneType);
 engine_list.KeepValue(AIAirport.PT_SMALL_PLANE);
@@ -60,8 +57,7 @@ for(local engine_existing = engine_list.Begin(); engine_list.HasNext(); engine_e
    }
 }
 
-function AutoreplaceRV()
-{
+function AutoreplaceRV() {
 local engine_list=AIEngineList(AIVehicle.VT_ROAD);
 engine_list.Valuate(AIEngine.GetRoadType);
 engine_list.KeepValue(AIRoad.ROADTYPE_ROAD);

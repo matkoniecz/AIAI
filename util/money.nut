@@ -1,15 +1,12 @@
-function RepayOnePieceOfLoan()
-{
+function RepayOnePieceOfLoan() {
 	return AICompany.SetLoanAmount(AICompany.GetLoanAmount()-AICompany.GetLoanInterval())
 }
 
-function BorrowOnePieceOfLoan()
-{
+function BorrowOnePieceOfLoan() {
 	return AICompany.SetLoanAmount(AICompany.GetLoanAmount()+AICompany.GetLoanInterval())
 }
 
-function GetSafeBankBalance()
-{
+function GetSafeBankBalance() {
 	local minimum = Money.Inflate(20000)
 	minimum +=  AIInfrastructure.GetMonthlyInfrastructureCosts(AICompany.COMPANY_SELF,  AIInfrastructure.INFRASTRUCTURE_RAIL)
 	minimum +=  AIInfrastructure.GetMonthlyInfrastructureCosts(AICompany.COMPANY_SELF,  AIInfrastructure.INFRASTRUCTURE_ROAD)
@@ -18,8 +15,7 @@ function GetSafeBankBalance()
 	return minimum
 }
 
-function GetAvailableMoney()
-{
+function GetAvailableMoney() {
 	local money = AICompany.GetBankBalance(AICompany.COMPANY_SELF)
 	if (money > money + AICompany.GetMaxLoanAmount()) {
 		return 2147483647 //implied by _intsize_ = 4 on 32bit architecture
@@ -29,8 +25,7 @@ function GetAvailableMoney()
 	return money;
 }
 
-function BankruptProtector()
-{
+function BankruptProtector() {
 	local needed_pocket_money = GetSafeBankBalance();
 	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0) {
 		if (AIBase.RandRange(10)==1) {
@@ -57,8 +52,7 @@ function BankruptProtector()
 	}
 }
 
-function ProvideMoney(amount = null)
-{
+function ProvideMoney(amount = null) {
 	if (AICompany.GetBankBalance(AICompany.COMPANY_SELF)>10*AICompany.GetMaxLoanAmount()) {
 		Money.MakeMaximumPayback();
 	} else {

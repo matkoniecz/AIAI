@@ -1,5 +1,4 @@
-function RailBuilder::GetTileOnTheSideOftrack(tile, prevtile, on_the_left)
-{
+function RailBuilder::GetTileOnTheSideOftrack(tile, prevtile, on_the_left) {
 	if (prevtile == null) {
 		return AIMap.TILE_INVALID;
 	}
@@ -79,13 +78,11 @@ function RailBuilder::GetTileOnTheSideOftrack(tile, prevtile, on_the_left)
 	return AIMap.TILE_INVALID;
 }
 
-function RailBuilder::IsDoubleConnected(tile, tile2, tile3)
-{
+function RailBuilder::IsDoubleConnected(tile, tile2, tile3) {
 	return IsConnected(tile, tile2) && IsConnected(tile3, tile2);
 }
 
-function RailBuilder::IsConnected(tile, tile2)
-{
+function RailBuilder::IsConnected(tile, tile2) {
 	for(local x=-1; x<=1; x++) {
 		for(local y=-1; y<=1; y++) {
 			if (x==0 || y==0) {
@@ -98,8 +95,7 @@ function RailBuilder::IsConnected(tile, tile2)
 	return false;
 }
 
-function RailBuilder::IsLongJump(tile1, tile2)
-{
+function RailBuilder::IsLongJump(tile1, tile2) {
 	if (Helper.Abs(AIMap.GetTileX(tile1) - AIMap.GetTileX(tile2)) > 1) {
 		if (AIMap.GetTileY(tile1) == AIMap.GetTileY(tile2)) {
 			return true;
@@ -113,8 +109,7 @@ function RailBuilder::IsLongJump(tile1, tile2)
 	return false;
 }
 
-function RailBuilder::Convert3TileLocatorToTrackID(prepre, pre, tile)
-{
+function RailBuilder::Convert3TileLocatorToTrackID(prepre, pre, tile) {
 	local data = tile-pre;
 	local dataprev = pre-prepre;
 
@@ -149,8 +144,7 @@ function RailBuilder::Convert3TileLocatorToTrackID(prepre, pre, tile)
 	abort("invalid track");
 }
 
-function RailBuilder::CheckTileForEvilTracks(tile, path)
-{
+function RailBuilder::CheckTileForEvilTracks(tile, path) {
 	local tracks = AIRail.GetRailTracks(tile);
 	local table = array(7);
 	if (tracks == AIRail.RAILTRACK_INVALID) {
@@ -200,8 +194,7 @@ function RailBuilder::CheckTileForEvilTracks(tile, path)
 	}
 }
 
-function RailBuilder::testPath(path, stay_behind_path)
-{
+function RailBuilder::testPath(path, stay_behind_path) {
 	if (!CheckTileForEvilTracks(path.GetTile(), stay_behind_path)) {
 		return false;
 	}
@@ -232,8 +225,7 @@ function RailBuilder::testPath(path, stay_behind_path)
 	return true;
 }
 
-function RailBuilder::addTileToPath(path, tile, stay_behind_path)
-{
+function RailBuilder::addTileToPath(path, tile, stay_behind_path) {
 	if (!AIMap.IsValidTile(tile)) {
 		return {path=path, OK=false};
 	}
@@ -282,8 +274,7 @@ function RailBuilder::addTileToPath(path, tile, stay_behind_path)
 	}
 }
 
-function RailBuilder::IsItPossibleToEndPathWIthIt(path, prevtile, tile, aftertile, side, stay_behind_path, after1tile, after2tile, after3tile)
-{
+function RailBuilder::IsItPossibleToEndPathWIthIt(path, prevtile, tile, aftertile, side, stay_behind_path, after1tile, after2tile, after3tile) {
 	local old_copy = path;
 
 	if (!AIMap.IsValidTile(prevtile)) {
@@ -337,8 +328,7 @@ function RailBuilder::IsItPossibleToEndPathWIthIt(path, prevtile, tile, aftertil
 	return path;
 }
 
-function RailBuilder::IsItPossibleToStartPathWIthIt(prevprevtile, prevtile, tile, aftertile, side, stay_behind_path)
-{
+function RailBuilder::IsItPossibleToStartPathWIthIt(prevprevtile, prevtile, tile, aftertile, side, stay_behind_path) {
 	local afterSide = GetTileOnTheSideOftrack(aftertile, tile, side)
 	if (!AIMap.IsValidTile(prevtile)) return false;
 	if (!AIMap.IsValidTile(tile)) return false;
@@ -500,8 +490,7 @@ class PassingLaneConstructor extends RailBuilder
 
 }
 
-function RailBuilder::GeneratePassingLanes(path)
-{
+function RailBuilder::GeneratePassingLanes(path) {
 	Info("GeneratePassingLanes");
 	local list = [];
 	local prevtile = null;
@@ -572,8 +561,7 @@ function RailBuilder::GeneratePassingLanes(path)
 	return list;
 }
 
-function RailBuilder::ConstructionOfPassingLanes(list)
-{
+function RailBuilder::ConstructionOfPassingLanes(list) {
 	local count = 0;
 	for(local i=0; i<list.len(); i++) {
 		Info("******************************** " + (i+1) + " of " + list.len() + " passing lanes")

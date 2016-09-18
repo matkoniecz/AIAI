@@ -1,28 +1,23 @@
-function Info(string)
-{
+function Info(string) {
 	local date=AIDate.GetCurrentDate ();
 	AILog.Info(GetReadableDate()  + " " + string);
 }
 
-function Warning(string)
-{
+function Warning(string) {
 	local date=AIDate.GetCurrentDate ();
 	AILog.Warning(GetReadableDate()  + " " + string);
 }
 
-function Error(string)
-{
+function Error(string) {
 	AILog.Error(GetReadableDate() + " " + string);
 }
 
-function GetReadableDate()
-{
+function GetReadableDate() {
 	local date=AIDate.GetCurrentDate ();
 	return AIDate.GetYear(date)  + "." + AIDate.GetMonth(date)  + "." + AIDate.GetDayOfMonth(date);
 }
 
-function IsTestModeEnabled()
-{
+function IsTestModeEnabled() {
 	local gender = AICompany.GetPresidentGender(AICompany.COMPANY_SELF);
 	local other_gender = AICompany.GENDER_MALE 
 	if (gender == other_gender) {
@@ -35,8 +30,7 @@ function IsTestModeEnabled()
 	return false;
 }
 
-function abort(message)
-{
+function abort(message) {
 	Error(message + ", last error is " + AIError.GetLastErrorString());
 	Warning("Please, post savegame");
 	if (IsTestModeEnabled()) {

@@ -92,8 +92,7 @@ function RailBuilder::Maintenance()
 	this.TrainReplace();
 }
 
-function RailBuilder::AddTrainsToThisStation(station, cargo)
-{
+function RailBuilder::AddTrainsToThisStation(station, cargo) {
 	if (!IsItNeededToImproveThatNoRawStation(station, cargo)) {
 		return 0;
 	}
@@ -151,8 +150,7 @@ function RailBuilder::AddTrainsToThisStation(station, cargo)
 	}
 	return 0;
 }
-function RailBuilder::AddTrains()
-{
+function RailBuilder::AddTrains() {
 	local how_many = 0;
 	local cargo_list=AICargoList();
 	for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) {
@@ -165,8 +163,7 @@ function RailBuilder::AddTrains()
 }
 
 
-function RailBuilder::copyVehicle(main_vehicle_id, cargo)
-{
+function RailBuilder::copyVehicle(main_vehicle_id, cargo) {
 	Info("Copying " + AIVehicle.GetName(main_vehicle_id))
 	if (!AIVehicle.IsValidVehicle(main_vehicle_id)) {
 		return false;
@@ -189,8 +186,7 @@ function RailBuilder::copyVehicle(main_vehicle_id, cargo)
 	return false;
 }
 
-function RailBuilder::TrainReplaceOnThisStation(station_id)
-{
+function RailBuilder::TrainReplaceOnThisStation(station_id) {
 	local vehicle_list=AIVehicleList_Station(station_id);
 	local max_train_count=LoadDataFromStationNameFoundByStationId(station_id, "{}")
 	if (vehicle_list.Count() > max_train_count) {
@@ -240,8 +236,7 @@ function RailBuilder::TrainReplaceOnThisStation(station_id)
 	}
 }
 
-function RailBuilder::TrainReplace()
-{
+function RailBuilder::TrainReplace() {
 	local station_list = AIStationList(AIStation.STATION_TRAIN);
 	if (station_list.Count() == 0) {
 		return;
@@ -261,8 +256,7 @@ function RailBuilder::TrainReplace()
 	}
 }
 
-function RailBuilder::GetStationSize(station_tile)
-{
+function RailBuilder::GetStationSize(station_tile) {
 	if (AIRail.GetRailStationDirection(station_tile) == AIRail.RAILTRACK_NE_SW) { //x_is_constant__horizontal
 		local direction = AIRail.RAILTRACK_NE_SW;
 		for(local i = 0; true; i++) {
@@ -288,8 +282,7 @@ function RailBuilder::GetStationSize(station_tile)
 	}
 }
 
-function RailBuilder::GetMaxSpeedOfTrain(engine, wagon)
-{
+function RailBuilder::GetMaxSpeedOfTrain(engine, wagon) {
 	if (engine == null || wagon == null) {
 		return 0;
 	}
@@ -301,14 +294,12 @@ function RailBuilder::GetMaxSpeedOfTrain(engine, wagon)
 	return min(speed_wagon, speed_engine);
 }
 
-function RailBuilder::RailwayLinkConstruction(path)
-{
+function RailBuilder::RailwayLinkConstruction(path) {
 	AIRail.SetCurrentRailType(trasa.track_type); 
 	return DumbBuilder(path);
 }
 
-function RailBuilder::DumbRemover(path, goal)
-{
+function RailBuilder::DumbRemover(path, goal) {
 	Warning("DumbRemover after " + AIError.GetLastErrorString());
 	local prev = null;
 	local prevprev = null;
@@ -350,8 +341,7 @@ class allowedConnections
 	constructions = null;
 }
 
-function RailBuilder::RetryCheck(non_critical_errors)
-{
+function RailBuilder::RetryCheck(non_critical_errors) {
 	if (non_critical_errors != null) {
 		for(local i = 0; i<non_critical_errors.len(); i++) {
 			if (non_critical_errors[i].error == AIError.GetLastError() && non_critical_errors[i].retry_count>0) {
@@ -368,8 +358,7 @@ function RailBuilder::RetryCheck(non_critical_errors)
 	}
 	return false;
 }
-function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.ERR_VEHICLE_IN_THE_WAY, retry_count = 4, retry_time_wait = 50}])
-{
+function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.ERR_VEHICLE_IN_THE_WAY, retry_count = 4, retry_time_wait = 50}]) {
 	Info("DumbBuilder");
 	local copy = path;
 	local prev = null;
@@ -435,8 +424,7 @@ function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.
 	return true;
 }
 
-function RailBuilder::GetCostOfRoute(path)
-{
+function RailBuilder::GetCostOfRoute(path) {
 	local costs = AIAccounting();
 	costs.ResetCosts ();
 
@@ -451,8 +439,7 @@ function RailBuilder::GetCostOfRoute(path)
 	}
 }
 
-function RailBuilder::GetWeightOfEngine(engine, cargo)
-{
+function RailBuilder::GetWeightOfEngine(engine, cargo) {
 	local weight = AIEngine.GetWeight(engine);
 	local capacity = max(AIEngine.GetCapacity(engine), 0);
 	if (AICargo.IsFreight(cargo)) {
@@ -461,24 +448,21 @@ function RailBuilder::GetWeightOfEngine(engine, cargo)
 	return weight;
 }
 
-function RailBuilder::BuildTrainButNotWithThisEngineWagonCombination(route, name_of_train, engine, wagon, recover_from_failed_engine)
-{
+function RailBuilder::BuildTrainButNotWithThisEngineWagonCombination(route, name_of_train, engine, wagon, recover_from_failed_engine) {
 	Info("Failed to combine '" + AIEngine.GetName(engine) +"' and '" + AIEngine.GetName(wagon) + "':" + AIError.GetLastErrorString() +" *^@@*")
 	blacklisted_engine_wagon_combination.append([engine, wagon])
 	Warning("blacklisted '" + AIEngine.GetName(engine) +"' and '" + AIEngine.GetName(wagon) + "' combination'")
 	return this.BuildTrainRecoverAfterBlacklisting(route, name_of_train, recover_from_failed_engine)
 }
 
-function RailBuilder::BuildTrainButNotWithThisVehicle(route, name_of_train, bad_vehicle, recover_from_failed_engine)
-{
+function RailBuilder::BuildTrainButNotWithThisVehicle(route, name_of_train, bad_vehicle, recover_from_failed_engine) {
 	Info("Failed to build '" + AIEngine.GetName(bad_vehicle) +"':" + AIError.GetLastErrorString() +" **@@*")
 	blacklisted_vehicles.AddItem(bad_vehicle, 0)
 	Warning("blacklisted "+AIEngine.GetName(bad_vehicle))
 	return this.BuildTrainRecoverAfterBlacklisting(route, name_of_train, recover_from_failed_engine)
 }
 
-function RailBuilder::BuildTrainRecoverAfterBlacklisting(route, name_of_train, recover_from_failed_engine)
-{
+function RailBuilder::BuildTrainRecoverAfterBlacklisting(route, name_of_train, recover_from_failed_engine) {
 	Helper.SellAllVehiclesStoppedInDepots()
 	if (!recover_from_failed_engine) {
 		return null;
@@ -491,8 +475,7 @@ function RailBuilder::BuildTrainRecoverAfterBlacklisting(route, name_of_train, r
 	return null;
 }
 
-function RailBuilder::AttachWagonToTheTrain(newWagon, engineId)
-{
+function RailBuilder::AttachWagonToTheTrain(newWagon, engineId) {
 	assert(AIVehicle.IsValidVehicle(newWagon));
 	assert(AIVehicle.GetNumWagons(newWagon) > 0);
 	assert(AIVehicle.IsValidVehicle(engineId));
@@ -511,8 +494,7 @@ function RailBuilder::AttachWagonToTheTrain(newWagon, engineId)
 	return true
 }
 
-function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engine)
-{
+function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engine) {
 	local costs = AIAccounting();
 	costs.ResetCosts ();
 	local bestEngine = route.engine[0];
@@ -651,8 +633,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 	return this.BuildTrainButNotWithThisVehicle(route, name_of_train, bestEngine, recover_from_failed_engine);
 }
 
-function RailBuilder::SignalPath(path)
-{
+function RailBuilder::SignalPath(path) {
 	SignalPathAdvanced(path, 0, null, 999999)
 }
 
@@ -714,8 +695,7 @@ function RailBuilder::SignalPathAdvanced(path, skip, end, signal_count_limit) //
 	return i;
 }
 
-function RailBuilder::TrainOrders(engineId)
-{
+function RailBuilder::TrainOrders(engineId) {
 	if (trasa.type == RouteType.rawCargo) {
 		AIOrder.AppendOrder (engineId, trasa.first_station.location, AIOrder.OF_FULL_LOAD_ANY | AIOrder.OF_NON_STOP_INTERMEDIATE );
 		AIOrder.AppendOrder (engineId, trasa.second_station.location, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_NO_LOAD );
@@ -730,8 +710,7 @@ function RailBuilder::TrainOrders(engineId)
 	}
 }
 
-function RailBuilder::ValuatorRailType(rail_type_id)
-{
+function RailBuilder::ValuatorRailType(rail_type_id) {
 	local engines = AIEngineList(AIVehicle.VT_RAIL);
 	engines.Valuate(AIEngine.IsWagon);
 	engines.RemoveValue(1);  
@@ -839,8 +818,7 @@ function RailBuilder::WagonValuator(engineId)//from DenverAndRioGrande
 	return  AIEngine.GetCapacity(engineId) * AIEngine.GetMaxSpeed(engineId);
 }
 
-function RailBuilder::IsThisThingBanned(engine, cargo_id, blacklisted_vehicles)
-{
+function RailBuilder::IsThisThingBanned(engine, cargo_id, blacklisted_vehicles) {
 	return blacklisted_vehicles.HasItem(engine);
 }
 
@@ -955,16 +933,14 @@ function RailBuilder::FindBestEngine(wagonId, trainsize, cargoId, track_type)//f
 	return engines.Begin();
 }
 
-function RailBuilder::ValuateProducer(ID, cargo)
-{
+function RailBuilder::ValuateProducer(ID, cargo) {
 	if (AIIndustry.GetLastMonthProduction(ID, cargo)<50-4*desperation) {
 		return 0; //protection from tiny industries servised by giant trains
 	}
 	return Builder.ValuateProducer(ID, cargo);
 }
 
-function RailBuilder::GetMinimalStationSize()
-{
+function RailBuilder::GetMinimalStationSize() {
 	return max(1, min(4 - (desperation/2), AIGameSettings.GetValue("station.station_spread")));
 }
 
@@ -1112,8 +1088,7 @@ function RailBuilder::PathFinder(limit)
 	return true;
 }
 
-function RailBuilder::distanceBetweenIndustriesValuator(distance)
-{
+function RailBuilder::distanceBetweenIndustriesValuator(distance) {
 	if (distance>GetMaxDistance()) return 0;
 	if (distance<GetMinDistance()) return 0;
 
@@ -1132,19 +1107,16 @@ function RailBuilder::distanceBetweenIndustriesValuator(distance)
 	return 0;
 }
 
-function RailBuilder::GetMinDistance()
-{
+function RailBuilder::GetMinDistance() {
 	return 10;
 }
 
-function RailBuilder::GetMaxDistance()
-{
+function RailBuilder::GetMaxDistance() {
 	if (desperation>5) return 100+desperation*75;
 	return 250+desperation*50;
 }
 
-function RailBuilder::IsAllowed()
-{
+function RailBuilder::IsAllowed() {
 	if (0 == AIAI.GetSetting("use_freight_trains")) {
 		Warning("Freight trains are disabled in AIAI settings.")
 		return false;
@@ -1178,8 +1150,7 @@ function RailBuilder::IsAllowed()
 	return true;
 }
 
-function RailBuilder::Possible()
-{
+function RailBuilder::Possible() {
 	if (!this.IsAllowed()) return false;
 	if (this.cost <= 1) {
 		Info("no cost estimation for a railway connection is available.");
@@ -1189,8 +1160,7 @@ function RailBuilder::Possible()
 	return this.cost<GetAvailableMoney();
 }
 
-function RailBuilder::Go()
-{
+function RailBuilder::Go() {
 	local list_of_rail_types = GetRailTypeList();
 	if (list_of_rail_types == null) {
 		Error("No suitable railtype!")
@@ -1244,8 +1214,7 @@ function RailBuilder::Go()
 	return false;
 }
 
-function RailBuilder::ConstructionOfRoute()
-{
+function RailBuilder::ConstructionOfRoute() {
 	AIRail.SetCurrentRailType(trasa.track_type);
 	ProvideMoney();
 
@@ -1308,8 +1277,7 @@ function RailBuilder::ConstructionOfRoute()
 	return true;
 }
 
-function RailBuilder::PrepareRoute()
-{
+function RailBuilder::PrepareRoute() {
 	Info("   Rail route on distance: " + AIMap.DistanceManhattan(trasa.start_tile, trasa.end_tile));
 	this.StationPreparation();   
 	if (!this.PathFinder(this.GetPathfindingLimit())) {
@@ -1336,13 +1304,11 @@ function RailBuilder::PrepareRoute()
 	return true;
 }
 
-function RailBuilder::FindPairForRoute(route)
-{
+function RailBuilder::FindPairForRoute(route) {
 	return FindPairWrapped(route, this);
 }
 
-function RailBuilder::GetNiceRandomTown(location)
-{
+function RailBuilder::GetNiceRandomTown(location) {
 	local town_list = AITownList();
 	town_list.Valuate(AITown.GetDistanceManhattanToTile, location);
 	town_list.KeepBelowValue(GetMaxDistance());
@@ -1356,8 +1322,7 @@ function RailBuilder::GetNiceRandomTown(location)
 }
 
 
-function RailBuilder::IndustryToIndustryStationAllocator(project)
-{
+function RailBuilder::IndustryToIndustryStationAllocator(project) {
 	project.station_size = AIAI.GetSetting("max_train_station_length");
 
 	local producer = project.start;
@@ -1376,8 +1341,7 @@ function RailBuilder::IndustryToIndustryStationAllocator(project)
 	return project;
 }
 
-function RailBuilder::IndustryToCityStationAllocator(project)
-{
+function RailBuilder::IndustryToCityStationAllocator(project) {
 	project.station_size = AIAI.GetSetting("max_train_station_length");
 
 	project.first_station.location = null; 
@@ -1392,18 +1356,15 @@ function RailBuilder::IndustryToCityStationAllocator(project)
 	return project;
 }
 
-function RailBuilder::FindCityConsumerStation(town, cargo, length)
-{
+function RailBuilder::FindCityConsumerStation(town, cargo, length) {
 	return FindCityProducerStation(town, cargo, length, AIAI.GetSetting("max_train_station_platform_count_city_end"))
 }
 
-function RailBuilder::FindCityProducerStation(town, cargo, length)
-{
+function RailBuilder::FindCityProducerStation(town, cargo, length) {
 	return FindCityProducerStation(town, cargo, length, AIAI.GetSetting("max_train_station_platform_count_city_start"))
 }
 
-function RailBuilder::FindCityProducerStation(town, cargo, length, platform_count)
-{
+function RailBuilder::FindCityProducerStation(town, cargo, length, platform_count) {
 	local radius = AIStation.GetCoverageRadius(AIStation.STATION_TRAIN);
 	local tile = AITown.GetLocation(town);
 	local list = AITileList();
@@ -1415,8 +1376,7 @@ function RailBuilder::FindCityProducerStation(town, cargo, length, platform_coun
 	return this.FindStationRail(list, length, platform_count); 
 }
 
-function RailBuilder::FindStationConsumer(consumer, cargo, length)
-{
+function RailBuilder::FindStationConsumer(consumer, cargo, length) {
 	local radius = AIStation.GetCoverageRadius(AIStation.STATION_TRAIN);
 	local list=AITileList_IndustryAccepting(consumer, radius);
 	list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, radius);
@@ -1426,8 +1386,7 @@ function RailBuilder::FindStationConsumer(consumer, cargo, length)
 	return this.FindStationRail(list, length, AIAI.GetSetting("max_train_station_platform_count_end_industry"));
 }
 
-function RailBuilder::FindStationProducer(producer, cargo, length)
-{
+function RailBuilder::FindStationProducer(producer, cargo, length) {
 	local radius = AIStation.GetCoverageRadius(AIStation.STATION_TRAIN);
 	local list=AITileList_IndustryProducing(producer, radius);
 	list.Valuate(AIMap.DistanceSquare, trasa.start_tile); //pure eyecandy (station near industry) TODO sort by industry count
@@ -1435,8 +1394,7 @@ function RailBuilder::FindStationProducer(producer, cargo, length)
 	return this.FindStationRail(list, length, AIAI.GetSetting("max_train_station_platform_count_start_industry"));
 }
 
-function RailBuilder::FindStationRail(list, length, max_platform_count)
-{
+function RailBuilder::FindStationRail(list, length, max_platform_count) {
 	local returned = RailwayStation();
 	returned.location = null;
 	returned.platform_count = 0;
@@ -1528,8 +1486,7 @@ function RailBuilder::ForbiddenArea(platform_count, length, station_tile, mover,
 	return forbidden;
 }
 
-function RailBuilder::IsTryToPlaceRailStationHereGoingToCompletelyFail(station_entrance_a, station_entrance_b, railtrack, length, station_tile)
-{
+function RailBuilder::IsTryToPlaceRailStationHereGoingToCompletelyFail(station_entrance_a, station_entrance_b, railtrack, length, station_tile) {
 	//avoid joining with our other station
 	if (AIRail.IsRailStationTile(station_entrance_a)) {
 		if (AIRail.GetRailStationDirection(station_entrance_a) == railtrack) {
@@ -1558,8 +1515,7 @@ function RailBuilder::IsTryToPlaceRailStationHereGoingToCompletelyFail(station_e
 	return false;
 }
 
-function RailBuilder::TryToPlaceRailStationHere(station_tile, direction, length, max_platform_count)
-{
+function RailBuilder::TryToPlaceRailStationHere(station_tile, direction, length, max_platform_count) {
 	local returned = RailwayStation();
 	returned.location = station_tile;
 	returned.direction = direction;

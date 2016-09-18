@@ -125,8 +125,7 @@ class RailPathfinder.Cost
 	}
 };
 
-function RailPathfinder::FindPath(iterations)
-{
+function RailPathfinder::FindPath(iterations) {
 	local test_mode = AITestMode();
 	local ret = this._pathfinder.FindPath(iterations);
 	this._running = (ret == false) ? true : false;
@@ -140,8 +139,7 @@ function RailPathfinder::FindPath(iterations)
 	return ret;
 }
 
-function RailPathfinder::_GetBridgeNumSlopes(end_a, end_b)
-{
+function RailPathfinder::_GetBridgeNumSlopes(end_a, end_b) {
 	local slopes = 0;
 	local direction = (end_b - end_a) / AIMap.DistanceManhattan(end_a, end_b);
 	local slope = AITile.GetSlope(end_a);
@@ -161,13 +159,11 @@ function RailPathfinder::_GetBridgeNumSlopes(end_a, end_b)
 	return slopes;
 }
 
-function RailPathfinder::_nonzero(a, b)
-{
+function RailPathfinder::_nonzero(a, b) {
 	return a != 0 ? a : b;
 }
 
-function RailPathfinder::_Cost(path, new_tile, new_direction, self)
-{
+function RailPathfinder::_Cost(path, new_tile, new_direction, self) {
 	/* path == null means this is the first node of a path, so the cost is 0. */
 	if (path == null) return 0;
 
@@ -266,8 +262,7 @@ function RailPathfinder::_Cost(path, new_tile, new_direction, self)
 	return path.GetCost() + cost;
 }
 
-function RailPathfinder::_Estimate(cur_tile, cur_direction, goal_tiles, self)
-{
+function RailPathfinder::_Estimate(cur_tile, cur_direction, goal_tiles, self) {
 	local min_cost = self._max_cost;
 	/* As estimate we multiply the lowest possible cost for a single tile with
 	 *  with the minimum number of tiles we need to traverse. */
@@ -280,8 +275,7 @@ function RailPathfinder::_Estimate(cur_tile, cur_direction, goal_tiles, self)
 	return min_cost*self.estimate_multiplier;
 }
 
-function RailPathfinder::_Neighbours(path, cur_node, self)
-{
+function RailPathfinder::_Neighbours(path, cur_node, self) {
 	if (AITile.HasTransportType(cur_node, AITile.TRANSPORT_RAIL)) return [];
 	/* self._max_cost is the maximum path cost, if we go over it, the path isn't valid. */
 	if (path.GetCost() >= self._max_cost) return [];
@@ -329,13 +323,11 @@ function RailPathfinder::_Neighbours(path, cur_node, self)
 	return tiles;
 }
 
-function RailPathfinder::_CheckDirection(tile, existing_direction, new_direction, self)
-{
+function RailPathfinder::_CheckDirection(tile, existing_direction, new_direction, self) {
 	return false;
 }
 
-function RailPathfinder::_dir(from, to)
-{
+function RailPathfinder::_dir(from, to) {
 	if (from - to == 1) return 0;
 	if (from - to == -1) return 1;
 	if (from - to == AIMap.GetMapSizeX()) return 2;
@@ -343,8 +335,7 @@ function RailPathfinder::_dir(from, to)
 	throw("Shouldn't come here in _dir");
 }
 
-function RailPathfinder::_GetDirection(pre_from, from, to, is_bridge)
-{
+function RailPathfinder::_GetDirection(pre_from, from, to, is_bridge) {
 	if (is_bridge) {
 		if (from - to == 1) return 1;
 		if (from - to == -1) return 2;
@@ -360,8 +351,7 @@ function RailPathfinder::_GetDirection(pre_from, from, to, is_bridge)
  *  for performance reasons. Tunnels will only be build if no terraforming
  *  is needed on both ends.
  */
-function RailPathfinder::_GetTunnelsBridges(last_node, cur_node, bridge_dir)
-{
+function RailPathfinder::_GetTunnelsBridges(last_node, cur_node, bridge_dir) {
 	local slope = AITile.GetSlope(cur_node);
 	if (slope == AITile.SLOPE_FLAT && AITile.IsBuildable(cur_node + (cur_node - last_node))) return [];
 	local tiles = [];
@@ -387,16 +377,14 @@ function RailPathfinder::_GetTunnelsBridges(last_node, cur_node, bridge_dir)
 	return tiles;
 }
 
-function RailPathfinder::_IsTurn(pre, start, middle, end)
-{
+function RailPathfinder::_IsTurn(pre, start, middle, end) {
 	//AIMap.DistanceManhattan(new_tile, path.GetParent().GetParent().GetTile()) == 3 &&
 	//path.GetParent().GetParent().GetTile() - path.GetParent().GetTile() != prev_tile - new_tile) {
 	return AIMap.DistanceManhattan(end, pre) == 3 && pre - start != middle - end;
 }
 
 
-function RailPathfinder::_IsSlopedRail(start, middle, end)
-{
+function RailPathfinder::_IsSlopedRail(start, middle, end) {
 	local NW = 0; // Set to true if we want to build a rail to / from the north-west
 	local NE = 0; // Set to true if we want to build a rail to / from the north-east
 	local SW = 0; // Set to true if we want to build a rail to / from the south-west

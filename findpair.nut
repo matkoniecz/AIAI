@@ -1,12 +1,10 @@
-function LogInFindPair(string)
-{
+function LogInFindPair(string) {
 	if (AIAI.GetSetting("log_in_find_pair") == 1) {
 		Info(string);
 	}
 }
 
-function FindPairWrapped(idea, builder)
-{
+function FindPairWrapped(idea, builder) {
 	local industry_list = builder.GetLimitedIndustryList();
 	local choice = Route();
 	local count = industry_list.Count();
