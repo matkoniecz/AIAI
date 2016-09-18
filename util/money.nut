@@ -26,9 +26,10 @@ function GetAvailableMoney() {
 }
 
 function BankruptProtector() {
-	if(AICompany.GetBankBalance(AICompany.COMPANY_SELF) < 0) {
-		FunnyComplaintAboutMoneyTrouble(AIBase.RandRange(11));
+	local needed_pocket_money = GetSafeBankBalance();
+	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF) < needed_pocket_money) {
 		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF) < 0) {
+			FunnyComplaintAboutMoneyTrouble(AIBase.RandRange(11));
 			if (AICompany.GetLoanAmount() == AICompany.GetMaxLoanAmount()) {
 				FunnyComplaintAboutMoneyTrouble(10);
 				DoomsdayMachine();
@@ -36,13 +37,12 @@ function BankruptProtector() {
 			}
 			BorrowOnePieceOfLoan()
 		}
-		Info("End of financial problems!");
-	}
+		if(AICompany.GetBankBalance(AICompany.COMPANY_SELF) > 0) {
+			Info("End of serious financial problems!");
+		}
 
-	local needed_pocket_money = GetSafeBankBalance();
-	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF) < needed_pocket_money) {
 		if (!BorrowOnePieceOfLoan()) {
-			Error("Borrowing more is impossible and we need money! ("+AICompany.GetBankBalance(AICompany.COMPANY_SELF)+"/"+needed_pocket_money+")");
+			Warning("Borrowing more is impossible and we need money! ("+AICompany.GetBankBalance(AICompany.COMPANY_SELF)+"/"+needed_pocket_money+")");
 			Helper.SellAllVehiclesStoppedInDepots();
 			Sleep(1000);
 		}
@@ -51,9 +51,9 @@ function BankruptProtector() {
 
 function FunnyComplaintAboutMoneyTrouble(severity){
 	if(severity < 9){
-		Error("We need money!");
+		Warning("We need money!");
 	} else if(severity == 10) {
-		Error("We need bailout!");
+		Warning("We need bailout!");
 	} else {
 		Error("We are too big to fail! Remember, we employ " + (AIVehicleList().Count()*7+AIStationList(AIStation.STATION_ANY).Count()*3+23) + " people!");
 	}
