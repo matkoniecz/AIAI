@@ -1252,10 +1252,9 @@ function RoadBuilder::RemoveRedundantRVFromStation(station_id, cargo, vehicle_li
 	local max_load = -1;
 	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()) {
 		if (IsForSell(vehicle_id) != false || AIVehicle.GetAge(vehicle_id) < 60) {
-			Error("skipped");
 			return 0;
 		}
-		if (AIVehicle.GetCapacity (vehicle_id, cargo) == 0) {
+		if (AIVehicle.GetCargoLoad(vehicle_id, cargo) == 0) {
 			if (RoadBuilder.IsVehicleNearStation(vehicle_id, station_id)) {
 				if (AIVehicle.GetState(vehicle_id) == AIVehicle.VS_AT_STATION) {
 					waiting_balance += 2;
@@ -1282,7 +1281,6 @@ function RoadBuilder::RemoveRedundantRVFromStation(station_id, cargo, vehicle_li
 			active_counter++;
 		}
 	}
-	Error("at " + AIStation.GetName(station_id) + " waits: " + waiting_counter + " vehicle for skipping: " + vehicle_for_skipping);
 	if(waiting_counter >= 2 && vehicle_for_skipping != null) {
 		if(AIStation.GetCargoWaiting(station_id, cargo) < AIVehicle.GetCapacity(vehicle_for_skipping, cargo)){
 			SkipVehicleIfLoadingAtThisStation(vehicle_for_skipping, station_id);
@@ -1298,7 +1296,6 @@ function RoadBuilder::RemoveRedundantRVFromStation(station_id, cargo, vehicle_li
 }
 
 function RoadBuilder::SkipVehicleIfLoadingAtThisStation(vehicle_for_skipping, station_id){
-	Error("attempt skipping");
 	if (!AIOrder.IsGotoStationOrder(vehicle_for_skipping, AIOrder.ORDER_CURRENT)) {
 		return;
 	}
