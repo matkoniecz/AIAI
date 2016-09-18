@@ -141,9 +141,9 @@ function ImproveTownRating(town_id, desperation) {
 	}
 	while(GetAvailableMoney()> Money.Inflate(3000000 || desperation > 5)) {
 		if (AITown.PerformTownAction(town_id, AITown.TOWN_ACTION_BRIBE)) {
-			Info("Bribed "+AITown.GetName(town_id)+"!" + AIError.GetLastErrorString());
+			Info("Bribed "+AITown.GetName(town_id)+".");
 		} else {
-			Info("Bribe in "+AITown.GetName(town_id)+" failed!" + AIError.GetLastErrorString());
+			Info("Bribe in "+AITown.GetName(town_id)+" failed! " + AIError.GetLastErrorString());
 			return false;
 		}
 		if (rating == AITown.TOWN_RATING_NONE || rating >= min_rating) {
