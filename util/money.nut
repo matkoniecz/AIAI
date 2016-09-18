@@ -33,7 +33,8 @@ function BankruptProtector() {
 			if (AICompany.GetLoanAmount() == AICompany.GetMaxLoanAmount()) {
 				FunnyComplaintAboutMoneyTrouble(10);
 				DoomsdayMachine();
-				Sleep(1000);
+				SafeMaintenance();
+				Sleep(200);
 			}
 			BorrowOnePieceOfLoan()
 		}
@@ -44,7 +45,8 @@ function BankruptProtector() {
 		if (!BorrowOnePieceOfLoan()) {
 			Warning("Borrowing more is impossible and we need money! ("+AICompany.GetBankBalance(AICompany.COMPANY_SELF)+"/"+needed_pocket_money+")");
 			Helper.SellAllVehiclesStoppedInDepots();
-			Sleep(1000);
+			SafeMaintenance();
+			Sleep(200);
 		}
 	}
 }
