@@ -48,7 +48,6 @@ function BusRoadBuilder::FindBusPair() {
 		return false;
 	}
 	Info("From " + AITown.GetName(trasa.start) + "  to " +  AITown.GetName(trasa.end));
-	trasa.cargo = Helper.GetPAXCargo();
 
 	trasa = TownCargoStationAllocator(trasa);
 
