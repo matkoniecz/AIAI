@@ -1,23 +1,41 @@
-function AIAI::BuildStatues() {
-	local veh_list = AIVehicleList();
-	if (veh_list.Count()==0) return false;
+function AIAI::EnsureStatueForThisStation(station_id) {
+	local location = AIStation.GetLocation(station_id);
+	local town = AITile.GetClosestTown(location);
+	if (AITown.HasStatue(town)){
+		return true;
+	}
+	if (AITown.PerformTownAction(town, AITown.TOWN_ACTION_BUILD_STATUE)) {
+		Info("Statue for " + AIStation.GetName(station_id));
+		return true;
+	}
+	return false;
+}
 
-	veh_list.Valuate(AIBase.RandItem);
+function AIAI::BuildStatues() {
+	Info("Trying to build statues.")
+	local veh_list = AIVehicleList();
+	if (veh_list.Count() == 0) {
+		return false;
+	}
+
+	//iterating over vehicles rather than AIStationList(AIStation.STATION_ANY);
+	//as not everything is point to point
+	//for example airports
+
+	veh_list.Valuate(RandomValuator);
 	veh_list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
 	for (local veh = veh_list.Begin(); veh_list.HasNext(); veh = veh_list.Next()) {
 		for(local i = 0; i < AIOrder.GetOrderCount(veh); i++) {
 			local location = AIOrder.GetOrderDestination(veh, i);
 			if (AITile.IsStationTile(location)) {
 				if ((AIOrder.GetOrderFlags(veh, i) & AIOrder.OF_NO_LOAD) != AIOrder.OF_NO_LOAD) {
-					local station = AIStation.GetStationID(location);
-					local suma = 0;
+					local station_id = AIStation.GetStationID(location);
 					if (AIVehicle.GetVehicleType(veh) == AIVehicle.VT_RAIL || AICompany.GetBankBalance(AICompany.COMPANY_SELF) > AICompany.GetMaxLoanAmount() || desperation>30) {
-						if (AITown.PerformTownAction(AITile.GetClosestTown(location), AITown.TOWN_ACTION_BUILD_STATUE)) {
-							Info("Statue for " + AIVehicle.GetName(veh));
-							return true;
-						} else {
+						if(!EnsureStatueForThisStation(station_id)) {
 							if (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH) {
 								return false;
+							}	else {
+								Warning("Statue construction failed due to " + AIError.GetLastErrorString());
 							}
 						}
 					}
@@ -25,7 +43,7 @@ function AIAI::BuildStatues() {
 			}
 		}
 	}
-	Info("Statue construction failed");
+	Info("Statue construction failed despite available cash.");
 	return false;
 }
 
