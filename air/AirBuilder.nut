@@ -367,7 +367,7 @@ return vehicle;
 
 function AirBuilder::HowManyInitialAirplanes(distance, speed, production, engine) {
 local count = (3*distance)/(2*speed);
-Info(count + " aircrafts needed; based on distance");
+Info(count + " aircrafts needed; based on distance ("+distance+") and speed ("+speed+")");
 
 count *= 10 * production;
 //Info(count + "&^%***********");
