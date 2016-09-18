@@ -500,7 +500,7 @@ function RoadBuilder::FindRV(cargo) {
 	local list = AIEngineList(AIVehicle.VT_ROAD);
 
 	list.Valuate(AIEngine.GetRoadType);
-	list.KeepValue(AIRoad.ROADTYPE_ROAD);
+	list.KeepValue(AIRoad.GetCurrentRoadType());
 
 	list.Valuate(AIEngine.CanRefitCargo, cargo);
 	list.KeepValue(1);

@@ -39,6 +39,10 @@ function BusRoadBuilder::FindBusPair() {
 	trasa.start = GetRatherBigRandomTown();
 	trasa.end = GetNiceRandomTown(AITown.GetLocation(trasa.start))
 	trasa.cargo = Helper.GetPAXCargo();
+	//supporting trams require improvements to BuildDepotNextToRoad in SuperLib
+	//if(AIRoad.IsRoadTypeAvailable(AIRoad.ROADTYPE_TRAM)){
+	//	AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_TRAM);
+	//}
 
 	if (trasa.end == null) {
 		return false;
