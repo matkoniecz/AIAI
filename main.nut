@@ -41,6 +41,7 @@ function AIAI::Starter() {
 		general_inspection = GetDate() - 12;
 		station_number = 1
 	} else {
+		//should be loaded from savegame
 	}
 	if (Helper.GetMailCargo==-1) {
 		abort("mail cargo does not exist");
@@ -77,6 +78,7 @@ function AIAI::CommunicateWithGS() {
 
 function AIAI::Start() {
 	this.Starter();
+	ConsiderGeneralInspection();
 	local builders = strategyGenerator();
 	for(local i = 1; true; i++) {
 		local waiting_for_money = false;
@@ -106,19 +108,22 @@ function AIAI::Start() {
 			desperation++;
 			continue;
 		}
-		local time = GetDate()-general_inspection;
-		if (time == 1) {
-			Info("1 month from general check");
-		} else {
-			Info(time + " months from general check");
-		}
-		if (time >= 6) { //6 months
-			this.Rungeneral_inspection();
-			this.general_inspection = GetDate();
-		}
 		Info("==================iteration number " + i + " of the main loop is now finished=================");
 		}
 	abort("Escaped Start function, it was not supposed to happen");
+}
+
+function AIAI::ConsiderGeneralInspection(){
+	local time = GetDate()-general_inspection;
+	if (time == 1) {
+		Info("1 month from general check");
+	} else {
+		Info(time + " months from general check");
+	}
+	if (time >= 6) { //6 months
+		this.Rungeneral_inspection();
+		this.general_inspection = GetDate();
+	}	
 }
 
 function AIAI::Rungeneral_inspection() {
