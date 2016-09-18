@@ -35,10 +35,14 @@ function BusRoadBuilder::GetNiceRandomTown(location) {
 	return town_list.Begin();
 }
 
+function BusRoadBuilder::GetCargo(){
+	return Helper.GetPAXCargo();
+}
+
 function BusRoadBuilder::FindBusPair() {
 	trasa.start = GetRatherBigRandomTown();
 	trasa.end = GetNiceRandomTown(AITown.GetLocation(trasa.start))
-	trasa.cargo = Helper.GetPAXCargo();
+	trasa.cargo = GetCargo();
 	//supporting trams require improvements to BuildDepotNextToRoad in SuperLib
 	//if(AIRoad.IsRoadTypeAvailable(AIRoad.ROADTYPE_TRAM)){
 	//	AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_TRAM);
