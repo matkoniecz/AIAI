@@ -263,6 +263,17 @@ class AIAI extends AIInfo {
 		custom_value = 0,
 		flags = CONFIG_BOOLEAN + CONFIG_INGAME
 	});
+	AddSetting( {
+		name = "log_level",
+		description = "Debug: Log level (higher = print more) for SuperLib",
+		easy_value = 1,
+		medium_value = 1,
+		hard_value = 1,
+		custom_value = 1,
+		flags = AICONFIG_INGAME + CONFIG_DEVELOPER,
+		min_value = 1,
+		max_value = 3
+	});
 	GetParameters();
 	}
 }
