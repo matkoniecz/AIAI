@@ -476,8 +476,8 @@ function RoadBuilder::MakePlaceForReversingVehicles(station, name){
 	return null;
 }
 
-function RoadBuilder::GetReplace(existing_vehicle, cargo) {
-	return this.FindRV(cargo);
+function RoadBuilder::GetReplacement(current_engine, cargo) {
+	return this.FindRV(cargo, current_engine);
 }
 
 function FindEngineForRoute(route) {
@@ -496,7 +496,7 @@ function RoadBuilder::FindRVValuator(engine) {
 	return min(43, max((AIEngine.GetMaxSpeed(engine) - 85) /4, 0)) * 1500 + AIEngine.GetCapacity(engine)*AIEngine.GetMaxSpeed(engine);
 }
 
-function RoadBuilder::FindRV(cargo) {
+function RoadBuilder::FindRV(cargo, first_engine_id = null) {
 	assert(AIRoad.GetCurrentRoadType() == AIRoad.ROADTYPE_ROAD) // || AIRoad.GetCurrentRoadType() == AIRoad.ROADTYPE_TRAM (trams not implemneted yet)
 
 	local list = AIEngineList(AIVehicle.VT_ROAD);
@@ -511,7 +511,10 @@ function RoadBuilder::FindRV(cargo) {
 	list.Sort(AIList.SORT_BY_VALUE, AIList.SORT_DESCENDING);
 
 	if (list.Count() != 0) {
-		local first_engine_id = list.Begin();
+		//expired engine will not appear on the list - but may be better than unexpired ones
+		if(first_engine_id == null){
+			first_engine_id = list.Begin();
+		}
 		local new_engine_id = first_engine_id
 		for(local engine = list.Begin(); list.HasNext(); engine = list.Next()) {
 			local speed_ratio_to_first = (AIEngine.GetMaxSpeed(engine)*100)/(AIEngine.GetMaxSpeed(first_engine_id));
