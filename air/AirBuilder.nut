@@ -347,22 +347,17 @@ return true;
 }
 
 function AirBuilder::BuildAircraft(tile_1, tile_2, engine, cargo) {
-	/* Build an aircraft */
 	local hangar = AIAirport.GetHangarOfAirport(tile_1);
-
 	local vehicle = AIVehicle.BuildVehicle(hangar, engine);
-
 	if (!AIVehicle.IsValidVehicle(vehicle)) {
 		return -1;
-		}
-
-if (!AIVehicle.RefitVehicle(vehicle, cargo)) 
-   {
-   Error("Couldn't refit the aircraft " + AIError.GetLastErrorString());
-   AIVehicle.SellVehicle(vehicle);
-   return -1;
-   }
-return vehicle;
+	}
+	if (!AIVehicle.RefitVehicle(vehicle, cargo)) {
+		Error("Couldn't refit the aircraft " + AIError.GetLastErrorString());
+		AIVehicle.SellVehicle(vehicle);
+		return -1;
+	}
+	return vehicle;
 }
 
 function AirBuilder::HowManyInitialAirplanes(distance, speed, production, engine) {
