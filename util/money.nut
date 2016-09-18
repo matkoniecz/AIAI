@@ -26,16 +26,11 @@ function GetAvailableMoney() {
 }
 
 function BankruptProtector() {
-	local needed_pocket_money = GetSafeBankBalance();
-	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0) {
-		if (AIBase.RandRange(10)==1) {
-			Error("We need bailout!");
-		} else {
-			Error("We need money!");
-		}
-		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)<0) {
-			if (AICompany.GetLoanAmount()==AICompany.GetMaxLoanAmount()) {
-				Error("We are too big to fail! Remember, we employ " + (AIVehicleList().Count()*7+AIStationList(AIStation.STATION_ANY).Count()*3+23) + " people!");
+	if(AICompany.GetBankBalance(AICompany.COMPANY_SELF) < 0) {
+		FunnyComplaintAboutMoneyTrouble(AIBase.RandRange(11));
+		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF) < 0) {
+			if (AICompany.GetLoanAmount() == AICompany.GetMaxLoanAmount()) {
+				FunnyComplaintAboutMoneyTrouble(10);
 				DoomsdayMachine();
 				Sleep(1000);
 			}
@@ -43,12 +38,24 @@ function BankruptProtector() {
 		}
 		Info("End of financial problems!");
 	}
-	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)< needed_pocket_money) {
+
+	local needed_pocket_money = GetSafeBankBalance();
+	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF) < needed_pocket_money) {
 		if (!BorrowOnePieceOfLoan()) {
-			Error("We need money! ("+AICompany.GetBankBalance(AICompany.COMPANY_SELF)+"/"+needed_pocket_money+")");
+			Error("Borrowing more is impossible and we need money! ("+AICompany.GetBankBalance(AICompany.COMPANY_SELF)+"/"+needed_pocket_money+")");
 			Helper.SellAllVehiclesStoppedInDepots();
 			Sleep(1000);
 		}
+	}
+}
+
+function FunnyComplaintAboutMoneyTrouble(severity){
+	if(severity < 9){
+		Error("We need money!");
+	} else if(severity == 10) {
+		Error("We need bailout!");
+	} else {
+		Error("We are too big to fail! Remember, we employ " + (AIVehicleList().Count()*7+AIStationList(AIStation.STATION_ANY).Count()*3+23) + " people!");
 	}
 }
 
@@ -59,11 +66,16 @@ function ProvideMoney(amount = null) {
 		Money.MaxLoan();
 	}
 
-	if (amount != null) {
-		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF) - 3*AICompany.GetLoanInterval() > amount && AICompany.GetLoanAmount() != 0) {
+	if(amount == null) {
+		return;
+	}
+
+	while(AICompany.GetBankBalance(AICompany.COMPANY_SELF) - 3*AICompany.GetLoanInterval() > amount) {
+		if(AICompany.GetLoanAmount() == 0) {
+			break;
+		}
 		RepayOnePieceOfLoan();
 		Info("Loan rebalanced to " + AICompany.GetLoanAmount());
-		}
 	}
 }
 
