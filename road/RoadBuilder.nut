@@ -1133,10 +1133,11 @@ function RoadBuilder::DynamicFullLoadManagement(full_station, empty_station, RV)
 }
 
 function RoadBuilder::copyVehicle(main_vehicle_id, cargo) {
-	ProvideMoney();
 	if (AIVehicle.IsValidVehicle(main_vehicle_id)==false) {
 		return false;
 	}
+	ProvideMoney();
+
 	local depot_tile = GetDepotLocation(main_vehicle_id);
 	local engine = AIVehicle.GetEngineType(main_vehicle_id)
 	AIRoad.SetCurrentRoadType(AIEngine.GetRoadType(engine));
