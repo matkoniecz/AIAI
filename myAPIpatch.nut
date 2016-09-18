@@ -162,7 +162,7 @@ AIVehicle.BuildVehicle <- function (depot_tile, engine_id)
 			do {
 				AIAI_instance.SafeMaintenance();
 				ProvideMoney();
-				AIController.Sleep(400);
+				AIController.Sleep(200);
 				Info("retry: BuildVehicle");
 				vehicle_id = AIVehicle.BuildVehicle_(depot_tile, engine_id);
 			} while(AIError.GetLastError()==AIError.ERR_NOT_ENOUGH_CASH)
