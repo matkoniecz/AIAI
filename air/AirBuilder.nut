@@ -586,69 +586,81 @@ for (local airport = list.Begin(); list.HasNext(); airport = list.Next()) {
 }
 
 function AirBuilder::Skipper() {
-local airport_list = AIStationList(AIStation.STATION_AIRPORT);
-if (airport_list.Count()==0) return;
+	local airport_list = AIStationList(AIStation.STATION_AIRPORT);
+	if (airport_list.Count()==0) {
+		return;
+	}
+	local list = AIList();
 
-local list = AIList();
-
-for (local airport = airport_list.Begin(); airport_list.HasNext(); airport = airport_list.Next())
-   {
-   local airlist=AIVehicleList_Station(airport);
-   if (airlist.Count()==0)continue;
-
-   local counter=0;
-   local minimum = 101;
-   local plane_left_on_airport = null;
-   for (local plane = airlist.Begin(); airlist.HasNext(); plane = airlist.Next()) {
-	  if (AIVehicle.GetState(plane)==AIVehicle.VS_AT_STATION)
-	     if (AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(plane), AIStation.GetLocation(airport))<30)
-		    if (AIVehicle.GetCapacity(plane, Helper.GetPAXCargo())>0) {
-			local percent = ( 100 * AIVehicle.GetCargoLoad(plane, Helper.GetPAXCargo()))/(AIVehicle.GetCapacity(plane, Helper.GetPAXCargo()));
-			if (percent < minimum)
-			   {
-			   minimum=percent;
-			   plane_left_on_airport=plane;
-			   }
-  		    list.AddItem(plane, airport);
-			counter++;
+	for (local airport = airport_list.Begin(); airport_list.HasNext(); airport = airport_list.Next()) {
+		local airlist = AIVehicleList_Station(airport);
+		if (airlist.Count() == 0) {
+			continue;
+		}
+		local counter = 0;
+		local minimum = 101;
+		local plane_left_on_airport = null;
+		for (local plane = airlist.Begin(); airlist.HasNext(); plane = airlist.Next()) {
+			if (AIVehicle.GetState(plane) != AIVehicle.VS_AT_STATION) {
+				continue;
 			}
-	  }
-   if (plane_left_on_airport!=null)list.RemoveItem(plane_left_on_airport); 
-   }
-local count=0;
-for (local plane = list.Begin(); list.HasNext(); plane = list.Next())
-	{
-	for(local i=0; i<AIOrder.GetOrderCount(plane); i++)
-		{
-		if (AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(plane), AIOrder.GetOrderDestination(plane, i))<30)
-			{
-			if (AIOrder.SkipToOrder(plane, (i+1)%AIOrder.GetOrderCount(plane)))
-				{
-				count++;
-				break;
+			if (AIVehicle.GetCapacity(plane, Helper.GetPAXCargo()) == 0) {
+				continue;
+			}
+			if (AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(plane), AIStation.GetLocation(airport))<30) {
+				local percent = ( 100 * AIVehicle.GetCargoLoad(plane, Helper.GetPAXCargo()))/(AIVehicle.GetCapacity(plane, Helper.GetPAXCargo()));
+				if (percent < minimum) {
+					minimum = percent;
+					plane_left_on_airport = plane;
 				}
-			else { 
-				break;
-				} 
+				list.AddItem(plane, airport);
+				counter++;
 			}
 		}
+		if (plane_left_on_airport != null) {
+			list.RemoveItem(plane_left_on_airport);
+		}
 	}
+	local count = 0;
+	for (local plane = list.Begin(); list.HasNext(); plane = list.Next()) {
+		count += SkipPlane(plane);
+	}
+	BoastAboutSkipping(count);
+}
+
+function AirBuilder::SkipPlane(plane){
+	local count = 0;
+	for(local i=0; i<AIOrder.GetOrderCount(plane); i++) {
+		if (AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(plane), AIOrder.GetOrderDestination(plane, i))<30) {
+			if (AIOrder.SkipToOrder(plane, (i+1)%AIOrder.GetOrderCount(plane))) {
+				count++;
+			}
+			break;
+		}
+	}
+	return count;
+}
+
+function AirBuilder::BoastAboutSkipping(count){
+	local what = "plane"
 	local plural = "s"
 	if (count == 1) {
 		plural = ""
 	}
-	Info(count+" plane"+plural+" skipped to next destination!");
+	Info(count + " " + what + plural + " skipped to next destination!");
 }
 
 function AirBuilder::PopulationWithRandValuator(town_id) {
-return AITown.GetPopulation(town_id)-AIBase.RandRange(500);
+	return AITown.GetPopulation(town_id)-AIBase.RandRange(500);
 }
 	
 function AirBuilder::DistanceWithRandValuator(town_id, center_tile) {
-local rand = AIBase.RandRange(150);
-local distance = AITown.GetDistanceManhattanToTile(town_id, center_tile)-AirBuilder.GetOptimalDistance();
-if (distance<0)distance*=-1;
-return distance + rand;
+	local rand = AIBase.RandRange(150);
+	local distance = AITown.GetDistanceManhattanToTile(town_id, center_tile)-AirBuilder.GetOptimalDistance();
+	if (distance < 0) {
+		distance *= -1;
+	}
+	return distance + rand;
 }
 
 function AirBuilder::IsItPossibleToHaveAirport(tile, airport_type, c) {
