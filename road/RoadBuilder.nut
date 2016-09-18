@@ -1192,7 +1192,13 @@ function RoadBuilder::copyVehicle(main_vehicle_id, cargo) {
 
 	local vehicle_id = AIVehicle.CloneVehicle(depot_tile, main_vehicle_id, true)
 	if (!AIVehicle.IsValidVehicle(vehicle_id)) {
-		Warning("RoadBuilder::copyVehicle failed due to " + AIError.GetLastErrorString());
+		local vehicle_description = null;
+		if(AIVehicle.IsValidVehicle(main_vehicle_id)){
+			vehicle_description = AIVehicle.GetName(main_vehicle_id) + " of type " + AIEngine.GetName(AIVehicle.GetEngineType(main_vehicle_id));
+		} else {
+			vehicle_description = " invalid vehicle ";
+		}
+		Warning("RoadBuilder::copyVehicle of " + vehicle_description + " failed due to " + AIError.GetLastErrorString());
 		return false;
 	}
 	if (!AIVehicle.StartStopVehicle (vehicle_id)) {
