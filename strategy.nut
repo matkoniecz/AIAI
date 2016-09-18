@@ -1,5 +1,5 @@
 function strategyGenerator() {
-	local builders = array(6);
+	local builders = array(7);
 	local new;
 
 	new = PAXAirBuilder(this, 0);
@@ -22,8 +22,14 @@ function strategyGenerator() {
 	new.retry_limit=1;
 	builders[4] = new; 
 
+	new = MailRoadBuilder(this, 0);
+	new.pathfinding_time_limit=10;
+	new.retry_limit=1;
+	builders[5] = new; 
+	return builders;
+
 	new = CargoAirBuilder(this, 0);
-	builders[5] = new;
+	builders[6] = new;
 
 	return builders;
 	}

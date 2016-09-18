@@ -15,9 +15,9 @@ function BusRoadBuilder::Possible() {
 		return false;
 	}
 	if (this.cost <= 1) {
-		Info("no cost estimation for a bus route connection is available.");
+		Info("no cost estimation for a " + GetName() + " route connection is available.");
 	} else {
-		Info("estimated cost of a bus connection: " + this.cost + " /  available funds: " + GetAvailableMoney() + " (" + (GetAvailableMoney()*100/this.cost) + "%)");
+		Info("estimated cost of a " + GetName() + " connection: " + this.cost + " /  available funds: " + GetAvailableMoney() + " (" + (GetAvailableMoney()*100/this.cost) + "%)");
 	}
 	return this.cost<GetAvailableMoney();
 }
@@ -37,6 +37,10 @@ function BusRoadBuilder::GetNiceRandomTown(location) {
 
 function BusRoadBuilder::GetCargo(){
 	return Helper.GetPAXCargo();
+}
+
+function BusRoadBuilder::GetName(){
+	return "bus"
 }
 
 function BusRoadBuilder::FindBusPair() {
@@ -78,13 +82,13 @@ function BusRoadBuilder::Go() {
 	trasa = Route();
 
 	for(local i=0; i<retry_limit; i++) {
-		Info("Scanning for bus route");
+		Info("Scanning for " + GetName() + " route");
 		if (!this.FindBusPair()) {
 			Info("Nothing found!");
 			cost = 0;
 			return false;
 		}
-		Info("Scanning for bus route completed [ " + desperation + " ] ");
+		Info("Scanning for " + GetName() + " route completed [ " + desperation + " ] ");
 		if (this.PrepareRoute()) {
 			Info("   Contruction started on correct route.");
 			if (this.ConstructionOfRVRoute()) {

@@ -111,6 +111,15 @@ class AIAI extends AIInfo {
 		flags = CONFIG_BOOLEAN + CONFIG_INGAME
 	});
 	AddSetting( {
+		name = "use_mail_trucks",
+		description = "Mail trucks allowed",
+		easy_value = 1,
+		medium_value = 1,
+		hard_value = 1,
+		custom_value = 1,
+		flags = CONFIG_BOOLEAN + CONFIG_INGAME
+	});
+	AddSetting( {
 		name = "PAX_plane",
 		description = "PAX planes allowed",
 		easy_value = 1,

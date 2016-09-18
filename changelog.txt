@@ -1,7 +1,7 @@
 Kappa (2013-07)
 -----------------------------------------------------------------------------
-Basic support for communicating with NoCarGoal GS (disabled as default)
-
+Basic support for NoCarGoal GS (disabled as default)
+Mail trucks
 
 -----------------------------------------------------------------------------
 Note that this changelog lists only major features added later than 2013-06.

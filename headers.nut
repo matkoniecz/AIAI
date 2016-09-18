@@ -47,6 +47,7 @@ require("Builder.nut");
 require("rail/RailBuilder.nut");
 require("road/RoadBuilder.nut");
 require("road/BusRoadBuilder.nut");
+require("road/MailRoadBuilder.nut");
 require("road/TruckRoadBuilder.nut");
 require("air/AirBuilder.nut");
 require("air/PAXAirBuilder.nut");

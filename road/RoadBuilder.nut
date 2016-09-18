@@ -673,7 +673,7 @@ function RoadBuilder::FindTownCargoSupplyStation(town, start, cargo) {
 	local range = Helper.Sqrt(AITown.GetPopulation(town)/100) + 15;
 	SafeAddRectangle(list, tile, range);
 	list.Valuate(AITile.GetCargoAcceptance, cargo, 1, 1, 3);
-	list.KeepAboveValue(max(25, 50-desperation));
+	list.KeepAboveValue(min(25, 50-desperation));
 
 	if (start != null) {
 		list.Valuate(AIMap.DistanceManhattan, start);
