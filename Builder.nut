@@ -144,3 +144,24 @@ function Builder::IsProducerOK(industry_id) {
 	}
 	return true;
 }
+
+function Builder::SkipVehicleToTheNextOrder(vehicle){
+	local count = 0;
+	for(local i=0; i<AIOrder.GetOrderCount(vehicle); i++) {
+		if (AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(vehicle), AIOrder.GetOrderDestination(vehicle, i))<30) {
+			if (AIOrder.SkipToOrder(vehicle, (i+1)%AIOrder.GetOrderCount(vehicle))) {
+				count++;
+			}
+			break;
+		}
+	}
+	return count;
+}
+
+function Builder::BoastAboutSkipping(count, what){
+	local plural = "s"
+	if (count == 1) {
+		plural = ""
+	}
+	Info(count + " " + what + plural + " skipped to next destination!");
+}

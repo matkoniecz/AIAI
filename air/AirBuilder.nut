@@ -623,31 +623,9 @@ function AirBuilder::Skipper() {
 	}
 	local count = 0;
 	for (local plane = list.Begin(); list.HasNext(); plane = list.Next()) {
-		count += SkipPlane(plane);
+		count += SkipVehicleToTheNextOrder(plane);
 	}
-	BoastAboutSkipping(count);
-}
-
-function AirBuilder::SkipPlane(plane){
-	local count = 0;
-	for(local i=0; i<AIOrder.GetOrderCount(plane); i++) {
-		if (AITile.GetDistanceManhattanToTile(AIVehicle.GetLocation(plane), AIOrder.GetOrderDestination(plane, i))<30) {
-			if (AIOrder.SkipToOrder(plane, (i+1)%AIOrder.GetOrderCount(plane))) {
-				count++;
-			}
-			break;
-		}
-	}
-	return count;
-}
-
-function AirBuilder::BoastAboutSkipping(count){
-	local what = "plane"
-	local plural = "s"
-	if (count == 1) {
-		plural = ""
-	}
-	Info(count + " " + what + plural + " skipped to next destination!");
+	BoastAboutSkipping(count, "plane");
 }
 
 function AirBuilder::PopulationWithRandValuator(town_id) {

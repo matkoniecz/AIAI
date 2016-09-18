@@ -1245,40 +1245,72 @@ function RoadBuilder::IsVehicleNearStation(vehicle_id, station_id) {
 }
 
 function RoadBuilder::RemoveRedundantRVFromStation(station_id, cargo, vehicle_list) {
-	local waiting_counter = 0;
+	local waiting_counter = 0;	
+	local waiting_balance = 0;
 	local active_counter = 0;
+	local vehicle_for_skipping = null;
+	local max_load = -1;
 	for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()) {
 		if (IsForSell(vehicle_id) != false || AIVehicle.GetAge(vehicle_id) < 60) {
+			Error("skipped");
 			return 0;
 		}
 		if (AIVehicle.GetCapacity (vehicle_id, cargo) == 0) {
 			if (RoadBuilder.IsVehicleNearStation(vehicle_id, station_id)) {
 				if (AIVehicle.GetState(vehicle_id) == AIVehicle.VS_AT_STATION) {
-					waiting_counter+=2;
-					//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "w1");
+					waiting_balance += 2;
+					waiting_counter += 1;
+					if(max_load < AIVehicle.GetCargoLoad(vehicle_id, cargo)) {
+						vehicle_for_skipping = vehicle_id;
+						max_load = AIVehicle.GetCargoLoad(vehicle_id, cargo);
+					}
+					//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "waiting - loading");
 				} else if (AIVehicle.GetCurrentSpeed(vehicle_id)==0) {
-					//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "w2");
+					//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "waiting - speed=0");
+					waiting_balance++;
 					waiting_counter++;
 				} else {
-					//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "a1");
-					waiting_counter--;
+					//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "active - speed="+AIVehicle.GetCurrentSpeed(vehicle_id));
+					waiting_balance--;
 				}
 			} else {
-				//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "a2");
+				//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "active - not near station");
 				active_counter++;
 			}
 		} else {
-			//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "a3");
+			//Helper.BuildSign(AIVehicle.GetLocation(vehicle_id), "active - 3");
 			active_counter++;
 		}
 	}
-	local delete_goal = waiting_counter-5; //TODO OPTION
-	local alternate_delete_goal = waiting_counter-active_counter-1;
+	Error("at " + AIStation.GetName(station_id) + " waits: " + waiting_counter + " vehicle for skipping: " + vehicle_for_skipping);
+	if(waiting_counter >= 2 && vehicle_for_skipping != null) {
+		if(AIStation.GetCargoWaiting(station_id, cargo) < AIVehicle.GetCapacity(vehicle_for_skipping, cargo)){
+			SkipVehicleIfLoadingAtThisStation(vehicle_for_skipping, station_id);
+		}
+	}
+	local delete_goal = waiting_balance-5; //TODO OPTION
+	local alternate_delete_goal = waiting_balance-active_counter-1;
 	if (delete_goal < alternate_delete_goal) {
 		delete_goal = alternate_delete_goal;
 	}
 	return this.deleteVehicles(vehicle_list, delete_goal, cargo);
 	return 0;
+}
+
+function RoadBuilder::SkipVehicleIfLoadingAtThisStation(vehicle_for_skipping, station_id){
+	Error("attempt skipping");
+	if (!AIOrder.IsGotoStationOrder(vehicle_for_skipping, AIOrder.ORDER_CURRENT)) {
+		return;
+	}
+	local tile_destination = AIOrder.GetOrderDestination(vehicle_for_skipping, AIOrder.ORDER_CURRENT);
+	local target_station_id = AIStation.GetStationID(tile_destination);
+	if(station_id != target_station_id) {
+		return;
+	}
+	if (AIVehicle.GetState(vehicle_for_skipping) != AIVehicle.VS_AT_STATION) {
+		return;
+	}
+	BoastAboutSkipping(SkipVehicleToTheNextOrder(vehicle_for_skipping), "RV");
 }
 
 function RoadBuilder::deleteVehicles(vehicle_list, delete_goal, cargo) {
