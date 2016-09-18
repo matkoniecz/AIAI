@@ -1283,7 +1283,7 @@ function RoadBuilder::RemoveRedundantRVFromStations(station_list)
 }
 
 function RoadBuilder::IsVehicleNearStation(vehicle_id, station_id) {
-	return AIStation.GetDistanceManhattanToTile(station_id, AIVehicle.GetLocation(vehicle_id))*16 > 4*AIVehicle.GetLength(vehicle_id)*2;
+	return AIStation.GetDistanceManhattanToTile(station_id, AIVehicle.GetLocation(vehicle_id)) < 4;
 }
 
 function RoadBuilder::RemoveRedundantRVFromStation(station_id, cargo, vehicle_list)
