@@ -4,7 +4,7 @@ class BusRoadBuilder extends RoadBuilder
 
 function BusRoadBuilder::IsAllowed() {
 	if (0 == AIAI.GetSetting("use_buses")) {
-		Warning("Buses are disabled in AIAI settings.")
+		Info("Buses are disabled in AIAI settings.")
 		return false;
 	}
 	return RoadBuilder.IsAllowed();

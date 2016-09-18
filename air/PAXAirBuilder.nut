@@ -4,7 +4,7 @@ class PAXAirBuilder extends AirBuilder
 
 function PAXAirBuilder::IsAllowed() {
 	if (0 == AIAI.GetSetting("PAX_plane")) {
-		Warning("PAX planes are disabled in AIAI settings.")
+		Info("PAX planes are disabled in AIAI settings.")
 		return false;
 	}
 	return AirBuilder.IsAllowed();

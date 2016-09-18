@@ -5,7 +5,7 @@ class CargoAirBuilder extends AirBuilder
 
 function CargoAirBuilder::IsAllowed() {
 	if (0 == AIAI.GetSetting("cargo_plane")) {
-		Warning("Cargo planes are disabled in AIAI settings.")
+		Info("Cargo planes are disabled in AIAI settings.")
 		return false;
 	}
 	return AirBuilder.IsAllowed();

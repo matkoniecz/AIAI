@@ -1118,7 +1118,7 @@ function RailBuilder::GetMaxDistance() {
 
 function RailBuilder::IsAllowed() {
 	if (0 == AIAI.GetSetting("use_freight_trains")) {
-		Warning("Freight trains are disabled in AIAI settings.")
+		Info("Freight trains are disabled in AIAI settings.")
 		return false;
 	}
 	if (AIGameSettings.IsDisabledVehicleType(AIVehicle.VT_RAIL)) {
