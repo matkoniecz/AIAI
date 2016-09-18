@@ -1060,9 +1060,12 @@ function RailBuilder::PathFinder(limit)
 
 	path = false;
 	local guardian=0;
+	local pathfinding_split = 5; //to make maintemance more often - for example plane skipping
+	limit = limit*pathfinding_split;
+	local time_for_pathfinding_run = 2000/pathfinding_split;
 	while (path == false) {
 		Info("   Pathfinding ("+guardian+" / " + limit + ") started");
-		path = pathfinder.FindPath(2000);
+		path = pathfinder.FindPath(time_for_pathfinding_run);
 		Info("   Pathfinding ("+guardian+" / " + limit + ") ended");
 		AIAI_instance.Maintenance();
 		AIController.Sleep(1);

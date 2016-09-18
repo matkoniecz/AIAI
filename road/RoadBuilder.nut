@@ -259,10 +259,12 @@ function RoadBuilder::PrepareRoute() {
 	pathfinder.InitializePath(trasa.second_station.road_loop, trasa.first_station.road_loop, forbidden_tiles);
 	path = false;
 	local guardian = 0;
-	local limit = this.GetPathfindingLimit();
+	local pathfinding_split = 5; //to make maintemance more often - for example plane skipping
+	local limit = this.GetPathfindingLimit()*pathfinding_split;
+	local time_for_pathfinding_run = 2000/pathfinding_split;
 	while (path == false) {
 		Info("   Pathfinding ("+guardian+" / " + limit + ") started");
-		path = pathfinder.FindPath(2000);
+		path = pathfinder.FindPath(time_for_pathfinding_run);
 		Info("   Pathfinding ("+guardian+" / " + limit + ") ended");
 		AIAI_instance.Maintenance();
 		AIController.Sleep(1);
