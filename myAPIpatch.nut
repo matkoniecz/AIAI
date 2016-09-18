@@ -190,7 +190,7 @@ AIVehicle.BuildVehicle <- function (depot_tile, engine_id)
 		abort("Supposedly valid vehicle that was just constructed is invalid.");
 	}
 	if (!AIEngine.IsWagon(AIVehicle.GetEngineType(vehicle_id))) {
-		AIVehicle.SetName(vehicle_id, "new")
+		AIVehicle.SetName(vehicle_id, "new vehicle from " + depot_tile)
 	}
 	return vehicle_id;
 }
