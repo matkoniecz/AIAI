@@ -497,6 +497,8 @@ function RoadBuilder::FindRVValuator(engine) {
 }
 
 function RoadBuilder::FindRV(cargo) {
+	assert(AIRoad.GetCurrentRoadType() == AIRoad.ROADTYPE_ROAD) // || AIRoad.GetCurrentRoadType() == AIRoad.ROADTYPE_TRAM (trams not implemneted yet)
+
 	local list = AIEngineList(AIVehicle.VT_ROAD);
 
 	list.Valuate(AIEngine.GetRoadType);
@@ -1136,7 +1138,18 @@ function RoadBuilder::copyVehicle(main_vehicle_id, cargo) {
 		return false;
 	}
 	local depot_tile = GetDepotLocation(main_vehicle_id);
-	local speed = AIEngine.GetMaxSpeed(this.FindRV(cargo));
+	local engine = AIVehicle.GetEngineType(main_vehicle_id)
+	AIRoad.SetCurrentRoadType(AIEngine.GetRoadType(engine));
+
+	local engine = this.FindRV(cargo);
+	if(engine == null){
+		Error("RV for " + AICargo.GetCargoLabel(cargo) + " disappeared.");
+		if (AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
+			abort("RV for " + AICargo.GetCargoLabel(cargo) + " disappeared.")
+		}
+		return false;
+	}
+	local speed = AIEngine.GetMaxSpeed(engine);
 	local load_station_tile = GetLoadStationLocation(main_vehicle_id);
 	local unload_station_tile = GetUnloadStationLocation(main_vehicle_id);
 	if (unload_station_tile == null || load_station_tile == null) {
