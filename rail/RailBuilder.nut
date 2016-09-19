@@ -375,7 +375,6 @@ function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.
 							Info("Failed tunnel")
 							if (!this.RetryCheck(non_critical_errors)) {
 								DumbRemover(copy, prev);
-								Info("return false;");
 								return false;
 							}
 						}
@@ -389,7 +388,6 @@ function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.
 							Info("Failed bridge")
 							if (!this.RetryCheck(non_critical_errors)) {
 								DumbRemover(copy, prev);
-								Info("return false;");
 								return false;
 							}
 						}
@@ -407,7 +405,6 @@ function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.
 						Info("Failed rail");
 						if (!this.RetryCheck(non_critical_errors)) {
 							DumbRemover(copy, prev);
-							Info("return false;");
 							return false;
 						}
 					}
@@ -420,7 +417,6 @@ function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.
 			path = path.GetParent();
 		}
 	}
-	Info("return true;");
 	return true;
 }
 
