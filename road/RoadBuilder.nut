@@ -1347,7 +1347,7 @@ function RoadBuilder::deleteVehicles(vehicle_list, delete_goal, cargo) {
 		if (delete_goal - delete_count < 0) {
 			break;
 		}
-		if (AIAI_instance.sellVehicle(vehicle_id, "queuer")) {
+		if (SellVehicle(vehicle_id, "queuer")) {
 			delete_count++;
 		}
 		Info(delete_count+" of " + delete_goal + " RV marked for deletion send to depot.")

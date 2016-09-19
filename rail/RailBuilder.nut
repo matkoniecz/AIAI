@@ -228,7 +228,7 @@ function RailBuilder::TrainReplaceOnThisStation(station_id) {
 				train = this.BuildTrain(route_data, "replacing", false);
 				if (train != null) {
 					if (AIOrder.ShareOrders(train, vehicle_id)) {
-						AIAI.gentleSellVehicle(vehicle_id, "replaced");
+						gentleSellVehicle(vehicle_id, "replaced");
 					}
 				}
 			}

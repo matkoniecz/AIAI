@@ -252,50 +252,6 @@ function AIAI::Load(version, data) {
 	}
 }
 
-function AIAI::gentleSellVehicle(vehicle_id, why) {
-	if (IsForSell(vehicle_id) != false) {
-		return false;
-	}
-	local tile_1 = GetLoadStationLocation(vehicle_id);
-	local tile_2 = GetUnloadStationLocation(vehicle_id);
-	local depot_location = GetDepotLocation(vehicle_id);
-	if (tile_1 == null || tile_2 == null || depot_location == null) {
-		return false
-	}
-
-	if (!AIOrder.UnshareOrders(vehicle_id)) {
-		abort("WTF? Unshare impossible? "+AIVehicle.GetName(vehicle_id));
-	}
-
-	//note: AIAI is using modified AIOrder.AppendOrder that will trigger assertion on failure
-	AIOrder.AppendOrder(vehicle_id, tile_1, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_FULL_LOAD_ANY);
-	AIOrder.AppendOrder(vehicle_id, tile_2, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_NO_LOAD);
-	AIOrder.AppendOrder(vehicle_id, depot_location, AIOrder.OF_NON_STOP_INTERMEDIATE | AIOrder.OF_STOP_IN_DEPOT);
-	if (AIOrder.ResolveOrderPosition (vehicle_id, AIOrder.ORDER_CURRENT) != 1) {
-		if (!AIOrder.SkipToOrder(vehicle_id, 1)) {
-			abort("SkipToOrder failed");
-		}
-	}
-	AIVehicle.SetName(vehicle_id, "for sell!" + why);
-}
-
-function AIAI::sellVehicle(vehicle_id, why) {
-	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
-		Error("Invalid or crashed vehicle " + vehicle_id);
-		return true;
-	}
-	if (IsForSell(vehicle_id) != false) {
-		return false;
-	}
-	AIVehicle.SetName(vehicle_id, "sell!" + why);
-	if (!AIVehicle.SendVehicleToDepot(vehicle_id)) {
-		Info("failed to sell vehicle! "+AIError.GetLastErrorString());
-		return false;
-	}
-	AIVehicle.SetName(vehicle_id, "for sell " + why);
-	return true;
-}
-
 function AIAI::BuilderMaintenance() {
 	local maintenance = array(3);
 	maintenance[0] = RailBuilder(this, 0);
