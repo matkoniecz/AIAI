@@ -200,28 +200,7 @@ function RailBuilder::testPath(path, stay_behind_path) {
 	}
 	local test = AITestMode();
 	if (path != null && path.GetParent() != null && path.GetParent().GetParent() != null) {
-		local final_answer = false
-		local returned
-		local not_final_answer_count = 0;
-		while(!final_answer) {
-			returned = AIRail.BuildRail(path.GetTile(), path.GetParent().GetTile(), path.GetParent().GetParent().GetTile())
-			if (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH) {
-				returned = true
-			}
-			final_answer = true
-			if (AIError.GetLastError() == AIError.ERR_VEHICLE_IN_THE_WAY) {
-				final_answer = false //this error may hide other real ones (bad terrain etc)
-			}
-			if (!final_answer) {
-				AIController.Sleep(20);
-				if(not_final_answer_count > 40){
-					final_answer = true;
-					//if it so blocked, there is no point in waiting
-				}
-				Warning("This answer is not final! (RailBuilder::testPath) not_final_answer_count: " + not_final_answer_count);
-				not_final_answer_count++;
-			}
-		}
+		local returned = interpretedBuildRailResult(path);
 		if (path.GetParent().GetParent().GetParent() != null) {
 			local curve = path.GetTile() - path.GetParent().GetTile() != - (path.GetParent().GetParent().GetTile() - path.GetParent().GetParent().GetParent().GetTile())
 			return curve && returned;
@@ -229,6 +208,29 @@ function RailBuilder::testPath(path, stay_behind_path) {
 		return returned;
 	}
 	return true;
+}
+
+function interpretedBuildRailResult(path){
+	local returned;
+	local not_final_answer_count = 0;
+	while(true) {
+		returned = AIRail.BuildRail(path.GetTile(), path.GetParent().GetTile(), path.GetParent().GetParent().GetTile());
+		if (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH) {
+			return true;
+		}
+		if (AIError.GetLastError() == AIError.ERR_VEHICLE_IN_THE_WAY) {
+			//this error may hide real ones (bad terrain etc)
+			Warning("This answer is not final! (RailBuilder::testPath) not_final_answer_count: " + not_final_answer_count);
+			AIController.Sleep(20);
+			if(not_final_answer_count > 40) {
+				//if it so blocked, there is no point in waiting
+				return false;
+			}
+			not_final_answer_count++;
+		} else {
+			return returned;
+		}
+	}
 }
 
 function RailBuilder::addTileToPath(path, tile, stay_behind_path) {
