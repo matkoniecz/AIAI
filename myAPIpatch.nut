@@ -46,6 +46,23 @@ AIMap.IsValidTile <- function(tile) {
 	return AIMap._IsValidTile(tile);
 }
 
+AIGroup._SetName <- AIGroup.SetName;
+AIGroup.SetName <- function(id, text) {
+	text+=""; //allow AIGroup.SetName(id, 42)
+	local returned = AIGroup._SetName(id, text);
+	if (AIError.GetLastError() != AIError.ERR_NONE) {
+		Error(AIError.GetLastErrorString() + " - GROUP NAMING FAILED.");
+		Error("Requested text: <" + text + "> on id " + id + ".");
+		if (AIError.GetLastError() == AIError.ERR_PRECONDITION_STRING_TOO_LONG) {
+			Error("Text " + text.len() + " characters long, maximum is 31");
+		}
+		if (!AIGroup.IsValidGroup(id)) {
+			Error("Group invalid");
+		}
+	}
+	return returned;
+}
+
 AISign._BuildSign <- AISign.BuildSign;
 AISign.BuildSign <- function(tile, text) {
 	local test = AIExecMode(); //allow sign construction in test mode
