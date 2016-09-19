@@ -361,16 +361,15 @@ function AirBuilder::BuildAircraft(tile_1, tile_2, engine, cargo) {
 }
 
 function AirBuilder::HowManyInitialAirplanes(distance, speed, production, engine) {
-local count = (3*distance)/(2*speed)/2;
-Info(count + " aircrafts needed; based on distance ("+distance+") and speed ("+speed+")");
+	local count = (3*distance)/(2*speed)/2;
+	Info(count + " aircrafts needed; based on distance ("+distance+") and speed ("+speed+")");
 
-count *= 10 * production;
-//Info(count + "&^%***********");
+	count *= 10 * production;
 
-count /= AIEngine.GetCapacity(engine);
-Info(count + " aircrafts needed after production (" + production + ") and capacity (" +  AIEngine.GetCapacity(engine) +") adjustment");
-count = max(count, 3);
-return count;
+	count /= AIEngine.GetCapacity(engine);
+	Info(count + " aircrafts needed after production (" + production + ") and capacity (" +  AIEngine.GetCapacity(engine) +") adjustment");
+	count = max(count, 3);
+	return count;
 }
 
 function AirBuilder::ValuateProducer(ID, cargo)
