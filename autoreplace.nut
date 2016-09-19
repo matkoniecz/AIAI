@@ -1,6 +1,6 @@
 function Autoreplace() {
 	Info("Autoreplace started");
-	AutoreplaceRVs();
+	AutoreplaceRVs(AIRoad.ROADTYPE_ROAD);
 	AutoreplaceSmallPlanes();
 	AutoreplaceBigPlanes();
 	Info("Autoreplace list updated by Autoreplace()");
@@ -54,10 +54,11 @@ function AutoreplaceSmallPlanes() {
 	}
 }
 
-function AutoreplaceRVs() {
+function AutoreplaceRVs(roadtype) {
+	AIRoad.SetCurrentRoadType(roadtype)
 	local engine_list = AIEngineList(AIVehicle.VT_ROAD);
 	engine_list.Valuate(AIEngine.GetRoadType);
-	engine_list.KeepValue(AIRoad.ROADTYPE_ROAD);
+	engine_list.KeepValue(roadtype);
 
 	for(local engine = engine_list.Begin(); engine_list.HasNext(); engine = engine_list.Next()) {
 		local veh_list = AIVehicleList()
