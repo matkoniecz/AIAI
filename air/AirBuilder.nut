@@ -488,51 +488,47 @@ return total <= maximum;
 }
 
 function AirBuilder::addPAXAircrafts() {
-local airport_type;
-local list = AIStationList(AIStation.STATION_AIRPORT);
-if (list.Count()==0) return;
-
-for (local airport = list.Begin(); list.HasNext(); airport = list.Next())
-	{
-	local cargo_list = AICargoList();
-	for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next())
-		{
-		if (AIStation.GetCargoWaiting(airport, cargo)>100)
-			{																						//protection from flood of mail planes
-			if ((GetAverageCapacityOfVehiclesFromStation(airport, cargo)*2 < AIStation.GetCargoWaiting(airport, cargo) &&  AIStation.GetCargoWaiting(airport, cargo)>200) 
-			|| AIStation.GetCargoRating(airport, cargo)<30 )
-				{
-				local airports_list = AIStationList(AIStation.STATION_AIRPORT);
-				for (local goal_airport = airports_list.Begin(); airports_list.HasNext(); goal_airport = airports_list.Next())
-					{
-					local tile_1 = AIStation.GetLocation(airport);
-					local tile_2 = AIStation.GetLocation(goal_airport);
-					local airport_type_1 = AIAirport.GetAirportType(tile_1);
-					local airport_type_2 = AIAirport.GetAirportType(tile_2);
-					if ((airport_type_1==AIAirport.AT_SMALL || airport_type_2==AIAirport.AT_SMALL)||
-					   (airport_type_1==AIAirport.AT_COMMUTER  || airport_type_2==AIAirport.AT_COMMUTER)) 
-						airport_type=AIAirport.AT_SMALL;
-					else
-						airport_type=AIAirport.AT_LARGE;
-
-					local engine=this.FindAircraft(airport_type, cargo, 1, GetAvailableMoney(), AIOrder.GetOrderDistance(AIVehicle.VT_AIR, tile_1, tile_2));
-					if (engine==null) continue;
-					local vehicle_list=AIVehicleList_Station(airport);
-					vehicle_list.Valuate(FindAircraftValuatorRunningOnVehicleIDs);
-					vehicle_list.RemoveAboveValue(FindAircraftValuator(engine))
-					if (vehicle_list.Count()==0) continue;
-					ProvideMoney();
-					if (AITile.GetDistanceManhattanToTile(tile_1, tile_2)>100
-					&& AgeOfTheYoungestVehicle(goal_airport)>40)
-						{
-						if (this.IsItPossibleToAddBurden(airport, tile_2, engine, 1)
-						&& this.IsItPossibleToAddBurden(goal_airport, tile_1, engine, 1))
-							{
-							if ( Helper.GetPAXCargo()==cargo )
-								this.BuildPassengerAircraft(tile_1, tile_2, engine, cargo);
-							else if (Helper.GetMailCargo()==cargo)
-								this.BuildExpressAircraft(tile_1, tile_2, engine, cargo);
-							break;
+	local airport_type;
+	local list = AIStationList(AIStation.STATION_AIRPORT);
+	if (list.Count()==0) {
+		return;
+	}
+	for (local airport = list.Begin(); list.HasNext(); airport = list.Next()) {
+		local cargo_list = AICargoList();
+		for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next()) {
+			if (AIStation.GetCargoWaiting(airport, cargo)>100) { //protection from flood of mail planes
+				if ((GetAverageCapacityOfVehiclesFromStation(airport, cargo)*2 < AIStation.GetCargoWaiting(airport, cargo) &&  AIStation.GetCargoWaiting(airport, cargo)>200)
+				|| AIStation.GetCargoRating(airport, cargo)<30 ) {
+					local airports_list = AIStationList(AIStation.STATION_AIRPORT);
+					for (local goal_airport = airports_list.Begin(); airports_list.HasNext(); goal_airport = airports_list.Next()) {
+						local tile_1 = AIStation.GetLocation(airport);
+						local tile_2 = AIStation.GetLocation(goal_airport);
+						local airport_type_1 = AIAirport.GetAirportType(tile_1);
+						local airport_type_2 = AIAirport.GetAirportType(tile_2);
+						if ((airport_type_1==AIAirport.AT_SMALL || airport_type_2==AIAirport.AT_SMALL) || (airport_type_1==AIAirport.AT_COMMUTER  || airport_type_2==AIAirport.AT_COMMUTER)) {
+							airport_type=AIAirport.AT_SMALL;
+						} else {
+							airport_type=AIAirport.AT_LARGE;
+						}
+						local engine = this.FindAircraft(airport_type, cargo, 1, GetAvailableMoney(), AIOrder.GetOrderDistance(AIVehicle.VT_AIR, tile_1, tile_2));
+						if (engine == null) {
+							continue;
+						}
+						local vehicle_list=AIVehicleList_Station(airport);
+						vehicle_list.Valuate(FindAircraftValuatorRunningOnVehicleIDs);
+						vehicle_list.RemoveAboveValue(FindAircraftValuator(engine))
+						if (vehicle_list.Count()==0) {
+							continue;
+						}
+						ProvideMoney();
+						if (AITile.GetDistanceManhattanToTile(tile_1, tile_2)>100 && AgeOfTheYoungestVehicle(goal_airport)>40) {
+							if (this.IsItPossibleToAddBurden(airport, tile_2, engine, 1) && this.IsItPossibleToAddBurden(goal_airport, tile_1, engine, 1)) {
+								if ( Helper.GetPAXCargo()==cargo ) {
+									this.BuildPassengerAircraft(tile_1, tile_2, engine, cargo);
+								}	else if (Helper.GetMailCargo()==cargo) {
+									this.BuildExpressAircraft(tile_1, tile_2, engine, cargo);
+								}
+								break;
 							}
 						}
 					}
