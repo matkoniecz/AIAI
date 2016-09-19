@@ -402,6 +402,41 @@ function AirBuilder::Maintenance() {
 
 	this.addPAXAircrafts();
 	this.AddCargoAircrafts();
+	this.RemovePlanesFromOverburdenedAirports();
+}
+
+function AirBuilder::RemovePlanesFromOverburdenedAirports(){
+	//typically needed after autoreplace
+	local list = AIStationList(AIStation.STATION_AIRPORT);
+	for (local airport_id = list.Begin(); list.HasNext(); airport_id = list.Next()) {
+		local tile = AIStation.GetLocation(airport_id);
+		local airport_type = AIAirport.GetAirportType(tile);
+		while(GetCurrentBurdenOfAirport(airport_id) > AirportThroughput(airport_type)) {
+			Info("before RemovePlanesFromThisOverburdenedAirport: " + GetCurrentBurdenOfAirport(airport_id) + "/" + AirportThroughput(airport_type));
+			RemovePlanesFromThisOverburdenedAirport(airport_id);
+			Info("after RemovePlanesFromThisOverburdenedAirport: " + GetCurrentBurdenOfAirport(airport_id) + "/" + AirportThroughput(airport_type));
+		}
+	}
+}
+
+function AirBuilder::RemovePlanesFromThisOverburdenedAirport(airport_id){
+	local vehicle_list = AIVehicleList_Station(airport_id)
+	vehicle_list.Valuate(AIVehicle.GetProfitLastYear);
+	vehicle_list.Sort(AIList.SORT_BY_VALUE, true);
+	local vehicle = vehicle_list.Begin();
+
+	AIOrder.UnshareOrders(vehicle);
+	while(AIOrder.GetOrderCount(vehicle) > 0) {
+		if(!AIOrder.RemoveOrder(vehicle, 0)){
+			if(!AIVehicle.IsValidVehicle(vehicle)){
+				break;
+			} else {
+				assert(false);
+			}
+		}
+	}
+	Info("Fixing airport over capacity - " + AIStation.GetName(airport_id) + ". " + AIVehicle.GetName(vehicle) + " will be sold.")
+	SellVehicle(vehicle, "overcapacity");
 }
 
 function AirBuilder::GetEffectiveDistanceBetweenAirports(tile_1, tile_2) {
