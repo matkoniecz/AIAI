@@ -202,6 +202,7 @@ function RailBuilder::testPath(path, stay_behind_path) {
 	if (path != null && path.GetParent() != null && path.GetParent().GetParent() != null) {
 		local final_answer = false
 		local returned
+		local not_final_answer_count = 0;
 		while(!final_answer) {
 			returned = AIRail.BuildRail(path.GetTile(), path.GetParent().GetTile(), path.GetParent().GetParent().GetTile())
 			if (AIError.GetLastError() == AIError.ERR_NOT_ENOUGH_CASH) {
@@ -213,7 +214,12 @@ function RailBuilder::testPath(path, stay_behind_path) {
 			}
 			if (!final_answer) {
 				AIController.Sleep(20);
-				Warning("This answer is not final! (RailBuilder::testPath)");
+				if(not_final_answer_count > 40){
+					final_answer = true;
+					//if it so blocked, there is no point in waiting
+				}
+				Warning("This answer is not final! (RailBuilder::testPath) not_final_answer_count: " + not_final_answer_count);
+				not_final_answer_count++;
 			}
 		}
 		if (path.GetParent().GetParent().GetParent() != null) {
