@@ -736,13 +736,13 @@ function RailBuilder::GetRailTypeList() //modified //from DenverAndRioGrande
 {
 	local railTypes = AIRailTypeList();
 	if (railTypes.Count() == 0) {
-		Error("No rail types!");
+		Warning("No rail types!");
 		return null;
 	}
 	railTypes.Valuate(AIRail.IsRailTypeAvailable);
 	railTypes.KeepValue(1);
 	if (railTypes.Count() == 0) {
-		Error("No available rail types!");
+		Warning("No available rail types!");
 		return null;
 	}
 
