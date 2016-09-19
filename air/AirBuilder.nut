@@ -449,32 +449,36 @@ for (local plane = airlist.Begin(); airlist.HasNext(); plane = airlist.Next())
 return total;
 }
 
+function AirBuilder::AirportThroughput(airport_type){
+	/*
+	throughtput measured by empty concordes
+	small: 5
+	commuter: 7
+	city: 7
+	metropo: 10
+	international: 11
+	intercontinental: 10
+	*/
+	/*
+	throughtput measured by loading/unloading sampsons
+	small: 3
+	commuter: 5
+	city: 5
+	metropo: 6
+	international: ?
+	intercontinental: ?
+	*/
+	if (airport_type==AIAirport.AT_METROPOLITAN ) return 600;
+	if (airport_type==AIAirport.AT_LARGE) return 500; // city 
+	if (airport_type==AIAirport.AT_COMMUTER) return 500;
+	if (airport_type==AIAirport.AT_SMALL) return 300;
+	assert(false);
+}
+
 function AirBuilder::IsItPossibleToAddBurden(airport_id, tile=null, engine=null, count=1) {
-/*
-throughtput measured by empty concordes
-small: 5
-commuter: 7
-city: 7
-metropo: 10
-international: 11
-intercontinental: 10
-*/
-/*
-throughtput measured by loading/unloading sampsons
-small: 3
-commuter: 5
-city: 5
-metropo: 6
-international: ?
-intercontinental: ?
-*/
-local maximum;
 local total = this.GetCurrentBurdenOfAirport(airport_id);
 local airport_type = AIAirport.GetAirportType(AIStation.GetLocation(airport_id));
-if (airport_type==AIAirport.AT_METROPOLITAN ) maximum = 600;
-if (airport_type==AIAirport.AT_LARGE) maximum = 500; // city 
-if (airport_type==AIAirport.AT_COMMUTER) maximum = 500;
-if (airport_type==AIAirport.AT_SMALL) maximum = 300;
+local maximum = AirportThroughput(airport_type);
  
 if (AIAI.GetSetting("debug_signs_for_airports_load")) Helper.BuildSign(AIStation.GetLocation(airport_id), total + " (" + maximum + ")");
 
