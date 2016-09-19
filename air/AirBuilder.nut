@@ -515,8 +515,8 @@ function AirBuilder::PAXAirportHelpNeeded(airport, cargo) {
 	return AIStation.GetCargoWaiting(airport, cargo) > GetAverageCapacityOfVehiclesFromStation(airport, cargo)*2;
 }
 
-function AirBuilder::IsAirportSmall(airport){
-	local tile = AIStation.GetLocation(airport);
+function AirBuilder::IsAirportSmall(airport_id){
+	local tile = AIStation.GetLocation(airport_id);
 	local airport_type = AIAirport.GetAirportType(tile);
 	if(airport_type == AIAirport.AT_SMALL){
 		return true;
@@ -566,39 +566,42 @@ function AirBuilder::addPAXAircraftsToAirport(airport, cargo) {
 }
 
 function AirBuilder::AddCargoAircrafts() {
-local list = AIStationList(AIStation.STATION_AIRPORT);
-if (list.Count()==0) return;
-
-for (local airport = list.Begin(); list.HasNext(); airport = list.Next()) {
-	local cargo_list = AICargoList();
-	for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next())
-		if (AIStation.GetCargoWaiting(airport, cargo)>1) {
-		if (cargo != Helper.GetPAXCargo())
-			if (cargo != Helper.GetMailCargo())
-				if (IsItNeededToImproveThatStation(airport, cargo))
-				{
-				local airport_type = AIAirport.GetAirportType(AIStation.GetLocation(airport));
-				if (airport_type==AIAirport.AT_SMALL || airport_type==AIAirport.AT_COMMUTER) {
-					airport_type=AIAirport.AT_SMALL;
-					}
-				local vehicle = AIVehicleList_Station(airport).Begin();
-				local another_station = AIOrder.GetOrderDestination(vehicle, 0);
-				if (AIStation.GetLocation(airport) == another_station) another_station = AIOrder.GetOrderDestination(vehicle, 1);
-				local engine=this.FindAircraft(airport_type, cargo, 1, GetAvailableMoney(), AIOrder.GetOrderDistance(AIVehicle.VT_AIR, another_station, AIBaseStation.GetLocation(airport)));
-				if (engine != null) {
-					ProvideMoney();
-					if (IsItPossibleToAddBurden(airport, another_station, engine)) {
-						if (IsItPossibleToAddBurden(AIStation.GetStationID(another_station), AIBaseStation.GetLocation(airport), engine)) {
-							this.BuildCargoAircraft(AIStation.GetLocation(airport), another_station, engine, cargo, "uzupelniacz");
+	local list = AIStationList(AIStation.STATION_AIRPORT);
+	if (list.Count()==0) {
+		return;
+	}
+	for (local airport = list.Begin(); list.HasNext(); airport = list.Next()) {
+		local cargo_list = AICargoList();
+		for (local cargo = cargo_list.Begin(); cargo_list.HasNext(); cargo = cargo_list.Next())
+			if (AIStation.GetCargoWaiting(airport, cargo)>1) {
+			if (cargo != Helper.GetPAXCargo()) {
+				if (cargo != Helper.GetMailCargo()) {
+					if (IsItNeededToImproveThatStation(airport, cargo)) {
+						local airport_type = AIAirport.GetAirportType(AIStation.GetLocation(airport));
+						if(IsAirportSmall(airport)){
+							airport_type = AIAirport.AT_SMALL;
+						}
+						local vehicle = AIVehicleList_Station(airport).Begin();
+						local another_station = AIOrder.GetOrderDestination(vehicle, 0);
+						if (AIStation.GetLocation(airport) == another_station) {
+							another_station = AIOrder.GetOrderDestination(vehicle, 1);
+						}
+						local engine=this.FindAircraft(airport_type, cargo, 1, GetAvailableMoney(), AIOrder.GetOrderDistance(AIVehicle.VT_AIR, another_station, AIBaseStation.GetLocation(airport)));
+						if (engine != null) {
+							ProvideMoney();
+							if (IsItPossibleToAddBurden(airport, another_station, engine)) {
+								if (IsItPossibleToAddBurden(AIStation.GetStationID(another_station), AIBaseStation.GetLocation(airport), engine)) {
+									this.BuildCargoAircraft(AIStation.GetLocation(airport), another_station, engine, cargo, "uzupelniacz");
+								}
 							}
+						} else {
+							Error("Plane not found for " + AICargo.GetCargoLabel(cargo) + " cargo.");
 						}
 					}
-				else {
-					Error("Plane not found for " + AICargo.GetCargoLabel(cargo) + " cargo.");
-					}
-		  }
-	   }   
-   }
+				}
+			}
+		}
+	}
 }
 
 function AirBuilder::Skipper() {
