@@ -1010,10 +1010,8 @@ function RailBuilder::StationConstruction(path)
 		direction = AIRail.RAILTRACK_NW_SE;
 	}
 	local source = true;
-	if (!AIRail.BuildNewGRFRailStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)) {
-		if (!AIRail.BuildRailStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW)) {
+	if(!BuildStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
 			return false;
-		}
 	}
 	
 	local location = trasa.second_station.location;
@@ -1024,11 +1022,9 @@ function RailBuilder::StationConstruction(path)
 		direction = AIRail.RAILTRACK_NW_SE;
 	}
 	local source = false;
-	if (!AIRail.BuildNewGRFRailStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)) {
-		if (!AIRail.BuildRailStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW)) {
+	if(!BuildStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
 			AITile.DemolishTile(trasa.first_station.location);
 			return false;
-		}
 	}
 
 	if (!trasa.first_station.BuildRailwayTracks(first, last)) {
@@ -1039,9 +1035,18 @@ function RailBuilder::StationConstruction(path)
 		this.UndoStationConstruction(path);
 		return false;
 	}
-
 	return true;
 }
+
+function RailBuilder::BuildStation(location, direction, platform_count, station_size, station_id, cargo, source_industry, goal_industry, distance, source) {
+	if (!AIRail.BuildNewGRFRailStation(location, direction, platform_count, station_size, station_id, cargo, source_industry, goal_industry, distance, source)) {
+		if (!AIRail.BuildRailStation(location, direction, platform_count, station_size, station_id)) {
+			return false;
+		}
+	}
+	return true;
+}
+
 
 function RailBuilder::PathFinder(limit) 
 {
