@@ -35,15 +35,14 @@ function BankruptProtector() {
 				DoomsdayMachine();
 				SafeMaintenance();
 				Sleep(200);
+				if(AICompany.GetBankBalance(AICompany.COMPANY_SELF) > 0) {
+					Info("End of serious financial problems!");
+				}
 			}
 			BorrowOnePieceOfLoan()
 		}
-		if(AICompany.GetBankBalance(AICompany.COMPANY_SELF) > 0) {
-			Info("End of serious financial problems!");
-		}
-
 		if (!BorrowOnePieceOfLoan()) {
-			Warning("Borrowing more is impossible and we need money! ("+AICompany.GetBankBalance(AICompany.COMPANY_SELF)+"/"+needed_pocket_money+")");
+			Warning("Borrowing more is impossible and we need money! ("+AICompany.GetBankBalance(AICompany.COMPANY_SELF)/1000+"k/"+needed_pocket_money/1000+"k)");
 			Helper.SellAllVehiclesStoppedInDepots();
 			SafeMaintenance();
 			Sleep(200);
