@@ -1036,7 +1036,9 @@ function RailBuilder::StationConstruction(path)
 
 function RailBuilder::BuildStation(location, direction, platform_count, station_size, station_id, cargo, source_industry, goal_industry, distance, source) {
 	if (!AIRail.BuildNewGRFRailStation(location, direction, platform_count, station_size, station_id, cargo, source_industry, goal_industry, distance, source)) {
+		Info("BuildNewGRFRailStation failed - " + AIError.GetLastErrorString());
 		if (!AIRail.BuildRailStation(location, direction, platform_count, station_size, station_id)) {
+			Warning("BuildRailStation failed - " + AIError.GetLastErrorString());
 			return false;
 		}
 	}
@@ -1191,7 +1193,8 @@ function RailBuilder::Go() {
 		}
 		AIRail.SetCurrentRailType(trasa.track_type);
 
-		local main_part_of_message = "Scanning for rail route completed. Desperation: " + desperation + " cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start);
+		Info("Scanning for rail route completed.")
+		local main_part_of_message = "Desperation: " + desperation + " cargo: " + AICargo.GetCargoLabel(trasa.cargo) + " Source: " + AIIndustry.GetName(trasa.start);
 		if (!trasa.second_station.is_city) {
 			Info(main_part_of_message + " End: " + AIIndustry.GetName(trasa.end));
 		} else if (trasa.second_station.is_city) {
@@ -1202,8 +1205,10 @@ function RailBuilder::Go() {
 		if (this.PrepareRoute()) {
 			Info("   Contruction started on correct route.");
 			if (this.ConstructionOfRoute()) {
+				Info("   Construction finished.");
 				return true;
 			} else {
+				Info("   Construction failed.");
 				trasa.forbidden_industries.AddItem(trasa.start, 0);
 			}
 		} else {
