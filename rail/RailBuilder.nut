@@ -1207,7 +1207,7 @@ function RailBuilder::Go() {
 				trasa.forbidden_industries.AddItem(trasa.start, 0);
 			}
 		} else {
-			Info("   Route preaparings failed.");
+			Info("   Route preparings failed.");
 			if (trasa.start==null) {
 				return false;
 			} else {
