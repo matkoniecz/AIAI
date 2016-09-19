@@ -360,6 +360,9 @@ function AirBuilder::BuildAircraft(tile_1, tile_2, engine, cargo) {
 	return vehicle;
 }
 
+function AirBuilder::HowManyMayBeBought(engine){
+	return GetAvailableMoney()/AIEngine.GetPrice(engine);
+}
 function AirBuilder::HowManyInitialAirplanes(distance, speed, production, engine) {
 	local count = (3*distance)/(2*speed)/2;
 	Info(count + " aircrafts needed; based on distance ("+distance+") and speed ("+speed+")");
@@ -369,6 +372,8 @@ function AirBuilder::HowManyInitialAirplanes(distance, speed, production, engine
 	count /= AIEngine.GetCapacity(engine);
 	Info(count + " aircrafts needed after production (" + production + ") and capacity (" +  AIEngine.GetCapacity(engine) +") adjustment");
 	count = max(count, 3);
+	local upper_limit = max(5, HowManyMayBeBought(engine)/2);
+	count = min(count, upper_limit)
 	return count;
 }
 
