@@ -279,6 +279,7 @@ function RoadBuilder::PrepareRoute() {
 	}
 
 	if (path == false || path == null) {
+		MajorInfo("RVpf fail after "+limit);
 		Info("   Pathfinder failed to find route. ");
 		return false;
 	}
@@ -286,9 +287,11 @@ function RoadBuilder::PrepareRoute() {
 	Info("   Road pathfinder found sth.");
 	local estimated_cost = this.CheckRoad(path);
 	if (estimated_cost==null) {
+		MajorInfo("RVpf: bad r. "+guardian +" of " +limit);
 		Info("   Pathfinder failed to find correct route.");
 		return false;
 	}
+	MajorInfo("RVpf: r. "+guardian +" of " +limit);
 
 	estimated_cost += AIEngine.GetPrice(trasa.engine) * 5;
 	cost = estimated_cost;

@@ -300,7 +300,7 @@ function RailBuilder::RailwayLinkConstruction(path) {
 }
 
 function RailBuilder::DumbRemover(path, goal) {
-	Warning("DumbRemover after " + AIError.GetLastErrorString());
+	MajorInfo("removing rails " + ShortenErrorString(AIError.GetLastErrorString()));
 	local prev = null;
 	local prevprev = null;
 	while (path != null) {
@@ -1051,6 +1051,7 @@ function RailBuilder::BuildSingleStation(station, station_size, station_id, carg
 		Info("BuildNewGRFRailStation failed - " + AIError.GetLastErrorString());
 		if (!AIRail.BuildRailStation(location, direction, platform_count, station_size, station_id)) {
 			Warning("BuildRailStation failed - " + AIError.GetLastErrorString());
+			MajorInfo("rail stat.:" + ShortenErrorString(AIError.GetLastErrorString()));
 			return false;
 		}
 	}
@@ -1096,13 +1097,19 @@ function RailBuilder::PathFinder(limit)
 
 	if (path == false || path == null) {
 		Info("   Pathfinder failed to find route. ");
-		if (AIAI.GetSetting("log_rail_pathfinding_time"))
-		AISign.BuildSign(AIMap.GetTileIndex(1, 1), "- "+GetReadableDate() + "[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]")
+		local message = "-in"+limit+"[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]rail pf"
+		MajorInfo(message);
+		if (AIAI.GetSetting("log_rail_pathfinding_time")) {
+			AISign.BuildSign(AIMap.GetTileIndex(1, 1), message + " " + GetReadableDate());
+		}
 		return false;
 	}
 	Info("   Rail pathfinder found sth.");
-	if (AIAI.GetSetting("log_rail_pathfinding_time"))
-	AISign.BuildSign(AIMap.GetTileIndex(1, 1), guardian+" "+GetReadableDate() + "[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]")
+	local message = "+in" + guardian + "[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]rail pf"
+	MajorInfo(message);
+	if (AIAI.GetSetting("log_rail_pathfinding_time")) {
+		AISign.BuildSign(AIMap.GetTileIndex(1, 1), message + " " + GetReadableDate());
+	}
 	return true;
 }
 
@@ -1221,6 +1228,7 @@ function RailBuilder::Go() {
 				return true;
 			} else {
 				Info("   Construction failed.");
+				MajorInfo("Rail failed")
 				trasa.forbidden_industries.AddItem(trasa.start, 0);
 			}
 		} else {
@@ -1307,7 +1315,8 @@ function RailBuilder::PrepareRoute() {
 	}
 	local estimated_cost = this.GetCostOfRoute(path); 
 	if (estimated_cost==null) {
-		Info("   Pathfinder failed to find correct route.");
+		Info("   Rail pathfinder failed to find correct route.");
+		MajorInfo("Rail pf route is bad");
 		return false;
 	}
 	Info("Route is OK!")
