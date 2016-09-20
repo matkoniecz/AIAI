@@ -374,7 +374,7 @@ function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.
 						} else {
 							Info("Failed tunnel")
 							if (!this.RetryCheck(non_critical_errors)) {
-								DumbRemover(copy, prev);
+								RunDumbRemoverIfNotInTestMode(copy, prev);
 								return false;
 							}
 						}
@@ -387,7 +387,7 @@ function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.
 						} else {
 							Info("Failed bridge")
 							if (!this.RetryCheck(non_critical_errors)) {
-								DumbRemover(copy, prev);
+								RunDumbRemoverIfNotInTestMode(copy, prev);
 								return false;
 							}
 						}
@@ -404,7 +404,7 @@ function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.
 					} else {
 						Info("Failed rail");
 						if (!this.RetryCheck(non_critical_errors)) {
-							DumbRemover(copy, prev);
+							RunDumbRemoverIfNotInTestMode(copy, prev);
 							return false;
 						}
 					}
@@ -418,6 +418,13 @@ function RailBuilder::DumbBuilder(path, non_critical_errors = [{error = AIError.
 		}
 	}
 	return true;
+}
+
+function RunDumbRemoverIfNotInTestMode(path, prev){
+	if(IsTestModeEnabled()){
+		return;
+	}
+	RunDumbRemoverIfNotInTestMode(copy, prev);
 }
 
 function RailBuilder::GetCostOfRoute(path) {
