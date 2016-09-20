@@ -1002,22 +1002,17 @@ function RailBuilder::StationConstruction(path)
 		goal_industry = AIIndustry.GetIndustryType(trasa.end);
 	}
 
-	local direction = null
-
 	local distance = AIMap.DistanceManhattan(trasa.first_station.location, trasa.second_station.location);
-	local location = trasa.first_station.location
-	local platform_count = trasa.first_station.platform_count
-	direction = StationDirectionToTrackDirection(trasa.first_station.direction);
+
+	local station = trasa.first_station;
 	local source = true;
-	if(!BuildStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
+	if(!BuildStation(station, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
 			return false;
 	}
 	
-	local location = trasa.second_station.location;
-	local platform_count = trasa.second_station.platform_count;
-	direction = StationDirectionToTrackDirection(trasa.second_station.direction);
+	local station = trasa.second_station;
 	local source = false;
-	if(!BuildStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
+	if(!BuildStation(station, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
 			AITile.DemolishTile(trasa.first_station.location);
 			return false;
 	}
@@ -1042,7 +1037,10 @@ function RailBuilder::StationDirectionToTrackDirection(station_direction){
 	assert(false);
 }
 
-function RailBuilder::BuildStation(location, direction, platform_count, station_size, station_id, cargo, source_industry, goal_industry, distance, source) {
+function RailBuilder::BuildStation(station, station_size, station_id, cargo, source_industry, goal_industry, distance, source) {
+	local location = station.location
+	local platform_count = station.platform_count
+	local direction = StationDirectionToTrackDirection(station.direction);
 	if (!AIRail.BuildNewGRFRailStation(location, direction, platform_count, station_size, station_id, cargo, source_industry, goal_industry, distance, source)) {
 		Info("BuildNewGRFRailStation failed - " + AIError.GetLastErrorString());
 		if (!AIRail.BuildRailStation(location, direction, platform_count, station_size, station_id)) {
