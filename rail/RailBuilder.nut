@@ -1235,6 +1235,7 @@ function RailBuilder::ConstructionOfRoute() {
 	ProvideMoney();
 
 	if (!this.StationConstruction(path)) {
+		Info("   But station construction failed");
 		return false;   
 	}
 	if (!this.RailwayLinkConstruction(path)) {
