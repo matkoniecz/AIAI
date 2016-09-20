@@ -1022,7 +1022,7 @@ function RailBuilder::StationTileConstruction(){
 
 	local station = trasa.first_station;
 	local source = true;
-	if(!BuildStation(station, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
+	if(!BuildSingleStation(station, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
 			return false;
 	}
 
@@ -1043,7 +1043,7 @@ function RailBuilder::StationDirectionToTrackDirection(station_direction){
 	assert(false);
 }
 
-function RailBuilder::BuildStation(station, station_size, station_id, cargo, source_industry, goal_industry, distance, source) {
+function RailBuilder::BuildSingleStation(station, station_size, station_id, cargo, source_industry, goal_industry, distance, source) {
 	local location = station.location
 	local platform_count = station.platform_count
 	local direction = StationDirectionToTrackDirection(station.direction);
