@@ -1007,11 +1007,7 @@ function RailBuilder::StationConstruction(path)
 	local distance = AIMap.DistanceManhattan(trasa.first_station.location, trasa.second_station.location);
 	local location = trasa.first_station.location
 	local platform_count = trasa.first_station.platform_count
-	if (trasa.first_station.direction != StationDirection.x_is_constant__horizontal) {
-		direction = AIRail.RAILTRACK_NE_SW;
-	} else {
-		direction = AIRail.RAILTRACK_NW_SE;
-	}
+	direction = StationDirectionToTrackDirection(trasa.first_station.direction);
 	local source = true;
 	if(!BuildStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
 			return false;
@@ -1019,11 +1015,7 @@ function RailBuilder::StationConstruction(path)
 	
 	local location = trasa.second_station.location;
 	local platform_count = trasa.second_station.platform_count;
-	if (trasa.second_station.direction != StationDirection.x_is_constant__horizontal) {
-		direction = AIRail.RAILTRACK_NE_SW;;
-	} else {
-		direction = AIRail.RAILTRACK_NW_SE;
-	}
+	direction = StationDirectionToTrackDirection(trasa.second_station.direction);
 	local source = false;
 	if(!BuildStation(location, direction, platform_count, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
 			AITile.DemolishTile(trasa.first_station.location);
@@ -1039,6 +1031,15 @@ function RailBuilder::StationConstruction(path)
 		return false;
 	}
 	return true;
+}
+
+function RailBuilder::StationDirectionToTrackDirection(station_direction){
+	if (station_direction != StationDirection.x_is_constant__horizontal) {
+		return AIRail.RAILTRACK_NE_SW;
+	} else {
+		return AIRail.RAILTRACK_NW_SE;
+	}
+	assert(false);
 }
 
 function RailBuilder::BuildStation(location, direction, platform_count, station_size, station_id, cargo, source_industry, goal_industry, distance, source) {
