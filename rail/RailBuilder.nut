@@ -1084,6 +1084,18 @@ function RailBuilder::PathFinder(limit)
 		path = pathfinder.FindPath(time_for_pathfinding_run);
 		Info("   Pathfinding ("+guardian+" / " + limit + ") ended");
 		AIAI_instance.Maintenance();
+		{
+			local test = AITestMode();
+			if(!StationTileConstruction()){
+				Warning("aborting rail pf, station place blocked!");
+				local message = "a-in"+guardian+"[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]rail pf"
+				MajorInfo(message);
+				if (AIAI.GetSetting("log_rail_pathfinding_time")) {
+					AISign.BuildSign(AIMap.GetTileIndex(1, 1), message + " " + GetReadableDate());
+				}
+				return false;
+			}
+		}
 		AIController.Sleep(1);
 		guardian++;
 		if (guardian>limit) {
