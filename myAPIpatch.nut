@@ -46,6 +46,13 @@ AIMap.IsValidTile <- function(tile) {
 	return AIMap._IsValidTile(tile);
 }
 
+function GetMaxTextfieldLength(){
+	//confirmed to be true for
+	//AIGroup.SetName
+	//AISign.BuildSign
+	return 31;
+}
+
 AIGroup._SetName <- AIGroup.SetName;
 AIGroup.SetName <- function(id, text) {
 	text+=""; //allow AIGroup.SetName(id, 42)
@@ -54,7 +61,7 @@ AIGroup.SetName <- function(id, text) {
 		Error(AIError.GetLastErrorString() + " - GROUP NAMING FAILED.");
 		Error("Requested text: <" + text + "> on id " + id + ".");
 		if (AIError.GetLastError() == AIError.ERR_PRECONDITION_STRING_TOO_LONG) {
-			Error("Text " + text.len() + " characters long, maximum is 31");
+			Error("Text " + text.len() + " characters long, maximum is "+GetMaxTextfieldLength());
 		}
 		if (!AIGroup.IsValidGroup(id)) {
 			Error("Group invalid");
@@ -72,7 +79,7 @@ AISign.BuildSign <- function(tile, text) {
 		Error(AIError.GetLastErrorString() + " - SIGN FAILED.");
 		Error("Requested text: <" + text + "> on tile " + tile + ".");
 		if (AIError.GetLastError() == AIError.ERR_PRECONDITION_STRING_TOO_LONG) {
-			Error("Text " + text.len() + " characters long, maximum is 31");
+			Error("Text " + text.len() + " characters long, maximum is "+GetMaxTextfieldLength());
 		}
 		if (!AIMap.IsValidTile(tile)) {
 			Error("Tile invalid");
