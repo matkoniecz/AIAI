@@ -8,6 +8,7 @@ class AIAI extends AIController
 	station_number = null;
 	list_of_detected_rail_crossings = null;
 	is_this_a_loaded_game = false;
+	potential_load_status_logged = false;
 	bridge_list = [];
 	library_to_communicate_with_GS = null;
 }
@@ -36,12 +37,16 @@ function AIAI::Starter() {
 	AICompany.SetAutoRenewMoney(100000);
 	list_of_detected_rail_crossings = AIList()
 
-	if (!is_this_a_loaded_game) {
+	if (is_this_a_loaded_game) {
+		if(!potential_load_status_logged) {
+			potential_load_status_logged = true;
+			MajorInfo("loaded game");
+		}
+		//should be loaded from savegame
+	} else {
 		desperation = 0;
 		general_inspection = GetDate() - 12;
 		station_number = 1
-	} else {
-		//should be loaded from savegame
 	}
 	if (Helper.GetMailCargo==-1) {
 		abort("mail cargo does not exist");
@@ -224,6 +229,7 @@ function AIAI::Save() {
 }
 
 function AIAI::Load(version, data) {
+	Info("Loading from save.")
 	if (data.rawin("desperation") && data.rawin("general_inspection") && data.rawin("BridgeList") && data.rawin("station_number")) {
 		this.is_this_a_loaded_game = true;
 		this.desperation = data.rawget("desperation");
