@@ -976,7 +976,7 @@ function RailBuilder::UndoStationConstruction(path)
 	trasa.first_station.RemoveRailwayTracks(first, last);
 }
 
-function RailBuilder::StationConstruction(path) 
+function RailBuilder::StationConstruction(path)
 {
 	local copy = path;
 	local first = path.GetTile();
@@ -986,6 +986,22 @@ function RailBuilder::StationConstruction(path)
 		path = path.GetParent();
 	}
 	path = copy;
+	if(!this.StationTileConstruction()){
+		return false;
+	}
+	
+	if (!trasa.first_station.BuildRailwayTracks(first, last)) {
+		this.UndoStationConstruction(path);
+		return false;
+	}
+	if (!trasa.second_station.BuildRailwayTracks(first, last)) {
+		this.UndoStationConstruction(path);
+		return false;
+	}
+	return true;
+}
+
+function RailBuilder::StationTileConstruction(){
 	//BuildNewGRFRailStation (TileIndex tile, RailTrack direction, uint num_platforms, uint platform_length, StationID station_id, 
 	//						CargoID cargo_id, IndustryType source_industry, IndustryType goal_industry, int distance, bool source_station)
 	AIRail.SetCurrentRailType(trasa.track_type);
@@ -1009,21 +1025,11 @@ function RailBuilder::StationConstruction(path)
 	if(!BuildStation(station, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
 			return false;
 	}
-	
-	local station = trasa.second_station;
-	local source = false;
-	if(!BuildStation(station, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
-			AITile.DemolishTile(trasa.first_station.location);
-			return false;
-	}
 
-	if (!trasa.first_station.BuildRailwayTracks(first, last)) {
-		this.UndoStationConstruction(path);
-		return false;
-	}
-	if (!trasa.second_station.BuildRailwayTracks(first, last)) {
-		this.UndoStationConstruction(path);
-		return false;
+	local station = trasa.second_station;
+	source = false;
+	if(!BuildSingleStation(station, trasa.station_size, AIStation.STATION_NEW, trasa.cargo, source_industry, goal_industry, distance, source)){
+			return false;
 	}
 	return true;
 }
