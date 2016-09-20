@@ -142,9 +142,7 @@ AIVehicle.CloneVehicle <- function (depot_tile, vehicle_id, share_orders) {
 	return new_vehicle_id
 }
 
-AIVehicle.BuildVehicle_ <- AIVehicle.BuildVehicle
-AIVehicle.BuildVehicle <- function (depot_tile, engine_id)
-{		
+function CheckBuildVehiclePreconditions(depot_tile, engine_id){
 	if (!AIEngine.IsBuildable(engine_id)) {
 		abort("not buildable!")
 	}
@@ -178,7 +176,12 @@ AIVehicle.BuildVehicle <- function (depot_tile, engine_id)
 		AISign.BuildSign(depot_tile, "depot_tile")
 		abort ("incorrect vehicle type (" + type + ")")
 	}
+}
 
+AIVehicle.BuildVehicle_ <- AIVehicle.BuildVehicle
+AIVehicle.BuildVehicle <- function (depot_tile, engine_id)
+{
+	CheckBuildVehiclePreconditions(depot_tile, engine_id);
 	local vehicle_id = AIVehicle.BuildVehicle_(depot_tile, engine_id);
 	if (AIError.GetLastError() != AIError.ERR_NONE) {
 		Warning("Vehicle ("+AIEngine.GetName(engine_id)+") construction failed with "+AIError.GetLastErrorString() + "(message from modified AIVehicle::BuildVehicle)")

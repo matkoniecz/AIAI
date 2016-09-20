@@ -545,11 +545,8 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 			}
 			length_of_wagon = AIVehicle.GetLength(engineId) - length_of_engine;
 			Info("length_of_wagon "+length_of_wagon+"; length_of_engine "+length_of_engine+";");
-			local length_limit = stationSize
-			if (length_limit > AIGameSettings.GetValue("max_train_length")) {
-				length_limit = AIGameSettings.GetValue("max_train_length");
-			}
-			length_limit = (length_limit*16-length_of_engine)/length_of_wagon;
+
+			local length_limit = MaxNumberOfWagonsLimitedByLength(stationSize, length_of_engine, length_of_wagon);
 			if (max_number_of_wagons > length_limit) {
 				max_number_of_wagons = length_limit;
 			}
@@ -576,11 +573,32 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 	if (AIVehicle.GetNumWagons(engineId) == 0) {
 		abort("it was not supposed to happen - wagonless train");
 	}
+	MultiplyTrain(engineId, max_number_of_wagons, costs, route);
+	if (AIVehicle.GetCapacity(engineId, route.cargo) == 0) {
+		return null;
+	}
+	return this.RailBuilder.StartTrain(engineId, name_of_train, depotTile, route);
+}
 
+function RailBuilder::MaxNumberOfWagonsLimitedByLength(stationSize, length_of_engine, length_of_wagon) {
+		//stationSize - in tiles
+		//length_of_engine, length_of_wagon - as returned from AIVehicle.GetLength
+		local length_limit = stationSize
+		if (length_limit > AIGameSettings.GetValue("max_train_length")) {
+			length_limit = AIGameSettings.GetValue("max_train_length");
+		}
+		return (length_limit*16-length_of_engine)/length_of_wagon;
+}
+
+function RailBuilder::MultiplyTrain(engineId, max_number_of_wagons, costs, route){
 	//multiplier: for weak locos it may be necessary to merge multiple trains ito one (2*loco + 10*wagon, instead of loco+5 wagons)
 	//without limiting number of wagons per locomotive travelling uphill would be ridiculously slow
 	//without merging trains would be very short and line would be quickly saturated
 	//multiplier = how many trains are merged into one
+	local bestEngine = route.engine[0];
+	local bestWagon = route.engine[1];
+	local depotTile = route.depot_tile;
+	local cargoIndex = route.cargo;
 	local multiplier = min(GetAvailableMoney()/costs.GetCosts(), route.station_size*16/AIVehicle.GetLength(engineId))
 	multiplier--; //one part of train is already constructed
 	for (local x=0; x<multiplier; x++) {
@@ -599,9 +617,10 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 			}
 		}
 	}
-	if (AIVehicle.GetCapacity(engineId, route.cargo) == 0) {
-		return null;
-	}
+}
+
+function RailBuilder::StartTrain(engineId, name_of_train, depotTile, route){
+	local depotTile = route.depot_tile;
 	if (AIVehicle.StartStopVehicle(engineId)) {
 		AIVehicle.SetName(engineId, name_of_train);
 		return engineId;
