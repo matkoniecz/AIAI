@@ -604,8 +604,8 @@ function RailBuilder::MaxTrainLengthInTiles(station_length_in_tiles){
 		return station_length_in_tiles;
 }
 
-function RailBuilder::MaxNumberOfWagonsLimitedByLength(stationSize, length_of_engine, length_of_wagon) {
-		//stationSize - in tiles
+function RailBuilder::MaxNumberOfWagonsLimitedByLength(station_length_in_tiles, length_of_engine, length_of_wagon) {
+		//station_length_in_tiles - in tiles
 		//length_of_engine, length_of_wagon - as returned from AIVehicle.GetLength
 		local length_limit = MaxTrainLengthInTiles(station_length_in_tiles);
 		return (length_limit*16-length_of_engine)/length_of_wagon;
@@ -627,7 +627,7 @@ function RailBuilder::MultiplyTrain(engineId, max_number_of_wagons, costs, route
 		}
 		AIVehicle.MoveWagon(newengineId, 0, engineId, 0);
 		for(local i = 0; i<max_number_of_wagons; i++) {
-			if (AIVehicle.GetLength(engineId) > MaxTrainLengthInTiles(station_size)*16) {
+			if (AIVehicle.GetLength(engineId) > MaxTrainLengthInTiles(route.station_size)*16) {
 				AIVehicle.SellWagon(engineId, AIVehicle.GetNumWagons(engineId)-1);
 				break;
 			}
