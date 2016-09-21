@@ -578,7 +578,8 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 	}
 
 	//multiplier: for weak locos it may be necessary to merge multiple trains ito one (2*loco + 10*wagon, instead of loco+5 wagons)
-	//without that travelling uphill would be ridiculously slow
+	//without limiting number of wagons per locomotive travelling uphill would be ridiculously slow
+	//without merging trains would be very short and line would be quickly saturated
 	//multiplier = how many trains are merged into one
 	local multiplier = min(GetAvailableMoney()/costs.GetCosts(), route.station_size*16/AIVehicle.GetLength(engineId))
 	multiplier--; //one part of train is already constructed
