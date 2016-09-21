@@ -63,6 +63,48 @@ function AIAI::Starter() {
 	if (Helper.GetPAXCargo==-1) {
 		abort("PAX cargo does not exist");
 	}
+	if(is_this_a_loaded_game){
+		deleteUnexpected();
+	}
+	Info("Starter completed.");
+}
+
+function AIAI::deleteUnexpected(){
+	Info("Cleanup on loading savegame.")
+	deleteVehiclesWithoutOrders();
+	DeleteEmptyStations();
+}
+
+function AIAI::deleteVehiclesWithoutOrders(){
+	local vehicle_list = AIVehicleList();
+	local counter = 0;
+	local run = true;
+	while(vehicle_list.Count() > 0){
+		if(!run){
+			break;
+		}
+		run = false;
+		vehicle_list = AIVehicleList();
+		vehicle_list.Valuate(IsForSellUseTrueForInvalidVehicles);
+		vehicle_list.KeepValue(0);
+		Info(vehicle_list.Count() + " vehicles to check!");
+
+		for (local vehicle_id = vehicle_list.Begin(); vehicle_list.HasNext(); vehicle_id = vehicle_list.Next()) {
+			local load_station_id = SafeGetLoadStationLocation(vehicle_id);
+			local unload_station_id = SafeGetUnloadStationLocation(vehicle_id);
+			if (load_station_id == null || unload_station_id == null) {
+				run = true;
+				Info(AIVehicle.GetName(vehicle_id) + " must be sold due to invalid orders!");
+				if (SellVehicle(vehicle_id, "invalid orders")) {
+					counter++;
+				} else {
+					Error(AIVehicle.GetName(vehicle_id) + " must be sold, but AI is unable to do this :(");
+				}
+			}
+		}
+	}
+
+	Info(counter + " buggy vehicle(s) sold.");
 }
 
 function AIAI::CommunicateWithGS() {
