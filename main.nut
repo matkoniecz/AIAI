@@ -27,7 +27,9 @@ function AIAI::Starter() {
 			Info("No possible HQ location found");
 		}
 	}
-	this.ShowContactInfoOnTheMap();
+	if(!is_this_a_loaded_game) {
+		this.ShowContactInfoOnTheMap();
+	}
 	if (AIGameSettings.GetValue("difficulty.vehicle_breakdowns")!= 0) {
 		AICompany.SetAutoRenewStatus(true);
 	} else {
