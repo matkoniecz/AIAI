@@ -612,16 +612,12 @@ function RailBuilder::MultiplyTrain(engineId, max_number_of_wagons, costs, route
 	//without limiting number of wagons per locomotive travelling uphill would be ridiculously slow
 	//without merging trains would be very short and line would be quickly saturated
 	//multiplier = how many trains are merged into one
-	local bestEngine = route.engine[0];
-	local bestWagon = route.engine[1];
-	local depotTile = route.depot_tile;
-	local cargoIndex = route.cargo;
 	local multiplier = min(GetAvailableMoney()/costs.GetCosts(), route.station_size*16/AIVehicle.GetLength(engineId))
 	multiplier--; //one part of train is already constructed
 	for (local x=0; x<multiplier; x++) {
-		local newengineId = AIVehicle.BuildVehicle(route.depot_tile, bestEngine);
-		if(AIEngine.CanRefitCargo(engineId, cargoIndex)){
-				if(!RefitVehicle(engineId, cargoIndex)){
+		local newengineId = AIVehicle.BuildVehicle(route.depot_tile, route.engine[0]);
+		if(AIEngine.CanRefitCargo(engineId, route.cargo)){
+				if(!RefitVehicle(engineId, route.cargo)){
 					Warning("Refitting engine failed: " + AIError.GetLastErrorString());
 				}
 		}
@@ -631,8 +627,8 @@ function RailBuilder::MultiplyTrain(engineId, max_number_of_wagons, costs, route
 				AIVehicle.SellWagon(engineId, AIVehicle.GetNumWagons(engineId)-1);
 				break;
 			}
-			local newWagon = AIVehicle.BuildVehicle(route.depot_tile, bestWagon);        
-			if(!RefitVehicle(newWagon, cargoIndex)) {
+			local newWagon = AIVehicle.BuildVehicle(route.depot_tile, route.engine[1]);
+			if(!RefitVehicle(newWagon, route.cargo)) {
 				Warning("RefitVehicle failed: " + AIError.GetLastErrorString());
 				AIVehicle.SellVehicle(newWagon);
 				newWagon = -1;
