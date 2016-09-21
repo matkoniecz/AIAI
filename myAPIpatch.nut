@@ -125,7 +125,9 @@ AIVehicle.SetName <- function (vehicle_id, string) {
 			if (AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
 				abort("ops?")
 			} else {
+				Error("name too long to set it!")
 				AIVehicle.SetName_(vehicle_id, "PRECONDITION_FAILED");
+				return false;
 			}
 		}
 	}
