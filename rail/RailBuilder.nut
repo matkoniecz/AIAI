@@ -424,7 +424,7 @@ function RunDumbRemoverIfNotInTestMode(path, prev){
 	if(IsTestModeEnabled()){
 		return;
 	}
-	RunDumbRemoverIfNotInTestMode(copy, prev);
+	RunDumbRemoverIfNotInTestMode(path, prev);
 }
 
 function RailBuilder::GetCostOfRoute(path) {
