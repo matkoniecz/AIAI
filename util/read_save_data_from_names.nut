@@ -61,12 +61,23 @@ function GetLoadStationLocation(vehicle_id) {
 	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
 		return null
 	}
+	local returned = SafeGetLoadStationLocation(vehicle_id);
+	if(returned != null){
+		return returned;
+	}
+	abort("Explosion caused by vehicle " + vehicle_id + " named "+ AIVehicle.GetName(vehicle_id));
+}
+
+function SafeGetLoadStationLocation(vehicle_id){
+	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
+		return null
+	}
 	for(local i=0; i<AIOrder.GetOrderCount(vehicle_id); i++) if (AIOrder.IsGotoStationOrder(vehicle_id, i)) {
 		if ((AIOrder.GetOrderFlags(vehicle_id, i) & AIOrder.OF_NO_LOAD) !=AIOrder.OF_NO_LOAD) {
 			return AIOrder.GetOrderDestination(vehicle_id, i);
 		}
 	}
-	abort("Explosion caused by vehicle " + vehicle_id + " named "+ AIVehicle.GetName(vehicle_id));
+	return null;
 }
 
 function GetSecondLoadStationId(vehicle_id) {
@@ -105,6 +116,17 @@ function GetUnloadStationLocation(vehicle_id) {
 	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
 		return null
 	}
+	local returned = SafeGetUnloadStationLocation(vehicle_id);
+	if(returned != null){
+		return returned;
+	}
+	abort("Explosion caused by vehicle " + vehicle_id + " named "+ AIVehicle.GetName(vehicle_id));
+}
+
+function SafeGetUnloadStationLocation(vehicle_id){
+	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
+		return null
+	}
 	local onoff = false;
 	for(local i=0; i<AIOrder.GetOrderCount(vehicle_id); i++) {
 		if (AIOrder.IsGotoStationOrder(vehicle_id, i)) {
@@ -114,7 +136,7 @@ function GetUnloadStationLocation(vehicle_id) {
 			onoff=true
 		}
 	}
-	abort("Explosion caused by vehicle " + AIVehicle.GetName(vehicle_id));
+	return null;
 }
 
 function LoadDataFromStationNameFoundByStationId(station_id, delimiters) {
