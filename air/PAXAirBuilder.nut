@@ -21,8 +21,8 @@ function PAXAirBuilder::Possible() {
 }
 
 function PAXAirBuilder::Go() {
-	cost = this.CostEstimation();
 	Info("Trying to build an airport route (city version)");
+	cost = this.CostEstimation();
 	if (BuildAirportRouteBetweenCitiesWithAirportTypeSet(AIAirport.AT_METROPOLITAN)) {
 		return true;
 		}

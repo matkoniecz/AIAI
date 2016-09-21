@@ -78,6 +78,7 @@ function BusRoadBuilder::FindBusPair() {
 }
 
 function BusRoadBuilder::Go() {
+	Info("Trying to build a " + GetName() + " route");
 	AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
 	trasa = Route();
 

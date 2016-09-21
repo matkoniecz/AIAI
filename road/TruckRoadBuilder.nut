@@ -78,6 +78,7 @@ function TruckRoadBuilder::IndustryToCityStationAllocator(project) {
 }
 
 function TruckRoadBuilder::Go() {
+	Info("Trying to build a truck route");
 	AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
 	trasa = Route();
 

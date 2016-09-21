@@ -1266,6 +1266,7 @@ function RailBuilder::Possible() {
 }
 
 function RailBuilder::Go() {
+	Info("Trying to build a rail route");
 	local list_of_rail_types = GetRailTypeList();
 	if (list_of_rail_types == null) {
 		Error("No suitable railtype!")

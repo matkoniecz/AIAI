@@ -17,8 +17,8 @@ function CargoAirBuilder::Possible() {
 }
 
 function CargoAirBuilder::Go() {
-	ProvideMoney();
 	Info("Trying to build an airport route from industry");
+	ProvideMoney();
 	trasa = Route();
 	trasa.budget = GetAvailableMoney();
 	trasa = this.FindPair(trasa);
