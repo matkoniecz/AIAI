@@ -526,7 +526,11 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 	}
 
 	AIVehicle.SetName(engineId, "in construction");
-	AIVehicle.RefitVehicle(engineId, cargoIndex);
+	if(AIEngine.CanRefitCargo(engineId, cargoIndex)){
+			if(!RefitVehicle(engineId, cargoIndex)){
+				Warning("Refitting engine failed: " + AIError.GetLastErrorString());
+			}
+	}
 
 	local max_number_of_wagons = 1000;
 	local maximal_weight = AIEngine.GetMaxTractiveEffort(bestEngine) * 3;
@@ -558,9 +562,13 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 		if (!AIVehicle.IsValidVehicle(newWagon)) {
 			Info("Failed to build wagon '" + AIEngine.GetName(bestWagon) +"':" + AIError.GetLastErrorString());
 		}
-		AIVehicle.RefitVehicle(newWagon, cargoIndex);
+		if(!RefitVehicle(newWagon, cargoIndex)) {
+			Warning("RefitVehicle failed: " + AIError.GetLastErrorString());
+			AIVehicle.SellVehicle(newWagon);
+			newWagon = -1;
+		}
 
-		if (!RailBuilder.AttachWagonToTheTrain(newWagon, engineId)) {
+		if (!AIVehicle.IsValidVehicle(newWagon) || !RailBuilder.AttachWagonToTheTrain(newWagon, engineId)) {
 			if (i==0) {
 				Warning("And it was the first one!");
 				return this.BuildTrainButNotWithThisEngineWagonCombination(route, name_of_train, bestEngine, bestWagon, recover_from_failed_engine);
@@ -576,6 +584,17 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 		return null;
 	}
 	return this.RailBuilder.StartTrain(engineId, name_of_train, depotTile, route);
+}
+
+function RailBuilder::RefitVehicle(vehicle, cargoIndex) {
+	if(AIVehicle.GetCapacity(vehicle, cargoIndex) > 0){
+		return true;
+	}
+	if(AIVehicle.RefitVehicle(vehicle, cargoIndex)) {
+		return true;
+	}
+	ProvideMoney();
+	return AIVehicle.RefitVehicle(vehicle, cargoIndex);
 }
 
 function RailBuilder::MaxNumberOfWagonsLimitedByLength(stationSize, length_of_engine, length_of_wagon) {
@@ -601,7 +620,11 @@ function RailBuilder::MultiplyTrain(engineId, max_number_of_wagons, costs, route
 	multiplier--; //one part of train is already constructed
 	for (local x=0; x<multiplier; x++) {
 		local newengineId = AIVehicle.BuildVehicle(route.depot_tile, bestEngine);
-		AIVehicle.RefitVehicle(newengineId, route.cargo);
+		if(AIEngine.CanRefitCargo(engineId, cargoIndex)){
+				if(!RefitVehicle(engineId, cargoIndex)){
+					Warning("Refitting engine failed: " + AIError.GetLastErrorString());
+				}
+		}
 		AIVehicle.MoveWagon(newengineId, 0, engineId, 0);
 		for(local i = 0; i<max_number_of_wagons; i++) {
 			if (AIVehicle.GetLength(engineId)>route.station_size*16) {
@@ -609,7 +632,11 @@ function RailBuilder::MultiplyTrain(engineId, max_number_of_wagons, costs, route
 				break;
 			}
 			local newWagon = AIVehicle.BuildVehicle(route.depot_tile, bestWagon);        
-			AIVehicle.RefitVehicle(newWagon, cargoIndex);
+			if(!RefitVehicle(newWagon, cargoIndex)) {
+				Warning("RefitVehicle failed: " + AIError.GetLastErrorString());
+				AIVehicle.SellVehicle(newWagon);
+				newWagon = -1;
+			}
 			if (!AIVehicle.MoveWagon(newWagon, 0, engineId, AIVehicle.GetNumWagons(engineId)-1)) {
 				Error("Couldn't join wagon to train: " + AIError.GetLastErrorString());
 			}
