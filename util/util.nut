@@ -337,6 +337,13 @@ function SellVehicle(vehicle_id, why) {
 	if (IsForSell(vehicle_id) != false) {
 		return false;
 	}
+	if (!AIVehicle.IsOKVehicle(vehicle_id)) {
+		Error("Invalid or crashed vehicle " + vehicle_id);
+		if (AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
+			abort("here");
+		}
+		return true;
+	}
 	AIVehicle.SetName(vehicle_id, "sell!" + why);
 	if (!AIVehicle.SendVehicleToDepot(vehicle_id)) {
 		Info("failed to sell vehicle! "+AIError.GetLastErrorString());
