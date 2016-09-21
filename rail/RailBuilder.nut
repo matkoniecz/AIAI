@@ -587,6 +587,28 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 }
 
 function RailBuilder::RefitVehicle(vehicle, cargoIndex) {
+	if(!AIVehicle.IsValidVehicle(vehicle)){
+		Error("invalid vehicle in RefitVehicle");
+		if (AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
+			abort("invalid vehicle");
+		}
+		return false;
+	}
+	if(!AICargo.IsValidCargo(cargoIndex)){
+		Error("invalid cargo in RefitVehicle during refitting " + AIVehicle.GetName(vehicle));
+		if (AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
+			abort("invalid cargo");
+		}
+		return false;
+	}
+	if(!AIVehicle.IsStoppedInDepot(vehicle)){
+		Error("not stopped in depot " + AIVehicle.GetName(vehicle));
+		if (AIAI.GetSetting("crash_AI_in_strange_situations") == 1) {
+			abort(AIVehicle.GetName(vehicle)+" is not stopped in depot");
+		}
+		return false;
+	}
+	Info("refitting " + AIVehicle.GetName(vehicle));
 	if(AIVehicle.GetCapacity(vehicle, cargoIndex) > 0){
 		return true;
 	}
