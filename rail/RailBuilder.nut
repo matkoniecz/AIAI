@@ -1371,13 +1371,7 @@ function RailBuilder::ConstructionOfRoute() {
 	} else if (max_train_count>=2) {
 		max_train_count = 2 + (max_train_count-2)/2;
 	}
-
-	AIAI_instance.SetStationName(trasa.first_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
-	AIAI_instance.SetStationName(trasa.second_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
-	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.first_station.location), "[]") == trasa.depot_tile);
-	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.second_station.location), "[]") == trasa.depot_tile);
-	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.first_station.location), "{}") == max_train_count);
-	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.second_station.location), "{}") == max_train_count);
+	this.NameStations(max_train_count);
 
 	if (max_train_count > 1) {
 		new_engine = this.BuildTrain(trasa, "muhahaha", true);
@@ -1386,6 +1380,15 @@ function RailBuilder::ConstructionOfRoute() {
 		}
 	}
 	return true;
+}
+
+function RailBuilder::NameStations(max_train_count){
+	AIAI_instance.SetStationName(trasa.first_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
+	AIAI_instance.SetStationName(trasa.second_station.location, "{"+max_train_count+"}"+"["+trasa.depot_tile+"]");
+	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.first_station.location), "[]") == trasa.depot_tile);
+	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.second_station.location), "[]") == trasa.depot_tile);
+	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.first_station.location), "{}") == max_train_count);
+	assert(LoadDataFromStationNameFoundByStationId(AIStation.GetStationID(trasa.second_station.location), "{}") == max_train_count);
 }
 
 function RailBuilder::PrepareRoute() {
