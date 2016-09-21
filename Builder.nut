@@ -99,7 +99,7 @@ function Builder::GetCost() {
 }
 
 function Builder::GetPathfindingLimit() {
-	return pathfinding_time_limit + desperation * 2;
+	return pathfinding_time_limit + min(desperation * 2, pathfinding_time_limit*4);
 }
 
 const MAX_AMOUNT_OF_PROCESSABLE_INDUSTRIES = 80;
