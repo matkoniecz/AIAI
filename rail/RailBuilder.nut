@@ -547,9 +547,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 			Info("length_of_wagon "+length_of_wagon+"; length_of_engine "+length_of_engine+";");
 
 			local length_limit = MaxNumberOfWagonsLimitedByLength(stationSize, length_of_engine, length_of_wagon);
-			if (max_number_of_wagons > length_limit) {
-				max_number_of_wagons = length_limit;
-			}
+			max_number_of_wagons = min(max_number_of_wagons, length_limit);
 			Info("Limit:"+max_number_of_wagons);
 			if (max_number_of_wagons == 0) {
 				max_number_of_wagons = 1;
