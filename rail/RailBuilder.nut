@@ -521,6 +521,7 @@ function RailBuilder::BuildTrain(route, name_of_train, recover_from_failed_engin
 
 	local engineId = AIVehicle.BuildVehicle(depotTile, bestEngine)
 	if (!AIVehicle.IsValidVehicle(engineId)) {
+		Warning("Construction of " + AIEngine.GetName(engineId) + " failed.")
 		return this.BuildTrainButNotWithThisVehicle(route, name_of_train, bestEngine, recover_from_failed_engine)
 	}
 
