@@ -349,7 +349,6 @@ function SellVehicle(vehicle_id, why) {
 		Info("failed to sell vehicle! "+AIError.GetLastErrorString());
 		return false;
 	}
-	AIVehicle.SetName(vehicle_id, "for sell " + why);
 	return true;
 }
 
