@@ -1089,7 +1089,7 @@ function RailBuilder::PathFinder(limit)
 			local test = AITestMode();
 			if(!StationTileConstruction()){
 				Warning("aborting rail pf, station place blocked!");
-				local message = "a-in"+guardian+"[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]rail pf"
+				local message = "rail pf|a-in"+guardian+"[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]"
 				MajorInfo(message);
 				if (AIAI.GetSetting("log_rail_pathfinding_time")) {
 					AISign.BuildSign(AIMap.GetTileIndex(1, 1), message + " " + GetReadableDate());
@@ -1110,7 +1110,7 @@ function RailBuilder::PathFinder(limit)
 
 	if (path == false || path == null) {
 		Info("   Pathfinder failed to find route. ");
-		local message = "-in"+limit+"[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]rail pf"
+		local message = "rail pf|-in"+limit+"[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]"
 		MajorInfo(message);
 		if (AIAI.GetSetting("log_rail_pathfinding_time")) {
 			AISign.BuildSign(AIMap.GetTileIndex(1, 1), message + " " + GetReadableDate());
@@ -1118,7 +1118,7 @@ function RailBuilder::PathFinder(limit)
 		return false;
 	}
 	Info("   Rail pathfinder found sth.");
-	local message = "+in" + guardian + "[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]rail pf"
+	local message = "rail pf|+in" + guardian + "[ " + AITile.GetDistanceManhattanToTile(start[0][0], end[0][0]) + "]"
 	MajorInfo(message);
 	if (AIAI.GetSetting("log_rail_pathfinding_time")) {
 		AISign.BuildSign(AIMap.GetTileIndex(1, 1), message + " " + GetReadableDate());
