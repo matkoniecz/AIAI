@@ -8,6 +8,7 @@ class AIAI extends AIController
 	station_number = null;
 	list_of_detected_rail_crossings = null;
 	is_this_a_loaded_game = false;
+	is_this_a_correctly_loaded_game = false;
 	potential_load_status_logged = false;
 	bridge_list = [];
 	library_to_communicate_with_GS = null;
@@ -16,6 +17,11 @@ class AIAI extends AIController
 require("headers.nut");
 
 function AIAI::Starter() {
+	if(AIVehicleList().Count()+AIStationList(AIStation.STATION_ANY).Count() > 0){
+		Warning("Loading from crashed/? game.");
+		is_this_a_loaded_game = true;
+		MajorInfo("stealth loaded game");
+	}
 	Info("AIAI loaded!");
 	Info("");
 	Info("Hi!");
@@ -45,7 +51,8 @@ function AIAI::Starter() {
 			MajorInfo("loaded game");
 		}
 		//should be loaded from savegame
-	} else {
+	}
+	if(!is_this_a_correctly_loaded_game) {
 		desperation = 0;
 		general_inspection = GetDate() - 12;
 		station_number = 1
@@ -231,9 +238,10 @@ function AIAI::Save() {
 }
 
 function AIAI::Load(version, data) {
-	Info("Loading from save.")
+	Info("Loading from save.");
+	this.is_this_a_loaded_game = true;
 	if (data.rawin("desperation") && data.rawin("general_inspection") && data.rawin("BridgeList") && data.rawin("station_number")) {
-		this.is_this_a_loaded_game = true;
+		this.is_this_a_correctly_loaded_game = true;
 		this.desperation = data.rawget("desperation");
 		this.general_inspection = data.rawget("general_inspection");
 		this.bridge_list =  data.rawget("BridgeList");
