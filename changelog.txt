@@ -1,9 +1,10 @@
-Kappa (2013-07)
+Kappa (2016-09)
 -----------------------------------------------------------------------------
 Basic support for NoCarGoal GS (disabled as default)
 Mail trucks
 
 -----------------------------------------------------------------------------
 Note that this changelog lists only major features added later than 2013-06.
+Typical version has also many, many tweaks and bugfixes.
 Full list of changes is a list of git commits, available at github:
 https://github.com/matkoniecz/AIAI/commits/master
