@@ -155,6 +155,9 @@ function AIAI::Start() {
 		while(AICompany.GetBankBalance(AICompany.COMPANY_SELF)>Money.Inflate(500000) && this.BuildStatues()) {
 			Info("I Am Rich! Statues!");
 		}
+		while(desperation > 10 && this.BuildStatues()) {
+			Info("There is no better thing for spending money, therefore statues.");
+		}
 		this.InformationCenter(builders);
 		if (this.TryEverything(builders)) {
 			desperation /= 10;
